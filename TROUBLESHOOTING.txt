@@ -1,0 +1,35 @@
+MedConnect 2.0 — Troubleshooting (Vercel + Neon)
+================================================
+
+1) Sign-up gives 500 / 504
+   - DATABASE_URL missing or wrong in Vercel env vars. Add it, then REDEPLOY.
+   - Make sure you ran schema.sql in Neon (else "users does not exist").
+   - Prefer Neon's POOLED connection string (host contains "-pooler").
+
+2) Everything 401 / won't stay logged in
+   - JWT_SECRET not set, or changed between deploys. Set it and keep it stable.
+
+3) /api/seed says "Forbidden"
+   - The ?key= must exactly equal your JWT_SECRET.
+
+4) Env var changes not taking effect
+   - Vercel applies env vars at build time. After changing them:
+     Deployments -> latest -> "..." menu -> Redeploy.
+
+5) Page refresh on /partners gives 404
+   - vercel.json includes the SPA rewrite; make sure it's committed at repo root.
+
+6) API route 404s
+   - Confirm the /api folder is at the repo ROOT (not inside /src).
+   - Each endpoint is its own file: /api/login.js -> /api/login
+
+7) Build fails
+   - Check the Vercel build log. Usually a missing dependency — all are in the
+     root package.json (react, neon serverless, bcryptjs, jsonwebtoken).
+
+DEMO LOGINS (after seeding): any seeded email / password123
+
+IMPORTANT — IF UPDATING FROM AN EARLIER VERSION:
+This version adds CHAT, which needs a new "messages" table. Re-run the schema
+in Neon (Neon SQL Editor -> paste api/_shared/schema.sql -> Run). It's safe to
+re-run; existing tables and data are untouched (uses IF NOT EXISTS).
