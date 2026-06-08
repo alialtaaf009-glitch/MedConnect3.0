@@ -1,4 +1,4 @@
-// API client — talks to Netlify Functions at /api/* (same origin, no IP needed).
+// API client — talks to serverless functions at /api/* (same origin, no IP needed).
 function token() { return localStorage.getItem('token'); }
 
 async function req(path, { method = 'GET', body } = {}) {
@@ -32,6 +32,6 @@ export const api = {
   getFavourites: () => req('/favourites'),
   toggleFavourite: (quoteId, action) => req('/favourites', { method: 'POST', body: { quoteId, action } }),
   getStats: () => req('/stats'),
-  resetRequest: (email) => req('/reset-request', { method: 'POST', auth: false, body: { email } }),
-  resetConfirm: (token, password) => req('/reset-confirm', { method: 'POST', auth: false, body: { token, password } }),
+  resetRequest: (email) => req('/reset', { method: 'POST', body: { action: 'request', email } }),
+  resetConfirm: (token, password) => req('/reset', { method: 'POST', body: { action: 'confirm', token, password } }),
 };
