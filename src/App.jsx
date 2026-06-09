@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route, Navigate, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, NavLink } from 'react-router-dom';
 import { useAuth } from './context/Auth.jsx';
 import { useTheme } from './context/Theme.jsx';
 import { api } from './lib/api';
@@ -14,6 +14,7 @@ import Chat from './pages/Chat.jsx';
 import Motivation from './pages/Motivation.jsx';
 import Legal from './pages/Legal.jsx';
 import Reset from './pages/Reset.jsx';
+import Globe from './pages/Globe.jsx';
 
 function Icon({ name }) {
   const common = { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none',
@@ -24,15 +25,15 @@ function Icon({ name }) {
     osce: <><rect x="4" y="5" width="16" height="11" rx="1" /><path d="M9 20h6M12 16v4" /></>,
     chat: <><path d="M4 5h16v11H7l-3 3z" /></>,
     profile: <><circle cx="12" cy="12" r="9" /><circle cx="12" cy="10" r="3" /><path d="M6.5 18.5c1-2.3 3.1-3.5 5.5-3.5s4.5 1.2 5.5 3.5" /></>,
+    globe: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18" /><path d="M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18" /></>,
   };
   return <svg {...common}>{paths[name]}</svg>;
 }
 
 function TabBar() {
   const [hasUnread, setHasUnread] = useState(false);
+  const [hasRequests, setHasRequests] = useState(false);
 
-  // poll conversations; show a dot on Chat if any incoming message is newer
-  // than what we've marked as read (stored locally per the helper).
   useEffect(() => {
     let alive = true;
     const check = async () => {
@@ -40,9 +41,14 @@ function TabBar() {
         const d = await api.conversations();
         const lastRead = Number(localStorage.getItem('chat_last_read') || 0);
         const newestIncoming = (d.conversations || [])
-          .filter((c) => c.last_sender == c.other_id) // last msg was from them
+          .filter((c) => c.last_sender == c.other_id)
           .reduce((max, c) => Math.max(max, new Date(c.last_at).getTime()), 0);
         if (alive) setHasUnread(newestIncoming > lastRead);
+      } catch (e) {}
+      try {
+        const cd = await api.connections();
+        const pending = (cd.incoming || cd.requests || cd.pending || []).length;
+        if (alive) setHasRequests(pending > 0);
       } catch (e) {}
     };
     check();
@@ -53,6 +59,7 @@ function TabBar() {
   const tabs = [
     ['/home', 'home', 'Home'],
     ['/partners', 'partners', 'Partners'],
+    ['/globe', 'globe', 'Globe'],
     ['/osce', 'osce', 'OSCE'],
     ['/chat', 'chat', 'Chat'],
     ['/profile', 'profile', 'Profile'],
@@ -64,31 +71,12 @@ function TabBar() {
           <span className="ic" style={{ position: 'relative' }}>
             <Icon name={ic} />
             {ic === 'chat' && hasUnread && <span className="badge-dot" />}
+            {ic === 'partners' && hasRequests && <span className="badge-dot" />}
           </span>{label}
         </NavLink>
       ))}
     </nav>
   );
-}
-
-// Swipe left/right between the main tabs (in addition to the nav bar).
-const TAB_ORDER = ['/home', '/partners', '/osce', '/chat', '/profile'];
-function SwipeNav({ children }) {
-  const nav = useNavigate();
-  const loc = useLocation();
-  const sx = (window.__sx = window.__sx || { x: 0, y: 0 });
-  const onStart = (e) => { const t = e.touches[0]; sx.x = t.clientX; sx.y = t.clientY; };
-  const onEnd = (e) => {
-    const t = e.changedTouches[0];
-    const dx = t.clientX - sx.x, dy = t.clientY - sx.y;
-    // only a deliberate, mostly-horizontal swipe
-    if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.8) return;
-    const i = TAB_ORDER.indexOf(loc.pathname);
-    if (i === -1) return;
-    if (dx < 0 && i < TAB_ORDER.length - 1) nav(TAB_ORDER[i + 1]); // swipe left → next
-    if (dx > 0 && i > 0) nav(TAB_ORDER[i - 1]);                    // swipe right → prev
-  };
-  return <div onTouchStart={onStart} onTouchEnd={onEnd} style={{ minHeight: '100%' }}>{children}</div>;
 }
 
 export default function App() {
@@ -104,7 +92,6 @@ export default function App() {
     </div>
   );
 
-  // not signed in
   if (!user) {
     return (
       <div className="app">
@@ -118,7 +105,6 @@ export default function App() {
     );
   }
 
-  // signed in but profile not set up
   if (!user.profile_complete) {
     return (
       <div className="app">
@@ -129,23 +115,21 @@ export default function App() {
     );
   }
 
-  // main app
   return (
     <div className="app">
       <button className="themebtn" onClick={toggle}>{mode === 'dark' ? '☀️' : '🌙'}</button>
-      <SwipeNav>
-        <Routes>
-          <Route path="/home" element={<Home />} />
-          <Route path="/partners" element={<Partners />} />
-          <Route path="/osce" element={<Osce />} />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/motivation" element={<Motivation />} />
-          <Route path="/legal" element={<Legal />} />
-          <Route path="/connections" element={<Connections />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="*" element={<Navigate to="/home" replace />} />
-        </Routes>
-      </SwipeNav>
+      <Routes>
+        <Route path="/home" element={<Home />} />
+        <Route path="/partners" element={<Partners />} />
+        <Route path="/osce" element={<Osce />} />
+        <Route path="/globe" element={<Globe />} />
+        <Route path="/chat" element={<Chat />} />
+        <Route path="/motivation" element={<Motivation />} />
+        <Route path="/legal" element={<Legal />} />
+        <Route path="/connections" element={<Connections />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="*" element={<Navigate to="/home" replace />} />
+      </Routes>
       <TabBar />
     </div>
   );
