@@ -86,7 +86,7 @@ export default function Osce() {
           <button key={e} className={`chip ${exam === e ? 'on' : ''}`} onClick={() => setExam(e)}>{e}</button>
         ))}
       </div>
-      <h2 style={{ fontSize:18, fontWeight:700, fontFamily:"'Fraunces',serif" }}>{exam} stations</h2>
+      <h2 style={{ fontSize:18, fontWeight:700, fontFamily:"'Newsreader',Georgia,serif" }}>{exam} stations</h2>
       {!isPro && <p className="sub" style={{ fontSize:12, marginBottom:10 }}>{FREE} free · unlock the rest with Pro</p>}
       {stations.map((st, i) => {
         const locked = !isPro && i >= FREE;
@@ -146,7 +146,11 @@ function Station({ name, minutes, onBack }) {
         <div onClick={() => setShowShare(false)} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.5)', display:'grid', placeItems:'center', zIndex:100, padding:24 }}>
           <div className="card" onClick={(e) => e.stopPropagation()} style={{ maxWidth:340, width:'100%' }}>
             <h2 className="serif" style={{ fontSize:18, fontWeight:700, marginBottom:6 }}>📹 Share the video link</h2>
-            <p className="sub" style={{ fontSize:13, marginBottom:12 }}>A Google Meet opened in a new tab. Send the link to a connected partner to practise together — they'll get it in your chat.</p>
+            <p className="sub" style={{ fontSize:13, marginBottom:12 }}>A Google Meet opened in a new tab. Copy the link or send it to a connected partner — they'll get it in your chat.</p>
+            <div style={{ display:'flex', gap:8, marginBottom:12 }}>
+              <input className="input" readOnly value={meetUrl} style={{ marginBottom:0, flex:1, fontSize:13 }} onFocus={(e) => e.target.select()} />
+              <button className="btn-sm" onClick={() => { navigator.clipboard?.writeText(meetUrl); window.alert('Link copied!'); }}>Copy</button>
+            </div>
             {friends.length === 0 ? (
               <p className="sub" style={{ fontSize:13 }}>No connections yet. Connect with a partner first, then invite them here.</p>
             ) : friends.map((f) => (
@@ -161,7 +165,7 @@ function Station({ name, minutes, onBack }) {
       <button className="link" onClick={onBack}>‹ Back to stations</button>
       <h1 className="h1" style={{ fontSize:24, margin:'12px 0 6px' }}>{name}</h1>
       <div className="card" style={{ textAlign:'center' }}>
-        <div style={{ fontFamily:"'Fraunces',serif", fontSize:44, fontWeight:900, color: seconds === 0 ? 'var(--rust)' : 'var(--forest)' }}>{mm}:{ss}</div>
+        <div style={{ fontFamily:"'Newsreader',Georgia,serif", fontSize:44, fontWeight:900, color: seconds === 0 ? 'var(--rust)' : 'var(--forest)' }}>{mm}:{ss}</div>
         <div style={{ display:'flex', gap:10, marginTop:12 }}>
           <button className="btn" onClick={() => setRunning(!running)}>{running ? 'Pause' : 'Start'}</button>
           <button className="btn ghost" onClick={() => { setRunning(false); setSeconds(total); }}>Reset</button>

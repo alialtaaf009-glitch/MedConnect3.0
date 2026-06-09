@@ -78,3 +78,28 @@ CREATE TABLE IF NOT EXISTS reset_tokens (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_reset_token ON reset_tokens(token);
+
+-- ===== Group study chats =====
+CREATE TABLE IF NOT EXISTS groups (
+  id         SERIAL PRIMARY KEY,
+  name       TEXT NOT NULL,
+  creator    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS group_members (
+  id        SERIAL PRIMARY KEY,
+  group_id  INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+  user_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  joined_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE (group_id, user_id)
+);
+CREATE TABLE IF NOT EXISTS group_messages (
+  id         SERIAL PRIMARY KEY,
+  group_id   INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+  sender     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  body       TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_gm_group ON group_messages(group_id);
+CREATE INDEX IF NOT EXISTS idx_gmem_group ON group_members(group_id);
+CREATE INDEX IF NOT EXISTS idx_gmem_user ON group_members(user_id);

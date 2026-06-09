@@ -1,5 +1,5 @@
 /* ===== MedConnect — v1.0 editorial design language ===== */
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 :root, [data-theme="light"] {
   --ink:#11201a; --paper:#f3efe3; --paper-2:#e6dfca; --card:#fffdf6;
@@ -32,7 +32,7 @@ body {
 .app { max-width: 480px; margin: 0 auto; min-height: 100vh; padding-bottom: 78px; position: relative; }
 .screen { padding: 20px; }
 
-h1, h2, h3, .h1, .name, .brand-name, .stat-num, .serif { font-family: 'Fraunces', serif; font-variant-ligatures: none; -webkit-font-feature-settings: "liga" 0, "dlig" 0; font-feature-settings: "liga" 0, "dlig" 0; }
+h1, h2, h3, .h1, .name, .brand-name, .stat-num, .serif { font-family: 'Newsreader', Georgia, serif; font-variant-ligatures: none; -webkit-font-feature-settings: "liga" 0, "dlig" 0; font-feature-settings: "liga" 0, "dlig" 0; }
 /* belt-and-suspenders: kill discretionary ligatures app-wide so 'f' words never look crooked */
 * { font-variant-ligatures: none; -webkit-font-feature-settings: "liga" 0, "dlig" 0, "calt" 0; font-feature-settings: "liga" 0, "dlig" 0, "calt" 0; }
 .h1 { font-size: 30px; font-weight: 900; letter-spacing: -0.5px; line-height: 1.05; }
@@ -67,14 +67,14 @@ h1, h2, h3, .h1, .name, .brand-name, .stat-num, .serif { font-family: 'Fraunces'
 .meta { color: var(--muted); font-size: 13px; margin-top: 3px; }
 
 /* labels + chips */
-.label { display: block; font-family: 'Fraunces', serif; font-size: 13px; color: var(--forest); font-weight: 700;
+.label { display: block; font-family: 'Newsreader', Georgia, serif; font-size: 13px; color: var(--forest); font-weight: 700;
   text-transform: uppercase; letter-spacing: .5px; margin: 18px 0 9px; }
 .chips { display: flex; flex-wrap: wrap; gap: 9px; }
 .chip { border: 1.5px solid var(--line); background: var(--paper); color: var(--muted);
   border-radius: 20px; padding: 8px 14px; font-size: 13.5px; cursor: pointer; font-family: 'Newsreader', serif; transition: .2s; }
 .chip.on { background: var(--forest); border-color: var(--forest); color: var(--paper); }
 
-.pill { font-size: 12px; padding: 4px 10px; border-radius: 20px; font-family: 'Fraunces', serif; font-weight: 700; }
+.pill { font-size: 12px; padding: 4px 10px; border-radius: 20px; font-family: 'Newsreader', Georgia, serif; font-weight: 700; }
 .pill.pending { background: var(--paper-2); color: var(--gold); }
 .pill.conn { background: var(--paper-2); color: var(--forest); }
 
@@ -89,23 +89,23 @@ h1, h2, h3, .h1, .name, .brand-name, .stat-num, .serif { font-family: 'Fraunces'
 .tabbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px;
   background: rgba(244,241,232,.94); backdrop-filter: blur(12px); border-top: 1.5px solid var(--line); display: flex; padding: 10px 0 16px; }
 [data-theme="dark"] .tabbar { background: rgba(20,17,12,.94); }
-.tabbar a { flex: 1; text-align: center; text-decoration: none; color: var(--subtle); font-size: 11px;
+.tabbar a { flex: 1; text-align: center; text-decoration: none; color: var(--subtle); font-size: 10px;
   font-family: 'Newsreader', serif; font-weight: 600; }
 .tabbar a.active { color: var(--forest); }
-.tabbar .ic { display: block; height: 22px; }
+.tabbar .ic { display: inline-block; position: relative; height: 22px; line-height: 0; }
 .tabbar .ic svg { display: block; margin: 0 auto; }
+.badge-dot { position: absolute; top: -3px; right: -5px; width: 8px; height: 8px; border-radius: 50%; background: var(--rust); border: 1.5px solid var(--card); }
 
 .center { display: flex; align-items: center; justify-content: center; min-height: 60vh; color: var(--muted); font-family: 'Newsreader', serif; }
 
 /* brand mark / logo */
 .logo { width: 64px; height: 64px; border-radius: 16px; margin: 0 auto 16px;
   background: linear-gradient(135deg, #0891b2, #4f46e5); display: grid; place-items: center;
-  color: #fff; font-family: 'Fraunces', serif; font-size: 30px; font-weight: 900; }
+  color: #fff; font-family: 'Newsreader', Georgia, serif; font-size: 30px; font-weight: 900; }
 
 /* presence dots */
 .dot-online { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #2ecc71; margin-right: 7px; vertical-align: middle; }
 .dot-offline { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--subtle); margin-right: 7px; vertical-align: middle; opacity: .5; }
-.badge-dot { position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; border-radius: 50%; background: var(--rust); border: 1.5px solid var(--card); }
 
 /* moderation menu */
 .menu-item { display: block; width: 100%; text-align: left; background: none; border: none;

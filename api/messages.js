@@ -8,6 +8,96 @@ export default async function handler(req, res) {
   if (!uid) return res.status(401).json({ error: 'Not authenticated' });
 
   try {
+    // ===================== GROUP CHAT =====================
+    // All group routes are namespaced with ?scope=groups
+    if (req.query.scope === 'groups') {
+      if (req.method === 'GET') {
+        const gid = req.query.group ? parseInt(req.query.group, 10) : null;
+        if (gid) {
+          // must be a member
+          const mem = await sql`SELECT 1 FROM group_members WHERE group_id = ${gid} AND user_id = ${uid}`;
+          if (!mem.length) return res.status(403).json({ error: 'Not a member of this group' });
+          const msgs = await sql`
+            SELECT gm.*, u.name AS sender_name, u.avatar AS sender_avatar
+            FROM group_messages gm JOIN users u ON u.id = gm.sender
+            WHERE gm.group_id = ${gid} ORDER BY gm.created_at ASC`;
+          const members = await sql`
+            SELECT u.id, u.name, u.avatar FROM group_members g JOIN users u ON u.id = g.user_id
+            WHERE g.group_id = ${gid}`;
+          const g = await sql`SELECT * FROM groups WHERE id = ${gid}`;
+          return res.status(200).json({ messages: msgs, members, group: g[0] });
+        }
+        // list groups I'm in, with last message
+        const groups = await sql`
+          SELECT g.id, g.name, g.creator,
+                 (SELECT body FROM group_messages WHERE group_id = g.id ORDER BY created_at DESC LIMIT 1) AS last_body,
+                 (SELECT created_at FROM group_messages WHERE group_id = g.id ORDER BY created_at DESC LIMIT 1) AS last_at,
+                 (SELECT COUNT(*) FROM group_members WHERE group_id = g.id)::int AS member_count
+          FROM groups g
+          JOIN group_members m ON m.group_id = g.id
+          WHERE m.user_id = ${uid}
+          ORDER BY last_at DESC NULLS LAST`;
+        return res.status(200).json({ groups });
+      }
+
+      if (req.method === 'POST') {
+        const body = readBody(req);
+        const action = body.action;
+
+        if (action === 'create') {
+          const name = (body.name || '').trim();
+          const memberIds = Array.isArray(body.memberIds) ? body.memberIds : [];
+          if (!name) return res.status(400).json({ error: 'Group name required' });
+          const g = await sql`INSERT INTO groups (name, creator) VALUES (${name}, ${uid}) RETURNING *`;
+          const gid = g[0].id;
+          await sql`INSERT INTO group_members (group_id, user_id) VALUES (${gid}, ${uid}) ON CONFLICT DO NOTHING`;
+          for (const mid of memberIds) {
+            const m = parseInt(mid, 10);
+            if (m) await sql`INSERT INTO group_members (group_id, user_id) VALUES (${gid}, ${m}) ON CONFLICT DO NOTHING`;
+          }
+          return res.status(201).json({ group: g[0] });
+        }
+
+        if (action === 'send') {
+          const gid = parseInt(body.groupId, 10);
+          const text = (body.body || '').trim();
+          if (!gid || !text) return res.status(400).json({ error: 'groupId and body required' });
+          const mem = await sql`SELECT 1 FROM group_members WHERE group_id = ${gid} AND user_id = ${uid}`;
+          if (!mem.length) return res.status(403).json({ error: 'Not a member' });
+          const rows = await sql`INSERT INTO group_messages (group_id, sender, body) VALUES (${gid}, ${uid}, ${text}) RETURNING *`;
+          return res.status(201).json({ message: rows[0] });
+        }
+
+        if (action === 'add_member') {
+          const gid = parseInt(body.groupId, 10);
+          const newId = parseInt(body.userId, 10);
+          if (!gid || !newId) return res.status(400).json({ error: 'groupId and userId required' });
+          const mem = await sql`SELECT 1 FROM group_members WHERE group_id = ${gid} AND user_id = ${uid}`;
+          if (!mem.length) return res.status(403).json({ error: 'Only members can add people' });
+          await sql`INSERT INTO group_members (group_id, user_id) VALUES (${gid}, ${newId}) ON CONFLICT DO NOTHING`;
+          return res.status(200).json({ ok: true });
+        }
+
+        if (action === 'leave') {
+          const gid = parseInt(body.groupId, 10);
+          await sql`DELETE FROM group_members WHERE group_id = ${gid} AND user_id = ${uid}`;
+          return res.status(200).json({ ok: true });
+        }
+
+        if (action === 'delete') {
+          const gid = parseInt(body.groupId, 10);
+          const g = await sql`SELECT creator FROM groups WHERE id = ${gid}`;
+          if (!g.length || g[0].creator !== uid) return res.status(403).json({ error: 'Only the creator can delete the group' });
+          await sql`DELETE FROM groups WHERE id = ${gid}`; // cascades to members + messages
+          return res.status(200).json({ ok: true });
+        }
+
+        return res.status(400).json({ error: 'Unknown group action' });
+      }
+      return res.status(405).json({ error: 'Method not allowed' });
+    }
+
+    // ===================== DIRECT MESSAGES =====================
     if (req.method === 'GET') {
       const other = req.query.with ? parseInt(req.query.with, 10) : null;
 
@@ -18,7 +108,11 @@ export default async function handler(req, res) {
           WHERE (sender = ${uid} AND recipient = ${other})
              OR (sender = ${other} AND recipient = ${uid})
           ORDER BY created_at ASC`;
-        return res.status(200).json({ messages: msgs });
+        // include both users' avatars so the client always shows the right emoji
+        const people = await sql`SELECT id, name, avatar FROM users WHERE id = ${uid} OR id = ${other}`;
+        const avatars = {};
+        for (const p of people) avatars[p.id] = p.avatar || '';
+        return res.status(200).json({ messages: msgs, avatars });
       }
 
       // conversation list: the most recent message with each other person

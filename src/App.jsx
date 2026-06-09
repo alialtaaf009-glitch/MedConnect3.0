@@ -14,7 +14,6 @@ import Chat from './pages/Chat.jsx';
 import Motivation from './pages/Motivation.jsx';
 import Legal from './pages/Legal.jsx';
 import Reset from './pages/Reset.jsx';
-import Globe from './pages/Globe.jsx';
 
 function Icon({ name }) {
   const common = { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none',
@@ -25,7 +24,6 @@ function Icon({ name }) {
     osce: <><rect x="4" y="5" width="16" height="11" rx="1" /><path d="M9 20h6M12 16v4" /></>,
     chat: <><path d="M4 5h16v11H7l-3 3z" /></>,
     profile: <><circle cx="12" cy="12" r="9" /><circle cx="12" cy="10" r="3" /><path d="M6.5 18.5c1-2.3 3.1-3.5 5.5-3.5s4.5 1.2 5.5 3.5" /></>,
-    globe: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18" /><path d="M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18" /></>,
   };
   return <svg {...common}>{paths[name]}</svg>;
 }
@@ -34,6 +32,8 @@ function TabBar() {
   const [hasUnread, setHasUnread] = useState(false);
   const [hasRequests, setHasRequests] = useState(false);
 
+  // poll conversations; show a dot on Chat if any incoming message is newer
+  // than what we've marked as read (stored locally per the helper).
   useEffect(() => {
     let alive = true;
     const check = async () => {
@@ -41,12 +41,13 @@ function TabBar() {
         const d = await api.conversations();
         const lastRead = Number(localStorage.getItem('chat_last_read') || 0);
         const newestIncoming = (d.conversations || [])
-          .filter((c) => c.last_sender == c.other_id)
+          .filter((c) => c.last_sender == c.other_id) // last msg was from them
           .reduce((max, c) => Math.max(max, new Date(c.last_at).getTime()), 0);
         if (alive) setHasUnread(newestIncoming > lastRead);
       } catch (e) {}
       try {
         const cd = await api.connections();
+        // incoming pending requests = someone asked to connect with me
         const pending = (cd.incoming || cd.requests || cd.pending || []).length;
         if (alive) setHasRequests(pending > 0);
       } catch (e) {}
@@ -59,7 +60,6 @@ function TabBar() {
   const tabs = [
     ['/home', 'home', 'Home'],
     ['/partners', 'partners', 'Partners'],
-    ['/globe', 'globe', 'Globe'],
     ['/osce', 'osce', 'OSCE'],
     ['/chat', 'chat', 'Chat'],
     ['/profile', 'profile', 'Profile'],
@@ -92,6 +92,7 @@ export default function App() {
     </div>
   );
 
+  // not signed in
   if (!user) {
     return (
       <div className="app">
@@ -105,6 +106,7 @@ export default function App() {
     );
   }
 
+  // signed in but profile not set up
   if (!user.profile_complete) {
     return (
       <div className="app">
@@ -115,6 +117,7 @@ export default function App() {
     );
   }
 
+  // main app
   return (
     <div className="app">
       <button className="themebtn" onClick={toggle}>{mode === 'dark' ? '☀️' : '🌙'}</button>
@@ -122,7 +125,6 @@ export default function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/partners" element={<Partners />} />
         <Route path="/osce" element={<Osce />} />
-        <Route path="/globe" element={<Globe />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="/motivation" element={<Motivation />} />
         <Route path="/legal" element={<Legal />} />

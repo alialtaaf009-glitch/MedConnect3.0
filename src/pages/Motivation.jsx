@@ -69,7 +69,7 @@ export default function Motivation() {
       {tab === 'today' && (
         <div className="card" style={{ padding: 24, textAlign: 'center' }}>
           <div style={{ fontSize: 30, marginBottom: 12 }}>✦</div>
-          <p style={{ fontFamily: "'Fraunces',serif", fontSize: 21, fontWeight: 600, lineHeight: 1.4, marginBottom: 18 }}>
+          <p style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 21, fontWeight: 600, lineHeight: 1.4, marginBottom: 18 }}>
             “{today.text}”
           </p>
           <Star id={today.id} />
@@ -87,7 +87,7 @@ export default function Motivation() {
           )}
           {favIds.map((id) => (
             <div key={id} className="card" style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-              <div style={{ flex: 1, fontFamily: "'Fraunces',serif", fontSize: 16, lineHeight: 1.45 }}>“{QUOTES[id]}”</div>
+              <div style={{ flex: 1, fontFamily: "'Newsreader',Georgia,serif", fontSize: 16, lineHeight: 1.45 }}>“{QUOTES[id]}”</div>
               <Star id={id} />
             </div>
           ))}

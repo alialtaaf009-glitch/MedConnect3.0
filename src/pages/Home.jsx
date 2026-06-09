@@ -97,7 +97,7 @@ export default function Home() {
       {daysLeft !== null && (
         <div className="card" style={{ textAlign: 'center', borderColor: 'var(--rust)' }}>
           <div className="label" style={{ marginTop: 0, color: 'var(--rust)' }}>Exam countdown</div>
-          <div style={{ fontFamily: "'Fraunces',serif", fontSize: 40, fontWeight: 900, color: 'var(--forest)' }}>
+          <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 40, fontWeight: 900, color: 'var(--forest)' }}>
             {daysLeft > 0 ? daysLeft : daysLeft === 0 ? 'Today' : 'Passed'}
           </div>
           {daysLeft > 0 && <div className="sub" style={{ marginTop: 0 }}>days until {user?.exam || 'your exam'}</div>}
@@ -106,11 +106,11 @@ export default function Home() {
 
       <div className="card" style={{ cursor: 'pointer' }} onClick={() => nav('/motivation')}>
         <div className="label" style={{ marginTop: 0 }}>✦ Daily motivation</div>
-        <p style={{ fontFamily: "'Fraunces',serif", fontSize: 16, lineHeight: 1.4 }}>“{quote.text}”</p>
+        <p style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 16, lineHeight: 1.4 }}>“{quote.text}”</p>
         <div className="link" style={{ marginTop: 6 }}>Open the motivation wall ›</div>
       </div>
 
-      <h2 className="serif" style={{ fontSize: 18, fontWeight: 600, margin: '24px 0 12px' }}>Browse</h2>
+      <h2 className="serif" style={{ fontSize: 18, fontWeight: 600, margin: '24px 0 12px' }}>Explore study partners</h2>
 
       <div className="tabs" style={{ marginBottom: 14 }}>
         <button className={`tab ${browseMode === 'country' ? 'on' : ''}`} onClick={() => { setBrowseMode('country'); setOpenExam(''); }}>By country</button>
@@ -167,7 +167,7 @@ export default function Home() {
                   onClick={() => setOpenExam(openExam === key ? '' : key)}>
                   <span style={{ flex: 1 }}>{exam}</span>
                   {examCount(exam) >= 2 && (
-                    <span style={{ fontSize: 11, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 20, padding: '3px 9px', marginRight: 8, fontFamily: "'Fraunces',serif", fontWeight: 700 }}>
+                    <span style={{ fontSize: 11, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 20, padding: '3px 9px', marginRight: 8, fontFamily: "'Newsreader',Georgia,serif", fontWeight: 700 }}>
                       {examCount(exam)} doctors
                     </span>
                   )}
