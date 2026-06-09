@@ -49,6 +49,7 @@ export default function Home() {
   const nav = useNavigate();
   const [openCountry, setOpenCountry] = useState('');
   const [openExam, setOpenExam] = useState('');
+  const [browseMode, setBrowseMode] = useState('country'); // 'country' | 'exam'
   const initials = (user?.name || 'Dr A').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map(x => x[0]?.toUpperCase()).join('');
 
   // exam countdown
@@ -109,14 +110,47 @@ export default function Home() {
         <div className="link" style={{ marginTop: 6 }}>Open the motivation wall ›</div>
       </div>
 
-      <div className="card" style={{ borderColor: 'var(--violet)', cursor: 'pointer' }} onClick={() => nav('/osce')}>
-        <div style={{ color: 'var(--violet)', fontSize: 11, fontWeight: 700, letterSpacing: 1 }}>NEW · OSCE PRACTICE</div>
-        <div style={{ fontSize: 17, fontWeight: 600, marginTop: 6 }}>Practice a live station with a partner</div>
-        <div className="meta">Timed, structured clinical practice. Tap to open.</div>
+      <h2 className="serif" style={{ fontSize: 18, fontWeight: 600, margin: '24px 0 12px' }}>Browse</h2>
+
+      <div className="tabs" style={{ marginBottom: 14 }}>
+        <button className={`tab ${browseMode === 'country' ? 'on' : ''}`} onClick={() => { setBrowseMode('country'); setOpenExam(''); }}>By country</button>
+        <button className={`tab ${browseMode === 'exam' ? 'on' : ''}`} onClick={() => { setBrowseMode('exam'); setOpenExam(''); }}>By exam</button>
       </div>
 
-      <h2 style={{ fontSize: 18, fontWeight: 600, margin: '24px 0 12px' }}>Browse by country</h2>
-      {CATALOG.map(([flag, country, exams]) => (
+      {browseMode === 'exam' && (
+        <>
+          {CATALOG.flatMap(([flag, country, exams]) => exams.map(([exam, parts]) => ({ flag, country, exam, parts })))
+            .map(({ flag, country, exam, parts }) => {
+              const key = 'exam|' + country + '|' + exam;
+              return (
+                <div key={key} className="card" style={{ padding: 0, overflow: 'hidden' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 14, cursor: 'pointer' }}
+                    onClick={() => setOpenExam(openExam === key ? '' : key)}>
+                    <span style={{ fontSize: 16 }}>{flag}</span>
+                    <span style={{ flex: 1, fontWeight: 600 }}>{exam}</span>
+                    {examCount(exam) >= 2 && (
+                      <span style={{ fontSize: 11, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 20, padding: '3px 9px', marginRight: 4, fontWeight: 700 }}>
+                        {examCount(exam)}
+                      </span>
+                    )}
+                    <span className="meta" style={{ fontSize: 11 }}>{openExam === key ? '▲' : '▼'}</span>
+                  </div>
+                  {openExam === key && parts.map((part, pi) => {
+                    const accents = ['var(--forest)', 'var(--rust)', 'var(--gold)', 'var(--forest-2)'];
+                    return (
+                      <div key={part} className="exam-accent" style={{ '--ec': accents[pi % accents.length], padding: '11px 16px 11px 22px', borderTop: '1px solid var(--line)', cursor: 'pointer' }}
+                        onClick={() => nav('/partners')}>
+                        <span style={{ fontWeight: 600, fontSize: 14 }}>{part}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+        </>
+      )}
+
+      {browseMode === 'country' && CATALOG.map(([flag, country, exams]) => (
         <div key={country} className="card" style={{ padding: 0, overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: 14, cursor: 'pointer' }}
             onClick={() => setOpenCountry(openCountry === country ? '' : country)}>

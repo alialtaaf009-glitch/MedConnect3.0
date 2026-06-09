@@ -1,4 +1,4 @@
-// API client — talks to serverless functions at /api/* (same origin, no IP needed).
+// API client — talks to Netlify Functions at /api/* (same origin, no IP needed).
 function token() { return localStorage.getItem('token'); }
 
 async function req(path, { method = 'GET', body } = {}) {

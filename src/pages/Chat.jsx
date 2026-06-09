@@ -9,8 +9,9 @@ export default function Chat() {
   const nav = useNavigate();
   const withId = params.get('with');
   const withName = params.get('name') || 'Chat';
+  const withAv = params.get('av') || '';
 
-  if (withId) return <Conversation me={user} withId={withId} withName={withName} onBack={() => nav('/chat')} />;
+  if (withId) return <Conversation me={user} withId={withId} withName={withName} withAv={withAv} onBack={() => nav('/chat')} />;
   return <ConversationList nav={nav} />;
 }
 
@@ -38,7 +39,7 @@ function ConversationList({ nav }) {
         const init = (c.name || 'Dr').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('');
         return (
           <div key={c.other_id} className="row" style={{ cursor: 'pointer' }}
-            onClick={() => nav(`/chat?with=${c.other_id}&name=${encodeURIComponent(c.name)}`)}>
+            onClick={() => nav(`/chat?with=${c.other_id}&name=${encodeURIComponent(c.name)}&av=${encodeURIComponent(c.avatar || '')}`)}>
             <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: c.avatar ? 22 : 15, color: 'var(--forest)', fontWeight: 600, flexShrink: 0 }}>{c.avatar || init}</div>
             <div className="grow">
               <div className="name">{c.name}</div>
@@ -53,8 +54,13 @@ function ConversationList({ nav }) {
   );
 }
 
-function Conversation({ me, withId, withName, onBack }) {
+function Conversation({ me, withId, withName, withAv, onBack }) {
   const [messages, setMessages] = useState([]);
+  const myInit = (me?.name || 'Me').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('');
+  const theirInit = (withName || 'Dr').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('');
+  const Avatar = ({ emoji, init }) => (
+    <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--paper-2)', border: '1px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: emoji ? 16 : 11, color: 'var(--forest)', fontWeight: 700, flexShrink: 0 }}>{emoji || init}</div>
+  );
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
   const [menu, setMenu] = useState(false);
@@ -70,16 +76,6 @@ function Conversation({ me, withId, withName, onBack }) {
     const body = text.trim();
     setText('');
     try { await api.sendMessage(withId, body); await load(); } catch (e) {} finally { setSending(false); }
-  };
-
-  const startVideo = async () => {
-    // open a fresh Google Meet and drop the link into the chat so the partner can join
-    const url = 'https://meet.google.com/new';
-    window.open(url, '_blank');
-    try {
-      await api.sendMessage(withId, `📹 I've started a video session for OSCE practice — join me here: ${url}\n(If that opens a new room, paste your room link back here so we land in the same call.)`);
-      await load();
-    } catch (e) {}
   };
 
   const doDelete = async () => {
@@ -104,7 +100,7 @@ function Conversation({ me, withId, withName, onBack }) {
   };
 
   return (
-    <div className="screen" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 76px)' }}>
+    <div className="screen" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100dvh - 76px)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
         <button className="link" onClick={onBack}>‹ Back</button>
         <h2 style={{ fontSize: 18, fontWeight: 600, flex: 1 }}>{withName}</h2>
@@ -127,9 +123,10 @@ function Conversation({ me, withId, withName, onBack }) {
           // make any URLs in the message tappable
           const parts = m.body.split(/(https?:\/\/[^\s]+)/g);
           return (
-            <div key={m.id} style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', marginBottom: 8 }}>
+            <div key={m.id} style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', alignItems: 'flex-end', gap: 7, marginBottom: 8 }}>
+              {!mine && <Avatar emoji={withAv} init={theirInit} />}
               <div style={{
-                maxWidth: '75%', padding: '10px 13px', borderRadius: 14, fontSize: 14,
+                maxWidth: '72%', padding: '10px 13px', borderRadius: 14, fontSize: 14,
                 background: mine ? 'var(--forest)' : 'var(--card)',
                 color: mine ? '#ffffff' : 'var(--ink)',
                 border: mine ? 'none' : '1.5px solid var(--line)',
@@ -141,6 +138,7 @@ function Conversation({ me, withId, withName, onBack }) {
                     : p
                 )}
               </div>
+              {mine && <Avatar emoji={me?.avatar} init={myInit} />}
             </div>
           );
         })}
@@ -148,7 +146,6 @@ function Conversation({ me, withId, withName, onBack }) {
       </div>
 
       <div style={{ display: 'flex', gap: 8, paddingTop: 10, borderTop: '1px solid var(--line)' }}>
-        <button className="btn-sm ghost" style={{ flexShrink: 0 }} onClick={startVideo} title="Start OSCE video session">📹</button>
         <input className="input" style={{ marginBottom: 0, flex: 1 }} placeholder="Type a message…"
           value={text} onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') send(); }} />

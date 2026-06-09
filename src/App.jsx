@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route, Navigate, NavLink } from 'react-router-dom';
+import { Routes, Route, Navigate, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from './context/Auth.jsx';
 import { useTheme } from './context/Theme.jsx';
 import { api } from './lib/api';
@@ -71,6 +71,26 @@ function TabBar() {
   );
 }
 
+// Swipe left/right between the main tabs (in addition to the nav bar).
+const TAB_ORDER = ['/home', '/partners', '/osce', '/chat', '/profile'];
+function SwipeNav({ children }) {
+  const nav = useNavigate();
+  const loc = useLocation();
+  const sx = (window.__sx = window.__sx || { x: 0, y: 0 });
+  const onStart = (e) => { const t = e.touches[0]; sx.x = t.clientX; sx.y = t.clientY; };
+  const onEnd = (e) => {
+    const t = e.changedTouches[0];
+    const dx = t.clientX - sx.x, dy = t.clientY - sx.y;
+    // only a deliberate, mostly-horizontal swipe
+    if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.8) return;
+    const i = TAB_ORDER.indexOf(loc.pathname);
+    if (i === -1) return;
+    if (dx < 0 && i < TAB_ORDER.length - 1) nav(TAB_ORDER[i + 1]); // swipe left → next
+    if (dx > 0 && i > 0) nav(TAB_ORDER[i - 1]);                    // swipe right → prev
+  };
+  return <div onTouchStart={onStart} onTouchEnd={onEnd} style={{ minHeight: '100%' }}>{children}</div>;
+}
+
 export default function App() {
   const { user, loading } = useAuth();
   const { mode, toggle } = useTheme();
@@ -78,7 +98,7 @@ export default function App() {
   if (loading) return (
     <div className="app">
       <div className="center" style={{ flexDirection: 'column', gap: 14 }}>
-        <div className="logo" style={{ margin: 0 }}>M+</div>
+        <img src="/pwa-192.png" alt="MedConnect" style={{ width: 76, height: 76, borderRadius: 16 }} />
         <div style={{ color: 'var(--muted)', fontSize: 13 }}>MedConnect</div>
       </div>
     </div>
@@ -113,17 +133,19 @@ export default function App() {
   return (
     <div className="app">
       <button className="themebtn" onClick={toggle}>{mode === 'dark' ? '☀️' : '🌙'}</button>
-      <Routes>
-        <Route path="/home" element={<Home />} />
-        <Route path="/partners" element={<Partners />} />
-        <Route path="/osce" element={<Osce />} />
-        <Route path="/chat" element={<Chat />} />
-        <Route path="/motivation" element={<Motivation />} />
-        <Route path="/legal" element={<Legal />} />
-        <Route path="/connections" element={<Connections />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="*" element={<Navigate to="/home" replace />} />
-      </Routes>
+      <SwipeNav>
+        <Routes>
+          <Route path="/home" element={<Home />} />
+          <Route path="/partners" element={<Partners />} />
+          <Route path="/osce" element={<Osce />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/motivation" element={<Motivation />} />
+          <Route path="/legal" element={<Legal />} />
+          <Route path="/connections" element={<Connections />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="*" element={<Navigate to="/home" replace />} />
+        </Routes>
+      </SwipeNav>
       <TabBar />
     </div>
   );
