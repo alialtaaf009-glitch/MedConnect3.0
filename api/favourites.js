@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
       const { quoteId, action } = readBody(req);
       const qid = parseInt(quoteId, 10);
-      if (!qid) return res.status(400).json({ error: 'quoteId required' });
+      if (Number.isNaN(qid)) return res.status(400).json({ error: 'quoteId required' });
       if (action === 'remove') {
         await sql`DELETE FROM favourite_quotes WHERE user_id = ${uid} AND quote_id = ${qid}`;
       } else {
@@ -29,3 +29,4 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Favourites failed: ' + e.message });
   }
 }
+
