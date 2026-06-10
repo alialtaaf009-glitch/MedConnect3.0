@@ -153,4 +153,38 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Messaging failed: ' + e.message });
   }
 }
+// ===================== STUDY STREAK =====================
+async function updateStreak(uid) {
+  const rows = await sql`
+    SELECT current_streak, longest_streak, last_active_date
+    FROM users WHERE id = ${uid}`;
+  if (!rows.length) return null;
 
+  const { current_streak, longest_streak, last_active_date } = rows[0];
+
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+
+  let newStreak;
+  if (!last_active_date) {
+    newStreak = 1;
+  } else {
+    const last = new Date(last_active_date);
+    last.setUTCHours(0, 0, 0, 0);
+    const diffDays = Math.round((today - last) / 86400000);
+    if (diffDays === 0)      newStreak = current_streak;
+    else if (diffDays === 1) newStreak = current_streak + 1;
+    else                     newStreak = 1;
+  }
+
+  const newLongest = Math.max(newStreak, longest_streak || 0);
+
+  await sql`
+    UPDATE users
+    SET current_streak = ${newStreak},
+        longest_streak = ${newLongest},
+        last_active_date = ${today.toISOString().slice(0, 10)}
+    WHERE id = ${uid}`;
+
+  return { current_streak: newStreak, longest_streak: newLongest };
+}
