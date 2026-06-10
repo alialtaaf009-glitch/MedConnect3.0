@@ -32,8 +32,6 @@ function TabBar() {
   const [hasUnread, setHasUnread] = useState(false);
   const [hasRequests, setHasRequests] = useState(false);
 
-  // poll conversations; show a dot on Chat if any incoming message is newer
-  // than what we've marked as read (stored locally per the helper).
   useEffect(() => {
     let alive = true;
     const check = async () => {
@@ -41,13 +39,12 @@ function TabBar() {
         const d = await api.conversations();
         const lastRead = Number(localStorage.getItem('chat_last_read') || 0);
         const newestIncoming = (d.conversations || [])
-          .filter((c) => c.last_sender == c.other_id) // last msg was from them
+          .filter((c) => c.last_sender == c.other_id)
           .reduce((max, c) => Math.max(max, new Date(c.last_at).getTime()), 0);
         if (alive) setHasUnread(newestIncoming > lastRead);
       } catch (e) {}
       try {
         const cd = await api.connections();
-        // incoming pending requests = someone asked to connect with me
         const pending = (cd.incoming || cd.requests || cd.pending || []).length;
         if (alive) setHasRequests(pending > 0);
       } catch (e) {}
@@ -83,7 +80,7 @@ export default function App() {
   const { user, loading } = useAuth();
   const { mode, toggle } = useTheme();
 
- if (loading) return (
+  if (loading) return (
     <div className="app">
       <div className="center" style={{ flexDirection: 'column', gap: 14 }}>
         <img src="/pwa-192.png" alt="MedConnect" style={{ width: 76, height: 76, borderRadius: 16 }} />
@@ -92,7 +89,6 @@ export default function App() {
     </div>
   );
 
-  // not signed in
   if (!user) {
     return (
       <div className="app">
@@ -106,7 +102,6 @@ export default function App() {
     );
   }
 
-  // signed in but profile not set up
   if (!user.profile_complete) {
     return (
       <div className="app">
@@ -117,10 +112,8 @@ export default function App() {
     );
   }
 
-  // main app
   return (
     <div className="app">
-      <TopBar user={user} />
       <button className="themebtn" onClick={toggle}>{mode === 'dark' ? '☀️' : '🌙'}</button>
       <Routes>
         <Route path="/home" element={<Home />} />
@@ -137,4 +130,3 @@ export default function App() {
     </div>
   );
 }
-
