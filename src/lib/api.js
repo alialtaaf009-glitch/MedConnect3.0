@@ -43,3 +43,4 @@ export const api = {
   resetRequest: (email) => req('/reset', { method: 'POST', body: { action: 'request', email } }),
   resetConfirm: (token, password) => req('/reset', { method: 'POST', body: { action: 'confirm', token, password } }),
 };
+
