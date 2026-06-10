@@ -145,8 +145,8 @@ export default async function handler(req, res) {
         INSERT INTO messages (sender, recipient, body)
         VALUES (${uid}, ${toId}, ${body.trim()})
         RETURNING *`;
-      return res.status(201).json({ message: rows[0] });
-    }
+      const streak = await updateStreak(uid);
+          return res.status(201).json({ message: rows[0], streak });
 
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (e) {
