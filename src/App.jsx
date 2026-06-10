@@ -131,6 +131,7 @@ export default function App() {
   // main app
   return (
     <div className="app">
+      <TopBar user={user} />
       <button className="themebtn" onClick={toggle}>{mode === 'dark' ? '☀️' : '🌙'}</button>
       <Routes>
         <Route path="/home" element={<Home />} />
