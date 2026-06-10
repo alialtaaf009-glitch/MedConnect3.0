@@ -83,7 +83,18 @@ export default function App() {
   const { user, loading } = useAuth();
   const { mode, toggle } = useTheme();
 
-  if (loading) return (
+ function TopBar({ user }) {
+  const streak = user?.current_streak || 0;
+  return (
+    <header className="topbar">
+      <span className="topbar-brand">MedConnect</span>
+      <span className="streak" title="Study streak">
+        <span className="streak-flame">🔥</span>
+        <span className="streak-count">{streak}</span>
+      </span>
+    </header>
+  );
+ } if (loading) return (
     <div className="app">
       <div className="center" style={{ flexDirection: 'column', gap: 14 }}>
         <img src="/pwa-192.png" alt="MedConnect" style={{ width: 76, height: 76, borderRadius: 16 }} />
