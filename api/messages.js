@@ -65,8 +65,8 @@ export default async function handler(req, res) {
           const mem = await sql`SELECT 1 FROM group_members WHERE group_id = ${gid} AND user_id = ${uid}`;
           if (!mem.length) return res.status(403).json({ error: 'Not a member' });
           const rows = await sql`INSERT INTO group_messages (group_id, sender, body) VALUES (${gid}, ${uid}, ${text}) RETURNING *`;
-          return res.status(201).json({ message: rows[0] });
-        }
+          const streak = await updateStreak(uid);
+          return res.status(201).json({ message: rows[0], streak });
 
         if (action === 'add_member') {
           const gid = parseInt(body.groupId, 10);
