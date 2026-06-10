@@ -89,11 +89,11 @@ h1, h2, h3, .h1, .name, .brand-name, .stat-num, .serif { font-family: 'Newsreade
 .tabbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px;
   background: rgba(244,241,232,.94); backdrop-filter: blur(12px); border-top: 1.5px solid var(--line); display: flex; padding: 10px 0 16px; }
 [data-theme="dark"] .tabbar { background: rgba(20,17,12,.94); }
-.tabbar a { flex: 1; text-align: center; text-decoration: none; color: var(--subtle); font-size: 10px;
+.tabbar a { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: var(--subtle); font-size: 10px;
   font-family: 'Newsreader', serif; font-weight: 600; }
 .tabbar a.active { color: var(--forest); }
-.tabbar .ic { display: inline-block; position: relative; height: 22px; line-height: 0; }
-.tabbar .ic svg { display: block; margin: 0 auto; }
+.tabbar .ic { display: inline-flex; position: relative; height: 22px; line-height: 0; }
+.tabbar .ic svg { display: block; }
 .badge-dot { position: absolute; top: -3px; right: -5px; width: 8px; height: 8px; border-radius: 50%; background: var(--rust); border: 1.5px solid var(--card); }
 
 .center { display: flex; align-items: center; justify-content: center; min-height: 60vh; color: var(--muted); font-family: 'Newsreader', serif; }
@@ -122,3 +122,4 @@ h1, h2, h3, .h1, .name, .brand-name, .stat-num, .serif { font-family: 'Newsreade
 .themebtn { position: fixed; top: 14px; right: max(14px, calc(50vw - 226px)); z-index: 80; background: var(--card);
   border: 1.5px solid var(--line); color: var(--ink); border-radius: 10px; width: 40px; height: 40px;
   cursor: pointer; font-size: 17px; }
+
