@@ -9,12 +9,10 @@ export default async function handler(req, res) {
 
   try {
     // ===================== GROUP CHAT =====================
-    // All group routes are namespaced with ?scope=groups
     if (req.query.scope === 'groups') {
       if (req.method === 'GET') {
         const gid = req.query.group ? parseInt(req.query.group, 10) : null;
         if (gid) {
-          // must be a member
           const mem = await sql`SELECT 1 FROM group_members WHERE group_id = ${gid} AND user_id = ${uid}`;
           if (!mem.length) return res.status(403).json({ error: 'Not a member of this group' });
           const msgs = await sql`
@@ -27,7 +25,6 @@ export default async function handler(req, res) {
           const g = await sql`SELECT * FROM groups WHERE id = ${gid}`;
           return res.status(200).json({ messages: msgs, members, group: g[0] });
         }
-        // list groups I'm in, with last message
         const groups = await sql`
           SELECT g.id, g.name, g.creator,
                  (SELECT body FROM group_messages WHERE group_id = g.id ORDER BY created_at DESC LIMIT 1) AS last_body,
@@ -67,6 +64,7 @@ export default async function handler(req, res) {
           const rows = await sql`INSERT INTO group_messages (group_id, sender, body) VALUES (${gid}, ${uid}, ${text}) RETURNING *`;
           const streak = await updateStreak(uid);
           return res.status(201).json({ message: rows[0], streak });
+        }
 
         if (action === 'add_member') {
           const gid = parseInt(body.groupId, 10);
@@ -88,7 +86,7 @@ export default async function handler(req, res) {
           const gid = parseInt(body.groupId, 10);
           const g = await sql`SELECT creator FROM groups WHERE id = ${gid}`;
           if (!g.length || g[0].creator !== uid) return res.status(403).json({ error: 'Only the creator can delete the group' });
-          await sql`DELETE FROM groups WHERE id = ${gid}`; // cascades to members + messages
+          await sql`DELETE FROM groups WHERE id = ${gid}`;
           return res.status(200).json({ ok: true });
         }
 
@@ -102,20 +100,17 @@ export default async function handler(req, res) {
       const other = req.query.with ? parseInt(req.query.with, 10) : null;
 
       if (other) {
-        // full conversation, oldest first
         const msgs = await sql`
           SELECT * FROM messages
           WHERE (sender = ${uid} AND recipient = ${other})
              OR (sender = ${other} AND recipient = ${uid})
           ORDER BY created_at ASC`;
-        // include both users' avatars so the client always shows the right emoji
         const people = await sql`SELECT id, name, avatar FROM users WHERE id = ${uid} OR id = ${other}`;
         const avatars = {};
         for (const p of people) avatars[p.id] = p.avatar || '';
         return res.status(200).json({ messages: msgs, avatars });
       }
 
-      // conversation list: the most recent message with each other person
       const rows = await sql`
         SELECT DISTINCT ON (sub.other_id)
                sub.other_id   AS other_id,
@@ -146,45 +141,51 @@ export default async function handler(req, res) {
         VALUES (${uid}, ${toId}, ${body.trim()})
         RETURNING *`;
       const streak = await updateStreak(uid);
-          return res.status(201).json({ message: rows[0], streak });
+      return res.status(201).json({ message: rows[0], streak });
+    }
 
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (e) {
     return res.status(500).json({ error: 'Messaging failed: ' + e.message });
   }
 }
+
 // ===================== STUDY STREAK =====================
 async function updateStreak(uid) {
-  const rows = await sql`
-    SELECT current_streak, longest_streak, last_active_date
-    FROM users WHERE id = ${uid}`;
-  if (!rows.length) return null;
+  try {
+    const rows = await sql`
+      SELECT current_streak, longest_streak, last_active_date
+      FROM users WHERE id = ${uid}`;
+    if (!rows.length) return null;
 
-  const { current_streak, longest_streak, last_active_date } = rows[0];
+    const { current_streak, longest_streak, last_active_date } = rows[0];
 
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
 
-  let newStreak;
-  if (!last_active_date) {
-    newStreak = 1;
-  } else {
-    const last = new Date(last_active_date);
-    last.setUTCHours(0, 0, 0, 0);
-    const diffDays = Math.round((today - last) / 86400000);
-    if (diffDays === 0)      newStreak = current_streak;
-    else if (diffDays === 1) newStreak = current_streak + 1;
-    else                     newStreak = 1;
+    let newStreak;
+    if (!last_active_date) {
+      newStreak = 1;
+    } else {
+      const last = new Date(last_active_date);
+      last.setUTCHours(0, 0, 0, 0);
+      const diffDays = Math.round((today - last) / 86400000);
+      if (diffDays === 0)      newStreak = current_streak;
+      else if (diffDays === 1) newStreak = current_streak + 1;
+      else                     newStreak = 1;
+    }
+
+    const newLongest = Math.max(newStreak, longest_streak || 0);
+
+    await sql`
+      UPDATE users
+      SET current_streak = ${newStreak},
+          longest_streak = ${newLongest},
+          last_active_date = ${today.toISOString().slice(0, 10)}
+      WHERE id = ${uid}`;
+
+    return { current_streak: newStreak, longest_streak: newLongest };
+  } catch (e) {
+    return null; // never let streak logic break messaging
   }
-
-  const newLongest = Math.max(newStreak, longest_streak || 0);
-
-  await sql`
-    UPDATE users
-    SET current_streak = ${newStreak},
-        longest_streak = ${newLongest},
-        last_active_date = ${today.toISOString().slice(0, 10)}
-    WHERE id = ${uid}`;
-
-  return { current_streak: newStreak, longest_streak: newLongest };
 }
