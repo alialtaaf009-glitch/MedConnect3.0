@@ -3,7 +3,6 @@
   "target": {
     "namespace": "android_app",
     "package_name": "app.vercel.med_connect3_0.twa",
-    "sha256_cert_fingerprints": ["19:9F:B9:5F:07:4A:6C:E7:77:77:5A:20:08:9D:CB:86:51:2A:37:AB:9D:5B:11:B2:DF:FE:5E:78:FF:67:0F:B2"]
+    "sha256_cert_fingerprints": ["C8:BC:C2:C6:E6:9B:06:D9:91:45:0F:5D:FD:E7:DD:AF:2A:C6:78:C3:9A:EE:F4:2B:3D:9A:B8:F6:CC:49:8D:02"]
   }
 }]
-
