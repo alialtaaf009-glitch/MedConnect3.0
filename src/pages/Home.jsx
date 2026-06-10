@@ -103,7 +103,20 @@ export default function Home() {
           {daysLeft > 0 && <div className="sub" style={{ marginTop: 0 }}>days until {user?.exam || 'your exam'}</div>}
         </div>
       )}
-
+<div className="card" style={{ textAlign: 'center' }}>
+        <div className="label" style={{ marginTop: 0, color: 'var(--forest)' }}>Study streak</div>
+        <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 40, fontWeight: 900, color: 'var(--rust)' }}>
+          🔥 {user?.current_streak || 0}
+        </div>
+        <div className="sub" style={{ marginTop: 0 }}>
+          {(user?.current_streak || 0) === 1 ? 'day' : 'days'} in a row · keep it going
+        </div>
+        {(user?.longest_streak || 0) > (user?.current_streak || 0) && (
+          <div className="meta" style={{ fontSize: 11, marginTop: 4 }}>
+            Best: {user.longest_streak} days
+          </div>
+        )}
+      </div>
       <div className="card" style={{ cursor: 'pointer' }} onClick={() => nav('/motivation')}>
         <div className="label" style={{ marginTop: 0 }}>✦ Daily motivation</div>
         <p style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 16, lineHeight: 1.4 }}>“{quote.text}”</p>
