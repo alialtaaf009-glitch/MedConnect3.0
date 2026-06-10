@@ -62,10 +62,8 @@ export default function Home() {
   const [counts, setCounts] = useState({});
   useEffect(() => { api.getStats().then((d) => setCounts(d.counts || {})).catch(() => {}); }, []);
 
-  // count for a browse exam label like "MRCP Part 1" -> match its family "MRCP"
   const examCount = (label) => {
-    const family = label.split(' ')[0]; // "MRCP", "FCPS", "USMLE"...
-    // sum any stored exam whose family matches
+    const family = label.split(' ')[0];
     let n = 0;
     for (const [key, val] of Object.entries(counts)) {
       if (key.split('—')[0].trim().split(' ')[0] === family) n = Math.max(n, val);
@@ -103,7 +101,8 @@ export default function Home() {
           {daysLeft > 0 && <div className="sub" style={{ marginTop: 0 }}>days until {user?.exam || 'your exam'}</div>}
         </div>
       )}
-<div className="card" style={{ textAlign: 'center' }}>
+
+      <div className="card" style={{ textAlign: 'center' }}>
         <div className="label" style={{ marginTop: 0, color: 'var(--forest)' }}>Study streak</div>
         <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 40, fontWeight: 900, color: 'var(--rust)' }}>
           🔥 {user?.current_streak || 0}
@@ -117,6 +116,7 @@ export default function Home() {
           </div>
         )}
       </div>
+
       <div className="card" style={{ cursor: 'pointer' }} onClick={() => nav('/motivation')}>
         <div className="label" style={{ marginTop: 0 }}>✦ Daily motivation</div>
         <p style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 16, lineHeight: 1.4 }}>“{quote.text}”</p>
@@ -203,5 +203,4 @@ export default function Home() {
       ))}
     </div>
   );
-}
-
+              }
