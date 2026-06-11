@@ -100,6 +100,8 @@ h1, h2, h3, .h1, .name, .brand-name, .stat-num, .serif { font-family: 'Newsreade
 .avatar-cell.on { border-color: var(--forest); background: var(--paper-2); }
 .spinner { width: 26px; height: 26px; border: 3px solid var(--line); border-top-color: var(--forest); border-radius: 50%; animation: spin 0.7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+.profile-corner { position: fixed; top: 12px; right: 14px; z-index: 50; width: 40px; height: 40px; border-radius: 50%; background: var(--card); border: 1.5px solid var(--line); display: grid; place-items: center; text-decoration: none; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+.profile-corner.active { border-color: var(--forest); }
 
 .center { display: flex; align-items: center; justify-content: center; min-height: 60vh; color: var(--muted); font-family: 'Newsreader', serif; }
 
@@ -127,4 +129,3 @@ h1, h2, h3, .h1, .name, .brand-name, .stat-num, .serif { font-family: 'Newsreade
 .themebtn { position: fixed; top: 14px; right: max(14px, calc(50vw - 226px)); z-index: 80; background: var(--card);
   border: 1.5px solid var(--line); color: var(--ink); border-radius: 10px; width: 40px; height: 40px;
   cursor: pointer; font-size: 17px; }
-
