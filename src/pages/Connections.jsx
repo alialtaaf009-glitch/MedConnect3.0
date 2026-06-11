@@ -26,13 +26,16 @@ export default function Connections() {
     <div className="screen">
       <div className="tabs">
         <button className="tab" onClick={() => nav('/partners')}>Discover</button>
-        <button className="tab on">My connections</button>
+        <button className="tab on">Study partners</button>
       </div>
-      <h1 className="h1" style={{ marginBottom: 14 }}>Connections</h1>
+      <h1 className="h1" style={{ marginBottom: 14 }}>Study partners</h1>
       <div className="tabs">
         {['connected','pending','requests'].map((t) => (
-          <button key={t} className={`tab ${tab === t ? 'on' : ''}`} onClick={() => setTab(t)}>
-            {t[0].toUpperCase()+t.slice(1)} {data[t]?.length || 0}
+          <button key={t} className={`tab ${tab === t ? 'on' : ''}`} onClick={() => setTab(t)} style={{ position: 'relative' }}>
+            {t === 'connected' ? 'Partners' : t[0].toUpperCase()+t.slice(1)} {data[t]?.length || 0}
+            {t === 'requests' && (data.requests?.length || 0) > 0 && (
+              <span style={{ position: 'absolute', top: 6, right: 6, width: 8, height: 8, borderRadius: '50%', background: 'var(--rust)' }} />
+            )}
           </button>
         ))}
       </div>
@@ -69,3 +72,4 @@ export default function Connections() {
     </div>
   );
 }
+
