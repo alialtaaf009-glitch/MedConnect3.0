@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/Auth.jsx';
+import { useTimer, SOUNDS } from '../context/Timer.jsx';
 import { api } from '../lib/api';
 
 const STATIONS = {
@@ -46,135 +47,85 @@ const SCENARIOS = {
   'Cranial nerve exam': 'A 60-year-old has presented with a new facial droop noticed this morning. Perform a cranial nerve examination, narrating what you are testing, then present your findings and suggest where the lesion might be.',
 };
 
-// ---- Study timer (Pomodoro): countdown with presets + custom, or count-up stopwatch ----
+// ---- Study timer (Pomodoro): consumes the app-wide Timer context so it survives tab switches ----
 function StudyTimer() {
-  const [mode, setMode] = useState('timer'); // 'timer' | 'stopwatch'
-  const [secondsLeft, setSecondsLeft] = useState(25 * 60); // timer
-  const [elapsed, setElapsed] = useState(0); // stopwatch
-  const [running, setRunning] = useState(false);
-  const [target, setTarget] = useState(25 * 60); // chosen timer length, for reset
+  const t = useTimer();
   const [custom, setCustom] = useState('');
-  const [done, setDone] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
-  const intervalRef = useRef(null);
+  if (!t) return null;
 
-  const PRESETS = [25, 45, 60];
-
-  useEffect(() => {
-    if (!running) return;
-    intervalRef.current = setInterval(() => {
-      if (mode === 'timer') {
-        setSecondsLeft((s) => {
-          if (s <= 1) {
-            clearInterval(intervalRef.current);
-            setRunning(false);
-            setDone(true);
-            try { beep(); } catch (e) {}
-            return 0;
-          }
-          return s - 1;
-        });
-      } else {
-        setElapsed((e) => e + 1);
-      }
-    }, 1000);
-    return () => clearInterval(intervalRef.current);
-  }, [running, mode]);
-
-  const pickPreset = (min) => {
-    setRunning(false); setDone(false);
-    setTarget(min * 60); setSecondsLeft(min * 60); setCustom('');
-  };
-  const applyCustom = () => {
-    const min = parseInt(custom, 10);
-    if (!min || min < 1) return;
-    setRunning(false); setDone(false);
-    setTarget(min * 60); setSecondsLeft(min * 60);
-  };
-  const startPause = () => { setDone(false); setRunning((r) => !r); };
-  const reset = () => {
-    setRunning(false); setDone(false);
-    if (mode === 'timer') setSecondsLeft(target);
-    else setElapsed(0);
-  };
-  const switchMode = (m) => {
-    setRunning(false); setDone(false); setMode(m);
-    if (m === 'timer') setSecondsLeft(target); else setElapsed(0);
-  };
-
-  const shown = mode === 'timer' ? secondsLeft : elapsed;
+  const shown = t.mode === 'timer' ? t.secondsLeft : t.elapsed;
   const mm = String(Math.floor(shown / 60)).padStart(2, '0');
   const ss = String(shown % 60).padStart(2, '0');
 
-  const controls = (big) => (
-    <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: big ? 28 : (mode === 'stopwatch' ? 14 : 0) }}>
-      <button className="btn" style={{ flex: 1, maxWidth: big ? 200 : 150 }} onClick={startPause}>{running ? 'Pause' : (mode === 'timer' && secondsLeft < target) || (mode === 'stopwatch' && elapsed > 0) ? 'Resume' : 'Start'}</button>
-      <button className="btn ghost" style={{ flex: 1, maxWidth: big ? 140 : 110 }} onClick={reset}>Reset</button>
+  const startLabel = t.running ? 'Pause'
+    : (t.mode === 'timer' && t.secondsLeft < t.target) || (t.mode === 'stopwatch' && t.elapsed > 0) ? 'Resume' : 'Start';
+
+  const ModeTabs = () => (
+    <div className="tabs" style={{ marginBottom: 12, maxWidth: 260, marginLeft: 'auto', marginRight: 'auto' }}>
+      <button className={`tab ${t.mode === 'timer' ? 'on' : ''}`} onClick={(e) => { e.stopPropagation(); t.switchMode('timer'); }}>Timer</button>
+      <button className={`tab ${t.mode === 'stopwatch' ? 'on' : ''}`} onClick={(e) => { e.stopPropagation(); t.switchMode('stopwatch'); }}>Stopwatch</button>
+    </div>
+  );
+  const Controls = ({ big }) => (
+    <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: big ? 28 : 4 }} onClick={(e) => e.stopPropagation()}>
+      <button className="btn" style={{ flex: 1, maxWidth: big ? 200 : 150 }} onClick={t.startPause}>{startLabel}</button>
+      <button className="btn ghost" style={{ flex: 1, maxWidth: big ? 140 : 110 }} onClick={t.reset}>Reset</button>
     </div>
   );
 
-  // ---- Full-screen distraction-free view ----
+  // ---- Full-screen distraction-free view (tap anywhere to exit) ----
   if (fullscreen) {
     return (
-      <div style={{ position: 'fixed', inset: 0, background: 'var(--paper)', zIndex: 200, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-        <button className="link" style={{ position: 'absolute', top: 18, right: 20, fontSize: 15 }} onClick={() => setFullscreen(false)}>✕ Close</button>
-        <div className="tabs" style={{ marginBottom: 24, maxWidth: 260 }}>
-          <button className={`tab ${mode === 'timer' ? 'on' : ''}`} onClick={() => switchMode('timer')}>Timer</button>
-          <button className={`tab ${mode === 'stopwatch' ? 'on' : ''}`} onClick={() => switchMode('stopwatch')}>Stopwatch</button>
-        </div>
-        <div onClick={() => setFullscreen(false)} style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 96, fontWeight: 900, color: done ? 'var(--rust)' : 'var(--forest)', lineHeight: 1, letterSpacing: 2, cursor: 'pointer' }}>
+      <div onClick={() => setFullscreen(false)} style={{ position: 'fixed', inset: 0, background: 'var(--paper)', zIndex: 200, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, cursor: 'pointer' }}>
+        <button className="link" style={{ position: 'absolute', top: 18, right: 20, fontSize: 15 }} onClick={(e) => { e.stopPropagation(); setFullscreen(false); }}>✕ Close</button>
+        <ModeTabs />
+        <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 96, fontWeight: 900, color: t.done ? 'var(--rust)' : 'var(--forest)', lineHeight: 1, letterSpacing: 2 }}>
           {mm}:{ss}
         </div>
-        {done && <div style={{ color: 'var(--rust)', fontWeight: 700, fontSize: 18, marginTop: 10 }}>Time's up! 🎉</div>}
-        {controls(true)}
-        <p className="sub" style={{ fontSize: 12, marginTop: 26 }}>Tap the clock to exit full-screen</p>
+        {t.done && <div style={{ color: 'var(--rust)', fontWeight: 700, fontSize: 18, marginTop: 10 }}>Time's up! 🎉</div>}
+        <Controls big={true} />
+        <p className="sub" style={{ fontSize: 12, marginTop: 26 }}>Tap anywhere to exit full-screen</p>
       </div>
     );
   }
 
   return (
-    <div className="card" style={{ marginBottom: 18, textAlign: 'center', borderColor: 'var(--forest)' }}>
-      <div className="tabs" style={{ marginBottom: 12 }}>
-        <button className={`tab ${mode === 'timer' ? 'on' : ''}`} onClick={() => switchMode('timer')}>Timer</button>
-        <button className={`tab ${mode === 'stopwatch' ? 'on' : ''}`} onClick={() => switchMode('stopwatch')}>Stopwatch</button>
-      </div>
+    <div className="card" onClick={() => setFullscreen(true)} style={{ marginBottom: 18, textAlign: 'center', borderColor: 'var(--forest)', minHeight: 280, cursor: 'pointer' }}>
+      <ModeTabs />
 
-      <div onClick={() => setFullscreen(true)} title="Tap for full-screen" style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 52, fontWeight: 900, color: done ? 'var(--rust)' : 'var(--forest)', lineHeight: 1.1, letterSpacing: 1, cursor: 'pointer' }}>
+      <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 52, fontWeight: 900, color: t.done ? 'var(--rust)' : 'var(--forest)', lineHeight: 1.1, letterSpacing: 1 }}>
         {mm}:{ss}
       </div>
-      <div className="sub" style={{ fontSize: 10, marginTop: 0, marginBottom: 2 }}>⤢ tap clock for full-screen</div>
-      {done && <div style={{ color: 'var(--rust)', fontWeight: 700, fontSize: 14, marginTop: 2 }}>Time's up! 🎉</div>}
+      <div className="sub" style={{ fontSize: 10, marginTop: 0, marginBottom: 2 }}>⤢ tap the box for full-screen</div>
+      {t.done && <div style={{ color: 'var(--rust)', fontWeight: 700, fontSize: 14, marginTop: 2 }}>Time's up! 🎉</div>}
 
-      {mode === 'timer' && (
-        <>
+      {t.mode === 'timer' && (
+        <div onClick={(e) => e.stopPropagation()}>
           <div className="chips" style={{ justifyContent: 'center', marginTop: 10, marginBottom: 8 }}>
-            {PRESETS.map((m) => (
-              <button key={m} className={`chip ${target === m * 60 ? 'on' : ''}`} onClick={() => pickPreset(m)}>{m} min</button>
+            {[25, 45, 60].map((m) => (
+              <button key={m} className={`chip ${t.target === m * 60 ? 'on' : ''}`} onClick={() => t.pickPreset(m)}>{m} min</button>
             ))}
           </div>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 12 }}>
             <input className="input" style={{ marginBottom: 0, width: 110, textAlign: 'center' }} type="number" min="1" placeholder="Custom min" value={custom} onChange={(e) => setCustom(e.target.value)} />
-            <button className="btn-sm" onClick={applyCustom}>Set</button>
+            <button className="btn-sm" onClick={() => { t.setCustomMinutes(parseInt(custom, 10)); }}>Set</button>
           </div>
-        </>
+        </div>
       )}
 
-      {controls(false)}
+      {t.mode === 'stopwatch' && <div style={{ height: 12 }} />}
+
+      <Controls big={false} />
+
+      <div style={{ marginTop: 12 }} onClick={(e) => e.stopPropagation()}>
+        <span className="sub" style={{ fontSize: 11, marginRight: 6 }}>Sound:</span>
+        {Object.entries(SOUNDS).map(([key, s]) => (
+          <button key={key} className={`chip ${t.sound === key ? 'on' : ''}`} style={{ fontSize: 11, padding: '4px 10px', marginRight: 4 }} onClick={() => t.setSound(key)}>{s.label}</button>
+        ))}
+      </div>
     </div>
   );
-}
-
-// short beep using the Web Audio API (no asset needed)
-function beep() {
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const o = ctx.createOscillator();
-  const g = ctx.createGain();
-  o.connect(g); g.connect(ctx.destination);
-  o.type = 'sine'; o.frequency.value = 880;
-  g.gain.setValueAtTime(0.001, ctx.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.3, ctx.currentTime + 0.02);
-  g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
-  o.start(); o.stop(ctx.currentTime + 0.6);
 }
 
 export default function Osce() {
