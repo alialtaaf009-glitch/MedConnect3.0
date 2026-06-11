@@ -110,12 +110,12 @@ export default function Home() {
           </div>
         )}
         <div className="card" style={{ flex: 1, textAlign: 'center', padding: '12px 8px', borderColor: 'var(--forest)', margin: 0 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'var(--forest)', textTransform: 'uppercase' }}>Streak</div>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'var(--forest)', textTransform: 'uppercase' }}>Study Streak</div>
           <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--rust)', lineHeight: 1.2, marginTop: 2 }}>
             <span style={{ fontSize: 18 }}>🔥</span> {streak}
           </div>
           {studiedToday ? (
-            <div className="sub" style={{ fontSize: 10, marginTop: 2, color: 'var(--forest)', fontWeight: 700 }}>✓ studied today</div>
+            <div className="sub" style={{ fontSize: 10, marginTop: 3, color: 'var(--forest)', fontWeight: 700 }}>✓ done today</div>
           ) : (
             <button onClick={markStudy} disabled={marking} style={{ marginTop: 4, fontSize: 11, fontWeight: 700, color: '#fff', background: 'var(--forest)', border: 'none', borderRadius: 8, padding: '5px 10px', cursor: 'pointer' }}>
               {marking ? '…' : 'Mark today ✓'}
@@ -214,4 +214,3 @@ export default function Home() {
     </div>
   );
 }
-
