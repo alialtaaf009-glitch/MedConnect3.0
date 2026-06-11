@@ -59,6 +59,7 @@ export default function Home() {
     if (!isNaN(t)) daysLeft = Math.ceil((t - Date.now()) / 86400000);
   }
   const quote = quoteOfTheDay();
+  const streak = user?.current_streak || 0;
   const [counts, setCounts] = useState({});
   useEffect(() => { api.getStats().then((d) => setCounts(d.counts || {})).catch(() => {}); }, []);
 
@@ -83,47 +84,41 @@ export default function Home() {
         </div>
       </div>
 
-      <div style={{ textAlign: 'center', padding: '4px 6px 8px' }}>
-        <p className="serif" style={{ fontSize: 19, fontWeight: 700, lineHeight: 1.25, marginBottom: 8 }}>
-          Find the right study partner for your medical exam.
-        </p>
-        <p className="sub" style={{ fontSize: 13.5, lineHeight: 1.55, marginTop: 0 }}>
-          Match with verified doctors preparing for the same boards, the same exam parts, and on a compatible timeline — wherever they are in the world.
-        </p>
-      </div>
+      <p className="serif" style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.3, textAlign: 'center', padding: '6px 10px 12px', color: 'var(--muted)' }}>
+        Find a study partner on your exam, your timeline.
+      </p>
 
-      {daysLeft !== null && (
-        <div className="card" style={{ textAlign: 'center', borderColor: 'var(--rust)' }}>
-          <div className="label" style={{ marginTop: 0, color: 'var(--rust)' }}>Exam countdown</div>
-          <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 40, fontWeight: 900, color: 'var(--forest)' }}>
-            {daysLeft > 0 ? daysLeft : daysLeft === 0 ? 'Today' : 'Passed'}
-          </div>
-          {daysLeft > 0 && <div className="sub" style={{ marginTop: 0 }}>days until {user?.exam || 'your exam'}</div>}
-        </div>
-      )}
-
-      <div className="card" style={{ textAlign: 'center' }}>
-        <div className="label" style={{ marginTop: 0, color: 'var(--forest)' }}>Study streak</div>
-        <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 40, fontWeight: 900, color: 'var(--rust)' }}>
-          🔥 {user?.current_streak || 0}
-        </div>
-        <div className="sub" style={{ marginTop: 0 }}>
-          {(user?.current_streak || 0) === 1 ? 'day' : 'days'} in a row · keep it going
-        </div>
-        {(user?.longest_streak || 0) > (user?.current_streak || 0) && (
-          <div className="meta" style={{ fontSize: 11, marginTop: 4 }}>
-            Best: {user.longest_streak} days
+      {/* compact momentum row: countdown + streak side by side */}
+      <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
+        {daysLeft !== null && (
+          <div className="card" style={{ flex: 1, textAlign: 'center', padding: '12px 8px', borderColor: 'var(--rust)', margin: 0 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'var(--rust)', textTransform: 'uppercase' }}>Countdown</div>
+            <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 30, fontWeight: 900, color: 'var(--forest)', lineHeight: 1.1 }}>
+              {daysLeft > 0 ? daysLeft : daysLeft === 0 ? 'Today' : '—'}
+            </div>
+            <div className="sub" style={{ fontSize: 10, marginTop: 0 }}>{daysLeft > 0 ? 'days to exam' : daysLeft === 0 ? 'exam day!' : 'passed'}</div>
           </div>
         )}
+        <div className="card" style={{ flex: 1, textAlign: 'center', padding: '12px 8px', margin: 0 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'var(--forest)', textTransform: 'uppercase' }}>Streak</div>
+          <div style={{ fontSize: 30, fontWeight: 900, color: 'var(--rust)', lineHeight: 1.1 }}>
+            🔥 {streak}
+          </div>
+          <div className="sub" style={{ fontSize: 10, marginTop: 0 }}>
+            {streak === 1 ? 'day' : 'days'} in a row
+            {(user?.longest_streak || 0) > streak ? ` · best ${user.longest_streak}` : ''}
+          </div>
+        </div>
       </div>
 
-      <div className="card" style={{ cursor: 'pointer' }} onClick={() => nav('/motivation')}>
-        <div className="label" style={{ marginTop: 0 }}>✦ Daily motivation</div>
-        <p style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 16, lineHeight: 1.4 }}>“{quote.text}”</p>
-        <div className="link" style={{ marginTop: 6 }}>Open the motivation wall ›</div>
+      {/* slim motivation line */}
+      <div onClick={() => nav('/motivation')} style={{ cursor: 'pointer', padding: '2px 2px 0', marginBottom: 2 }}>
+        <p style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 14, fontStyle: 'italic', lineHeight: 1.4, color: 'var(--muted)' }}>
+          “{quote.text}” <span className="link" style={{ fontStyle: 'normal' }}>›</span>
+        </p>
       </div>
 
-      <h2 className="serif" style={{ fontSize: 18, fontWeight: 600, margin: '24px 0 12px' }}>Explore study partners</h2>
+      <h2 className="serif" style={{ fontSize: 18, fontWeight: 600, margin: '18px 0 12px' }}>Explore study partners</h2>
 
       <div className="tabs" style={{ marginBottom: 14 }}>
         <button className={`tab ${browseMode === 'country' ? 'on' : ''}`} onClick={() => { setBrowseMode('country'); setOpenExam(''); }}>By country</button>
@@ -203,4 +198,4 @@ export default function Home() {
       ))}
     </div>
   );
-              }
+          }
