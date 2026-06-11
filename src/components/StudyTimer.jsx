@@ -14,12 +14,12 @@ export default function StudyTimer() {
   const [fullscreen, setFullscreen] = useState(false);
   if (!t) return null;
 
-  // wrap timer actions so every tap gives a clear haptic buzz
-  const onStartPause = () => { haptic(40); t.startPause(); };
-  const onReset = () => { haptic([30, 30, 30]); t.reset(); };
-  const onPreset = (m) => { haptic(25); t.pickPreset(m); };
-  const onSwitchMode = (m) => { haptic(25); t.switchMode(m); };
-  const onPickSound = (key) => { haptic(25); t.setSound(key); playSound(key); };
+  // wrap timer actions so every tap gives a subtle haptic buzz
+  const onStartPause = () => { haptic(18); t.startPause(); };
+  const onReset = () => { haptic(22); t.reset(); };
+  const onPreset = (m) => { haptic(12); t.pickPreset(m); };
+  const onSwitchMode = (m) => { haptic(12); t.switchMode(m); };
+  const onPickSound = (key) => { haptic(12); t.setSound(key); playSound(key); };
 
   const shown = t.mode === 'timer' ? t.secondsLeft : t.elapsed;
   const mm = String(Math.floor(shown / 60)).padStart(2, '0');
