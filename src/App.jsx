@@ -122,9 +122,6 @@ export default function App() {
   // main app
   return (
     <div className="app">
-      <NavLink to="/profile" className="profile-corner" aria-label="Profile">
-        <span style={{ fontSize: 20 }}>{user.avatar || '🩺'}</span>
-      </NavLink>
       <Routes>
         <Route path="/home" element={<Home />} />
         <Route path="/partners" element={<Partners />} />
