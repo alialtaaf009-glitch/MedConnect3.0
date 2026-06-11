@@ -24,7 +24,7 @@ export default function Partners() {
   const Toggle = () => (
     <div className="tabs">
       <button className="tab on">Discover</button>
-      <button className="tab" onClick={() => nav('/connections')}>My connections</button>
+      <button className="tab" onClick={() => nav('/connections')}>Study partners</button>
     </div>
   );
 
@@ -61,3 +61,4 @@ export default function Partners() {
     </div>
   );
 }
+
