@@ -6,7 +6,7 @@ import { api } from '../lib/api';
 const STATIONS = {
   'MRCP — PACES': ['Breathlessness history','Thyroid eye disease','Breaking bad news','Abdominal exam','Mixed valve disease','Acromegaly consult'],
   'MRCS — Part B (OSCE)': ['Anatomy — brachial plexus','Consent for chole','Examine neck lump','Surgical suturing','Inguinal hernia','Post-op sepsis'],
-  'PLAB / UKMLA — 2': ['Chest pain history','Explain diabetes dx','Cranial nerve exam','Manage anaphylaxis','Post-op fever call','Discuss HRT risks'],
+  'PLAB 2 / UKMLA CPSA': ['Chest pain history','Explain diabetes dx','Cranial nerve exam','Manage anaphylaxis','Post-op fever call','Discuss HRT risks'],
 };
 const FREE = 3;
 
@@ -14,7 +14,7 @@ const FREE = 3;
 const EXAM_MINUTES = {
   'MRCP — PACES': 10,            // PACES encounters run ~10 min (history/communication)
   'MRCS — Part B (OSCE)': 9,     // MRCS Part B stations ~9 min
-  'PLAB / UKMLA — 2': 8,         // PLAB 2 / UKMLA CPSA stations ~8 min
+  'PLAB 2 / UKMLA CPSA': 8,         // PLAB 2 / UKMLA CPSA stations ~8 min
 };
 
 // what MedConnect Pro unlocks (shown under locked stations)
@@ -28,7 +28,7 @@ const PRO_FEATURES = [
 const TOTAL_STATIONS = {
   'MRCP — PACES': '200+',
   'MRCS — Part B (OSCE)': '150+',
-  'PLAB / UKMLA — 2': '250+',
+  'PLAB 2 / UKMLA CPSA': '250+',
 };
 
 // fuller scenario text — sets the scene and the task clearly (still the candidate's task only)
