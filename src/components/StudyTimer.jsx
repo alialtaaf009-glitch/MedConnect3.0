@@ -1,12 +1,24 @@
 import { useState } from 'react';
 import { useTimer, SOUNDS, playSound } from '../context/Timer.jsx';
 
+// tiny haptic tap — silent feedback, ignored on devices without vibration
+function haptic(ms = 12) {
+  try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {}
+}
+
 // ---- Study timer (Pomodoro): consumes the app-wide Timer context so it survives tab switches ----
 export default function StudyTimer() {
   const t = useTimer();
   const [custom, setCustom] = useState('');
   const [fullscreen, setFullscreen] = useState(false);
   if (!t) return null;
+
+  // wrap timer actions so every tap gives a subtle haptic buzz
+  const onStartPause = () => { haptic(15); t.startPause(); };
+  const onReset = () => { haptic(20); t.reset(); };
+  const onPreset = (m) => { haptic(10); t.pickPreset(m); };
+  const onSwitchMode = (m) => { haptic(10); t.switchMode(m); };
+  const onPickSound = (key) => { haptic(10); t.setSound(key); playSound(key); };
 
   const shown = t.mode === 'timer' ? t.secondsLeft : t.elapsed;
   const mm = String(Math.floor(shown / 60)).padStart(2, '0');
@@ -17,14 +29,14 @@ export default function StudyTimer() {
 
   const ModeTabs = () => (
     <div className="tabs" style={{ marginBottom: 12, maxWidth: 260, marginLeft: 'auto', marginRight: 'auto' }}>
-      <button className={`tab ${t.mode === 'timer' ? 'on' : ''}`} onClick={(e) => { e.stopPropagation(); t.switchMode('timer'); }}>Timer</button>
-      <button className={`tab ${t.mode === 'stopwatch' ? 'on' : ''}`} onClick={(e) => { e.stopPropagation(); t.switchMode('stopwatch'); }}>Stopwatch</button>
+      <button className={`tab ${t.mode === 'timer' ? 'on' : ''}`} onClick={(e) => { e.stopPropagation(); onSwitchMode('timer'); }}>Timer</button>
+      <button className={`tab ${t.mode === 'stopwatch' ? 'on' : ''}`} onClick={(e) => { e.stopPropagation(); onSwitchMode('stopwatch'); }}>Stopwatch</button>
     </div>
   );
   const Controls = ({ big }) => (
     <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: big ? 28 : 4 }} onClick={(e) => e.stopPropagation()}>
-      <button className="btn" style={{ flex: 1, maxWidth: big ? 200 : 150 }} onClick={t.startPause}>{startLabel}</button>
-      <button className="btn ghost" style={{ flex: 1, maxWidth: big ? 140 : 110 }} onClick={t.reset}>Reset</button>
+      <button className="btn" style={{ flex: 1, maxWidth: big ? 200 : 150 }} onClick={onStartPause}>{startLabel}</button>
+      <button className="btn ghost" style={{ flex: 1, maxWidth: big ? 140 : 110 }} onClick={onReset}>Reset</button>
     </div>
   );
 
@@ -57,12 +69,12 @@ export default function StudyTimer() {
         <div onClick={(e) => e.stopPropagation()}>
           <div className="chips" style={{ justifyContent: 'center', marginTop: 10, marginBottom: 8 }}>
             {[25, 45, 60].map((m) => (
-              <button key={m} className={`chip ${t.target === m * 60 ? 'on' : ''}`} onClick={() => t.pickPreset(m)}>{m} min</button>
+              <button key={m} className={`chip ${t.target === m * 60 ? 'on' : ''}`} onClick={() => onPreset(m)}>{m} min</button>
             ))}
           </div>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 12 }}>
             <input className="input" style={{ marginBottom: 0, width: 110, textAlign: 'center' }} type="number" min="1" placeholder="Custom" value={custom} onChange={(e) => setCustom(e.target.value)} />
-            <button className="btn-sm" onClick={() => { t.setCustomMinutes(parseInt(custom, 10)); }}>Set</button>
+            <button className="btn-sm" onClick={() => { haptic(12); t.setCustomMinutes(parseInt(custom, 10)); }}>Set</button>
           </div>
         </div>
       )}
@@ -74,7 +86,7 @@ export default function StudyTimer() {
       <div style={{ marginTop: 12 }} onClick={(e) => e.stopPropagation()}>
         <span className="sub" style={{ fontSize: 11, marginRight: 6 }}>Sound:</span>
         {Object.entries(SOUNDS).map(([key, s]) => (
-          <button key={key} className={`chip ${t.sound === key ? 'on' : ''}`} style={{ fontSize: 11, padding: '4px 10px', marginRight: 4 }} onClick={() => { t.setSound(key); playSound(key); }}>{s.label}</button>
+          <button key={key} className={`chip ${t.sound === key ? 'on' : ''}`} style={{ fontSize: 11, padding: '4px 10px', marginRight: 4 }} onClick={() => onPickSound(key)}>{s.label}</button>
         ))}
       </div>
     </div>
