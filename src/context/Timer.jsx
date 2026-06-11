@@ -9,7 +9,7 @@ export const SOUNDS = {
   bell:  { label: 'Bell',  freq: 660, type: 'square',   dur: 0.5 },
 };
 
-function playSound(key) {
+export function playSound(key) {
   const s = SOUNDS[key] || SOUNDS.beep;
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
