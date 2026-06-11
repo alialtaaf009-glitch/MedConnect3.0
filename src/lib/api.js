@@ -17,6 +17,7 @@ export const api = {
   register: (name, email, password) => req('/register', { method: 'POST', body: { name, email, password } }),
   login: (email, password) => req('/login', { method: 'POST', body: { email, password } }),
   me: () => req('/me'),
+  markStudy: () => req('/me', { method: 'POST', body: { action: 'mark_study' } }),
   updateProfile: (p) => req('/profile', { method: 'PUT', body: p }),
   matches: () => req('/matches'),
   connections: () => req('/connections'),
