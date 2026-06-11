@@ -46,6 +46,112 @@ const SCENARIOS = {
   'Cranial nerve exam': 'A 60-year-old has presented with a new facial droop noticed this morning. Perform a cranial nerve examination, narrating what you are testing, then present your findings and suggest where the lesion might be.',
 };
 
+// ---- Study timer (Pomodoro): countdown with presets + custom, or count-up stopwatch ----
+function StudyTimer() {
+  const [mode, setMode] = useState('timer'); // 'timer' | 'stopwatch'
+  const [secondsLeft, setSecondsLeft] = useState(25 * 60); // timer
+  const [elapsed, setElapsed] = useState(0); // stopwatch
+  const [running, setRunning] = useState(false);
+  const [target, setTarget] = useState(25 * 60); // chosen timer length, for reset
+  const [custom, setCustom] = useState('');
+  const [done, setDone] = useState(false);
+  const intervalRef = useRef(null);
+
+  const PRESETS = [25, 45, 60];
+
+  useEffect(() => {
+    if (!running) return;
+    intervalRef.current = setInterval(() => {
+      if (mode === 'timer') {
+        setSecondsLeft((s) => {
+          if (s <= 1) {
+            clearInterval(intervalRef.current);
+            setRunning(false);
+            setDone(true);
+            try { beep(); } catch (e) {}
+            return 0;
+          }
+          return s - 1;
+        });
+      } else {
+        setElapsed((e) => e + 1);
+      }
+    }, 1000);
+    return () => clearInterval(intervalRef.current);
+  }, [running, mode]);
+
+  const pickPreset = (min) => {
+    setRunning(false); setDone(false);
+    setTarget(min * 60); setSecondsLeft(min * 60); setCustom('');
+  };
+  const applyCustom = () => {
+    const min = parseInt(custom, 10);
+    if (!min || min < 1) return;
+    setRunning(false); setDone(false);
+    setTarget(min * 60); setSecondsLeft(min * 60);
+  };
+  const startPause = () => { setDone(false); setRunning((r) => !r); };
+  const reset = () => {
+    setRunning(false); setDone(false);
+    if (mode === 'timer') setSecondsLeft(target);
+    else setElapsed(0);
+  };
+  const switchMode = (m) => {
+    setRunning(false); setDone(false); setMode(m);
+    if (m === 'timer') setSecondsLeft(target); else setElapsed(0);
+  };
+
+  const shown = mode === 'timer' ? secondsLeft : elapsed;
+  const mm = String(Math.floor(shown / 60)).padStart(2, '0');
+  const ss = String(shown % 60).padStart(2, '0');
+
+  return (
+    <div className="card" style={{ marginBottom: 18, textAlign: 'center', borderColor: 'var(--forest)' }}>
+      <div className="tabs" style={{ marginBottom: 12 }}>
+        <button className={`tab ${mode === 'timer' ? 'on' : ''}`} onClick={() => switchMode('timer')}>Timer</button>
+        <button className={`tab ${mode === 'stopwatch' ? 'on' : ''}`} onClick={() => switchMode('stopwatch')}>Stopwatch</button>
+      </div>
+
+      <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 52, fontWeight: 900, color: done ? 'var(--rust)' : 'var(--forest)', lineHeight: 1.1, letterSpacing: 1 }}>
+        {mm}:{ss}
+      </div>
+      {done && <div style={{ color: 'var(--rust)', fontWeight: 700, fontSize: 14, marginTop: 2 }}>Time's up! 🎉</div>}
+
+      {mode === 'timer' && (
+        <>
+          <div className="chips" style={{ justifyContent: 'center', marginTop: 10, marginBottom: 8 }}>
+            {PRESETS.map((m) => (
+              <button key={m} className={`chip ${target === m * 60 ? 'on' : ''}`} onClick={() => pickPreset(m)}>{m} min</button>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 12 }}>
+            <input className="input" style={{ marginBottom: 0, width: 110, textAlign: 'center' }} type="number" min="1" placeholder="Custom min" value={custom} onChange={(e) => setCustom(e.target.value)} />
+            <button className="btn-sm" onClick={applyCustom}>Set</button>
+          </div>
+        </>
+      )}
+
+      <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: mode === 'stopwatch' ? 14 : 0 }}>
+        <button className="btn" style={{ flex: 1, maxWidth: 150 }} onClick={startPause}>{running ? 'Pause' : (mode === 'timer' && secondsLeft < target) || (mode === 'stopwatch' && elapsed > 0) ? 'Resume' : 'Start'}</button>
+        <button className="btn ghost" style={{ flex: 1, maxWidth: 110 }} onClick={reset}>Reset</button>
+      </div>
+    </div>
+  );
+}
+
+// short beep using the Web Audio API (no asset needed)
+function beep() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.type = 'sine'; o.frequency.value = 880;
+  g.gain.setValueAtTime(0.001, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.3, ctx.currentTime + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+  o.start(); o.stop(ctx.currentTime + 0.6);
+}
+
 export default function Osce() {
   const { user } = useAuth();
   const exams = Object.keys(STATIONS);
@@ -81,6 +187,9 @@ export default function Osce() {
       )}
       <h1 className="h1">OSCE Practice</h1>
       <p className="sub" style={{ marginBottom:14 }}>Timed station practice. Free stations are open to try solo; live partner mode is coming.</p>
+
+      <StudyTimer />
+
       <div className="chips" style={{ marginBottom:16 }}>
         {exams.map((e) => (
           <button key={e} className={`chip ${exam === e ? 'on' : ''}`} onClick={() => setExam(e)}>{e}</button>
