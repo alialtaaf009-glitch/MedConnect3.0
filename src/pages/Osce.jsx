@@ -97,7 +97,6 @@ function StudyTimer() {
       <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 52, fontWeight: 900, color: t.done ? 'var(--rust)' : 'var(--forest)', lineHeight: 1.1, letterSpacing: 1 }}>
         {mm}:{ss}
       </div>
-      <div className="sub" style={{ fontSize: 10, marginTop: 0, marginBottom: 2 }}>⤢ tap the box for full-screen</div>
       {t.done && <div style={{ color: 'var(--rust)', fontWeight: 700, fontSize: 14, marginTop: 2 }}>Time's up! 🎉</div>}
 
       {t.mode === 'timer' && (
