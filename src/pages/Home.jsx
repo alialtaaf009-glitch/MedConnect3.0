@@ -101,18 +101,18 @@ export default function Home() {
       {/* compact momentum row: countdown + streak side by side */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
         {daysLeft !== null && (
-          <div className="card" style={{ flex: 1, textAlign: 'center', padding: '12px 8px', borderColor: 'var(--rust)', margin: 0 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'var(--rust)', textTransform: 'uppercase' }}>Countdown</div>
-            <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 30, fontWeight: 900, color: 'var(--forest)', lineHeight: 1.1 }}>
+          <div className="card" style={{ flex: 1, textAlign: 'center', padding: '12px 8px', borderColor: 'var(--forest)', margin: 0 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'var(--forest)', textTransform: 'uppercase' }}>Countdown</div>
+            <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 30, fontWeight: 900, color: 'var(--forest)', lineHeight: 1.15 }}>
               {daysLeft > 0 ? daysLeft : daysLeft === 0 ? 'Today' : '—'}
             </div>
             <div className="sub" style={{ fontSize: 10, marginTop: 0 }}>{daysLeft > 0 ? 'days to exam' : daysLeft === 0 ? 'exam day!' : 'passed'}</div>
           </div>
         )}
-        <div className="card" style={{ flex: 1, textAlign: 'center', padding: '12px 8px', margin: 0 }}>
+        <div className="card" style={{ flex: 1, textAlign: 'center', padding: '12px 8px', borderColor: 'var(--forest)', margin: 0 }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'var(--forest)', textTransform: 'uppercase' }}>Streak</div>
-          <div style={{ fontSize: 30, fontWeight: 900, color: 'var(--rust)', lineHeight: 1.1 }}>
-            🔥 {streak}
+          <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--rust)', lineHeight: 1.2, marginTop: 2 }}>
+            <span style={{ fontSize: 18 }}>🔥</span> {streak}
           </div>
           {studiedToday ? (
             <div className="sub" style={{ fontSize: 10, marginTop: 2, color: 'var(--forest)', fontWeight: 700 }}>✓ studied today</div>
@@ -159,9 +159,10 @@ export default function Home() {
                   {openExam === key && parts.map((part, pi) => {
                     const accents = ['var(--forest)', 'var(--rust)', 'var(--gold)', 'var(--forest-2)'];
                     return (
-                      <div key={part} className="exam-accent" style={{ '--ec': accents[pi % accents.length], padding: '11px 16px 11px 22px', borderTop: '1px solid var(--line)', cursor: 'pointer' }}
+                      <div key={part} className="exam-accent" style={{ '--ec': accents[pi % accents.length], padding: '11px 16px 11px 22px', borderTop: '1px solid var(--line)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                         onClick={() => nav('/partners')}>
-                        <span style={{ fontWeight: 600, fontSize: 14 }}>{part}</span>
+                        <span style={{ fontWeight: 600, fontSize: 14, flex: 1 }}>{part}</span>
+                        <span style={{ color: 'var(--subtle)', fontSize: 13 }}>›</span>
                       </div>
                     );
                   })}
@@ -198,9 +199,10 @@ export default function Home() {
                   const accents = ['var(--forest)', 'var(--rust)', 'var(--gold)', 'var(--forest-2)'];
                   const ec = accents[pi % accents.length];
                   return (
-                    <div key={part} className="exam-accent" style={{ '--ec': ec, padding: '11px 16px 11px 22px', borderTop: '1px solid var(--line)', cursor: 'pointer' }}
+                    <div key={part} className="exam-accent" style={{ '--ec': ec, padding: '11px 16px 11px 22px', borderTop: '1px solid var(--line)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                       onClick={() => nav('/partners')}>
-                      <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)' }}>{part}</span>
+                      <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)', flex: 1 }}>{part}</span>
+                      <span style={{ color: 'var(--subtle)', fontSize: 13 }}>›</span>
                     </div>
                   );
                 })}
