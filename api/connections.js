@@ -15,7 +15,34 @@ export default async function handler(req, res) {
       const connected = all.filter((c) => c.status === 'accepted');
       const pending   = all.filter((c) => c.status === 'pending' && c.requester === uid);
       const requests  = all.filter((c) => c.status === 'pending' && c.recipient === uid);
-      return res.status(200).json({ connected, pending, requests });
+
+      // ---- Idle-match nudges: accepted connections with NO messages exchanged yet ----
+      let nudges = [];
+      if (connected.length) {
+        const otherIds = connected.map((c) => (c.requester === uid ? c.recipient : c.requester));
+        // which of these partners have we exchanged ANY message with?
+        const chatted = await sql`
+          SELECT DISTINCT CASE WHEN sender = ${uid} THEN recipient ELSE sender END AS other
+          FROM messages
+          WHERE sender = ${uid} OR recipient = ${uid}`;
+        const chattedSet = new Set(chatted.map((r) => Number(r.other)));
+        nudges = connected
+          .filter((c) => {
+            const otherId = c.requester === uid ? c.recipient : c.requester;
+            return !chattedSet.has(Number(otherId));
+          })
+          .map((c) => {
+            const iAmRequester = c.requester === uid;
+            return {
+              id: iAmRequester ? c.recipient : c.requester,
+              name: iAmRequester ? c.recipient_name : c.requester_name,
+              exam: iAmRequester ? c.recipient_exam : c.requester_exam,
+              avatar: iAmRequester ? c.recipient_avatar : c.requester_avatar,
+            };
+          });
+      }
+
+      return res.status(200).json({ connected, pending, requests, nudges });
     }
 
     if (req.method === 'POST') {
@@ -48,3 +75,4 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Connection action failed' });
   }
 }
+
