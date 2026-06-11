@@ -55,7 +55,10 @@ export default function Profile() {
       const { user: updated } = await api.updateProfile({ name, avatar, country, timezone, questionBank, studyTime, examDate, attempt, regCouncil, regNumber, medicalSchool, bio });
       setUser(updated);
       setEditing(false);
-    } } catch (e) { window.alert('Save failed: ' + e.message); } finally { setBusy(false); }
+    } catch (e) {
+      window.alert('Save failed: ' + e.message);
+    } finally { setBusy(false); }
+  };
 
   const doDelete = async () => {
     setBusy(true);
@@ -158,5 +161,5 @@ export default function Profile() {
       <p className="meta" style={{ textAlign:'center', marginTop:20, fontSize:11, opacity:0.7 }}>MedConnect v{APP_VERSION}</p>
     </div>
   );
-                                                                       }
+}
 
