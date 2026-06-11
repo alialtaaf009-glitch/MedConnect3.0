@@ -19,6 +19,7 @@ export const api = {
   me: () => req('/me'),
   markStudy: () => req('/me', { method: 'POST', body: { action: 'mark_study' } }),
   updateProfile: (p) => req('/profile', { method: 'PUT', body: p }),
+  deleteAccount: () => req('/profile', { method: 'DELETE' }),
   matches: () => req('/matches'),
   connections: () => req('/connections'),
   sendRequest: (recipientId) => req('/connections', { method: 'POST', body: { recipientId } }),
