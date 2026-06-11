@@ -55,6 +55,7 @@ function StudyTimer() {
   const [target, setTarget] = useState(25 * 60); // chosen timer length, for reset
   const [custom, setCustom] = useState('');
   const [done, setDone] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
   const intervalRef = useRef(null);
 
   const PRESETS = [25, 45, 60];
@@ -105,6 +106,32 @@ function StudyTimer() {
   const mm = String(Math.floor(shown / 60)).padStart(2, '0');
   const ss = String(shown % 60).padStart(2, '0');
 
+  const controls = (big) => (
+    <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: big ? 28 : (mode === 'stopwatch' ? 14 : 0) }}>
+      <button className="btn" style={{ flex: 1, maxWidth: big ? 200 : 150 }} onClick={startPause}>{running ? 'Pause' : (mode === 'timer' && secondsLeft < target) || (mode === 'stopwatch' && elapsed > 0) ? 'Resume' : 'Start'}</button>
+      <button className="btn ghost" style={{ flex: 1, maxWidth: big ? 140 : 110 }} onClick={reset}>Reset</button>
+    </div>
+  );
+
+  // ---- Full-screen distraction-free view ----
+  if (fullscreen) {
+    return (
+      <div style={{ position: 'fixed', inset: 0, background: 'var(--paper)', zIndex: 200, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+        <button className="link" style={{ position: 'absolute', top: 18, right: 20, fontSize: 15 }} onClick={() => setFullscreen(false)}>✕ Close</button>
+        <div className="tabs" style={{ marginBottom: 24, maxWidth: 260 }}>
+          <button className={`tab ${mode === 'timer' ? 'on' : ''}`} onClick={() => switchMode('timer')}>Timer</button>
+          <button className={`tab ${mode === 'stopwatch' ? 'on' : ''}`} onClick={() => switchMode('stopwatch')}>Stopwatch</button>
+        </div>
+        <div onClick={() => setFullscreen(false)} style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 96, fontWeight: 900, color: done ? 'var(--rust)' : 'var(--forest)', lineHeight: 1, letterSpacing: 2, cursor: 'pointer' }}>
+          {mm}:{ss}
+        </div>
+        {done && <div style={{ color: 'var(--rust)', fontWeight: 700, fontSize: 18, marginTop: 10 }}>Time's up! 🎉</div>}
+        {controls(true)}
+        <p className="sub" style={{ fontSize: 12, marginTop: 26 }}>Tap the clock to exit full-screen</p>
+      </div>
+    );
+  }
+
   return (
     <div className="card" style={{ marginBottom: 18, textAlign: 'center', borderColor: 'var(--forest)' }}>
       <div className="tabs" style={{ marginBottom: 12 }}>
@@ -112,9 +139,10 @@ function StudyTimer() {
         <button className={`tab ${mode === 'stopwatch' ? 'on' : ''}`} onClick={() => switchMode('stopwatch')}>Stopwatch</button>
       </div>
 
-      <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 52, fontWeight: 900, color: done ? 'var(--rust)' : 'var(--forest)', lineHeight: 1.1, letterSpacing: 1 }}>
+      <div onClick={() => setFullscreen(true)} title="Tap for full-screen" style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 52, fontWeight: 900, color: done ? 'var(--rust)' : 'var(--forest)', lineHeight: 1.1, letterSpacing: 1, cursor: 'pointer' }}>
         {mm}:{ss}
       </div>
+      <div className="sub" style={{ fontSize: 10, marginTop: 0, marginBottom: 2 }}>⤢ tap clock for full-screen</div>
       {done && <div style={{ color: 'var(--rust)', fontWeight: 700, fontSize: 14, marginTop: 2 }}>Time's up! 🎉</div>}
 
       {mode === 'timer' && (
@@ -131,10 +159,7 @@ function StudyTimer() {
         </>
       )}
 
-      <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: mode === 'stopwatch' ? 14 : 0 }}>
-        <button className="btn" style={{ flex: 1, maxWidth: 150 }} onClick={startPause}>{running ? 'Pause' : (mode === 'timer' && secondsLeft < target) || (mode === 'stopwatch' && elapsed > 0) ? 'Resume' : 'Start'}</button>
-        <button className="btn ghost" style={{ flex: 1, maxWidth: 110 }} onClick={reset}>Reset</button>
-      </div>
+      {controls(false)}
     </div>
   );
 }
@@ -188,8 +213,6 @@ export default function Osce() {
       <h1 className="h1">OSCE Practice</h1>
       <p className="sub" style={{ marginBottom:14 }}>Timed station practice. Free stations are open to try solo; live partner mode is coming.</p>
 
-      <StudyTimer />
-
       <div className="chips" style={{ marginBottom:16 }}>
         {exams.map((e) => (
           <button key={e} className={`chip ${exam === e ? 'on' : ''}`} onClick={() => setExam(e)}>{e}</button>
@@ -208,6 +231,11 @@ export default function Osce() {
           </div>
         );
       })}
+
+      <div style={{ borderTop: '1px solid var(--line)', margin: '26px 0 16px' }} />
+      <h2 style={{ fontSize:18, fontWeight:700, fontFamily:"'Newsreader',Georgia,serif", marginBottom:4 }}>Focus Mode ☕</h2>
+      <p className="sub" style={{ fontSize:12, marginBottom:12 }}>A focus timer for your study sessions. Tap the clock to go full-screen.</p>
+      <StudyTimer />
     </div>
   );
 }
