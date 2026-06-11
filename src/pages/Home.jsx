@@ -190,7 +190,7 @@ export default function Home() {
                     const accents = ['var(--forest)', 'var(--rust)', 'var(--gold)', 'var(--forest-2)'];
                     return (
                       <div key={part} className="exam-accent" style={{ '--ec': accents[pi % accents.length], padding: '11px 16px 11px 22px', borderTop: '1px solid var(--line)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                        onClick={() => nav('/partners')}>
+                        onClick={() => nav(`/partners?exam=${encodeURIComponent(exam)}&part=${encodeURIComponent(part)}`)}>
                         <span style={{ fontWeight: 600, fontSize: 14, flex: 1 }}>{part}</span>
                         <span style={{ color: 'var(--subtle)', fontSize: 13 }}>›</span>
                       </div>
@@ -230,7 +230,7 @@ export default function Home() {
                   const ec = accents[pi % accents.length];
                   return (
                     <div key={part} className="exam-accent" style={{ '--ec': ec, padding: '11px 16px 11px 22px', borderTop: '1px solid var(--line)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                      onClick={() => nav('/partners')}>
+                      onClick={() => nav(`/partners?exam=${encodeURIComponent(exam)}&part=${encodeURIComponent(part)}`)}>
                       <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)', flex: 1 }}>{part}</span>
                       <span style={{ color: 'var(--subtle)', fontSize: 13 }}>›</span>
                     </div>
