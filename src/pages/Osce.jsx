@@ -91,10 +91,10 @@ export default function Osce() {
       {stations.map((st, i) => {
         const locked = !isPro && i >= FREE;
         return (
-          <div key={st} className="row" style={{ justifyContent:'space-between', opacity: locked ? .65 : 1, cursor:'pointer' }}
+          <div key={st} className="row" style={{ justifyContent:'space-between', opacity: locked ? .55 : 1, cursor:'pointer' }}
             onClick={() => { if (locked) { setShowPro(true); } else { setActive(st); } }}>
-            <span style={{ fontWeight:600 }}>{locked ? '🔒 ' : ''}{st}</span>
-            {locked ? <span className="pill" style={{ background:'var(--gold)', color:'#2a1c05' }}>PRO</span>
+            <span style={{ fontWeight:600 }}>{st}</span>
+            {locked ? <span className="meta" style={{ fontSize:13, display:'flex', alignItems:'center', gap:4 }}>🔒</span>
                     : <span className="link">Practise ›</span>}
           </div>
         );
