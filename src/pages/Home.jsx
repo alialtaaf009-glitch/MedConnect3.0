@@ -86,16 +86,17 @@ export default function Home() {
 
   return (
     <div className="screen">
-      <div className="card">
+      <div className="card" onClick={() => nav('/profile')} style={{ cursor: 'pointer' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 13 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, flexShrink: 0 }}>
+            <div style={{ width: 50, height: 50, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', color: 'var(--forest)', fontWeight: 600, fontSize: user?.avatar ? 26 : 18 }}>{user?.avatar || initials}</div>
+            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--forest)' }}>Profile</span>
+          </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 18, fontWeight: 600 }}>Welcome back, {user?.name}</div>
             <div className="meta">{[user?.exam, user?.country].filter(Boolean).join(' · ') || 'Ready to match'}</div>
           </div>
-          <div onClick={() => nav('/profile')} style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, flexShrink: 0 }}>
-            <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', color: 'var(--forest)', fontWeight: 600, fontSize: user?.avatar ? 25 : 17 }}>{user?.avatar || initials}</div>
-            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--forest)' }}>Profile</span>
-          </div>
+          <span style={{ color: 'var(--subtle)', fontSize: 18, flexShrink: 0 }}>›</span>
         </div>
       </div>
 
@@ -246,4 +247,5 @@ export default function Home() {
       ))}
     </div>
   );
-      }
+}
+
