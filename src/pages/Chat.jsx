@@ -3,6 +3,16 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../context/Auth.jsx';
 
+// turn a connection record into the "other person" {id, name, avatar}
+function otherPerson(c, myId) {
+  const iAmRequester = c.requester == myId;
+  return {
+    id: iAmRequester ? c.recipient : c.requester,
+    name: iAmRequester ? c.recipient_name : c.requester_name,
+    avatar: iAmRequester ? c.recipient_avatar : c.requester_avatar,
+  };
+}
+
 export default function Chat() {
   const { user } = useAuth();
   const [params] = useSearchParams();
@@ -38,7 +48,7 @@ function ConversationList({ nav, me }) {
     setCreating(true);
     try {
       const d = await api.connections();
-      setFriends(d.connected || []);
+      setFriends((d.connected || []).map((c) => otherPerson(c, me?.id)));
     } catch (e) { setFriends([]); }
   };
   const togglePick = (id) => setPicked((p) => p.includes(id) ? p.filter((x) => x !== id) : [...p, id]);
@@ -51,7 +61,7 @@ function ConversationList({ nav, me }) {
     } catch (e) { window.alert('Could not create group.'); }
   };
 
-  if (status === 'loading') return <div className="center">Loading…</div>;
+  if (status === 'loading') return <div className="center" style={{minHeight:200}}><div className="spinner" /></div>;
 
   return (
     <div className="screen">
@@ -153,7 +163,7 @@ function GroupConversation({ me, groupId, onBack }) {
   };
   const openAdd = async () => {
     setMenu(false);
-    try { const d = await api.connections(); setFriends(d.connected || []); } catch (e) { setFriends([]); }
+    try { const d = await api.connections(); setFriends((d.connected || []).map((c) => otherPerson(c, me?.id))); } catch (e) { setFriends([]); }
     setAddOpen(true);
   };
   const addMember = async (uid) => {
@@ -334,5 +344,5 @@ function Conversation({ me, withId, withName, withAv, onBack }) {
       </div>
     </div>
   );
-    }
-                                                                            
+}
+
