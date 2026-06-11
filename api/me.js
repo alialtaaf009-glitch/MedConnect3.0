@@ -3,8 +3,67 @@ import { sql, getUserId, safeUser } from './_shared/util.js';
 export default async function handler(req, res) {
   const uid = getUserId(req);
   if (!uid) return res.status(401).json({ error: 'Not authenticated' });
-  // stamp last_seen on every identity check (happens on app load / refresh)
+
+  const cur = await sql`SELECT * FROM users WHERE id = ${uid}`;
+  if (!cur.length) return res.status(401).json({ error: 'User not found' });
+  const u = cur[0];
+
+  // POST /api/me  { action: 'mark_study' }  -> deliberate daily study tick
+  if (req.method === 'POST') {
+    const offsetMin = parseTzOffsetMinutes(u.timezone);
+    const todayKey = localDayKey(new Date(), offsetMin);
+    const lastKey = u.last_study_day ? localDayKey(new Date(u.last_study_day), offsetMin) : null;
+
+    let current = u.current_streak || 0;
+    let longest = u.longest_streak || 0;
+
+    if (lastKey === todayKey) {
+      // already marked today — no change
+      return res.status(200).json({ user: safeUser(u), alreadyMarked: true });
+    }
+    const gap = lastKey ? dayDifference(lastKey, todayKey) : null;
+    if (gap === 1) current = current + 1; // studied yesterday -> continue
+    else current = 1;                      // missed a day / first time -> start at 1
+    if (current > longest) longest = current;
+
+    const rows = await sql`
+      UPDATE users
+      SET current_streak = ${current}, longest_streak = ${longest}, last_study_day = now()
+      WHERE id = ${uid} RETURNING *`;
+    return res.status(200).json({ user: safeUser(rows[0]), marked: true });
+  }
+
+  // GET — identity check; also flag whether today's study is already marked
+  const offsetMin = parseTzOffsetMinutes(u.timezone);
+  const todayKey = localDayKey(new Date(), offsetMin);
+  const lastKey = u.last_study_day ? localDayKey(new Date(u.last_study_day), offsetMin) : null;
+  // if the user broke their streak (missed a day), reflect 0 until they mark again
+  let displayStreak = u.current_streak || 0;
+  if (lastKey && lastKey !== todayKey) {
+    const gap = dayDifference(lastKey, todayKey);
+    if (gap > 1) displayStreak = 0; // chain broken
+  }
   const rows = await sql`UPDATE users SET last_seen = now() WHERE id = ${uid} RETURNING *`;
-  if (!rows.length) return res.status(401).json({ error: 'User not found' });
-  return res.status(200).json({ user: safeUser(rows[0]) });
+  const out = safeUser(rows[0]);
+  out.current_streak = displayStreak;
+  out.studied_today = lastKey === todayKey;
+  return res.status(200).json({ user: out });
 }
+
+function localDayKey(date, offsetMin) {
+  const shifted = new Date(date.getTime() + offsetMin * 60000);
+  return shifted.toISOString().slice(0, 10);
+}
+function dayDifference(aKey, bKey) {
+  const a = new Date(aKey + 'T00:00:00Z').getTime();
+  const b = new Date(bKey + 'T00:00:00Z').getTime();
+  return Math.round((b - a) / 86400000);
+}
+function parseTzOffsetMinutes(tz) {
+  if (!tz) return 0;
+  const m = String(tz).match(/([+-])(\d{1,2})(?::(\d{2}))?/);
+  if (!m) return 0;
+  const sign = m[1] === '-' ? -1 : 1;
+  return sign * ((parseInt(m[2], 10) || 0) * 60 + (parseInt(m[3] || '0', 10) || 0));
+}
+
