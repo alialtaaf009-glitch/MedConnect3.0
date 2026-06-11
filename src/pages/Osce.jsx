@@ -94,7 +94,7 @@ export default function Osce() {
           <div key={st} className="row" style={{ justifyContent:'space-between', opacity: locked ? .55 : 1, cursor:'pointer' }}
             onClick={() => { if (locked) { setShowPro(true); } else { setActive(st); } }}>
             <span style={{ fontWeight:600 }}>{st}</span>
-            {locked ? <span className="meta" style={{ fontSize:13, display:'flex', alignItems:'center', gap:4 }}>🔒</span>
+            {locked ? <span className="meta" style={{ fontSize:11, color:'var(--subtle)', opacity:0.7 }}>Locked</span>
                     : <span className="link">Practise ›</span>}
           </div>
         );
