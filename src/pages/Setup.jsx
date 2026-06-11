@@ -28,7 +28,6 @@ function Chips({ label, options, value, onChange, optional }) {
 
 export default function Setup() {
   const { setUser } = useAuth();
-  const [name, setName] = useState('');
   const [exam, setExam] = useState(EXAMS[0]);
   const [country, setCountry] = useState(COUNTRIES[0]);
   const [questionBank, setQuestionBank] = useState('');
@@ -49,8 +48,6 @@ export default function Setup() {
     <div className="screen">
       <h1 className="h1" style={{ textAlign: 'center', fontSize: 23 }}>Set up your profile</h1>
       <p className="sub" style={{ textAlign: 'center', marginBottom: 8 }}>This powers your matches. Takes 30 seconds.</p>
-      <label className="label">Full name</label>
-      <input className="input" placeholder="Dr Ali Khan" value={name} onChange={(e) => setName(e.target.value)} />
       <Chips label="Exam you're preparing for" options={EXAMS} value={exam} onChange={setExam} />
       <Chips label="Country" options={COUNTRIES} value={country} onChange={setCountry} />
       <Chips label="Timezone" options={TIMEZONES} value={timezone} onChange={setTimezone} />
@@ -63,3 +60,4 @@ export default function Setup() {
     </div>
   );
 }
+
