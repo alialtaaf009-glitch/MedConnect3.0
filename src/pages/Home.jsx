@@ -94,9 +94,14 @@ export default function Home() {
         </div>
       </div>
 
-      <p className="serif" style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.3, textAlign: 'center', padding: '6px 10px 12px', color: 'var(--muted)' }}>
-        Study your way, on your timeline.
-      </p>
+      <div style={{ textAlign: 'center', padding: '6px 10px 12px' }}>
+        <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, color: 'var(--rust)', textTransform: 'uppercase', marginBottom: 4 }}>
+          For doctors, by doctors
+        </div>
+        <p className="serif" style={{ fontSize: 16.5, fontWeight: 700, lineHeight: 1.3, color: 'var(--forest)', margin: 0 }}>
+          Find the right study partner for your medical exam.
+        </p>
+      </div>
 
       {/* compact momentum row: countdown + streak side by side */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
@@ -124,11 +129,14 @@ export default function Home() {
         </div>
       </div>
 
-      {/* slim motivation line */}
-      <div onClick={() => nav('/motivation')} style={{ cursor: 'pointer', padding: '2px 2px 0', marginBottom: 2 }}>
-        <p style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 14, fontStyle: 'italic', lineHeight: 1.4, color: 'var(--muted)' }}>
-          “{quote.text}” <span className="link" style={{ fontStyle: 'normal' }}>›</span>
+      {/* slim motivation line with a clear tappable link */}
+      <div onClick={() => nav('/motivation')} style={{ cursor: 'pointer', padding: '4px 2px 0', marginBottom: 4 }}>
+        <p style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 14, fontStyle: 'italic', lineHeight: 1.4, color: 'var(--muted)', marginBottom: 4 }}>
+          “{quote.text}”
         </p>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12.5, fontWeight: 700, color: 'var(--forest)' }}>
+          ✦ Open the motivation wall <span style={{ fontSize: 14 }}>›</span>
+        </div>
       </div>
 
       <h2 className="serif" style={{ fontSize: 18, fontWeight: 600, margin: '18px 0 12px' }}>Explore study partners</h2>
