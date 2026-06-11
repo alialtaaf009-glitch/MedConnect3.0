@@ -59,7 +59,17 @@ export default function Home() {
     if (!isNaN(t)) daysLeft = Math.ceil((t - Date.now()) / 86400000);
   }
   const quote = quoteOfTheDay();
-  const streak = user?.current_streak || 0;
+  const [streak, setStreak] = useState(user?.current_streak || 0);
+  const [studiedToday, setStudiedToday] = useState(user?.studied_today || false);
+  const [marking, setMarking] = useState(false);
+  const markStudy = async () => {
+    if (marking || studiedToday) return;
+    setMarking(true);
+    try {
+      const d = await api.markStudy();
+      if (d.user) { setStreak(d.user.current_streak || 0); setStudiedToday(true); }
+    } catch (e) {} finally { setMarking(false); }
+  };
   const [counts, setCounts] = useState({});
   useEffect(() => { api.getStats().then((d) => setCounts(d.counts || {})).catch(() => {}); }, []);
 
@@ -85,7 +95,7 @@ export default function Home() {
       </div>
 
       <p className="serif" style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.3, textAlign: 'center', padding: '6px 10px 12px', color: 'var(--muted)' }}>
-        Find a study partner on your exam, your timeline.
+        Study your way, on your timeline.
       </p>
 
       {/* compact momentum row: countdown + streak side by side */}
@@ -104,10 +114,13 @@ export default function Home() {
           <div style={{ fontSize: 30, fontWeight: 900, color: 'var(--rust)', lineHeight: 1.1 }}>
             🔥 {streak}
           </div>
-          <div className="sub" style={{ fontSize: 10, marginTop: 0 }}>
-            {streak === 1 ? 'day' : 'days'} in a row
-            {(user?.longest_streak || 0) > streak ? ` · best ${user.longest_streak}` : ''}
-          </div>
+          {studiedToday ? (
+            <div className="sub" style={{ fontSize: 10, marginTop: 2, color: 'var(--forest)', fontWeight: 700 }}>✓ studied today</div>
+          ) : (
+            <button onClick={markStudy} disabled={marking} style={{ marginTop: 4, fontSize: 11, fontWeight: 700, color: '#fff', background: 'var(--forest)', border: 'none', borderRadius: 8, padding: '5px 10px', cursor: 'pointer' }}>
+              {marking ? '…' : 'Mark today ✓'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -198,4 +211,5 @@ export default function Home() {
       ))}
     </div>
   );
-          }
+}
+
