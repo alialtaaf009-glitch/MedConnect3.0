@@ -55,7 +55,9 @@ export default function Profile() {
       const { user: updated } = await api.updateProfile({ name, avatar, country, timezone, questionBank, studyTime, examDate, attempt, regCouncil, regNumber, medicalSchool, bio });
       setUser(updated);
       setEditing(false);
-    } catch (e) {} finally { setBusy(false); }
+    } catch (e) {
+      window.alert('Save failed: ' + e.message);
+    } finally { setBusy(false); }
   };
 
   const doDelete = async () => {
