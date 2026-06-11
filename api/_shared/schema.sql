@@ -20,6 +20,9 @@ CREATE TABLE IF NOT EXISTS users (
   reg_council   TEXT DEFAULT '',
   reg_number    TEXT DEFAULT '',
   last_seen     TIMESTAMPTZ DEFAULT now(),
+  current_streak INTEGER DEFAULT 0,
+  longest_streak INTEGER DEFAULT 0,
+  last_study_day TIMESTAMPTZ,
   created_at    TIMESTAMPTZ DEFAULT now()
 );
 
@@ -103,3 +106,4 @@ CREATE TABLE IF NOT EXISTS group_messages (
 CREATE INDEX IF NOT EXISTS idx_gm_group ON group_messages(group_id);
 CREATE INDEX IF NOT EXISTS idx_gmem_group ON group_members(group_id);
 CREATE INDEX IF NOT EXISTS idx_gmem_user ON group_members(user_id);
+
