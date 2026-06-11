@@ -71,7 +71,9 @@ export default function Home() {
     } catch (e) {} finally { setMarking(false); }
   };
   const [counts, setCounts] = useState({});
+  const [nudges, setNudges] = useState([]);
   useEffect(() => { api.getStats().then((d) => setCounts(d.counts || {})).catch(() => {}); }, []);
+  useEffect(() => { api.connections().then((d) => setNudges(d.nudges || [])).catch(() => {}); }, []);
 
   const examCount = (label) => {
     const family = label.split(' ')[0];
@@ -93,6 +95,22 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {nudges.length > 0 && (
+        <div onClick={() => nav(`/chat?with=${nudges[0].id}&name=${encodeURIComponent(nudges[0].name)}&av=${encodeURIComponent(nudges[0].avatar || '')}`)}
+          style={{ cursor: 'pointer', marginTop: 12, padding: '12px 14px', borderRadius: 14, background: 'var(--forest)', color: '#fff', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,.18)', display: 'grid', placeItems: 'center', fontSize: 20, flexShrink: 0 }}>{nudges[0].avatar || '👋'}</div>
+          <div style={{ flex: 1, lineHeight: 1.35 }}>
+            <div style={{ fontWeight: 700, fontSize: 14 }}>Say hi to {nudges[0].name}! 👋</div>
+            <div style={{ fontSize: 12, opacity: 0.9 }}>
+              {nudges.length === 1
+                ? `You matched${nudges[0].exam ? ` — also studying for ${nudges[0].exam}` : ''}. Break the ice before your next study slot.`
+                : `You have ${nudges.length} new matches waiting to hear from you.`}
+            </div>
+          </div>
+          <span style={{ fontSize: 18 }}>›</span>
+        </div>
+      )}
 
       <div style={{ textAlign: 'center', padding: '6px 10px 12px' }}>
         <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, color: 'var(--rust)', textTransform: 'uppercase', marginBottom: 4 }}>
