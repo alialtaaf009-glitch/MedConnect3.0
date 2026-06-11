@@ -107,7 +107,7 @@ function StudyTimer() {
             ))}
           </div>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 12 }}>
-            <input className="input" style={{ marginBottom: 0, width: 110, textAlign: 'center' }} type="number" min="1" placeholder="Custom min" value={custom} onChange={(e) => setCustom(e.target.value)} />
+            <input className="input" style={{ marginBottom: 0, width: 110, textAlign: 'center' }} type="number" min="1" placeholder="Custom" value={custom} onChange={(e) => setCustom(e.target.value)} />
             <button className="btn-sm" onClick={() => { t.setCustomMinutes(parseInt(custom, 10)); }}>Set</button>
           </div>
         </div>
@@ -267,4 +267,3 @@ function Station({ name, minutes, onBack }) {
     </div>
   );
 }
-
