@@ -104,7 +104,11 @@ export default function Home() {
             <div style={{ fontWeight: 700, fontSize: 14 }}>Say hi to {nudges[0].name}! 👋</div>
             <div style={{ fontSize: 12, opacity: 0.9 }}>
               {nudges.length === 1
-                ? `You matched${nudges[0].exam ? ` — also studying for ${nudges[0].exam}` : ''}. Break the ice before your next study slot.`
+                ? (nudges[0].exam && nudges[0].exam === user?.exam
+                    ? `You matched — also preparing for ${nudges[0].exam}. Break the ice before your next study slot.`
+                    : nudges[0].exam
+                      ? `You matched — they're preparing for ${nudges[0].exam}. Break the ice and say hello.`
+                      : `You matched! Break the ice and say hello.`)
                 : `You have ${nudges.length} new matches waiting to hear from you.`}
             </div>
           </div>
@@ -240,3 +244,4 @@ export default function Home() {
     </div>
   );
 }
+
