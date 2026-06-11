@@ -32,6 +32,8 @@ function TabBar() {
   const [hasUnread, setHasUnread] = useState(false);
   const [hasRequests, setHasRequests] = useState(false);
 
+  // poll conversations; show a dot on Chat if any incoming message is newer
+  // than what we've marked as read (stored locally per the helper).
   useEffect(() => {
     let alive = true;
     const check = async () => {
@@ -39,12 +41,13 @@ function TabBar() {
         const d = await api.conversations();
         const lastRead = Number(localStorage.getItem('chat_last_read') || 0);
         const newestIncoming = (d.conversations || [])
-          .filter((c) => c.last_sender == c.other_id)
+          .filter((c) => c.last_sender == c.other_id) // last msg was from them
           .reduce((max, c) => Math.max(max, new Date(c.last_at).getTime()), 0);
         if (alive) setHasUnread(newestIncoming > lastRead);
       } catch (e) {}
       try {
         const cd = await api.connections();
+        // incoming pending requests = someone asked to connect with me
         const pending = (cd.incoming || cd.requests || cd.pending || []).length;
         if (alive) setHasRequests(pending > 0);
       } catch (e) {}
@@ -89,6 +92,7 @@ export default function App() {
     </div>
   );
 
+  // not signed in
   if (!user) {
     return (
       <div className="app">
@@ -102,6 +106,7 @@ export default function App() {
     );
   }
 
+  // signed in but profile not set up
   if (!user.profile_complete) {
     return (
       <div className="app">
@@ -112,9 +117,9 @@ export default function App() {
     );
   }
 
+  // main app
   return (
     <div className="app">
-      <button className="themebtn" onClick={toggle}>{mode === 'dark' ? '☀️' : '🌙'}</button>
       <Routes>
         <Route path="/home" element={<Home />} />
         <Route path="/partners" element={<Partners />} />
@@ -130,3 +135,4 @@ export default function App() {
     </div>
   );
 }
+
