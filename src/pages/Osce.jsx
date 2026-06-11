@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/Auth.jsx';
-import { useTimer, SOUNDS } from '../context/Timer.jsx';
+import { useTimer, SOUNDS, playSound } from '../context/Timer.jsx';
 import { api } from '../lib/api';
 
 const STATIONS = {
@@ -121,7 +121,7 @@ function StudyTimer() {
       <div style={{ marginTop: 12 }} onClick={(e) => e.stopPropagation()}>
         <span className="sub" style={{ fontSize: 11, marginRight: 6 }}>Sound:</span>
         {Object.entries(SOUNDS).map(([key, s]) => (
-          <button key={key} className={`chip ${t.sound === key ? 'on' : ''}`} style={{ fontSize: 11, padding: '4px 10px', marginRight: 4 }} onClick={() => t.setSound(key)}>{s.label}</button>
+          <button key={key} className={`chip ${t.sound === key ? 'on' : ''}`} style={{ fontSize: 11, padding: '4px 10px', marginRight: 4 }} onClick={() => { t.setSound(key); playSound(key); }}>{s.label}</button>
         ))}
       </div>
     </div>
