@@ -31,7 +31,7 @@ body {
 
 .app { max-width: 480px; margin: 0 auto; min-height: 100vh; padding-bottom: 78px; position: relative; }
 .screen { padding: 20px; animation: fadeUp .28s ease both; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeUp { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {
   .screen { animation: none; }
   .chip:active, .btn:active, .btn-sm:active, .row:active { transform: none; }
@@ -142,4 +142,3 @@ h1, h2, h3, .h1, .name, .brand-name, .stat-num, .serif { font-family: 'Newsreade
 .themebtn { position: fixed; top: 14px; right: max(14px, calc(50vw - 226px)); z-index: 80; background: var(--card);
   border: 1.5px solid var(--line); color: var(--ink); border-radius: 10px; width: 40px; height: 40px;
   cursor: pointer; font-size: 17px; }
-
