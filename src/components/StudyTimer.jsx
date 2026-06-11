@@ -44,10 +44,10 @@ export default function StudyTimer() {
   // ---- Full-screen distraction-free view (tap anywhere to exit) ----
   if (fullscreen) {
     return (
-      <div onClick={() => setFullscreen(false)} style={{ position: 'fixed', inset: 0, background: 'var(--paper)', zIndex: 200, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, cursor: 'pointer' }}>
-        <button className="link" style={{ position: 'absolute', top: 18, right: 20, fontSize: 15 }} onClick={(e) => { e.stopPropagation(); setFullscreen(false); }}>✕ Close</button>
+      <div onClick={() => setFullscreen(false)} style={{ position: 'fixed', inset: 0, background: 'var(--paper)', zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 'calc(env(safe-area-inset-top, 0px) + 60px) 24px calc(env(safe-area-inset-bottom, 0px) + 40px)', cursor: 'pointer' }}>
+        <button className="link" style={{ position: 'absolute', top: 'calc(env(safe-area-inset-top, 0px) + 16px)', right: 20, fontSize: 15 }} onClick={(e) => { e.stopPropagation(); setFullscreen(false); }}>✕ Close</button>
         <ModeTabs />
-        <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 96, fontWeight: 900, color: t.done ? 'var(--rust)' : 'var(--forest)', lineHeight: 1, letterSpacing: 2 }}>
+        <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 'min(22vw, 90px)', fontWeight: 900, color: t.done ? 'var(--rust)' : 'var(--forest)', lineHeight: 1, letterSpacing: 2 }}>
           {mm}:{ss}
         </div>
         {t.done && <div style={{ color: 'var(--rust)', fontWeight: 700, fontSize: 18, marginTop: 10 }}>Time's up! 🎉</div>}
@@ -93,4 +93,3 @@ export default function StudyTimer() {
     </div>
   );
 }
-
