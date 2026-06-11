@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useTimer, SOUNDS, playSound } from '../context/Timer.jsx';
 
-// tiny haptic tap — silent feedback, ignored on devices without vibration
-function haptic(ms = 12) {
+// haptic tap — silent feedback, ignored on devices without vibration.
+// Accepts a duration (ms) or a pattern array like [30,30,30].
+function haptic(ms = 25) {
   try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {}
 }
 
@@ -13,12 +14,12 @@ export default function StudyTimer() {
   const [fullscreen, setFullscreen] = useState(false);
   if (!t) return null;
 
-  // wrap timer actions so every tap gives a subtle haptic buzz
-  const onStartPause = () => { haptic(15); t.startPause(); };
-  const onReset = () => { haptic(20); t.reset(); };
-  const onPreset = (m) => { haptic(10); t.pickPreset(m); };
-  const onSwitchMode = (m) => { haptic(10); t.switchMode(m); };
-  const onPickSound = (key) => { haptic(10); t.setSound(key); playSound(key); };
+  // wrap timer actions so every tap gives a clear haptic buzz
+  const onStartPause = () => { haptic(40); t.startPause(); };
+  const onReset = () => { haptic([30, 30, 30]); t.reset(); };
+  const onPreset = (m) => { haptic(25); t.pickPreset(m); };
+  const onSwitchMode = (m) => { haptic(25); t.switchMode(m); };
+  const onPickSound = (key) => { haptic(25); t.setSound(key); playSound(key); };
 
   const shown = t.mode === 'timer' ? t.secondsLeft : t.elapsed;
   const mm = String(Math.floor(shown / 60)).padStart(2, '0');
