@@ -6,8 +6,8 @@ export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
       const all = await sql`
-        SELECT c.*, ru.name AS requester_name, ru.exam AS requester_exam, ru.last_seen AS requester_seen,
-               cu.name AS recipient_name, cu.exam AS recipient_exam, cu.last_seen AS recipient_seen
+        SELECT c.*, ru.name AS requester_name, ru.exam AS requester_exam, ru.last_seen AS requester_seen, ru.avatar AS requester_avatar, ru.bio AS requester_bio,
+               cu.name AS recipient_name, cu.exam AS recipient_exam, cu.last_seen AS recipient_seen, cu.avatar AS recipient_avatar, cu.bio AS recipient_bio
         FROM connections c
         JOIN users ru ON ru.id = c.requester
         JOIN users cu ON cu.id = c.recipient
