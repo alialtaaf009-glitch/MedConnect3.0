@@ -371,17 +371,22 @@ export default function Home() {
 
   const [nudges, setNudges] = useState([]);
 
-  // profile share links: opening med-connect3-0.vercel.app/?add=ID sends that doctor a request
+  // profile share links: opening med-connect3-0.vercel.app/?add=ID shows that doctor's card
+  const [addCard, setAddCard] = useState(null);   // { id, name, avatar, exam, country }
+  const [addSent, setAddSent] = useState(false);
   useEffect(() => {
     const addId = new URLSearchParams(window.location.search).get('add');
     if (!addId || !user?.id) return;
     window.history.replaceState({}, '', window.location.pathname); // run once
     const target = parseInt(addId, 10);
-    if (!target || target === user.id) return;
-    api.sendRequest(target)
-      .then(() => window.alert('Connection request sent! 🩺'))
-      .catch(() => window.alert('Could not send the request — you may already be connected.'));
+    if (!target) return;
+    if (target === user.id) { window.alert("That's your own profile link — share it with a colleague so they can add you. 😄"); return; }
+    api.publicProfile(target).then((d) => { if (d.user) setAddCard(d.user); }).catch(() => {});
   }, [user?.id]);
+  const sendAdd = async () => {
+    try { await api.sendRequest(addCard.id); setAddSent(true); }
+    catch (e) { window.alert('Could not send — you may already be connected.'); setAddCard(null); }
+  };
   const [invited, setInvited] = useState(false);
   useEffect(() => { api.connections().then((d) => setNudges(d.nudges || [])).catch(() => {}); }, []);
 
@@ -403,6 +408,27 @@ export default function Home() {
 
   return (
     <div className="screen">
+      {addCard && (
+        <div onClick={() => setAddCard(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'grid', placeItems: 'center', zIndex: 100, padding: 24 }}>
+          <div onClick={(e) => e.stopPropagation()} className="card" style={{ maxWidth: 320, width: '100%', textAlign: 'center', animation: 'popIn .3s cubic-bezier(0.34, 1.56, 0.64, 1) both', margin: 0 }}>
+            <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'var(--paper-2)', border: '2px solid var(--forest)', display: 'grid', placeItems: 'center', fontSize: 30, margin: '0 auto 10px' }}>{addCard.avatar || '🩺'}</div>
+            <div style={{ fontSize: 17, fontWeight: 700 }}>{addCard.name}</div>
+            <div className="meta" style={{ marginTop: 2 }}>{[addCard.exam, addCard.country].filter(Boolean).join(' · ')}</div>
+            {addSent ? (
+              <>
+                <p className="voice" style={{ fontSize: 14.5, margin: '12px 0 4px', color: 'var(--forest)' }}>Request sent — over to them now. 🩺</p>
+                <button className="btn ghost" style={{ marginTop: 8 }} onClick={() => { setAddCard(null); setAddSent(false); }}>Done</button>
+              </>
+            ) : (
+              <>
+                <p className="sub" style={{ fontSize: 12.5, margin: '10px 0 2px' }}>Wants to study with you on MedConnect.</p>
+                <button className="btn btn-cta" style={{ marginTop: 10 }} onClick={sendAdd}>Send connection request</button>
+                <button className="btn ghost" style={{ marginTop: 8 }} onClick={() => setAddCard(null)}>Not now</button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
       <div className="card" onClick={() => nav('/profile')} style={{ cursor: 'pointer' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 13 }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, flexShrink: 0 }}>
