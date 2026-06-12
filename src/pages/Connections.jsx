@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
+import { examColor } from '../lib/examColors';
 import { useAuth } from '../context/Auth.jsx';
 import { isOnline as online } from '../lib/presence';
 
@@ -51,14 +52,14 @@ export default function Connections() {
         const av = iAmRequester ? c.recipient_avatar : c.requester_avatar;
         const init = (name || 'Dr').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('');
         return (
-          <div key={c.id} className="row">
-            <div onClick={() => setPeek({ name, exam, avatar: av, bio: iAmRequester ? c.recipient_bio : c.requester_bio })} style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: av ? 22 : 15, color: 'var(--forest)', fontWeight: 600, flexShrink: 0, cursor: 'pointer' }}>{av || init}</div>
+          <div key={c.id} className="row" style={{ borderLeft: `4px solid ${examColor(exam)}` }}>
+            <div onClick={() => setPeek({ name, exam, avatar: av, bio: iAmRequester ? c.recipient_bio : c.requester_bio })} style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--paper-2)', border: `2px solid ${examColor(exam)}`, display: 'grid', placeItems: 'center', fontSize: av ? 22 : 15, color: 'var(--forest)', fontWeight: 600, flexShrink: 0, cursor: 'pointer' }}>{av || init}</div>
             <div className="grow">
               <div className="name">
                 {tab === 'connected' && <span className={online(otherSeen) ? 'dot-online' : 'dot-offline'}></span>}
                 {name}
               </div>
-              <div className="meta">{exam}</div>
+              <div className="meta" style={{ color: examColor(exam), fontWeight: 700 }}>{exam}</div>
             </div>
             {tab === 'requests' ? (
               <div style={{ display:'flex', gap:7 }}>
