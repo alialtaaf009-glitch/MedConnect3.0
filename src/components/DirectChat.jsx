@@ -17,7 +17,9 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
 
   const load = () => api.conversation(withId).then((d) => { setMessages(d.messages || []); if (d.avatars) setAvatars(d.avatars); localStorage.setItem('chat_read_' + withId, String(Date.now())); }).catch(() => {});
   useEffect(() => { load(); const t = setInterval(load, 4000); return () => clearInterval(t); }, [withId]);
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+  // only scroll when a genuinely new message lands (not on every 4s poll)
+  const lastMsgId = messages.length ? messages[messages.length - 1].id : 0;
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [lastMsgId]);
 
   const send = async () => {
     if (!text.trim() || sending) return;
@@ -109,4 +111,3 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
     </div>
   );
 }
-
