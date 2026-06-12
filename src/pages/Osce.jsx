@@ -46,6 +46,13 @@ const SCENARIOS = {
   'Cranial nerve exam': 'A 60-year-old has presented with a new facial droop noticed this morning. Perform a cranial nerve examination, narrating what you are testing, then present your findings and suggest where the lesion might be.',
 };
 
+const LockIcon = ({ size = 14 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+    <rect x="4.5" y="10.5" width="15" height="10" rx="2.5" />
+    <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" />
+  </svg>
+);
+
 export default function Osce() {
   const { user } = useAuth();
   const exams = Object.keys(STATIONS);
@@ -62,7 +69,7 @@ export default function Osce() {
       {showPro && (
         <div onClick={() => setShowPro(false)} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.5)', display:'grid', placeItems:'center', zIndex:100, padding:24 }}>
           <div className="card" onClick={(e) => e.stopPropagation()} style={{ maxWidth:340, textAlign:'center' }}>
-            <div style={{ fontSize:38 }}>🔒</div>
+            <div style={{ display:'grid', placeItems:'center', color:'var(--forest)' }}><LockIcon size={34} /></div>
             <h2 className="serif" style={{ fontSize:20, fontWeight:700, margin:'8px 0' }}>This is a Pro station</h2>
             <p className="sub" style={{ fontSize:14, lineHeight:1.5, marginBottom:12 }}>
               You've got {FREE} free stations. MedConnect Pro unlocks <strong>{TOTAL_STATIONS[exam] || '200+'} {exam.split('—')[0].trim()} stations</strong> plus:
@@ -80,14 +87,14 @@ export default function Osce() {
         </div>
       )}
       <h1 className="h1">OSCE Practice</h1>
-      <p className="sub" style={{ marginBottom:14 }}>Timed station practice. Free stations are open to try solo; live partner mode is coming.</p>
+      <p className="sub" style={{ marginBottom:14 }}>Timed station practice — solo, or live with a partner over a Meet link.</p>
 
       <div className="chips" style={{ marginBottom:16 }}>
         {exams.map((e) => (
           <button key={e} className={`chip ${exam === e ? 'on' : ''}`} onClick={() => setExam(e)}>{e}</button>
         ))}
       </div>
-      <h2 style={{ fontSize:18, fontWeight:700, fontFamily:"'Newsreader',Georgia,serif" }}>{exam} stations</h2>
+      <h2 style={{ fontSize:18, fontWeight:700, fontFamily:"'Inter',system-ui,sans-serif" }}>{exam} stations</h2>
       {!isPro && <p className="sub" style={{ fontSize:12, marginBottom:10 }}>{FREE} free · unlock the rest with Pro</p>}
       {stations.map((st, i) => {
         const locked = !isPro && i >= FREE;
@@ -95,7 +102,7 @@ export default function Osce() {
           <div key={st} className="row" style={{ justifyContent:'space-between', opacity: locked ? .55 : 1, cursor:'pointer' }}
             onClick={() => { if (locked) { setShowPro(true); } else { setActive(st); } }}>
             <span style={{ fontWeight:600 }}>{st}</span>
-            {locked ? <span className="meta" style={{ fontSize:11, color:'var(--subtle)', opacity:0.7 }}>Locked</span>
+            {locked ? <span style={{ color:'var(--subtle)', opacity:0.7 }}><LockIcon /></span>
                     : <span className="link">Practise ›</span>}
           </div>
         );
@@ -166,7 +173,7 @@ function Station({ name, minutes, onBack }) {
       <button className="link" onClick={onBack}>‹ Back to stations</button>
       <h1 className="h1" style={{ fontSize:24, margin:'12px 0 6px' }}>{name}</h1>
       <div className="card" style={{ textAlign:'center' }}>
-        <div style={{ fontFamily:"'Newsreader',Georgia,serif", fontSize:44, fontWeight:900, color: seconds === 0 ? 'var(--rust)' : 'var(--forest)' }}>{mm}:{ss}</div>
+        <div style={{ fontFamily:"'Inter',system-ui,sans-serif", fontSize:44, fontWeight:900, color: seconds === 0 ? 'var(--rust)' : 'var(--forest)' }}>{mm}:{ss}</div>
         <div style={{ display:'flex', gap:10, marginTop:12 }}>
           <button className="btn" onClick={() => setRunning(!running)}>{running ? 'Pause' : 'Start'}</button>
           <button className="btn ghost" onClick={() => { setRunning(false); setSeconds(total); }}>Reset</button>
@@ -181,4 +188,3 @@ function Station({ name, minutes, onBack }) {
     </div>
   );
 }
-
