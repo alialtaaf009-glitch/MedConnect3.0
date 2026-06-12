@@ -5,7 +5,7 @@ export default function Focus() {
     <div className="screen">
       <h1 className="h1">Focus ☕</h1>
       <p className="sub" style={{ marginBottom: 16 }}>
-        A timer for your study sessions. Set a block, or count up — tap the box for full-screen. It keeps running while you use the rest of the app.
+        Chai in hand? Good. Set a block, tap the box for full-screen, and guard it like an exam hall. ☕
       </p>
       <StudyTimer />
     </div>
