@@ -2,8 +2,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root, [data-theme="light"] {
-  --ink:#11201a; --paper:#e9f0e6; --paper-2:#d9e5d4; --card:#fdfffb;
-  --line:#bfd2b8; --forest:#16624a; --forest-2:#1f8a66; --rust:#c2421f;
+  --ink:#11201a; --paper:#f3ead4; --paper-2:#e8dcba; --card:#fffdf6;
+  --line:#d8c99e; --forest:#16624a; --forest-2:#1f8a66; --rust:#c2421f;
   --gold:#d99411; --muted:#5f6b62; --subtle:#94998c;
   --bg:var(--paper); --bg2:var(--paper-2); --panel:var(--card); --panel2:var(--paper-2);
   --teal:var(--forest); --teal-dim:var(--forest-2); --amber:var(--gold);
@@ -164,3 +164,4 @@ h1, h2, h3, .h1, .name, .brand-name, .stat-num, .serif { font-family: 'Inter', s
 /* box-breathing pacer */
 .breathe-ball { width: 110px; height: 110px; border-radius: 50%; background: var(--forest);
   opacity: .9; margin: 14px auto; transition: transform 3.9s ease-in-out; }
+
