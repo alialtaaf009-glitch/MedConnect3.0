@@ -46,6 +46,19 @@ const CATALOG = [
 
 
 // country-code map for round flag images (flagcdn.com)
+
+// v1 vibrancy: each exam family carries its own signature color
+const EXAM_COLORS = {
+  'USMLE': '#1a5a8a', 'MRCP': '#1a6b5a', 'MRCS': '#2a6a8a', 'MRCPCH': '#1a7a4a',
+  'MRCGP': '#3a7a4a', 'MRCPath': '#2a5a6a', 'MRCEM': '#1a5f7a', 'MRCOG': '#2e4a7a',
+  'MRCPsych': '#1a6b8a', 'PLAB / UKMLA': '#1a7a6a', 'FCPS Part 1': '#1a7a4a',
+  'FCPS Part 2': '#3a6a3a', 'IMM': '#2a6a7a', 'MCPS': '#3a7a4a',
+  'AMC': '#1a5f7a', 'RACP': '#1a6b5a', 'RACS': '#2a5a6a',
+  'SMLE': '#2e4a7a', 'Saudi Board': '#1a6b8a', 'SCFHS Prometric': '#2a6a8a',
+  'NEET-PG': '#3a7a4a', 'INI-CET': '#1a7a6a', 'FMGE / NExT': '#1a5a8a', 'NEET-SS': '#2a6a7a',
+};
+const examColor = (exam) => EXAM_COLORS[exam] || EXAM_COLORS[exam.split(' ')[0]] || 'var(--forest)';
+
 const FLAG_CODE = { 'United States': 'us', 'United Kingdom': 'gb', 'Pakistan': 'pk', 'Australia': 'au', 'Saudi Arabia': 'sa', 'India': 'in' };
 function Flag({ country, emoji, size = 34 }) {
   const code = FLAG_CODE[country];
@@ -59,72 +72,14 @@ function Flag({ country, emoji, size = 34 }) {
   );
 }
 
-export default function Home() {
-  const { user } = useAuth();
+// "Explore study partners" browser: by-country / by-exam trees with partner counts
+function ExploreBrowse() {
   const nav = useNavigate();
   const [openCountry, setOpenCountry] = useState('');
   const [openExam, setOpenExam] = useState('');
   const [browseMode, setBrowseMode] = useState('country'); // 'country' | 'exam'
-  const initials = (user?.name || 'Dr A').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map(x => x[0]?.toUpperCase()).join('');
-
-  // exam countdown
-  let daysLeft = null;
-  if (user?.exam_date) {
-    const t = new Date(user.exam_date).getTime();
-    if (!isNaN(t)) daysLeft = Math.ceil((t - Date.now()) / 86400000);
-  }
-  const quote = quoteOfTheDay();
-  const [cdOpen, setCdOpen] = useState(false);
-  const [stOpen, setStOpen] = useState(false);
-  const [nowTs, setNowTs] = useState(Date.now());
-  useEffect(() => {
-    if (!cdOpen) return;
-    const t = setInterval(() => setNowTs(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, [cdOpen]);
-
-  // adaptive coach line — urgency without panic
-  const coachLine = (d) => {
-    if (d > 60) return 'Plenty of runway. Build the habit now.';
-    if (d > 14) return 'This is the sharpening phase. Every block counts.';
-    if (d > 2)  return "Lock in. You've done the work — now protect it.";
-    if (d >= 0) return 'Trust your preparation. Sleep matters more than cramming now.';
-    return 'Exam day has passed — update your date in Profile when the next one is set.';
-  };
-  const [streak, setStreak] = useState(user?.current_streak || 0);
-  const [studiedToday, setStudiedToday] = useState(user?.studied_today || false);
-  const [marking, setMarking] = useState(false);
-  const markStudy = async () => {
-    if (marking || studiedToday) return;
-    setMarking(true);
-    try {
-      const d = await api.markStudy();
-      if (d.user) { setStreak(d.user.current_streak || 0); setStudiedToday(true); }
-    } catch (e) {} finally { setMarking(false); }
-  };
   const [counts, setCounts] = useState({});
-  const [nudges, setNudges] = useState([]);
-  const [invited, setInvited] = useState(false);
-
-  // native share sheet on Android & iOS; clipboard fallback elsewhere
-  const inviteFriend = async () => {
-    const data = {
-      title: 'MedConnect',
-      text: "I'm using MedConnect to find study partners for medical exams — doctors only, matched by exam. Join me:",
-      url: 'https://med-connect3-0.vercel.app',
-    };
-    try {
-      if (navigator.share) { await navigator.share(data); return; }
-    } catch (e) { if (e?.name === 'AbortError') return; }
-    try {
-      await navigator.clipboard.writeText(`${data.text} ${data.url}`);
-      setInvited(true); setTimeout(() => setInvited(false), 3000);
-    } catch (e) {}
-  };
-
   useEffect(() => { api.getStats().then((d) => setCounts(d.counts || {})).catch(() => {}); }, []);
-  useEffect(() => { api.connections().then((d) => setNudges(d.nudges || [])).catch(() => {}); }, []);
-
 
   // counts for a specific exam PART (best-effort mapping to users' exam strings)
   const partCount = (exam, part) => {
@@ -142,6 +97,267 @@ export default function Home() {
       if (key.split('—')[0].trim().split(' ')[0] === family) n = Math.max(n, val);
     }
     return n;
+  };
+
+  return (
+    <>
+      <div className="tabs" style={{ marginBottom: 14 }}>
+        <button className={`tab ${browseMode === 'country' ? 'on' : ''}`} onClick={() => { setBrowseMode('country'); setOpenExam(''); }}>By country</button>
+        <button className={`tab ${browseMode === 'exam' ? 'on' : ''}`} onClick={() => { setBrowseMode('exam'); setOpenExam(''); }}>By exam</button>
+      </div>
+
+      {browseMode === 'exam' && (
+        <>
+          {CATALOG.flatMap(([flag, country, exams]) => exams.map(([exam, parts]) => ({ flag, country, exam, parts })))
+            .map(({ flag, country, exam, parts }) => {
+              const key = 'exam|' + country + '|' + exam;
+              const ecx = examColor(exam);
+              return (
+                <div key={key} className="card" style={{ padding: 0, overflow: 'hidden', borderLeft: `4px solid ${ecx}` }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 14, cursor: 'pointer' }}
+                    onClick={() => setOpenExam(openExam === key ? '' : key)}>
+                    <Flag country={country} emoji={flag} size={30} />
+                    <span style={{ flex: 1, fontWeight: 600 }}>{exam}</span>
+                    {examCount(exam) >= 2 && (
+                      <span style={{ fontSize: 11, color: ecx, background: 'var(--paper-2)', borderRadius: 20, padding: '3px 9px', marginRight: 4, fontWeight: 700 }}>
+                        {examCount(exam)}
+                      </span>
+                    )}
+                    <span className="meta" style={{ fontSize: 11 }}>{openExam === key ? '▲' : '▼'}</span>
+                  </div>
+                  {openExam === key && parts.map((part) => {
+                    return (
+                      <div key={part} className="exam-accent" style={{ '--ec': ecx, padding: '11px 16px 11px 22px', borderTop: '1px solid var(--line)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                        onClick={() => nav(`/partners?exam=${encodeURIComponent(exam)}&part=${encodeURIComponent(part)}`)}>
+                        <span style={{ fontWeight: 600, fontSize: 14, flex: 1 }}>{part}</span>
+                        {partCount(exam, part) >= 1 && <span style={{ fontSize: 10.5, color: examColor(exam), background: 'var(--paper-2)', borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 6 }}>{partCount(exam, part)}</span>}
+                        <span style={{ color: 'var(--subtle)', fontSize: 13 }}>›</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+        </>
+      )}
+
+      {browseMode === 'country' && CATALOG.map(([flag, country, exams]) => (
+        <div key={country} className="card" style={{ padding: 0, overflow: 'hidden' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: 14, cursor: 'pointer' }}
+            onClick={() => setOpenCountry(openCountry === country ? '' : country)}>
+            <Flag country={country} emoji={flag} />
+            <span style={{ flex: 1, fontWeight: 600 }}>{country}</span>
+            <span className="meta">{openCountry === country ? '▲' : '▼'}</span>
+          </div>
+
+          {openCountry === country && exams.map(([exam, parts]) => {
+            const key = country + '|' + exam;
+            return (
+              <div key={exam} style={{ borderTop: '1px solid var(--line)', borderLeft: `4px solid ${examColor(exam)}` }}>
+                <div style={{ display: 'flex', alignItems: 'center', padding: '12px 16px 12px 40px', cursor: 'pointer', fontWeight: 500, fontSize: 14 }}
+                  onClick={() => setOpenExam(openExam === key ? '' : key)}>
+                  <span style={{ flex: 1 }}>{exam}</span>
+                  {examCount(exam) >= 2 && (
+                    <span style={{ fontSize: 11, color: examColor(exam), background: 'var(--paper-2)', borderRadius: 20, padding: '3px 9px', marginRight: 8, fontWeight: 700 }}>
+                      {examCount(exam)} doctors
+                    </span>
+                  )}
+                  <span className="meta" style={{ fontSize: 11 }}>{openExam === key ? '▲' : '▼'}</span>
+                </div>
+                {openExam === key && parts.map((part) => {
+                  const ec = examColor(exam);
+                  return (
+                    <div key={part} className="exam-accent" style={{ '--ec': ec, padding: '11px 16px 11px 22px', borderTop: '1px solid var(--line)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                      onClick={() => nav(`/partners?exam=${encodeURIComponent(exam)}&part=${encodeURIComponent(part)}`)}>
+                      <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)', flex: 1 }}>{part}</span>
+                      {partCount(exam, part) >= 1 && <span style={{ fontSize: 10.5, color: examColor(exam), background: 'var(--paper-2)', borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 6 }}>{partCount(exam, part)}</span>}
+                      <span style={{ color: 'var(--subtle)', fontSize: 13 }}>›</span>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+      ))}
+    </>
+  );
+}
+
+// Countdown + Study Streak tiles, each with a tap-to-expand pop-out.
+function Momentum({ user }) {
+  // user-hideable tiles (Profile -> Home screen)
+  const hideCd = localStorage.getItem('hide_countdown') === '1';
+  const hideSt = localStorage.getItem('hide_streak') === '1';
+
+  // exam countdown
+  let daysLeft = null;
+  if (user?.exam_date) {
+    const t = new Date(user.exam_date).getTime();
+    if (!isNaN(t)) daysLeft = Math.ceil((t - Date.now()) / 86400000);
+  }
+
+  // streak
+  const [streak, setStreak] = useState(user?.current_streak || 0);
+  const [studiedToday, setStudiedToday] = useState(user?.studied_today || false);
+  const [marking, setMarking] = useState(false);
+  const markStudy = async () => {
+    if (marking || studiedToday) return;
+    setMarking(true);
+    try {
+      const d = await api.markStudy();
+      if (d.user) { setStreak(d.user.current_streak || 0); setStudiedToday(true); }
+    } catch (e) {} finally { setMarking(false); }
+  };
+
+  // pop-outs
+  const [cdOpen, setCdOpen] = useState(false);
+  const [stOpen, setStOpen] = useState(false);
+  const [nowTs, setNowTs] = useState(Date.now());
+  useEffect(() => {
+    if (!cdOpen) return;
+    const t = setInterval(() => setNowTs(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [cdOpen]);
+
+  // adaptive coach line — urgency without panic
+  const coachLine = (d) => {
+    if (d > 60) return 'Plenty of runway. Build the habit now.';
+    if (d > 14) return 'This is the sharpening phase. Every block counts.';
+    if (d > 2)  return "Lock in. You've done the work — now protect it.";
+    if (d >= 0) return 'Trust your preparation. Sleep matters more than cramming now.';
+    return 'Exam day has passed — update your date in Profile when the next one is set.';
+  };
+
+  return (
+    <>
+      {(!hideCd && daysLeft !== null) || !hideSt ? (
+      <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
+        {!hideCd && daysLeft !== null && (
+          <div className="card" onClick={() => setCdOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '12px 8px', borderColor: 'var(--forest)', margin: 0, cursor: 'pointer', position: 'relative' }}>
+            <span style={{ position: 'absolute', top: 7, right: 9, fontSize: 11, color: 'var(--subtle)', opacity: 0.8 }}>⤢</span>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'var(--forest)', textTransform: 'uppercase' }}>Countdown</div>
+            <div className="display-num" style={{ fontSize: 30, fontWeight: 700, color: 'var(--forest)', lineHeight: 1.15 }}>
+              {daysLeft > 0 ? daysLeft : daysLeft === 0 ? 'Today' : '—'}
+            </div>
+            <div className="sub" style={{ fontSize: 10, marginTop: 0 }}>{daysLeft > 0 ? 'days to exam' : daysLeft === 0 ? 'exam day!' : 'passed'}</div>
+          </div>
+        )}
+        {!hideSt && (
+        <div className="card" onClick={() => setStOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '12px 8px', borderColor: 'var(--forest)', margin: 0, cursor: 'pointer', position: 'relative' }}>
+          <span style={{ position: 'absolute', top: 7, right: 9, fontSize: 11, color: 'var(--subtle)', opacity: 0.8 }}>⤢</span>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'var(--forest)', textTransform: 'uppercase' }}>Study Streak</div>
+          <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--rust)', lineHeight: 1.2, marginTop: 2 }}>
+            <span style={{ fontSize: 18 }}>🔥</span> {streak}
+          </div>
+          {studiedToday ? (
+            <div className="sub" style={{ fontSize: 10, marginTop: 3, color: 'var(--forest)', fontWeight: 700 }}>✓ done today</div>
+          ) : (
+            <button onClick={(e) => { e.stopPropagation(); markStudy(); }} disabled={marking} style={{ marginTop: 4, fontSize: 11, fontWeight: 700, color: '#fff', background: 'var(--forest)', border: 'none', borderRadius: 8, padding: '5px 10px', cursor: 'pointer' }}>
+              {marking ? '…' : 'Mark today ✓'}
+            </button>
+          )}
+        </div>
+        )}
+      </div>
+      ) : null}
+
+      {cdOpen && user?.exam_date && (() => {
+        const examTs = new Date(user.exam_date).getTime();
+        const diff = Math.max(0, examTs - nowTs);
+        const totSec = Math.floor(diff / 1000);
+        const totDays = Math.floor(totSec / 86400);
+        const weeks = Math.floor(totDays / 7);
+        const days = totDays % 7;
+        const hh = String(Math.floor((totSec % 86400) / 3600)).padStart(2, '0');
+        const mm2 = String(Math.floor((totSec % 3600) / 60)).padStart(2, '0');
+        const ss = String(totSec % 60).padStart(2, '0');
+        const dLeft = Math.ceil((examTs - nowTs) / 86400000);
+        return (
+          <div onClick={() => setCdOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'grid', placeItems: 'center', zIndex: 100, padding: 24 }}>
+            <div onClick={(e) => e.stopPropagation()} className="card" style={{ maxWidth: 340, width: '100%', textAlign: 'center', animation: 'popIn .3s cubic-bezier(0.34, 1.56, 0.64, 1) both', margin: 0 }}>
+              <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--rust)', textTransform: 'uppercase' }}>{user?.exam || 'Your exam'}</div>
+              <div className="sub" style={{ fontSize: 12, marginTop: 2 }}>{new Date(user.exam_date).toDateString()}</div>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 10, margin: '16px 0 4px' }}>
+                <div style={{ flex: 1, maxWidth: 90 }}>
+                  <div className="display-num" style={{ fontSize: 34, fontWeight: 700, color: 'var(--forest)', lineHeight: 1 }}>{weeks}</div>
+                  <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>weeks</div>
+                </div>
+                <div style={{ flex: 1, maxWidth: 90 }}>
+                  <div className="display-num" style={{ fontSize: 34, fontWeight: 700, color: 'var(--forest)', lineHeight: 1 }}>{days}</div>
+                  <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>days</div>
+                </div>
+              </div>
+              <div className="display-num" style={{ fontSize: 30, fontWeight: 700, color: 'var(--rust)', letterSpacing: 2, fontVariantNumeric: 'tabular-nums', margin: '6px 0 2px' }}>
+                {hh}:{mm2}:{ss}
+              </div>
+              <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>hours · minutes · seconds</div>
+              <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)', margin: '14px 6px 4px', lineHeight: 1.45 }}>{coachLine(dLeft)}</p>
+              <button className="btn ghost" style={{ marginTop: 10 }} onClick={() => setCdOpen(false)}>Back to it</button>
+            </div>
+          </div>
+        );
+      })()}
+
+      {stOpen && (() => {
+        const best = Math.max(user?.longest_streak || 0, streak);
+        const line = !studiedToday
+          ? 'One tap keeps the flame alive.'
+          : streak >= best && streak > 1
+            ? "Personal best territory. Don't look down."
+            : streak === 0
+              ? 'Every legendary streak starts at day one.'
+              : "Today's locked in. See you tomorrow, doctor.";
+        return (
+          <div onClick={() => setStOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'grid', placeItems: 'center', zIndex: 100, padding: 24 }}>
+            <div onClick={(e) => e.stopPropagation()} className="card" style={{ maxWidth: 340, width: '100%', textAlign: 'center', animation: 'popIn .3s cubic-bezier(0.34, 1.56, 0.64, 1) both', margin: 0 }}>
+              <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--rust)', textTransform: 'uppercase' }}>Study Streak</div>
+              <div style={{ fontSize: 52, lineHeight: 1.1, marginTop: 8 }}>🔥</div>
+              <div className="display-num" style={{ fontSize: 40, fontWeight: 700, color: 'var(--rust)', lineHeight: 1.1 }}>{streak}</div>
+              <div className="sub" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 }}>day{streak === 1 ? '' : 's'} in a row</div>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, marginTop: 12 }}>
+                <span style={{ fontSize: 15 }}>🏆</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--forest)' }}>Personal best: {best} day{best === 1 ? '' : 's'}</span>
+              </div>
+              <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)', margin: '12px 6px 4px', lineHeight: 1.45 }}>{line}</p>
+              {!studiedToday && (
+                <button className="btn" style={{ marginTop: 10 }} disabled={marking} onClick={markStudy}>
+                  {marking ? '…' : 'Mark today ✓'}
+                </button>
+              )}
+              <button className="btn ghost" style={{ marginTop: 8 }} onClick={() => setStOpen(false)}>Keep going</button>
+            </div>
+          </div>
+        );
+      })()}
+    </>
+  );
+}
+
+export default function Home() {
+  const { user } = useAuth();
+  const nav = useNavigate();
+  const initials = (user?.name || 'Dr A').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map(x => x[0]?.toUpperCase()).join('');
+  const quote = quoteOfTheDay();
+
+  const [nudges, setNudges] = useState([]);
+  const [invited, setInvited] = useState(false);
+  useEffect(() => { api.connections().then((d) => setNudges(d.nudges || [])).catch(() => {}); }, []);
+
+  // native share sheet on Android & iOS; clipboard fallback elsewhere
+  const inviteFriend = async () => {
+    const data = {
+      title: 'MedConnect',
+      text: "I'm using MedConnect to find study partners for medical exams — doctors only, matched by exam. Join me:",
+      url: 'https://med-connect3-0.vercel.app',
+    };
+    try {
+      if (navigator.share) { await navigator.share(data); return; }
+    } catch (e) { if (e?.name === 'AbortError') return; }
+    try {
+      await navigator.clipboard.writeText(`${data.text} ${data.url}`);
+      setInvited(true); setTimeout(() => setInvited(false), 3000);
+    } catch (e) {}
   };
 
   return (
@@ -188,102 +404,8 @@ export default function Home() {
           Find the right study partner for your medical exam.
         </p>
       </div>
-      {/* compact momentum row: countdown + streak side by side */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
-        {daysLeft !== null && (
-          <div className="card" onClick={() => setCdOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '12px 8px', borderColor: 'var(--forest)', margin: 0, cursor: 'pointer', position: 'relative' }}>
-            <span style={{ position: 'absolute', top: 7, right: 9, fontSize: 11, color: 'var(--subtle)', opacity: 0.8 }}>⤢</span>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'var(--forest)', textTransform: 'uppercase' }}>Countdown</div>
-            <div style={{ fontFamily: "'Inter',system-ui,sans-serif", fontSize: 30, fontWeight: 900, color: 'var(--forest)', lineHeight: 1.15 }}>
-              {daysLeft > 0 ? daysLeft : daysLeft === 0 ? 'Today' : '—'}
-            </div>
-            <div className="sub" style={{ fontSize: 10, marginTop: 0 }}>{daysLeft > 0 ? 'days to exam' : daysLeft === 0 ? 'exam day!' : 'passed'}</div>
-          </div>
-        )}
-        <div className="card" onClick={() => setStOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '12px 8px', borderColor: 'var(--forest)', margin: 0, cursor: 'pointer', position: 'relative' }}>
-          <span style={{ position: 'absolute', top: 7, right: 9, fontSize: 11, color: 'var(--subtle)', opacity: 0.8 }}>⤢</span>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'var(--forest)', textTransform: 'uppercase' }}>Study Streak</div>
-          <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--rust)', lineHeight: 1.2, marginTop: 2 }}>
-            <span style={{ fontSize: 18 }}>🔥</span> {streak}
-          </div>
-          {studiedToday ? (
-            <div className="sub" style={{ fontSize: 10, marginTop: 3, color: 'var(--forest)', fontWeight: 700 }}>✓ done today</div>
-          ) : (
-            <button onClick={(e) => { e.stopPropagation(); markStudy(); }} disabled={marking} style={{ marginTop: 4, fontSize: 11, fontWeight: 700, color: '#fff', background: 'var(--forest)', border: 'none', borderRadius: 8, padding: '5px 10px', cursor: 'pointer' }}>
-              {marking ? '…' : 'Mark today ✓'}
-            </button>
-          )}
-        </div>
-      </div>
 
-      {cdOpen && user?.exam_date && (() => {
-        const examTs = new Date(user.exam_date).getTime();
-        const diff = Math.max(0, examTs - nowTs);
-        const totSec = Math.floor(diff / 1000);
-        const totDays = Math.floor(totSec / 86400);
-        const weeks = Math.floor(totDays / 7);
-        const days = totDays % 7;
-        const hh = String(Math.floor((totSec % 86400) / 3600)).padStart(2, '0');
-        const mm2 = String(Math.floor((totSec % 3600) / 60)).padStart(2, '0');
-        const ss = String(totSec % 60).padStart(2, '0');
-        const dLeft = Math.ceil((examTs - nowTs) / 86400000);
-        return (
-          <div onClick={() => setCdOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'grid', placeItems: 'center', zIndex: 100, padding: 24 }}>
-            <div onClick={(e) => e.stopPropagation()} className="card" style={{ maxWidth: 340, width: '100%', textAlign: 'center', animation: 'popIn .3s cubic-bezier(0.34, 1.56, 0.64, 1) both', margin: 0 }}>
-              <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--rust)', textTransform: 'uppercase' }}>{user?.exam || 'Your exam'}</div>
-              <div className="sub" style={{ fontSize: 12, marginTop: 2 }}>{new Date(user.exam_date).toDateString()}</div>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: 10, margin: '16px 0 4px' }}>
-                <div style={{ flex: 1, maxWidth: 90 }}>
-                  <div style={{ fontSize: 34, fontWeight: 900, color: 'var(--forest)', lineHeight: 1 }}>{weeks}</div>
-                  <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>weeks</div>
-                </div>
-                <div style={{ flex: 1, maxWidth: 90 }}>
-                  <div style={{ fontSize: 34, fontWeight: 900, color: 'var(--forest)', lineHeight: 1 }}>{days}</div>
-                  <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>days</div>
-                </div>
-              </div>
-              <div style={{ fontSize: 30, fontWeight: 900, color: 'var(--rust)', letterSpacing: 2, fontVariantNumeric: 'tabular-nums', margin: '6px 0 2px' }}>
-                {hh}:{mm2}:{ss}
-              </div>
-              <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>hours · minutes · seconds</div>
-              <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)', margin: '14px 6px 4px', lineHeight: 1.45 }}>{coachLine(dLeft)}</p>
-              <button className="btn ghost" style={{ marginTop: 10 }} onClick={() => setCdOpen(false)}>Back to it</button>
-            </div>
-          </div>
-        );
-      })()}
-
-      {stOpen && (() => {
-        const best = Math.max(user?.longest_streak || 0, streak);
-        const line = !studiedToday
-          ? 'One tap keeps the flame alive.'
-          : streak >= best && streak > 1
-            ? "Personal best territory. Don't look down."
-            : streak === 0
-              ? 'Every legendary streak starts at day one.'
-              : "Today's locked in. See you tomorrow, doctor.";
-        return (
-          <div onClick={() => setStOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'grid', placeItems: 'center', zIndex: 100, padding: 24 }}>
-            <div onClick={(e) => e.stopPropagation()} className="card" style={{ maxWidth: 340, width: '100%', textAlign: 'center', animation: 'popIn .3s cubic-bezier(0.34, 1.56, 0.64, 1) both', margin: 0 }}>
-              <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--rust)', textTransform: 'uppercase' }}>Study Streak</div>
-              <div style={{ fontSize: 52, lineHeight: 1.1, marginTop: 8 }}>🔥</div>
-              <div style={{ fontSize: 40, fontWeight: 900, color: 'var(--rust)', lineHeight: 1.1 }}>{streak}</div>
-              <div className="sub" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 }}>day{streak === 1 ? '' : 's'} in a row</div>
-              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, marginTop: 12 }}>
-                <span style={{ fontSize: 15 }}>🏆</span>
-                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--forest)' }}>Personal best: {best} day{best === 1 ? '' : 's'}</span>
-              </div>
-              <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)', margin: '12px 6px 4px', lineHeight: 1.45 }}>{line}</p>
-              {!studiedToday && (
-                <button className="btn" style={{ marginTop: 10 }} disabled={marking} onClick={markStudy}>
-                  {marking ? '…' : 'Mark today ✓'}
-                </button>
-              )}
-              <button className="btn ghost" style={{ marginTop: 8 }} onClick={() => setStOpen(false)}>Keep going</button>
-            </div>
-          </div>
-        );
-      })()}
+      <Momentum user={user} />
 
       {/* slim motivation line with a clear tappable link */}
       <div onClick={() => nav('/motivation')} style={{ cursor: 'pointer', padding: '4px 2px 0', marginBottom: 4 }}>
@@ -297,89 +419,10 @@ export default function Home() {
 
       <h2 className="serif" style={{ fontSize: 18, fontWeight: 600, margin: '18px 0 12px' }}>Explore study partners</h2>
 
-      <div className="tabs" style={{ marginBottom: 14 }}>
-        <button className={`tab ${browseMode === 'country' ? 'on' : ''}`} onClick={() => { setBrowseMode('country'); setOpenExam(''); }}>By country</button>
-        <button className={`tab ${browseMode === 'exam' ? 'on' : ''}`} onClick={() => { setBrowseMode('exam'); setOpenExam(''); }}>By exam</button>
-      </div>
-
-      {browseMode === 'exam' && (
-        <>
-          {CATALOG.flatMap(([flag, country, exams]) => exams.map(([exam, parts]) => ({ flag, country, exam, parts })))
-            .map(({ flag, country, exam, parts }) => {
-              const key = 'exam|' + country + '|' + exam;
-              return (
-                <div key={key} className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 14, cursor: 'pointer' }}
-                    onClick={() => setOpenExam(openExam === key ? '' : key)}>
-                    <Flag country={country} emoji={flag} size={30} />
-                    <span style={{ flex: 1, fontWeight: 600 }}>{exam}</span>
-                    {examCount(exam) >= 2 && (
-                      <span style={{ fontSize: 11, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 20, padding: '3px 9px', marginRight: 4, fontWeight: 700 }}>
-                        {examCount(exam)}
-                      </span>
-                    )}
-                    <span className="meta" style={{ fontSize: 11 }}>{openExam === key ? '▲' : '▼'}</span>
-                  </div>
-                  {openExam === key && parts.map((part, pi) => {
-                    const accents = ['var(--forest)', 'var(--rust)', 'var(--gold)', 'var(--forest-2)'];
-                    return (
-                      <div key={part} className="exam-accent" style={{ '--ec': accents[pi % accents.length], padding: '11px 16px 11px 22px', borderTop: '1px solid var(--line)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                        onClick={() => nav(`/partners?exam=${encodeURIComponent(exam)}&part=${encodeURIComponent(part)}`)}>
-                        <span style={{ fontWeight: 600, fontSize: 14, flex: 1 }}>{part}</span>
-                        {partCount(exam, part) >= 1 && <span style={{ fontSize: 10.5, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 6 }}>{partCount(exam, part)}</span>}
-                        <span style={{ color: 'var(--subtle)', fontSize: 13 }}>›</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
-        </>
-      )}
-
-      {browseMode === 'country' && CATALOG.map(([flag, country, exams]) => (
-        <div key={country} className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: 14, cursor: 'pointer' }}
-            onClick={() => setOpenCountry(openCountry === country ? '' : country)}>
-            <Flag country={country} emoji={flag} />
-            <span style={{ flex: 1, fontWeight: 600 }}>{country}</span>
-            <span className="meta">{openCountry === country ? '▲' : '▼'}</span>
-          </div>
-
-          {openCountry === country && exams.map(([exam, parts]) => {
-            const key = country + '|' + exam;
-            return (
-              <div key={exam} style={{ borderTop: '1px solid var(--line)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', padding: '12px 16px 12px 40px', cursor: 'pointer', fontWeight: 500, fontSize: 14 }}
-                  onClick={() => setOpenExam(openExam === key ? '' : key)}>
-                  <span style={{ flex: 1 }}>{exam}</span>
-                  {examCount(exam) >= 2 && (
-                    <span style={{ fontSize: 11, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 20, padding: '3px 9px', marginRight: 8, fontFamily: "'Inter',system-ui,sans-serif", fontWeight: 700 }}>
-                      {examCount(exam)} doctors
-                    </span>
-                  )}
-                  <span className="meta" style={{ fontSize: 11 }}>{openExam === key ? '▲' : '▼'}</span>
-                </div>
-                {openExam === key && parts.map((part, pi) => {
-                  const accents = ['var(--forest)', 'var(--rust)', 'var(--gold)', 'var(--forest-2)'];
-                  const ec = accents[pi % accents.length];
-                  return (
-                    <div key={part} className="exam-accent" style={{ '--ec': ec, padding: '11px 16px 11px 22px', borderTop: '1px solid var(--line)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                      onClick={() => nav(`/partners?exam=${encodeURIComponent(exam)}&part=${encodeURIComponent(part)}`)}>
-                      <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)', flex: 1 }}>{part}</span>
-                      {partCount(exam, part) >= 1 && <span style={{ fontSize: 10.5, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 6 }}>{partCount(exam, part)}</span>}
-                      <span style={{ color: 'var(--subtle)', fontSize: 13 }}>›</span>
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })}
-        </div>
-      ))}
+      <ExploreBrowse />
 
       {/* invite a colleague — native share sheet (Android & iOS), clipboard fallback */}
-      <div className="card" style={{ textAlign: 'center', marginTop: 20 }}>
+      <div className="card tint-gold" style={{ textAlign: 'center', marginTop: 20 }}>
         <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Know a doctor who needs a study partner?</div>
         <p className="sub" style={{ fontSize: 13, marginBottom: 12 }}>MedConnect grows one colleague at a time.</p>
         <button className="btn" onClick={inviteFriend}>Invite your friends</button>
