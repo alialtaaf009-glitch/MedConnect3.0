@@ -188,7 +188,6 @@ export default function Home() {
           Find the right study partner for your medical exam.
         </p>
       </div>
-
       {/* compact momentum row: countdown + streak side by side */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
         {daysLeft !== null && (
@@ -327,8 +326,49 @@ export default function Home() {
                       <div key={part} className="exam-accent" style={{ '--ec': accents[pi % accents.length], padding: '11px 16px 11px 22px', borderTop: '1px solid var(--line)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                         onClick={() => nav(`/partners?exam=${encodeURIComponent(exam)}&part=${encodeURIComponent(part)}`)}>
                         <span style={{ fontWeight: 600, fontSize: 14, flex: 1 }}>{part}</span>
-                        {partCount(exam, part) >= 1 && <span style={{ fontSize: 10.5, color: 'var(--forest)', background: 'var(--paper-2)', borderRa
-                          <span style={{ color: 'var(--subtle)', fontSize: 13 }}>›</span>
+                        {partCount(exam, part) >= 1 && <span style={{ fontSize: 10.5, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 6 }}>{partCount(exam, part)}</span>}
+                        <span style={{ color: 'var(--subtle)', fontSize: 13 }}>›</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+        </>
+      )}
+
+      {browseMode === 'country' && CATALOG.map(([flag, country, exams]) => (
+        <div key={country} className="card" style={{ padding: 0, overflow: 'hidden' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: 14, cursor: 'pointer' }}
+            onClick={() => setOpenCountry(openCountry === country ? '' : country)}>
+            <Flag country={country} emoji={flag} />
+            <span style={{ flex: 1, fontWeight: 600 }}>{country}</span>
+            <span className="meta">{openCountry === country ? '▲' : '▼'}</span>
+          </div>
+
+          {openCountry === country && exams.map(([exam, parts]) => {
+            const key = country + '|' + exam;
+            return (
+              <div key={exam} style={{ borderTop: '1px solid var(--line)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', padding: '12px 16px 12px 40px', cursor: 'pointer', fontWeight: 500, fontSize: 14 }}
+                  onClick={() => setOpenExam(openExam === key ? '' : key)}>
+                  <span style={{ flex: 1 }}>{exam}</span>
+                  {examCount(exam) >= 2 && (
+                    <span style={{ fontSize: 11, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 20, padding: '3px 9px', marginRight: 8, fontFamily: "'Inter',system-ui,sans-serif", fontWeight: 700 }}>
+                      {examCount(exam)} doctors
+                    </span>
+                  )}
+                  <span className="meta" style={{ fontSize: 11 }}>{openExam === key ? '▲' : '▼'}</span>
+                </div>
+                {openExam === key && parts.map((part, pi) => {
+                  const accents = ['var(--forest)', 'var(--rust)', 'var(--gold)', 'var(--forest-2)'];
+                  const ec = accents[pi % accents.length];
+                  return (
+                    <div key={part} className="exam-accent" style={{ '--ec': ec, padding: '11px 16px 11px 22px', borderTop: '1px solid var(--line)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                      onClick={() => nav(`/partners?exam=${encodeURIComponent(exam)}&part=${encodeURIComponent(part)}`)}>
+                      <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)', flex: 1 }}>{part}</span>
+                      {partCount(exam, part) >= 1 && <span style={{ fontSize: 10.5, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 6 }}>{partCount(exam, part)}</span>}
+                      <span style={{ color: 'var(--subtle)', fontSize: 13 }}>›</span>
                     </div>
                   );
                 })}
@@ -347,4 +387,4 @@ export default function Home() {
       </div>
     </div>
   );
-      }
+}
