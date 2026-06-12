@@ -191,7 +191,8 @@ export default function Home() {
       {/* compact momentum row: countdown + streak side by side */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
         {daysLeft !== null && (
-          <div className="card" onClick={() => setCdOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '12px 8px', borderColor: 'var(--forest)', margin: 0, cursor: 'pointer' }}>
+          <div className="card" onClick={() => setCdOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '12px 8px', borderColor: 'var(--forest)', margin: 0, cursor: 'pointer', position: 'relative' }}>
+            <span style={{ position: 'absolute', top: 7, right: 9, fontSize: 11, color: 'var(--subtle)', opacity: 0.8 }}>⤢</span>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'var(--forest)', textTransform: 'uppercase' }}>Countdown</div>
             <div style={{ fontFamily: "'Inter',system-ui,sans-serif", fontSize: 30, fontWeight: 900, color: 'var(--forest)', lineHeight: 1.15 }}>
               {daysLeft > 0 ? daysLeft : daysLeft === 0 ? 'Today' : '—'}
@@ -332,7 +333,7 @@ export default function Home() {
                   return (
                     <div key={part} className="exam-accent" style={{ '--ec': ec, padding: '11px 16px 11px 22px', borderTop: '1px solid var(--line)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                       onClick={() => nav(`/partners?exam=${encodeURIComponent(exam)}&part=${encodeURIComponent(part)}`)}>
-                      <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)', flex: 1 }}>{part}</span>
+                   <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)', flex: 1 }}>{part}</span>
                       {partCount(exam, part) >= 1 && <span style={{ fontSize: 10.5, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 6 }}>{partCount(exam, part)}</span>}
                       <span style={{ color: 'var(--subtle)', fontSize: 13 }}>›</span>
                     </div>
