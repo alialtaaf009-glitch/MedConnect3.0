@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../lib/api';
+import { examColor } from '../lib/examColors';
 import { isOnline } from '../lib/presence';
 
 export default function Partners() {
@@ -80,21 +81,21 @@ export default function Partners() {
       )}
 
       {visible.map((m) => (
-        <div key={m.user.id} className="row">
-          <div style={{ width:42, height:42, borderRadius:'50%', background:'var(--paper-2)', border:'1.5px solid var(--line)', display:'grid', placeItems:'center', fontSize:22, flexShrink:0 }}>{m.user.avatar || '🩺'}</div>
+        <div key={m.user.id} className="row" style={{ borderLeft: `4px solid ${examColor(m.user.exam)}` }}>
+          <div style={{ width:42, height:42, borderRadius:'50%', background:'var(--paper-2)', border:`2px solid ${examColor(m.user.exam)}`, display:'grid', placeItems:'center', fontSize:22, flexShrink:0 }}>{m.user.avatar || '🩺'}</div>
           <div className="grow">
             <div className="name">
               <span className={isOnline(m.user.last_seen) ? 'dot-online' : 'dot-offline'}></span>
               {m.user.name}
             </div>
             <div className="meta" style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-              <span>{m.user.exam} · {m.user.country}</span>
+              <span><span style={{ color: examColor(m.user.exam), fontWeight: 700 }}>{m.user.exam}</span> · {m.user.country}</span>
               <span className={`match-pill ${m.matchPercent >= 80 ? 'pill-exc' : m.matchPercent >= 55 ? 'pill-good' : 'pill-fair'}`}>
                 {m.matchPercent}% · {m.matchPercent >= 80 ? 'Excellent' : m.matchPercent >= 55 ? 'Good' : 'Fair'}
               </span>
             </div>
           </div>
-          <button className="btn-sm" onClick={() => connect(m.user.id)}>Connect</button>
+          <button className="btn-sm btn-cta" onClick={() => connect(m.user.id)}>Connect</button>
         </div>
       ))}
     </div>
