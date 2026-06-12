@@ -46,9 +46,11 @@ function ConversationList({ nav, me }) {
   const [picked, setPicked] = useState([]);
 
   useEffect(() => {
-    api.conversations().then((d) => { setConvos(d.conversations || []); setStatus('ok'); }).catch(() => setStatus('error'));
+    api.conversations().then((d) => {
+      const sorted = (d.conversations || []).slice().sort((a, b) => new Date(b.last_at) - new Date(a.last_at));
+      setConvos(sorted); setStatus('ok');
+    }).catch(() => setStatus('error'));
     api.groups().then((d) => setGroups(d.groups || [])).catch(() => {});
-    localStorage.setItem('chat_last_read', String(Date.now()));
   }, []);
 
   const openCreate = async () => {
@@ -87,16 +89,18 @@ function ConversationList({ nav, me }) {
           )}
           {convos.map((c) => {
             const init = (c.name || 'Dr').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('');
+            const unread = c.last_sender == c.other_id && new Date(c.last_at).getTime() > Number(localStorage.getItem('chat_read_' + c.other_id) || 0);
             return (
               <div key={c.other_id} className="row" style={{ cursor: 'pointer' }}
                 onClick={() => nav(`/chat?with=${c.other_id}&name=${encodeURIComponent(c.name)}&av=${encodeURIComponent(c.avatar || '')}`)}>
                 <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: c.avatar ? 22 : 15, color: 'var(--forest)', fontWeight: 600, flexShrink: 0 }}>{c.avatar || init}</div>
                 <div className="grow">
                   <div className="name">{c.name}</div>
-                  <div className="meta" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div className="meta" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: unread ? 700 : 400, color: unread ? 'var(--ink)' : undefined }}>
                     {c.last_sender == c.other_id ? '' : 'You: '}{c.last_body}
                   </div>
                 </div>
+                {unread && <span style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--rust)', flexShrink: 0 }} />}
               </div>
             );
           })}
@@ -269,7 +273,7 @@ function Conversation({ me, withId, withName, withAv, onBack }) {
   const [menu, setMenu] = useState(false);
   const endRef = useRef(null);
 
-  const load = () => api.conversation(withId).then((d) => { setMessages(d.messages || []); if (d.avatars) setAvatars(d.avatars); }).catch(() => {});
+  const load = () => api.conversation(withId).then((d) => { setMessages(d.messages || []); if (d.avatars) setAvatars(d.avatars); localStorage.setItem('chat_read_' + withId, String(Date.now())); }).catch(() => {});
   useEffect(() => { load(); const t = setInterval(load, 4000); return () => clearInterval(t); }, [withId]);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
@@ -357,8 +361,4 @@ function Conversation({ me, withId, withName, withAv, onBack }) {
         <input className="input" style={{ marginBottom: 0, flex: 1 }} placeholder="Type a message…"
           value={text} onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') send(); }} />
-        <button onClick={send} disabled={sending} aria-label="Send" style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--forest)', color: '#fff', border: 'none', display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0, transition: 'transform .22s cubic-bezier(0.34,1.56,0.64,1)', opacity: sending ? 0.6 : 1 }}><SendIcon /></button>
-      </div>
-    </div>
-  );
-}
+   
