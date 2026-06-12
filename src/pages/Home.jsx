@@ -199,7 +199,7 @@ export default function Home() {
                 <div key={key} className="card" style={{ padding: 0, overflow: 'hidden' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 14, cursor: 'pointer' }}
                     onClick={() => setOpenExam(openExam === key ? '' : key)}>
-                    <span className="flag-circ" style={{ width: 30, height: 30, fontSize: 15 }}>{flag}</span>
+                    <span className="flag-circ" style={{ width: 30, height: 30, fontSize: 44 }}>{flag}</span>
                     <span style={{ flex: 1, fontWeight: 600 }}>{exam}</span>
                     {examCount(exam) >= 2 && (
                       <span style={{ fontSize: 11, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 20, padding: '3px 9px', marginRight: 4, fontWeight: 700 }}>
@@ -274,3 +274,4 @@ export default function Home() {
     </div>
   );
 }
+
