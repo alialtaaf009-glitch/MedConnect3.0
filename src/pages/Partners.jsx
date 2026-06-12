@@ -87,7 +87,12 @@ export default function Partners() {
               <span className={isOnline(m.user.last_seen) ? 'dot-online' : 'dot-offline'}></span>
               {m.user.name}
             </div>
-            <div className="meta">{m.user.exam} · {m.user.country} · {m.matchPercent}% match</div>
+            <div className="meta" style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+              <span>{m.user.exam} · {m.user.country}</span>
+              <span className={`match-pill ${m.matchPercent >= 80 ? 'pill-exc' : m.matchPercent >= 55 ? 'pill-good' : 'pill-fair'}`}>
+                {m.matchPercent}% · {m.matchPercent >= 80 ? 'Excellent' : m.matchPercent >= 55 ? 'Good' : 'Fair'}
+              </span>
+            </div>
           </div>
           <button className="btn-sm" onClick={() => connect(m.user.id)}>Connect</button>
         </div>
