@@ -27,7 +27,7 @@ function Breathe() {
   return (
     <>
     <div style={{ borderTop: '1px solid var(--line)', margin: '24px 0 16px' }} />
-    <div className="card" style={{ textAlign: 'center' }}>
+    <div className="card tint-gold" style={{ textAlign: 'center' }}>
       <div style={{ fontSize: 15, fontWeight: 700 }}>Take a break</div>
       <p className="voice sub" style={{ fontSize: 14, marginTop: 2 }}>60 seconds of calm. No side effects.</p>
       <p className="sub" style={{ fontSize: 11, marginTop: 2 }}>
@@ -60,4 +60,3 @@ export default function Focus() {
     </div>
   );
 }
-
