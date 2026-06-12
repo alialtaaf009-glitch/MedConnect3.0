@@ -35,7 +35,9 @@ body {
   .chip:active, .btn:active, .btn-sm:active, .row:active { transform: none; }
 }
 
-h1, h2, h3, .h1, .name, .brand-name, .stat-num, .serif { font-family: 'Inter', system-ui, sans-serif; font-variant-ligatures: none; -webkit-font-feature-settings: "liga" 0, "dlig" 0; font-feature-settings: "liga" 0, "dlig" 0; }
+h1, h2, h3, .h1, .name, .brand-name, .stat-num { font-family: 'Inter', system-ui, sans-serif; font-variant-ligatures: none; -webkit-font-feature-settings: "liga" 0, "dlig" 0; font-feature-settings: "liga" 0, "dlig" 0; }
+.serif { font-family: 'Newsreader', Georgia, serif; }
+.voice { font-family: 'Newsreader', Georgia, serif; font-style: italic; }
 /* belt-and-suspenders: kill discretionary ligatures app-wide so 'f' words never look crooked */
 * { font-variant-ligatures: none; -webkit-font-feature-settings: "liga" 0, "dlig" 0, "calt" 0; font-feature-settings: "liga" 0, "dlig" 0, "calt" 0; }
 .h1 { font-family: 'Fraunces', Georgia, serif; font-size: 30px; font-weight: 700; letter-spacing: -0.5px; line-height: 1.05; }
@@ -178,3 +180,4 @@ h1, h2, h3, .h1, .name, .brand-name, .stat-num, .serif { font-family: 'Inter', s
 /* v1 vibrancy: gold-tinted highlight card */
 .tint-gold { background:#fbf4e8; border-color: var(--gold, #b98a2e); }
 [data-theme="dark"] .tint-gold { background:#2a2415; }
+
