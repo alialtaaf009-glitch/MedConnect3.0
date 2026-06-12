@@ -145,12 +145,12 @@ function ExploreBrowse() {
                     onClick={() => setOpenExam(openExam === key ? '' : key)}>
                     <Flag country={country} emoji={flag} size={30} />
                     <span style={{ flex: 1, fontWeight: 600 }}>{exam}</span>
-                    <span onClick={(e) => { e.stopPropagation(); togglePinE(key); }} style={{ padding: '0 5px', fontSize: 16, color: pinE.includes(key) ? 'var(--gold)' : 'var(--subtle)', cursor: 'pointer' }}>{pinE.includes(key) ? '★' : '☆'}</span>
                     {examCount(exam) >= 2 && (
-                      <span style={{ fontSize: 11, color: ecx, background: 'var(--paper-2)', borderRadius: 20, padding: '3px 9px', marginRight: 4, fontWeight: 700 }}>
+                      <span style={{ fontSize: 11, color: '#fff', background: ecx, borderRadius: 20, padding: '3px 9px', fontWeight: 700 }}>
                         {examCount(exam)}
                       </span>
                     )}
+                    <span onClick={(e) => { e.stopPropagation(); togglePinE(key); }} style={{ padding: '0 5px', fontSize: 16, color: pinE.includes(key) ? 'var(--gold)' : 'var(--subtle)', cursor: 'pointer' }}>{pinE.includes(key) ? '★' : '☆'}</span>
                     <span className="meta" style={{ fontSize: 11 }}>{openExam === key ? '▲' : '▼'}</span>
                   </div>
                   {openExam === key && parts.map((part) => {
@@ -158,7 +158,7 @@ function ExploreBrowse() {
                       <div key={part} className="exam-accent" style={{ '--ec': ecx, padding: '11px 16px 11px 22px', borderTop: '1px solid var(--line)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                         onClick={() => nav(`/partners?exam=${encodeURIComponent(exam)}&part=${encodeURIComponent(part)}`)}>
                         <span style={{ fontWeight: 600, fontSize: 14, flex: 1 }}>{part}</span>
-                        {partCount(exam, part) >= 1 && <span style={{ fontSize: 10.5, color: examColor(exam), background: 'var(--paper-2)', borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 6 }}>{partCount(exam, part)}</span>}
+                        {partCount(exam, part) >= 1 && <span style={{ fontSize: 10.5, color: '#fff', background: examColor(exam), borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 6 }}>{partCount(exam, part)}</span>}
                         <span style={{ color: 'var(--subtle)', fontSize: 13 }}>›</span>
                       </div>
                     );
@@ -187,7 +187,7 @@ function ExploreBrowse() {
                   onClick={() => setOpenExam(openExam === key ? '' : key)}>
                   <span style={{ flex: 1 }}>{exam}</span>
                   {examCount(exam) >= 2 && (
-                    <span style={{ fontSize: 11, color: examColor(exam), background: 'var(--paper-2)', borderRadius: 20, padding: '3px 9px', marginRight: 8, fontWeight: 700 }}>
+                    <span style={{ fontSize: 11, color: '#fff', background: examColor(exam), borderRadius: 20, padding: '3px 9px', marginRight: 8, fontWeight: 700 }}>
                       {examCount(exam)} doctors
                     </span>
                   )}
@@ -199,7 +199,7 @@ function ExploreBrowse() {
                     <div key={part} className="exam-accent" style={{ '--ec': ec, padding: '11px 16px 11px 22px', borderTop: '1px solid var(--line)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                       onClick={() => nav(`/partners?exam=${encodeURIComponent(exam)}&part=${encodeURIComponent(part)}`)}>
                       <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)', flex: 1 }}>{part}</span>
-                      {partCount(exam, part) >= 1 && <span style={{ fontSize: 10.5, color: examColor(exam), background: 'var(--paper-2)', borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 6 }}>{partCount(exam, part)}</span>}
+                      {partCount(exam, part) >= 1 && <span style={{ fontSize: 10.5, color: '#fff', background: examColor(exam), borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 6 }}>{partCount(exam, part)}</span>}
                       <span style={{ color: 'var(--subtle)', fontSize: 13 }}>›</span>
                     </div>
                   );
@@ -370,6 +370,18 @@ export default function Home() {
   const quote = quoteOfTheDay();
 
   const [nudges, setNudges] = useState([]);
+
+  // profile share links: opening med-connect3-0.vercel.app/?add=ID sends that doctor a request
+  useEffect(() => {
+    const addId = new URLSearchParams(window.location.search).get('add');
+    if (!addId || !user?.id) return;
+    window.history.replaceState({}, '', window.location.pathname); // run once
+    const target = parseInt(addId, 10);
+    if (!target || target === user.id) return;
+    api.sendRequest(target)
+      .then(() => window.alert('Connection request sent! 🩺'))
+      .catch(() => window.alert('Could not send the request — you may already be connected.'));
+  }, [user?.id]);
   const [invited, setInvited] = useState(false);
   useEffect(() => { api.connections().then((d) => setNudges(d.nudges || [])).catch(() => {}); }, []);
 
