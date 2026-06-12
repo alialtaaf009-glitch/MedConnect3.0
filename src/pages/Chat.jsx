@@ -361,4 +361,9 @@ function Conversation({ me, withId, withName, withAv, onBack }) {
         <input className="input" style={{ marginBottom: 0, flex: 1 }} placeholder="Type a message…"
           value={text} onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') send(); }} />
+        <button onClick={send} disabled={sending} aria-label="Send" style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--forest)', color: '#fff', border: 'none', display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0, transition: 'transform .22s cubic-bezier(0.34,1.56,0.64,1)', opacity: sending ? 0.6 : 1 }}><SendIcon /></button>
+      </div>
+    </div>
+  );
+}
    
