@@ -72,6 +72,24 @@ export default function Home() {
   };
   const [counts, setCounts] = useState({});
   const [nudges, setNudges] = useState([]);
+  const [invited, setInvited] = useState(false);
+
+  // native share sheet on Android & iOS; clipboard fallback elsewhere
+  const inviteFriend = async () => {
+    const data = {
+      title: 'MedConnect',
+      text: "I'm using MedConnect to find study partners for medical exams — doctors only, matched by exam. Join me:",
+      url: 'https://med-connect3-0.vercel.app',
+    };
+    try {
+      if (navigator.share) { await navigator.share(data); return; }
+    } catch (e) { if (e?.name === 'AbortError') return; }
+    try {
+      await navigator.clipboard.writeText(`${data.text} ${data.url}`);
+      setInvited(true); setTimeout(() => setInvited(false), 3000);
+    } catch (e) {}
+  };
+
   useEffect(() => { api.getStats().then((d) => setCounts(d.counts || {})).catch(() => {}); }, []);
   useEffect(() => { api.connections().then((d) => setNudges(d.nudges || [])).catch(() => {}); }, []);
 
@@ -134,7 +152,7 @@ export default function Home() {
         {daysLeft !== null && (
           <div className="card" style={{ flex: 1, textAlign: 'center', padding: '12px 8px', borderColor: 'var(--forest)', margin: 0 }}>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'var(--forest)', textTransform: 'uppercase' }}>Countdown</div>
-            <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 30, fontWeight: 900, color: 'var(--forest)', lineHeight: 1.15 }}>
+            <div style={{ fontFamily: "'Inter',system-ui,sans-serif", fontSize: 30, fontWeight: 900, color: 'var(--forest)', lineHeight: 1.15 }}>
               {daysLeft > 0 ? daysLeft : daysLeft === 0 ? 'Today' : '—'}
             </div>
             <div className="sub" style={{ fontSize: 10, marginTop: 0 }}>{daysLeft > 0 ? 'days to exam' : daysLeft === 0 ? 'exam day!' : 'passed'}</div>
@@ -157,7 +175,7 @@ export default function Home() {
 
       {/* slim motivation line with a clear tappable link */}
       <div onClick={() => nav('/motivation')} style={{ cursor: 'pointer', padding: '4px 2px 0', marginBottom: 4 }}>
-        <p style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 14, fontStyle: 'italic', lineHeight: 1.4, color: 'var(--muted)', marginBottom: 4 }}>
+        <p style={{ fontFamily: "'Inter',system-ui,sans-serif", fontSize: 14, fontStyle: 'italic', lineHeight: 1.4, color: 'var(--muted)', marginBottom: 4 }}>
           “{quote.text}”
         </p>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12.5, fontWeight: 700, color: 'var(--forest)' }}>
@@ -181,7 +199,7 @@ export default function Home() {
                 <div key={key} className="card" style={{ padding: 0, overflow: 'hidden' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 14, cursor: 'pointer' }}
                     onClick={() => setOpenExam(openExam === key ? '' : key)}>
-                    <span style={{ fontSize: 16 }}>{flag}</span>
+                    <span className="flag-circ" style={{ width: 30, height: 30, fontSize: 15 }}>{flag}</span>
                     <span style={{ flex: 1, fontWeight: 600 }}>{exam}</span>
                     {examCount(exam) >= 2 && (
                       <span style={{ fontSize: 11, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 20, padding: '3px 9px', marginRight: 4, fontWeight: 700 }}>
@@ -210,7 +228,7 @@ export default function Home() {
         <div key={country} className="card" style={{ padding: 0, overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: 14, cursor: 'pointer' }}
             onClick={() => setOpenCountry(openCountry === country ? '' : country)}>
-            <span style={{ fontSize: 20 }}>{flag}</span>
+            <span className="flag-circ">{flag}</span>
             <span style={{ flex: 1, fontWeight: 600 }}>{country}</span>
             <span className="meta">{openCountry === country ? '▲' : '▼'}</span>
           </div>
@@ -223,7 +241,7 @@ export default function Home() {
                   onClick={() => setOpenExam(openExam === key ? '' : key)}>
                   <span style={{ flex: 1 }}>{exam}</span>
                   {examCount(exam) >= 2 && (
-                    <span style={{ fontSize: 11, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 20, padding: '3px 9px', marginRight: 8, fontFamily: "'Newsreader',Georgia,serif", fontWeight: 700 }}>
+                    <span style={{ fontSize: 11, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 20, padding: '3px 9px', marginRight: 8, fontFamily: "'Inter',system-ui,sans-serif", fontWeight: 700 }}>
                       {examCount(exam)} doctors
                     </span>
                   )}
@@ -245,7 +263,14 @@ export default function Home() {
           })}
         </div>
       ))}
+
+      {/* invite a colleague — native share sheet (Android & iOS), clipboard fallback */}
+      <div className="card" style={{ textAlign: 'center', marginTop: 20 }}>
+        <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Know a doctor who needs a study partner?</div>
+        <p className="sub" style={{ fontSize: 13, marginBottom: 12 }}>MedConnect grows one colleague at a time.</p>
+        <button className="btn" onClick={inviteFriend}>Invite your friends</button>
+        {invited && <p className="sub" style={{ fontSize: 12, marginTop: 8, color: 'var(--forest)', fontWeight: 700 }}>Link copied — paste it anywhere! ✓</p>}
+      </div>
     </div>
   );
 }
-
