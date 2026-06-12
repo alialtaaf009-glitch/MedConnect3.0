@@ -121,7 +121,12 @@ export default function Profile() {
         <div style={{ width:84, height:84, borderRadius:'50%', background:'var(--paper-2)', border:'1.5px solid var(--line)', display:'grid', placeItems:'center', fontSize:42, margin:'0 auto 12px' }}>{user?.avatar || '🩺'}</div>
         <h1 className="h1" style={{ fontSize:24 }}>{user?.name}</h1>
         <p className="sub">{user?.country}</p>
-        {user?.bio && <p style={{ fontSize:14, lineHeight:1.5, color:'var(--muted)', maxWidth:340, margin:'8px auto 0', fontStyle:'italic' }}>“{user.bio}”</p>}
+        {user?.bio && (
+          <p style={{ fontSize:14, lineHeight:1.5, color:'var(--muted)', maxWidth:340, margin:'8px auto 0', fontStyle:'italic', display:'flex', alignItems:'flex-start', gap:6, justifyContent:'center' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0, marginTop:3, opacity:.75 }}><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.3 8.9 8.9 0 0 1-3.8-.85L3 20l1.1-4.2A8 8 0 0 1 3.5 11.5 8.38 8.38 0 0 1 12 3.2a8.38 8.38 0 0 1 9 8.3z" /></svg>
+            <span>{user.bio}</span>
+          </p>
+        )}
       </div>
       <div className="card" style={{ marginTop:16 }}>
         <Row k="Exam" v={user?.exam} />
@@ -154,4 +159,3 @@ export default function Profile() {
     </div>
   );
 }
-
