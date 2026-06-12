@@ -154,6 +154,7 @@ h1, h2, h3, .h1, .name, .brand-name, .stat-num { font-family: 'Inter', system-ui
 .flag-circ { width: 34px; height: 34px; border-radius: 50%; background: var(--paper-2);
   border: 1px solid var(--line); display: grid; place-items: center; flex-shrink: 0;
   line-height: 1; overflow: hidden; }
+.flag-circ img { border-radius: 50%; transform: scale(1.08); }
 
 /* small anchored popover menu (chat ⋯) */
 .popover { position: absolute; top: 40px; right: 0; background: var(--card); border: 1.5px solid var(--line);
@@ -165,8 +166,10 @@ h1, h2, h3, .h1, .name, .brand-name, .stat-num { font-family: 'Inter', system-ui
 @keyframes popIn { from { opacity: 0; transform: scale(.85) translateY(-4px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
 /* box-breathing pacer */
-.breathe-ball { width: 110px; height: 110px; border-radius: 50%; background: var(--forest);
-  opacity: .9; margin: 14px auto; transition: transform 3.9s ease-in-out; }
+.breathe-ball { width: 110px; height: 110px; border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, var(--forest-2), var(--forest));
+  box-shadow: 0 12px 30px rgba(31, 77, 63, .30);
+  margin: 14px auto; transition: transform 3.9s ease-in-out; }
 
 /* v1 vibrancy: tiered match pills */
 .pill-exc  { background:#dcefe6; color:#1f4d3f; }
