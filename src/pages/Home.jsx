@@ -292,7 +292,7 @@ function Momentum({ user }) {
                 {hh}:{mm2}:{ss}
               </div>
               <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>hours · minutes · seconds</div>
-              <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)', margin: '14px 6px 4px', lineHeight: 1.45 }}>{coachLine(dLeft)}</p>
+              <p className="voice" style={{ fontSize: 15, fontWeight: 500, color: 'var(--ink)', margin: '14px 6px 4px', lineHeight: 1.45 }}>{coachLine(dLeft)}</p>
               <button className="btn ghost" style={{ marginTop: 10 }} onClick={() => setCdOpen(false)}>Back to it</button>
             </div>
           </div>
@@ -319,7 +319,7 @@ function Momentum({ user }) {
                 <span style={{ fontSize: 15 }}>🏆</span>
                 <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--forest)' }}>Personal best: {best} day{best === 1 ? '' : 's'}</span>
               </div>
-              <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)', margin: '12px 6px 4px', lineHeight: 1.45 }}>{line}</p>
+              <p className="voice" style={{ fontSize: 15, fontWeight: 500, color: 'var(--ink)', margin: '12px 6px 4px', lineHeight: 1.45 }}>{line}</p>
               {!studiedToday && (
                 <button className="btn" style={{ marginTop: 10 }} disabled={marking} onClick={markStudy}>
                   {marking ? '…' : 'Mark today ✓'}
@@ -409,7 +409,7 @@ export default function Home() {
 
       {/* slim motivation line with a clear tappable link */}
       <div onClick={() => nav('/motivation')} style={{ cursor: 'pointer', padding: '4px 2px 0', marginBottom: 4 }}>
-        <p style={{ fontFamily: "'Inter',system-ui,sans-serif", fontSize: 14, fontStyle: 'italic', lineHeight: 1.4, color: 'var(--muted)', marginBottom: 4 }}>
+        <p className="voice" style={{ fontSize: 15, lineHeight: 1.4, color: 'var(--muted)', marginBottom: 4 }}>
           “{quote.text}”
         </p>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12.5, fontWeight: 700, color: 'var(--forest)' }}>
@@ -431,3 +431,4 @@ export default function Home() {
     </div>
   );
 }
+
