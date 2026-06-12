@@ -112,6 +112,7 @@ export default function Osce() {
 }
 
 function Station({ name, minutes, onBack }) {
+  const { user: stnMe } = useAuth();
   const total = (minutes || 8) * 60;
   const [seconds, setSeconds] = useState(total);
   const [running, setRunning] = useState(false);
@@ -134,15 +135,22 @@ function Station({ name, minutes, onBack }) {
     // load connected friends to offer sharing the link
     try {
       const d = await api.connections();
-      const accepted = (d.connections || d.connected || []).filter((c) => (c.status ? c.status === 'accepted' : true));
-      setFriends(accepted);
+      const rows = (d.connected || d.connections || []).filter((c) => (c.status ? c.status === 'accepted' : true));
+      setFriends(rows.map((c) => {
+        const iAmRequester = c.requester == stnMe?.id;
+        return {
+          id: iAmRequester ? c.recipient : c.requester,
+          name: iAmRequester ? c.recipient_name : c.requester_name,
+          avatar: iAmRequester ? c.recipient_avatar : c.requester_avatar,
+        };
+      }));
     } catch (e) { setFriends([]); }
     setShowShare(true);
   };
 
   const shareTo = async (friendId) => {
     try {
-      await api.sendMessage(friendId, `📹 Join me for OSCE practice — "${name}". Video room: ${meetUrl}\n(If a fresh room opened for me, I'll paste the real link here.)`);
+      await api.sendMessage(friendId, `📹 Join me for OSCE practice — "${name}". Video room: ${meetUrl}`);
       window.alert('Invite sent in your chat with them.');
     } catch (e) {}
     setShowShare(false);
@@ -154,9 +162,9 @@ function Station({ name, minutes, onBack }) {
         <div onClick={() => setShowShare(false)} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.5)', display:'grid', placeItems:'center', zIndex:100, padding:24 }}>
           <div className="card" onClick={(e) => e.stopPropagation()} style={{ maxWidth:340, width:'100%' }}>
             <h2 className="serif" style={{ fontSize:18, fontWeight:700, marginBottom:6 }}>📹 Share the video link</h2>
-            <p className="sub" style={{ fontSize:13, marginBottom:12 }}>A Google Meet opened in a new tab. Copy the link or send it to a connected partner — they'll get it in your chat.</p>
+            <p className="sub" style={{ fontSize:13, marginBottom:12 }}>A Google Meet opened in a new tab. Copy your room's link from Meet, paste it below, then send it to a partner — they'll get it in your chat.</p>
             <div style={{ display:'flex', gap:8, marginBottom:12 }}>
-              <input className="input" readOnly value={meetUrl} style={{ marginBottom:0, flex:1, fontSize:13 }} onFocus={(e) => e.target.select()} />
+              <input className="input" placeholder="Paste your Meet room link" value={meetUrl} onChange={(e) => setMeetUrl(e.target.value)} style={{ marginBottom:0, flex:1, fontSize:13 }} onFocus={(e) => e.target.select()} />
               <button className="btn-sm" onClick={() => { navigator.clipboard?.writeText(meetUrl); window.alert('Link copied!'); }}>Copy</button>
             </div>
             {friends.length === 0 ? (
