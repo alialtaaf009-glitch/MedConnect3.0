@@ -3,6 +3,13 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../context/Auth.jsx';
 
+const SendIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: 2 }}>
+    <path d="M3.4 20.4l17.8-7.6c.8-.35.8-1.25 0-1.6L3.4 3.6c-.66-.28-1.4.2-1.4.9v5.2c0 .5.37.93.87 1L14 12 2.87 13.3c-.5.07-.87.5-.87 1v5.2c0 .7.74 1.18 1.4.9z"/>
+  </svg>
+);
+
+
 // turn a connection record into the "other person" {id, name, avatar}
 function otherPerson(c, myId) {
   const iAmRequester = c.requester == myId;
@@ -191,16 +198,21 @@ function GroupConversation({ me, groupId, onBack }) {
           <h2 style={{ fontSize: 17, fontWeight: 600 }}>{data.group?.name || 'Group'}</h2>
           <div className="meta">{(data.members || []).length} members</div>
         </div>
-        <button className="link" style={{ fontSize: 22, lineHeight: 1 }} onClick={() => setMenu(!menu)}>⋯</button>
+        <div style={{ position: 'relative' }}>
+          <button className="link" style={{ fontSize: 22, lineHeight: 1 }} onClick={() => setMenu(!menu)}>⋯</button>
+          {menu && (
+            <>
+              <div style={{ position: 'fixed', inset: 0, zIndex: 110 }} onClick={() => setMenu(false)} />
+              <div className="popover">
+                <button onClick={openAdd}>＋ Add a connection</button>
+                <button onClick={leave}>👋 Leave group</button>
+                {isCreator && <button style={{ color: 'var(--rust)' }} onClick={del}>🗑️ Delete group</button>}
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
-      {menu && (
-        <div className="card" style={{ padding: 6, marginBottom: 10 }}>
-          <button className="menu-item" onClick={openAdd}>＋ Add a connection</button>
-          <button className="menu-item" onClick={leave}>👋 Leave group</button>
-          {isCreator && <button className="menu-item danger" onClick={del}>🗑️ Delete group</button>}
-        </div>
-      )}
 
       <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 10 }}>
         {(data.messages || []).length === 0 && <p className="sub" style={{ textAlign: 'center', marginTop: 20 }}>No messages yet. Say hello to your study group 👋</p>}
@@ -238,7 +250,7 @@ function GroupConversation({ me, groupId, onBack }) {
 
       <div style={{ display: 'flex', gap: 8, paddingTop: 10, borderTop: '1px solid var(--line)', position: 'sticky', bottom: 0, background: 'var(--paper)' }}>
         <input className="input" style={{ marginBottom: 0, flex: 1 }} placeholder="Message the group…" value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') send(); }} />
-        <button className="btn-sm" onClick={send} disabled={sending}>Send</button>
+        <button onClick={send} disabled={sending} aria-label="Send" style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--forest)', color: '#fff', border: 'none', display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0, transition: 'transform .22s cubic-bezier(0.34,1.56,0.64,1)', opacity: sending ? 0.6 : 1 }}><SendIcon /></button>
       </div>
     </div>
   );
@@ -295,17 +307,22 @@ function Conversation({ me, withId, withName, withAv, onBack }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
         <button className="link" onClick={onBack}>‹ Back</button>
         <h2 style={{ fontSize: 18, fontWeight: 600, flex: 1 }}>{withName}</h2>
-        <button className="link" style={{ fontSize: 22, lineHeight: 1 }} onClick={() => setMenu(!menu)}>⋯</button>
+        <div style={{ position: 'relative' }}>
+          <button className="link" style={{ fontSize: 22, lineHeight: 1 }} onClick={() => setMenu(!menu)}>⋯</button>
+          {menu && (
+            <>
+              <div style={{ position: 'fixed', inset: 0, zIndex: 110 }} onClick={() => setMenu(false)} />
+              <div className="popover">
+                <button onClick={doDelete}>🗑️ Delete chat</button>
+                <button onClick={doUnfriend}>👋 Unfriend</button>
+                <button onClick={doBlock}>🚫 Block user</button>
+                <button style={{ color: 'var(--rust)' }} onClick={doReport}>⚑ Report user</button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
-      {menu && (
-        <div className="card" style={{ padding: 6, marginBottom: 10 }}>
-          <button className="menu-item" onClick={doDelete}>🗑️ Delete chat</button>
-          <button className="menu-item" onClick={doUnfriend}>👋 Unfriend</button>
-          <button className="menu-item" onClick={doBlock}>🚫 Block user</button>
-          <button className="menu-item danger" onClick={doReport}>⚑ Report user</button>
-        </div>
-      )}
 
       <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 10 }}>
         {messages.length === 0 && <p className="sub" style={{ textAlign: 'center', marginTop: 20 }}>Say hello 👋</p>}
@@ -340,9 +357,8 @@ function Conversation({ me, withId, withName, withAv, onBack }) {
         <input className="input" style={{ marginBottom: 0, flex: 1 }} placeholder="Type a message…"
           value={text} onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') send(); }} />
-        <button className="btn-sm" onClick={send} disabled={sending}>Send</button>
+        <button onClick={send} disabled={sending} aria-label="Send" style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--forest)', color: '#fff', border: 'none', display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0, transition: 'transform .22s cubic-bezier(0.34,1.56,0.64,1)', opacity: sending ? 0.6 : 1 }}><SendIcon /></button>
       </div>
     </div>
   );
 }
-
