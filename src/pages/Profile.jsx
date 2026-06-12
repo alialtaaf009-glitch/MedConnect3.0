@@ -32,6 +32,7 @@ function Chips({ label, options, value, onChange, optional }) {
 export default function Profile() {
   const { user, logout, setUser } = useAuth();
   const { mode, toggle } = useTheme();
+  const [, setTilePrefs] = useState(0); // re-render when tile prefs change
   const nav = useNavigate();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(user?.name || '');
@@ -122,7 +123,7 @@ export default function Profile() {
         <h1 className="h1" style={{ fontSize:24 }}>{user?.name}</h1>
         <p className="sub">{user?.country}</p>
         {user?.bio && (
-          <p style={{ fontSize:14, lineHeight:1.5, color:'var(--muted)', maxWidth:340, margin:'8px auto 0', fontStyle:'italic', display:'flex', alignItems:'flex-start', gap:6, justifyContent:'center' }}>
+          <p className="voice" style={{ fontSize:15, lineHeight:1.5, color:'var(--muted)', maxWidth:340, margin:'8px auto 0', display:'flex', alignItems:'flex-start', gap:6, justifyContent:'center' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0, marginTop:3, opacity:.75 }}><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.3 8.9 8.9 0 0 1-3.8-.85L3 20l1.1-4.2A8 8 0 0 1 3.5 11.5 8.38 8.38 0 0 1 12 3.2a8.38 8.38 0 0 1 9 8.3z" /></svg>
             <span>{user.bio}</span>
           </p>
@@ -137,6 +138,17 @@ export default function Profile() {
       </div>
       <button className="btn" onClick={() => setEditing(true)}>Edit profile</button>
       <button className="btn ghost" style={{ marginTop:10 }} onClick={toggle}>{mode === 'dark' ? '☀️  Light mode' : '🌙  Dark mode'}</button>
+
+      <div className="label" style={{ marginTop: 18 }}>Home screen</div>
+      {[['hide_countdown', 'Show exam countdown'], ['hide_streak', 'Show study streak']].map(([key, label]) => (
+        <div key={key} className="row" style={{ padding: '12px 14px', cursor: 'pointer' }}
+          onClick={() => { localStorage.setItem(key, localStorage.getItem(key) === '1' ? '' : '1'); setTilePrefs((p) => p + 1); }}>
+          <span style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>{label}</span>
+          <span style={{ width: 40, height: 23, borderRadius: 999, background: localStorage.getItem(key) === '1' ? 'var(--line)' : 'var(--forest)', position: 'relative', transition: 'background .2s ease', flexShrink: 0 }}>
+            <span style={{ position: 'absolute', top: 2.5, left: localStorage.getItem(key) === '1' ? 3 : 19, width: 18, height: 18, borderRadius: '50%', background: '#fff', transition: 'left .2s ease' }} />
+          </span>
+        </div>
+      ))}
       <button className="btn ghost" style={{ marginTop:10, color:'var(--rust)', borderColor:'var(--rust)' }} onClick={logout}>Log out</button>
 
       <div style={{ textAlign:'center', marginTop:18 }}>
