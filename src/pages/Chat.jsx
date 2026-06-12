@@ -2,23 +2,9 @@ import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../context/Auth.jsx';
-
-const SendIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: 2 }}>
-    <path d="M3.4 20.4l17.8-7.6c.8-.35.8-1.25 0-1.6L3.4 3.6c-.66-.28-1.4.2-1.4.9v5.2c0 .5.37.93.87 1L14 12 2.87 13.3c-.5.07-.87.5-.87 1v5.2c0 .7.74 1.18 1.4.9z"/>
-  </svg>
-);
-
-
-// turn a connection record into the "other person" {id, name, avatar}
-function otherPerson(c, myId) {
-  const iAmRequester = c.requester == myId;
-  return {
-    id: iAmRequester ? c.recipient : c.requester,
-    name: iAmRequester ? c.recipient_name : c.requester_name,
-    avatar: iAmRequester ? c.recipient_avatar : c.requester_avatar,
-  };
-}
+import { otherPerson } from '../components/ChatBits.jsx';
+import GroupChat from '../components/GroupChat.jsx';
+import DirectChat from '../components/DirectChat.jsx';
 
 export default function Chat() {
   const { user } = useAuth();
@@ -29,8 +15,8 @@ export default function Chat() {
   const withAv = params.get('av') || '';
   const groupId = params.get('group');
 
-  if (groupId) return <GroupConversation me={user} groupId={groupId} onBack={() => nav('/chat?tab=groups')} />;
-  if (withId) return <Conversation me={user} withId={withId} withName={withName} withAv={withAv} onBack={() => nav('/chat')} />;
+  if (groupId) return <GroupChat me={user} groupId={groupId} onBack={() => nav('/chat?tab=groups')} />;
+  if (withId) return <DirectChat me={user} withId={withId} withName={withName} withAv={withAv} onBack={() => nav('/chat')} />;
   return <ConversationList nav={nav} me={user} />;
 }
 
@@ -44,6 +30,21 @@ function ConversationList({ nav, me }) {
   const [gname, setGname] = useState('');
   const [friends, setFriends] = useState([]);
   const [picked, setPicked] = useState([]);
+
+  // long-press to delete a chat
+  const pressTimer = useRef(null);
+  const longFired = useRef(false);
+  const pressStart = (c) => {
+    longFired.current = false;
+    pressTimer.current = setTimeout(() => {
+      longFired.current = true;
+      if (navigator.vibrate) { try { navigator.vibrate(18); } catch (e) {} }
+      if (window.confirm(`Delete your chat with ${c.name}? This cannot be undone.`)) {
+        api.deleteChat(c.other_id).then(() => setConvos((v) => v.filter((x) => x.other_id !== c.other_id))).catch(() => {});
+      }
+    }, 550);
+  };
+  const pressEnd = () => clearTimeout(pressTimer.current);
 
   useEffect(() => {
     api.conversations().then((d) => {
@@ -87,12 +88,16 @@ function ConversationList({ nav, me }) {
               No conversations yet. Connect with a partner, then start chatting from the Connections tab.
             </p>
           )}
+          {convos.length > 0 && <p className="sub" style={{ fontSize: 11, marginBottom: 8 }}>Hold a chat to delete it.</p>}
           {convos.map((c) => {
             const init = (c.name || 'Dr').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('');
             const unread = c.last_sender == c.other_id && new Date(c.last_at).getTime() > Number(localStorage.getItem('chat_read_' + c.other_id) || 0);
             return (
               <div key={c.other_id} className="row" style={{ cursor: 'pointer' }}
-                onClick={() => nav(`/chat?with=${c.other_id}&name=${encodeURIComponent(c.name)}&av=${encodeURIComponent(c.avatar || '')}`)}>
+                onTouchStart={() => pressStart(c)} onTouchEnd={pressEnd} onTouchMove={pressEnd}
+                onMouseDown={() => pressStart(c)} onMouseUp={pressEnd} onMouseLeave={pressEnd}
+                onContextMenu={(e) => e.preventDefault()}
+                onClick={() => { if (longFired.current) return; nav(`/chat?with=${c.other_id}&name=${encodeURIComponent(c.name)}&av=${encodeURIComponent(c.avatar || '')}`); }}>
                 <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: c.avatar ? 22 : 15, color: 'var(--forest)', fontWeight: 600, flexShrink: 0 }}>{c.avatar || init}</div>
                 <div className="grow">
                   <div className="name">{c.name}</div>
@@ -132,7 +137,7 @@ function ConversationList({ nav, me }) {
       {creating && (
         <div onClick={() => setCreating(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'grid', placeItems: 'center', zIndex: 100, padding: 24 }}>
           <div className="card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 360, width: '100%' }}>
-            <h2 className="serif" style={{ fontSize: 18, fontWeight: 700, marginBottom: 10 }}>New study group</h2>
+            <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 10 }}>New study group</h2>
             <input className="input" placeholder="Group name (e.g. MRCP May 2026)" value={gname} onChange={(e) => setGname(e.target.value)} />
             <div className="label" style={{ marginTop: 4 }}>Invite connections</div>
             <div style={{ maxHeight: 220, overflowY: 'auto' }}>
@@ -153,217 +158,3 @@ function ConversationList({ nav, me }) {
   );
 }
 
-function GroupConversation({ me, groupId, onBack }) {
-  const [data, setData] = useState({ messages: [], members: [], group: null });
-  const [text, setText] = useState('');
-  const [sending, setSending] = useState(false);
-  const [menu, setMenu] = useState(false);
-  const [addOpen, setAddOpen] = useState(false);
-  const [friends, setFriends] = useState([]);
-  const endRef = useRef(null);
-
-  const load = () => api.group(groupId).then((d) => setData(d)).catch(() => {});
-  useEffect(() => { load(); const t = setInterval(load, 4000); return () => clearInterval(t); }, [groupId]);
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [data.messages]);
-
-  const send = async () => {
-    if (!text.trim() || sending) return;
-    setSending(true);
-    const b = text.trim(); setText('');
-    try { await api.sendGroupMessage(groupId, b); await load(); } catch (e) {} finally { setSending(false); }
-  };
-  const openAdd = async () => {
-    setMenu(false);
-    try { const d = await api.connections(); setFriends((d.connected || []).map((c) => otherPerson(c, me?.id))); } catch (e) { setFriends([]); }
-    setAddOpen(true);
-  };
-  const addMember = async (uid) => {
-    try { await api.addGroupMember(groupId, uid); await load(); window.alert('Added to group.'); } catch (e) {}
-  };
-  const leave = async () => {
-    setMenu(false);
-    if (!window.confirm('Leave this group?')) return;
-    try { await api.leaveGroup(groupId); onBack(); } catch (e) {}
-  };
-  const del = async () => {
-    setMenu(false);
-    if (!window.confirm('Delete this group for everyone? This cannot be undone.')) return;
-    try { await api.deleteGroup(groupId); onBack(); } catch (e) {}
-  };
-
-  const isCreator = data.group && data.group.creator == me?.id;
-  const memberIds = new Set((data.members || []).map((m) => m.id));
-
-  return (
-    <div className="screen" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100dvh - 76px)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-        <button className="link" onClick={onBack}>‹ Back</button>
-        <div style={{ flex: 1 }}>
-          <h2 style={{ fontSize: 17, fontWeight: 600 }}>{data.group?.name || 'Group'}</h2>
-          <div className="meta">{(data.members || []).length} members</div>
-        </div>
-        <div style={{ position: 'relative' }}>
-          <button className="link" style={{ fontSize: 22, lineHeight: 1 }} onClick={() => setMenu(!menu)}>⋯</button>
-          {menu && (
-            <>
-              <div style={{ position: 'fixed', inset: 0, zIndex: 110 }} onClick={() => setMenu(false)} />
-              <div className="popover">
-                <button onClick={openAdd}>＋ Add a connection</button>
-                <button onClick={leave}>👋 Leave group</button>
-                {isCreator && <button style={{ color: 'var(--rust)' }} onClick={del}>🗑️ Delete group</button>}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-
-
-      <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 10 }}>
-        {(data.messages || []).length === 0 && <p className="sub" style={{ textAlign: 'center', marginTop: 20 }}>No messages yet. Say hello to your study group 👋</p>}
-        {(data.messages || []).map((m) => {
-          const mine = m.sender == me?.id;
-          const init = (m.sender_name || 'Dr').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('');
-          const parts = m.body.split(/(https?:\/\/[^\s]+)/g);
-          return (
-            <div key={m.id} style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', alignItems: 'flex-end', gap: 7, marginBottom: 8 }}>
-              {!mine && <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--paper-2)', border: '1px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: m.sender_avatar ? 16 : 11, color: 'var(--forest)', fontWeight: 700, flexShrink: 0 }}>{m.sender_avatar || init}</div>}
-              <div style={{ maxWidth: '72%', padding: '8px 12px', borderRadius: 14, fontSize: 14, background: mine ? 'var(--forest)' : 'var(--card)', color: mine ? '#fff' : 'var(--ink)', border: mine ? 'none' : '1.5px solid var(--line)', whiteSpace: 'pre-line', wordBreak: 'break-word' }}>
-                {!mine && <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--rust)', marginBottom: 2 }}>{m.sender_name}</div>}
-                {parts.map((p, i) => /^https?:\/\//.test(p) ? <a key={i} href={p} target="_blank" rel="noreferrer" style={{ color: mine ? '#cdeee2' : 'var(--forest)', textDecoration: 'underline' }}>{p}</a> : p)}
-              </div>
-            </div>
-          );
-        })}
-        <div ref={endRef} />
-      </div>
-
-      {addOpen && (
-        <div onClick={() => setAddOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'grid', placeItems: 'center', zIndex: 100, padding: 24 }}>
-          <div className="card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 340, width: '100%' }}>
-            <h2 className="serif" style={{ fontSize: 17, fontWeight: 700, marginBottom: 8 }}>Add a connection</h2>
-            {friends.filter((f) => !memberIds.has(f.id)).length === 0 && <p className="sub" style={{ fontSize: 13 }}>All your connections are already in this group.</p>}
-            {friends.filter((f) => !memberIds.has(f.id)).map((f) => (
-              <button key={f.id} className="menu-item" onClick={() => addMember(f.id)}>
-                {(f.avatar || '🩺')} {f.name} <span className="link" style={{ marginLeft: 'auto' }}>Add ›</span>
-              </button>
-            ))}
-            <button className="btn ghost" style={{ marginTop: 10 }} onClick={() => setAddOpen(false)}>Done</button>
-          </div>
-        </div>
-      )}
-
-      <div style={{ display: 'flex', gap: 8, paddingTop: 10, borderTop: '1px solid var(--line)', position: 'sticky', bottom: 0, background: 'var(--paper)' }}>
-        <input className="input" style={{ marginBottom: 0, flex: 1 }} placeholder="Message the group…" value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') send(); }} />
-        <button onClick={send} disabled={sending} aria-label="Send" style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--forest)', color: '#fff', border: 'none', display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0, transition: 'transform .22s cubic-bezier(0.34,1.56,0.64,1)', opacity: sending ? 0.6 : 1 }}><SendIcon /></button>
-      </div>
-    </div>
-  );
-}
-
-function Conversation({ me, withId, withName, withAv, onBack }) {
-  const [messages, setMessages] = useState([]);
-  const [avatars, setAvatars] = useState({});
-  const myInit = (me?.name || 'Me').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('');
-  const theirInit = (withName || 'Dr').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('');
-  const Avatar = ({ emoji, init }) => (
-    <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--paper-2)', border: '1px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: emoji ? 16 : 11, color: 'var(--forest)', fontWeight: 700, flexShrink: 0 }}>{emoji || init}</div>
-  );
-  const [text, setText] = useState('');
-  const [sending, setSending] = useState(false);
-  const [menu, setMenu] = useState(false);
-  const endRef = useRef(null);
-
-  const load = () => api.conversation(withId).then((d) => { setMessages(d.messages || []); if (d.avatars) setAvatars(d.avatars); localStorage.setItem('chat_read_' + withId, String(Date.now())); }).catch(() => {});
-  useEffect(() => { load(); const t = setInterval(load, 4000); return () => clearInterval(t); }, [withId]);
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
-
-  const send = async () => {
-    if (!text.trim() || sending) return;
-    setSending(true);
-    const body = text.trim();
-    setText('');
-    try { await api.sendMessage(withId, body); await load(); } catch (e) {} finally { setSending(false); }
-  };
-
-  const doDelete = async () => {
-    setMenu(false);
-    if (!window.confirm('Delete this entire chat? This cannot be undone.')) return;
-    try { await api.deleteChat(withId); setMessages([]); } catch (e) {}
-  };
-  const doBlock = async () => {
-    setMenu(false);
-    if (!window.confirm(`Block ${withName}? They will be removed from your connections and can no longer message you.`)) return;
-    try { await api.blockUser(withId); onBack(); } catch (e) {}
-  };
-  const doUnfriend = async () => {
-    setMenu(false);
-    if (!window.confirm(`Remove ${withName} from your connections? You can reconnect later.`)) return;
-    try { await api.unfriendUser(withId); onBack(); } catch (e) {}
-  };
-  const doReport = async () => {
-    setMenu(false);
-    const reason = window.prompt('Briefly, what are you reporting? (optional)') || '';
-    try { await api.reportUser(withId, reason); window.alert('Report submitted. Thank you.'); } catch (e) {}
-  };
-
-  return (
-    <div className="screen" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100dvh - 76px)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-        <button className="link" onClick={onBack}>‹ Back</button>
-        <h2 style={{ fontSize: 18, fontWeight: 600, flex: 1 }}>{withName}</h2>
-        <div style={{ position: 'relative' }}>
-          <button className="link" style={{ fontSize: 22, lineHeight: 1 }} onClick={() => setMenu(!menu)}>⋯</button>
-          {menu && (
-            <>
-              <div style={{ position: 'fixed', inset: 0, zIndex: 110 }} onClick={() => setMenu(false)} />
-              <div className="popover">
-                <button onClick={doDelete}>🗑️ Delete chat</button>
-                <button onClick={doUnfriend}>👋 Unfriend</button>
-                <button onClick={doBlock}>🚫 Block user</button>
-                <button style={{ color: 'var(--rust)' }} onClick={doReport}>⚑ Report user</button>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-
-
-      <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 10 }}>
-        {messages.length === 0 && <p className="sub" style={{ textAlign: 'center', marginTop: 20 }}>Say hello 👋</p>}
-        {messages.map((m) => {
-          const mine = m.sender == me.id;
-          // make any URLs in the message tappable
-          const parts = m.body.split(/(https?:\/\/[^\s]+)/g);
-          return (
-            <div key={m.id} style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', alignItems: 'flex-end', gap: 7, marginBottom: 8 }}>
-              {!mine && <Avatar emoji={avatars[m.sender] || withAv} init={theirInit} />}
-              <div style={{
-                maxWidth: '72%', padding: '10px 13px', borderRadius: 14, fontSize: 14,
-                background: mine ? 'var(--forest)' : 'var(--card)',
-                color: mine ? '#ffffff' : 'var(--ink)',
-                border: mine ? 'none' : '1.5px solid var(--line)',
-                whiteSpace: 'pre-line', wordBreak: 'break-word',
-              }}>
-                {parts.map((p, i) =>
-                  /^https?:\/\//.test(p)
-                    ? <a key={i} href={p} target="_blank" rel="noreferrer" style={{ color: mine ? '#cdeee2' : 'var(--forest)', textDecoration: 'underline' }}>{p}</a>
-                    : p
-                )}
-              </div>
-              {mine && <Avatar emoji={avatars[m.sender] || me?.avatar} init={myInit} />}
-            </div>
-          );
-        })}
-        <div ref={endRef} />
-      </div>
-
-      <div style={{ display: 'flex', gap: 8, paddingTop: 10, borderTop: '1px solid var(--line)', position: 'sticky', bottom: 0, background: 'var(--paper)' }}>
-        <input className="input" style={{ marginBottom: 0, flex: 1 }} placeholder="Type a message…"
-          value={text} onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter') send(); }} />
-        <button onClick={send} disabled={sending} aria-label="Send" style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--forest)', color: '#fff', border: 'none', display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0, transition: 'transform .22s cubic-bezier(0.34,1.56,0.64,1)', opacity: sending ? 0.6 : 1 }}><SendIcon /></button>
-      </div>
-    </div>
-  );
-}
-   
