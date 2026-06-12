@@ -90,17 +90,12 @@ export default function Profile() {
         <label className="label">Short bio <span style={{ textTransform:'none', letterSpacing:0, fontWeight:400 }}>(optional — what you're looking for)</span></label>
         <textarea className="input" rows={3} style={{ resize:'vertical', fontFamily:'inherit' }} placeholder="e.g. MRCP Part 1 in May, looking for an evening study partner to do PassMedicine questions together." value={bio} onChange={(e) => setBio(e.target.value)} maxLength={300} />
 
-        <label className="label">Medical school <span style={{ textTransform:'none', letterSpacing:0, fontWeight:400 }}>(optional)</span></label>
-        <input className="input" placeholder="e.g. King Edward Medical University" value={medicalSchool} onChange={(e) => setMedicalSchool(e.target.value)} />
-
         <label className="label">Exam date <span style={{ textTransform: 'none', letterSpacing: 0, fontWeight: 400 }}>(for your countdown)</span></label>
         <input className="input" type="date" value={examDate} onChange={(e) => setExamDate(e.target.value)} />
 
-        <Chips label="Which sitting/attempt" options={['1st sitting','2nd sitting','3rd sitting','4th+ sitting']} value={attempt} onChange={setAttempt} optional />
         <Chips label="Country" options={COUNTRIES} value={country} onChange={setCountry} />
         <Chips label="Timezone" options={TIMEZONES} value={timezone} onChange={setTimezone} optional />
         <Chips label="Question bank" options={QBANKS} value={questionBank} onChange={setQuestionBank} optional />
-        <Chips label="Preferred study time" options={TIMES} value={studyTime} onChange={setStudyTime} optional />
 
         <label className="label">Medical registration <span style={{ textTransform: 'none', letterSpacing: 0, fontWeight: 400 }}>(self-reported)</span></label>
         <select className="select" value={regCouncil} onChange={(e) => setRegCouncil(e.target.value)}>
@@ -131,11 +126,8 @@ export default function Profile() {
       <div className="card" style={{ marginTop:16 }}>
         <Row k="Exam" v={user?.exam} />
         <Row k="Exam date" v={user?.exam_date ? user.exam_date.slice(0, 10) : '—'} />
-        <Row k="Attempt" v={user?.attempt} />
-        <Row k="Medical school" v={user?.medical_school} />
         <Row k="Timezone" v={user?.timezone} />
         <Row k="Question bank" v={user?.question_bank} />
-        <Row k="Study time" v={user?.study_time} />
         <Row k="Registration" v={user?.reg_council ? `${user.reg_council} ${user.reg_number} (self-reported)` : '—'} />
       </div>
       <button className="btn" onClick={() => setEditing(true)}>Edit profile</button>
