@@ -44,11 +44,11 @@ function TabBar() {
     const check = async () => {
       try {
         const d = await api.conversations();
-        const lastRead = Number(localStorage.getItem('chat_last_read') || 0);
-        const newestIncoming = (d.conversations || [])
-          .filter((c) => c.last_sender == c.other_id) // last msg was from them
-          .reduce((max, c) => Math.max(max, new Date(c.last_at).getTime()), 0);
-        if (alive) setHasUnread(newestIncoming > lastRead);
+        const anyUnread = (d.conversations || []).some((c) =>
+          c.last_sender == c.other_id &&
+          new Date(c.last_at).getTime() > Number(localStorage.getItem('chat_read_' + c.other_id) || 0)
+        );
+        if (alive) setHasUnread(anyUnread);
       } catch (e) {}
       try {
         const cd = await api.connections();
