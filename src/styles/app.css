@@ -147,9 +147,9 @@ h1, h2, h3, .h1, .name, .brand-name, .stat-num, .serif { font-family: 'Inter', s
 @keyframes pulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.45); opacity: .65; } }
 @media (prefers-reduced-motion: reduce) { .timer-live { animation: none; } }
 
-/* round flags: oversize the emoji and clip it to a circle so the flag itself fills the shape */
+/* round flags: real flag images clipped to a circle (predictable on every device) */
 .flag-circ { width: 34px; height: 34px; border-radius: 50%; background: var(--paper-2);
-  border: 1px solid var(--line); display: grid; place-items: center; font-size: 50px; flex-shrink: 0;
+  border: 1px solid var(--line); display: grid; place-items: center; flex-shrink: 0;
   line-height: 1; overflow: hidden; }
 
 /* small anchored popover menu (chat ⋯) */
