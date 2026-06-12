@@ -280,7 +280,7 @@ function Momentum({ user }) {
             <span style={{ fontSize: 18 }}>🔥</span> {streak}
           </div>
           {studiedToday ? (
-            <div className="sub" style={{ fontSize: 10, marginTop: 3, color: 'var(--forest)', fontWeight: 700 }}>Streak safe ✓</div>
+            <div style={{ marginTop: 5 }}><span className="match-pill pill-exc">✓ done today</span></div>
           ) : (
             <button onClick={(e) => { e.stopPropagation(); markStudy(); }} disabled={marking} style={{ marginTop: 4, fontSize: 11, fontWeight: 700, color: '#fff', background: 'var(--rust)', border: 'none', borderRadius: 999, padding: '5px 11px', cursor: 'pointer' }}>
               {marking ? '…' : 'Mark today ✓'}
