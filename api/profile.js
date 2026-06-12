@@ -3,43 +3,65 @@ import { sql, getUserId, safeUser, readBody } from './_shared/util.js';
 export default async function handler(req, res) {
   const uid = getUserId(req);
   if (!uid) return res.status(401).json({ error: 'Not authenticated' });
-  // DELETE /api/profile -> permanently delete the user's account
+
   if (req.method === 'DELETE') {
     try {
-      await sql`DELETE FROM users WHERE id = ${uid}`; // cascades to messages, connections, etc.
+      await sql`DELETE FROM users WHERE id = ${uid}`;
       return res.status(200).json({ ok: true });
     } catch (e) {
       return res.status(500).json({ error: 'Could not delete account' });
     }
   }
+  // GET /api/profile?user=ID -> public mini-card for QR / share links
+  if (req.method === 'GET') {
+    const target = parseInt(req.query.user, 10);
+    if (!target) return res.status(400).json({ error: 'user id required' });
+    try {
+      const rows = await sql`SELECT id, name, avatar, exam, country FROM users WHERE id = ${target}`;
+      if (!rows.length) return res.status(404).json({ error: 'Not found' });
+      return res.status(200).json({ user: rows[0] });
+    } catch (e) {
+      return res.status(500).json({ error: 'Lookup failed' });
+    }
+  }
   if (req.method !== 'PUT') return res.status(405).json({ error: 'Method not allowed' });
+
   try {
     const body = readBody(req);
-    const { exam, country, attempt, timezone, questionBank, studyTime, avatar, name, regCouncil, regNumber, medicalSchool, bio } = body;
-    // exam_date: only touch it if the key was sent; empty string clears it
     const hasExamDate = Object.prototype.hasOwnProperty.call(body, 'examDate');
     const examDateVal = hasExamDate ? (body.examDate || null) : undefined;
-    const rows = await sql`
+
+    // Update the simple text fields first
+    await sql`
       UPDATE users SET
-        name = COALESCE(${name}, name),
-        exam = COALESCE(${exam}, exam),
-        country = COALESCE(${country}, country),
-        attempt = COALESCE(${attempt}, attempt),
-        timezone = COALESCE(${timezone}, timezone),
-        question_bank = COALESCE(${questionBank}, question_bank),
-        study_time = COALESCE(${studyTime}, study_time),
-        avatar = COALESCE(${avatar}, avatar),
-        exam_date = CASE WHEN ${hasExamDate} THEN ${examDateVal} ELSE exam_date END,
-        reg_council = COALESCE(${regCouncil}, reg_council),
-        reg_number = COALESCE(${regNumber}, reg_number),
-        medical_school = COALESCE(${medicalSchool}, medical_school),
-        bio = COALESCE(${bio}, bio),
+        name = COALESCE(${body.name}, name),
+        exam = COALESCE(${body.exam}, exam),
+        country = COALESCE(${body.country}, country),
+        attempt = COALESCE(${body.attempt}, attempt),
+        timezone = COALESCE(${body.timezone}, timezone),
+        question_bank = COALESCE(${body.questionBank}, question_bank),
+        study_time = COALESCE(${body.studyTime}, study_time),
+        avatar = COALESCE(${body.avatar}, avatar),
+        reg_council = COALESCE(${body.regCouncil}, reg_council),
+        reg_number = COALESCE(${body.regNumber}, reg_number),
+        bio = COALESCE(${body.bio}, bio),
         profile_complete = TRUE
-      WHERE id = ${uid}
-      RETURNING *`;
+      WHERE id = ${uid}`;
+
+    // medical school column (separate statement, value pulled from body to avoid any identifier typos)
+    if (body.medicalSchool !== undefined) {
+      await sql`UPDATE users SET medical_school = ${body.medicalSchool} WHERE id = ${uid}`;
+    }
+
+    // exam date (clear or set)
+    if (hasExamDate) {
+      await sql`UPDATE users SET exam_date = ${examDateVal} WHERE id = ${uid}`;
+    }
+
+    const rows = await sql`SELECT * FROM users WHERE id = ${uid}`;
     return res.status(200).json({ user: safeUser(rows[0]) });
   } catch (e) {
-    return res.status(500).json({ error: 'Could not update profile [v2]: ' + (e.message || String(e)) });
+    return res.status(500).json({ error: 'Could not update profile [v3]: ' + (e.message || String(e)) });
   }
 }
 
