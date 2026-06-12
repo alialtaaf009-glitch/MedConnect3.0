@@ -9,6 +9,8 @@ export default function Partners() {
   const filterExam = params.get('exam');   // e.g. "MRCP" or "SMLE"
   const filterPart = params.get('part');   // e.g. "PACES"
   const [matches, setMatches] = useState([]);
+  const [reqCount, setReqCount] = useState(0);
+  useEffect(() => { api.connections().then((d) => setReqCount((d.requests || []).length)).catch(() => {}); }, []);
   const [status, setStatus] = useState('loading');
   const [err, setErr] = useState('');
 
@@ -38,7 +40,10 @@ export default function Partners() {
   const Toggle = () => (
     <div className="tabs">
       <button className="tab on">Discover</button>
-      <button className="tab" onClick={() => nav('/connections')}>Study partners</button>
+      <button className="tab" style={{ position: 'relative' }} onClick={() => nav('/connections')}>
+        Study partners
+        {reqCount > 0 && <span style={{ position: 'absolute', top: 6, right: 10, width: 8, height: 8, borderRadius: '50%', background: 'var(--rust)' }} />}
+      </button>
     </div>
   );
 
