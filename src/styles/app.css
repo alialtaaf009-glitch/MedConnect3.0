@@ -2,9 +2,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root, [data-theme="light"] {
-  --ink:#11201a; --paper:#f3ead4; --paper-2:#e8dcba; --card:#fffdf6;
-  --line:#d8c99e; --forest:#16624a; --forest-2:#1f8a66; --rust:#c2421f;
-  --gold:#d99411; --muted:#5f6b62; --subtle:#94998c;
+  --ink:#15201c; --paper:#f4f1e8; --paper-2:#ece7d8; --card:#fbfaf4;
+  --line:#dcd5c2; --forest:#1f4d3f; --forest-2:#2c6a55; --rust:#a8442a;
+  --gold:#b98a2e; --muted:#6b7670; --subtle:#9aa39c;
   --bg:var(--paper); --bg2:var(--paper-2); --panel:var(--card); --panel2:var(--paper-2);
   --teal:var(--forest); --teal-dim:var(--forest-2); --amber:var(--gold);
   --rose:var(--rust); --green:#1aa860; --violet:var(--rust); --faint:var(--subtle);
