@@ -168,7 +168,6 @@ function ExploreBrowse() {
             })}
         </>
       )}
-
       {browseMode === 'country' && orderedCountries.map(([flag, country, exams]) => (
         <div key={country} className="card" style={{ padding: 0, overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: 14, cursor: 'pointer' }}
