@@ -33,6 +33,14 @@ export default function Profile() {
   const { user, logout, setUser } = useAuth();
   const { mode, toggle } = useTheme();
   const [, setTilePrefs] = useState(0); // re-render when tile prefs change
+  const [shareOpen, setShareOpen] = useState(false);
+  const shareLink = `https://med-connect3-0.vercel.app/?add=${user?.id}`;
+  const shareProfile = async () => {
+    try {
+      if (navigator.share) { await navigator.share({ title: 'Add me on MedConnect', text: `Add me as a study partner on MedConnect — ${user?.name}`, url: shareLink }); return; }
+    } catch (e) { if (e?.name === 'AbortError') return; }
+    try { await navigator.clipboard.writeText(shareLink); window.alert('Profile link copied!'); } catch (e) {}
+  };
   const nav = useNavigate();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(user?.name || '');
@@ -137,7 +145,23 @@ export default function Profile() {
         <Row k="Registration" v={user?.reg_council ? `${user.reg_council} ${user.reg_number} (self-reported)` : '—'} />
       </div>
       <button className="btn" onClick={() => setEditing(true)}>Edit profile</button>
-      <button className="btn ghost" style={{ marginTop:10 }} onClick={toggle}>{mode === 'dark' ? '☀️  Light mode' : '🌙  Dark mode'}</button>
+      <button className="btn ghost" style={{ marginTop:10 }} onClick={() => setShareOpen(true)}>Share my profile</button>
+      <button className="btn ghost" style={{ marginTop:8 }} onClick={toggle}>{mode === 'dark' ? '☀️  Light mode' : '🌙  Dark mode'}</button>
+
+      {shareOpen && (
+        <div onClick={() => setShareOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'grid', placeItems: 'center', zIndex: 100, padding: 24 }}>
+          <div onClick={(e) => e.stopPropagation()} className="card" style={{ maxWidth: 320, width: '100%', textAlign: 'center', animation: 'popIn .3s cubic-bezier(0.34, 1.56, 0.64, 1) both', margin: 0 }}>
+            <h2 style={{ fontSize: 17, fontWeight: 700 }}>Add me on MedConnect</h2>
+            <p className="sub" style={{ fontSize: 12, marginTop: 2, marginBottom: 12 }}>Scan to send {user?.name} a connection request.</p>
+            <div style={{ background: '#fff', borderRadius: 16, padding: 12, display: 'inline-block' }}>
+              <img alt="Profile QR" width="200" height="200" style={{ display: 'block' }}
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=0&color=1f4d3f&data=${encodeURIComponent(shareLink)}`} />
+            </div>
+            <button className="btn" style={{ marginTop: 14 }} onClick={shareProfile}>Share link</button>
+            <button className="btn ghost" style={{ marginTop: 8 }} onClick={() => setShareOpen(false)}>Close</button>
+          </div>
+        </div>
+      )}
 
       <div className="label" style={{ marginTop: 18 }}>Home screen</div>
       {[['hide_countdown', 'Show exam countdown'], ['hide_streak', 'Show study streak']].map(([key, label]) => (
@@ -171,3 +195,4 @@ export default function Profile() {
     </div>
   );
 }
+
