@@ -44,6 +44,21 @@ const CATALOG = [
   ]],
 ];
 
+
+// country-code map for round flag images (flagcdn.com)
+const FLAG_CODE = { 'United States': 'us', 'United Kingdom': 'gb', 'Pakistan': 'pk', 'Australia': 'au', 'Saudi Arabia': 'sa', 'India': 'in' };
+function Flag({ country, emoji, size = 34 }) {
+  const code = FLAG_CODE[country];
+  const [broken, setBroken] = useState(false);
+  if (!code || broken) return <span className="flag-circ" style={{ width: size, height: size, fontSize: size * 0.5, overflow: 'visible' }}>{emoji}</span>;
+  return (
+    <span className="flag-circ" style={{ width: size, height: size }}>
+      <img src={`https://flagcdn.com/w80/${code}.png`} alt={country + ' flag'} onError={() => setBroken(true)}
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+    </span>
+  );
+}
+
 export default function Home() {
   const { user } = useAuth();
   const nav = useNavigate();
@@ -199,7 +214,7 @@ export default function Home() {
                 <div key={key} className="card" style={{ padding: 0, overflow: 'hidden' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 14, cursor: 'pointer' }}
                     onClick={() => setOpenExam(openExam === key ? '' : key)}>
-                    <span className="flag-circ" style={{ width: 30, height: 30, fontSize: 44 }}>{flag}</span>
+                    <Flag country={country} emoji={flag} size={30} />
                     <span style={{ flex: 1, fontWeight: 600 }}>{exam}</span>
                     {examCount(exam) >= 2 && (
                       <span style={{ fontSize: 11, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 20, padding: '3px 9px', marginRight: 4, fontWeight: 700 }}>
@@ -228,7 +243,7 @@ export default function Home() {
         <div key={country} className="card" style={{ padding: 0, overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: 14, cursor: 'pointer' }}
             onClick={() => setOpenCountry(openCountry === country ? '' : country)}>
-            <span className="flag-circ">{flag}</span>
+            <Flag country={country} emoji={flag} />
             <span style={{ flex: 1, fontWeight: 600 }}>{country}</span>
             <span className="meta">{openCountry === country ? '▲' : '▼'}</span>
           </div>
