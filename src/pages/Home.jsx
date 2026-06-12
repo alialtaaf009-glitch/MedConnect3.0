@@ -74,6 +74,22 @@ export default function Home() {
     if (!isNaN(t)) daysLeft = Math.ceil((t - Date.now()) / 86400000);
   }
   const quote = quoteOfTheDay();
+  const [cdOpen, setCdOpen] = useState(false);
+  const [nowTs, setNowTs] = useState(Date.now());
+  useEffect(() => {
+    if (!cdOpen) return;
+    const t = setInterval(() => setNowTs(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [cdOpen]);
+
+  // adaptive coach line — urgency without panic
+  const coachLine = (d) => {
+    if (d > 60) return 'Plenty of runway. Build the habit now.';
+    if (d > 14) return 'This is the sharpening phase. Every block counts.';
+    if (d > 2)  return "Lock in. You've done the work — now protect it.";
+    if (d >= 0) return 'Trust your preparation. Sleep matters more than cramming now.';
+    return 'Exam day has passed — update your date in Profile when the next one is set.';
+  };
   const [streak, setStreak] = useState(user?.current_streak || 0);
   const [studiedToday, setStudiedToday] = useState(user?.studied_today || false);
   const [marking, setMarking] = useState(false);
@@ -175,7 +191,7 @@ export default function Home() {
       {/* compact momentum row: countdown + streak side by side */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
         {daysLeft !== null && (
-          <div className="card" style={{ flex: 1, textAlign: 'center', padding: '12px 8px', borderColor: 'var(--forest)', margin: 0 }}>
+          <div className="card" onClick={() => setCdOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '12px 8px', borderColor: 'var(--forest)', margin: 0, cursor: 'pointer' }}>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'var(--forest)', textTransform: 'uppercase' }}>Countdown</div>
             <div style={{ fontFamily: "'Inter',system-ui,sans-serif", fontSize: 30, fontWeight: 900, color: 'var(--forest)', lineHeight: 1.15 }}>
               {daysLeft > 0 ? daysLeft : daysLeft === 0 ? 'Today' : '—'}
@@ -197,6 +213,43 @@ export default function Home() {
           )}
         </div>
       </div>
+
+      {cdOpen && user?.exam_date && (() => {
+        const examTs = new Date(user.exam_date).getTime();
+        const diff = Math.max(0, examTs - nowTs);
+        const totSec = Math.floor(diff / 1000);
+        const totDays = Math.floor(totSec / 86400);
+        const weeks = Math.floor(totDays / 7);
+        const days = totDays % 7;
+        const hh = String(Math.floor((totSec % 86400) / 3600)).padStart(2, '0');
+        const mm2 = String(Math.floor((totSec % 3600) / 60)).padStart(2, '0');
+        const ss = String(totSec % 60).padStart(2, '0');
+        const dLeft = Math.ceil((examTs - nowTs) / 86400000);
+        return (
+          <div onClick={() => setCdOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'grid', placeItems: 'center', zIndex: 100, padding: 24 }}>
+            <div onClick={(e) => e.stopPropagation()} className="card" style={{ maxWidth: 340, width: '100%', textAlign: 'center', animation: 'popIn .3s cubic-bezier(0.34, 1.56, 0.64, 1) both', margin: 0 }}>
+              <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--rust)', textTransform: 'uppercase' }}>{user?.exam || 'Your exam'}</div>
+              <div className="sub" style={{ fontSize: 12, marginTop: 2 }}>{new Date(user.exam_date).toDateString()}</div>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 10, margin: '16px 0 4px' }}>
+                <div style={{ flex: 1, maxWidth: 90 }}>
+                  <div style={{ fontSize: 34, fontWeight: 900, color: 'var(--forest)', lineHeight: 1 }}>{weeks}</div>
+                  <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>weeks</div>
+                </div>
+                <div style={{ flex: 1, maxWidth: 90 }}>
+                  <div style={{ fontSize: 34, fontWeight: 900, color: 'var(--forest)', lineHeight: 1 }}>{days}</div>
+                  <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>days</div>
+                </div>
+              </div>
+              <div style={{ fontSize: 30, fontWeight: 900, color: 'var(--rust)', letterSpacing: 2, fontVariantNumeric: 'tabular-nums', margin: '6px 0 2px' }}>
+                {hh}:{mm2}:{ss}
+              </div>
+              <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>hours · minutes · seconds</div>
+              <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)', margin: '14px 6px 4px', lineHeight: 1.45 }}>{coachLine(dLeft)}</p>
+              <button className="btn ghost" style={{ marginTop: 10 }} onClick={() => setCdOpen(false)}>Back to it</button>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* slim motivation line with a clear tappable link */}
       <div onClick={() => nav('/motivation')} style={{ cursor: 'pointer', padding: '4px 2px 0', marginBottom: 4 }}>
