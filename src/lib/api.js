@@ -19,6 +19,7 @@ export const api = {
   me: () => req('/me'),
   markStudy: () => req('/me', { method: 'POST', body: { action: 'mark_study' } }),
   updateProfile: (p) => req('/profile', { method: 'PUT', body: p }),
+  publicProfile: (id) => req(`/profile?user=${id}`),
   deleteAccount: () => req('/profile', { method: 'DELETE' }),
   matches: () => req('/matches'),
   connections: () => req('/connections'),
@@ -45,4 +46,3 @@ export const api = {
   resetRequest: (email) => req('/reset', { method: 'POST', body: { action: 'request', email } }),
   resetConfirm: (token, password) => req('/reset', { method: 'POST', body: { action: 'confirm', token, password } }),
 };
-
