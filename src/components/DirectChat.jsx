@@ -5,6 +5,7 @@ import { SendIcon, IcoTrash, IcoLeave, IcoBan, IcoFlag, Stamp } from './ChatBits
 export default function DirectChat({ me, withId, withName, withAv, onBack }) {
   const [messages, setMessages] = useState([]);
   const [avatars, setAvatars] = useState({});
+  const [peer, setPeer] = useState(null);
   const myInit = (me?.name || 'Me').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('');
   const theirInit = (withName || 'Dr').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('');
   const Avatar = ({ emoji, init }) => (
@@ -15,7 +16,7 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
   const [menu, setMenu] = useState(false);
   const endRef = useRef(null);
 
-  const load = () => api.conversation(withId).then((d) => { setMessages(d.messages || []); if (d.avatars) setAvatars(d.avatars); localStorage.setItem('chat_read_' + withId, String(Date.now())); }).catch(() => {});
+  const load = () => api.conversation(withId).then((d) => { setMessages(d.messages || []); if (d.avatars) setAvatars(d.avatars); if (d.peer) setPeer(d.peer); localStorage.setItem('chat_read_' + withId, String(Date.now())); }).catch(() => {});
   useEffect(() => { load(); const t = setInterval(load, 4000); return () => clearInterval(t); }, [withId]);
   // only scroll when a genuinely new message lands (not on every 4s poll)
   const lastMsgId = messages.length ? messages[messages.length - 1].id : 0;
@@ -56,7 +57,10 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
     <div className="screen" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100dvh - 76px)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
         <button className="link" onClick={onBack}>‹ Back</button>
-        <h2 style={{ fontSize: 18, fontWeight: 600, flex: 1 }}>{withName}</h2>
+        <div style={{ flex: 1 }}>
+          <h2 style={{ fontSize: 17, fontWeight: 600 }}>{withName}</h2>
+          {peer && <div className="meta" style={{ fontSize: 11 }}>{[peer.exam, peer.country, peer.timezone].filter(Boolean).join(' · ')}</div>}
+        </div>
         <div style={{ position: 'relative' }}>
           <button className="link" style={{ fontSize: 22, lineHeight: 1 }} onClick={() => setMenu(!menu)}>⋯</button>
           {menu && (
@@ -111,3 +115,4 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
     </div>
   );
 }
+
