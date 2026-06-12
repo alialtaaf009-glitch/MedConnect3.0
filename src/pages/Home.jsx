@@ -253,7 +253,7 @@ function Momentum({ user }) {
           {studiedToday ? (
             <div className="sub" style={{ fontSize: 10, marginTop: 3, color: 'var(--forest)', fontWeight: 700 }}>✓ done today</div>
           ) : (
-            <button onClick={(e) => { e.stopPropagation(); markStudy(); }} disabled={marking} style={{ marginTop: 4, fontSize: 11, fontWeight: 700, color: '#fff', background: 'var(--forest)', border: 'none', borderRadius: 8, padding: '5px 10px', cursor: 'pointer' }}>
+            <button onClick={(e) => { e.stopPropagation(); markStudy(); }} disabled={marking} style={{ marginTop: 4, fontSize: 11, fontWeight: 700, color: '#fff', background: 'var(--rust)', border: 'none', borderRadius: 999, padding: '5px 11px', cursor: 'pointer' }}>
               {marking ? '…' : 'Mark today ✓'}
             </button>
           )}
@@ -321,7 +321,7 @@ function Momentum({ user }) {
               </div>
               <p className="voice" style={{ fontSize: 15, fontWeight: 500, color: 'var(--ink)', margin: '12px 6px 4px', lineHeight: 1.45 }}>{line}</p>
               {!studiedToday && (
-                <button className="btn" style={{ marginTop: 10 }} disabled={marking} onClick={markStudy}>
+                <button className="btn btn-cta" style={{ marginTop: 10 }} disabled={marking} onClick={markStudy}>
                   {marking ? '…' : 'Mark today ✓'}
                 </button>
               )}
@@ -396,13 +396,13 @@ export default function Home() {
         </div>
       )}
 
-      <div style={{ textAlign: 'center', padding: '6px 10px 12px' }}>
-        <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, color: 'var(--rust)', textTransform: 'uppercase', marginBottom: 4 }}>
+      <div style={{ padding: '14px 4px 16px' }}>
+        <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: 3, color: 'var(--rust)', textTransform: 'uppercase', marginBottom: 12 }}>
           For doctors, by doctors
         </div>
-        <p className="serif" style={{ fontSize: 16.5, fontWeight: 700, lineHeight: 1.3, color: 'var(--forest)', margin: 0 }}>
-          Find the right study partner for your medical exam.
-        </p>
+        <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 34, fontWeight: 900, lineHeight: 1.02, letterSpacing: '-1.5px', color: 'var(--ink)', margin: 0 }}>
+          Find the right <em style={{ fontStyle: 'italic', color: 'var(--forest)' }}>study&nbsp;partner</em> for your medical exam.
+        </h1>
       </div>
 
       <Momentum user={user} />
@@ -425,10 +425,9 @@ export default function Home() {
       <div className="card tint-gold" style={{ textAlign: 'center', marginTop: 20 }}>
         <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Know a doctor who needs a study partner?</div>
         <p className="sub" style={{ fontSize: 13, marginBottom: 12 }}>MedConnect grows one colleague at a time.</p>
-        <button className="btn" onClick={inviteFriend}>Invite your friends</button>
+        <button className="btn btn-cta" onClick={inviteFriend}>Invite your friends</button>
         {invited && <p className="sub" style={{ fontSize: 12, marginTop: 8, color: 'var(--forest)', fontWeight: 700 }}>Link copied — paste it anywhere! ✓</p>}
       </div>
     </div>
   );
 }
-
