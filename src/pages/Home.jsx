@@ -75,6 +75,7 @@ export default function Home() {
   }
   const quote = quoteOfTheDay();
   const [cdOpen, setCdOpen] = useState(false);
+  const [stOpen, setStOpen] = useState(false);
   const [nowTs, setNowTs] = useState(Date.now());
   useEffect(() => {
     if (!cdOpen) return;
@@ -200,7 +201,8 @@ export default function Home() {
             <div className="sub" style={{ fontSize: 10, marginTop: 0 }}>{daysLeft > 0 ? 'days to exam' : daysLeft === 0 ? 'exam day!' : 'passed'}</div>
           </div>
         )}
-        <div className="card" style={{ flex: 1, textAlign: 'center', padding: '12px 8px', borderColor: 'var(--forest)', margin: 0 }}>
+        <div className="card" onClick={() => setStOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '12px 8px', borderColor: 'var(--forest)', margin: 0, cursor: 'pointer', position: 'relative' }}>
+          <span style={{ position: 'absolute', top: 7, right: 9, fontSize: 11, color: 'var(--subtle)', opacity: 0.8 }}>⤢</span>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'var(--forest)', textTransform: 'uppercase' }}>Study Streak</div>
           <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--rust)', lineHeight: 1.2, marginTop: 2 }}>
             <span style={{ fontSize: 18 }}>🔥</span> {streak}
@@ -208,7 +210,7 @@ export default function Home() {
           {studiedToday ? (
             <div className="sub" style={{ fontSize: 10, marginTop: 3, color: 'var(--forest)', fontWeight: 700 }}>✓ done today</div>
           ) : (
-            <button onClick={markStudy} disabled={marking} style={{ marginTop: 4, fontSize: 11, fontWeight: 700, color: '#fff', background: 'var(--forest)', border: 'none', borderRadius: 8, padding: '5px 10px', cursor: 'pointer' }}>
+            <button onClick={(e) => { e.stopPropagation(); markStudy(); }} disabled={marking} style={{ marginTop: 4, fontSize: 11, fontWeight: 700, color: '#fff', background: 'var(--forest)', border: 'none', borderRadius: 8, padding: '5px 10px', cursor: 'pointer' }}>
               {marking ? '…' : 'Mark today ✓'}
             </button>
           )}
@@ -247,6 +249,38 @@ export default function Home() {
               <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>hours · minutes · seconds</div>
               <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)', margin: '14px 6px 4px', lineHeight: 1.45 }}>{coachLine(dLeft)}</p>
               <button className="btn ghost" style={{ marginTop: 10 }} onClick={() => setCdOpen(false)}>Back to it</button>
+            </div>
+          </div>
+        );
+      })()}
+
+      {stOpen && (() => {
+        const best = Math.max(user?.longest_streak || 0, streak);
+        const line = !studiedToday
+          ? 'One tap keeps the flame alive.'
+          : streak >= best && streak > 1
+            ? "Personal best territory. Don't look down."
+            : streak === 0
+              ? 'Every legendary streak starts at day one.'
+              : "Today's locked in. See you tomorrow, doctor.";
+        return (
+          <div onClick={() => setStOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'grid', placeItems: 'center', zIndex: 100, padding: 24 }}>
+            <div onClick={(e) => e.stopPropagation()} className="card" style={{ maxWidth: 340, width: '100%', textAlign: 'center', animation: 'popIn .3s cubic-bezier(0.34, 1.56, 0.64, 1) both', margin: 0 }}>
+              <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--rust)', textTransform: 'uppercase' }}>Study Streak</div>
+              <div style={{ fontSize: 52, lineHeight: 1.1, marginTop: 8 }}>🔥</div>
+              <div style={{ fontSize: 40, fontWeight: 900, color: 'var(--rust)', lineHeight: 1.1 }}>{streak}</div>
+              <div className="sub" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 }}>day{streak === 1 ? '' : 's'} in a row</div>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, marginTop: 12 }}>
+                <span style={{ fontSize: 15 }}>🏆</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--forest)' }}>Personal best: {best} day{best === 1 ? '' : 's'}</span>
+              </div>
+              <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)', margin: '12px 6px 4px', lineHeight: 1.45 }}>{line}</p>
+              {!studiedToday && (
+                <button className="btn" style={{ marginTop: 10 }} disabled={marking} onClick={markStudy}>
+                  {marking ? '…' : 'Mark today ✓'}
+                </button>
+              )}
+              <button className="btn ghost" style={{ marginTop: 8 }} onClick={() => setStOpen(false)}>Keep going</button>
             </div>
           </div>
         );
@@ -293,49 +327,8 @@ export default function Home() {
                       <div key={part} className="exam-accent" style={{ '--ec': accents[pi % accents.length], padding: '11px 16px 11px 22px', borderTop: '1px solid var(--line)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                         onClick={() => nav(`/partners?exam=${encodeURIComponent(exam)}&part=${encodeURIComponent(part)}`)}>
                         <span style={{ fontWeight: 600, fontSize: 14, flex: 1 }}>{part}</span>
-                        {partCount(exam, part) >= 1 && <span style={{ fontSize: 10.5, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 6 }}>{partCount(exam, part)}</span>}
-                        <span style={{ color: 'var(--subtle)', fontSize: 13 }}>›</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
-        </>
-      )}
-
-      {browseMode === 'country' && CATALOG.map(([flag, country, exams]) => (
-        <div key={country} className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: 14, cursor: 'pointer' }}
-            onClick={() => setOpenCountry(openCountry === country ? '' : country)}>
-            <Flag country={country} emoji={flag} />
-            <span style={{ flex: 1, fontWeight: 600 }}>{country}</span>
-            <span className="meta">{openCountry === country ? '▲' : '▼'}</span>
-          </div>
-
-          {openCountry === country && exams.map(([exam, parts]) => {
-            const key = country + '|' + exam;
-            return (
-              <div key={exam} style={{ borderTop: '1px solid var(--line)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', padding: '12px 16px 12px 40px', cursor: 'pointer', fontWeight: 500, fontSize: 14 }}
-                  onClick={() => setOpenExam(openExam === key ? '' : key)}>
-                  <span style={{ flex: 1 }}>{exam}</span>
-                  {examCount(exam) >= 2 && (
-                    <span style={{ fontSize: 11, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 20, padding: '3px 9px', marginRight: 8, fontFamily: "'Inter',system-ui,sans-serif", fontWeight: 700 }}>
-                      {examCount(exam)} doctors
-                    </span>
-                  )}
-                  <span className="meta" style={{ fontSize: 11 }}>{openExam === key ? '▲' : '▼'}</span>
-                </div>
-                {openExam === key && parts.map((part, pi) => {
-                  const accents = ['var(--forest)', 'var(--rust)', 'var(--gold)', 'var(--forest-2)'];
-                  const ec = accents[pi % accents.length];
-                  return (
-                    <div key={part} className="exam-accent" style={{ '--ec': ec, padding: '11px 16px 11px 22px', borderTop: '1px solid var(--line)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                      onClick={() => nav(`/partners?exam=${encodeURIComponent(exam)}&part=${encodeURIComponent(part)}`)}>
-                   <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)', flex: 1 }}>{part}</span>
-                      {partCount(exam, part) >= 1 && <span style={{ fontSize: 10.5, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 6 }}>{partCount(exam, part)}</span>}
-                      <span style={{ color: 'var(--subtle)', fontSize: 13 }}>›</span>
+                        {partCount(exam, part) >= 1 && <span style={{ fontSize: 10.5, color: 'var(--forest)', background: 'var(--paper-2)', borderRa
+                          <span style={{ color: 'var(--subtle)', fontSize: 13 }}>›</span>
                     </div>
                   );
                 })}
@@ -354,4 +347,4 @@ export default function Home() {
       </div>
     </div>
   );
-}
+      }
