@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, NavLink } from 'react-router-dom';
 import { useAuth } from './context/Auth.jsx';
 import { useTheme } from './context/Theme.jsx';
+import { useTimer } from './context/Timer.jsx';
 import { api } from './lib/api';
 import SignIn from './pages/SignIn.jsx';
 import Setup from './pages/Setup.jsx';
@@ -31,6 +32,8 @@ function Icon({ name }) {
 }
 
 function TabBar() {
+  const timer = useTimer();
+  const timerRunning = !!timer?.running;
   const [hasUnread, setHasUnread] = useState(false);
   const [hasRequests, setHasRequests] = useState(false);
 
@@ -74,6 +77,7 @@ function TabBar() {
             <Icon name={ic} />
             {ic === 'chat' && hasUnread && <span className="badge-dot" />}
             {ic === 'partners' && hasRequests && <span className="badge-dot" />}
+            {ic === 'focus' && timerRunning && <span className="timer-live" />}
           </span>{label}
         </NavLink>
       ))}
@@ -138,4 +142,3 @@ export default function App() {
     </div>
   );
 }
-
