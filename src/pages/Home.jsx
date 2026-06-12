@@ -78,6 +78,14 @@ function ExploreBrowse() {
   const [openCountry, setOpenCountry] = useState('');
   const [openExam, setOpenExam] = useState('');
   const [browseMode, setBrowseMode] = useState('country'); // 'country' | 'exam'
+  // "lock in" pins: chosen countries/exams float to top; others collapse behind Show all
+  const [pinC, setPinC] = useState(() => { try { return JSON.parse(localStorage.getItem('pin_countries') || '[]'); } catch (e) { return []; } });
+  const [pinE, setPinE] = useState(() => { try { return JSON.parse(localStorage.getItem('pin_exams') || '[]'); } catch (e) { return []; } });
+  const [showAllC, setShowAllC] = useState(false);
+  const [showAllE, setShowAllE] = useState(false);
+  const togglePinC = (name) => setPinC((p) => { const n = p.includes(name) ? p.filter((x) => x !== name) : [...p, name]; localStorage.setItem('pin_countries', JSON.stringify(n)); return n; });
+  const togglePinE = (key) => setPinE((p) => { const n = p.includes(key) ? p.filter((x) => x !== key) : [...p, key]; localStorage.setItem('pin_exams', JSON.stringify(n)); return n; });
+
   const [counts, setCounts] = useState({});
   useEffect(() => { api.getStats().then((d) => setCounts(d.counts || {})).catch(() => {}); }, []);
 
@@ -99,6 +107,19 @@ function ExploreBrowse() {
     return n;
   };
 
+  const orderedCountries = (() => {
+    const p = CATALOG.filter((x) => pinC.includes(x[1]));
+    const r = CATALOG.filter((x) => !pinC.includes(x[1]));
+    return pinC.length && !showAllC ? p : [...p, ...r];
+  })();
+  const allExams = CATALOG.flatMap(([flag, country, exams]) => exams.map(([exam, parts]) => ({ flag, country, exam, parts })));
+  const orderedExams = (() => {
+    const kk = (x) => 'exam|' + x.country + '|' + x.exam;
+    const p = allExams.filter((x) => pinE.includes(kk(x)));
+    const r = allExams.filter((x) => !pinE.includes(kk(x)));
+    return pinE.length && !showAllE ? p : [...p, ...r];
+  })();
+
   return (
     <>
       <div className="tabs" style={{ marginBottom: 14 }}>
@@ -106,10 +127,16 @@ function ExploreBrowse() {
         <button className={`tab ${browseMode === 'exam' ? 'on' : ''}`} onClick={() => { setBrowseMode('exam'); setOpenExam(''); }}>By exam</button>
       </div>
 
+      {((browseMode === 'country' && pinC.length > 0) || (browseMode === 'exam' && pinE.length > 0)) && (
+        <button className="link" style={{ display: 'block', margin: '0 auto 12px', fontSize: 12.5, fontWeight: 700 }}
+          onClick={() => browseMode === 'country' ? setShowAllC(!showAllC) : setShowAllE(!showAllE)}>
+          {(browseMode === 'country' ? showAllC : showAllE) ? 'Show pinned only ▴' : 'Show all ▾'}
+        </button>
+      )}
+
       {browseMode === 'exam' && (
         <>
-          {CATALOG.flatMap(([flag, country, exams]) => exams.map(([exam, parts]) => ({ flag, country, exam, parts })))
-            .map(({ flag, country, exam, parts }) => {
+          {orderedExams.map(({ flag, country, exam, parts }) => {
               const key = 'exam|' + country + '|' + exam;
               const ecx = examColor(exam);
               return (
@@ -118,6 +145,7 @@ function ExploreBrowse() {
                     onClick={() => setOpenExam(openExam === key ? '' : key)}>
                     <Flag country={country} emoji={flag} size={30} />
                     <span style={{ flex: 1, fontWeight: 600 }}>{exam}</span>
+                    <span onClick={(e) => { e.stopPropagation(); togglePinE(key); }} style={{ padding: '0 5px', fontSize: 16, color: pinE.includes(key) ? 'var(--gold)' : 'var(--subtle)', cursor: 'pointer' }}>{pinE.includes(key) ? '★' : '☆'}</span>
                     {examCount(exam) >= 2 && (
                       <span style={{ fontSize: 11, color: ecx, background: 'var(--paper-2)', borderRadius: 20, padding: '3px 9px', marginRight: 4, fontWeight: 700 }}>
                         {examCount(exam)}
@@ -141,12 +169,13 @@ function ExploreBrowse() {
         </>
       )}
 
-      {browseMode === 'country' && CATALOG.map(([flag, country, exams]) => (
+      {browseMode === 'country' && orderedCountries.map(([flag, country, exams]) => (
         <div key={country} className="card" style={{ padding: 0, overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: 14, cursor: 'pointer' }}
             onClick={() => setOpenCountry(openCountry === country ? '' : country)}>
             <Flag country={country} emoji={flag} />
             <span style={{ flex: 1, fontWeight: 600 }}>{country}</span>
+            <span onClick={(e) => { e.stopPropagation(); togglePinC(country); }} style={{ padding: '0 5px', fontSize: 16, color: pinC.includes(country) ? 'var(--gold)' : 'var(--subtle)', cursor: 'pointer' }}>{pinC.includes(country) ? '★' : '☆'}</span>
             <span className="meta">{openCountry === country ? '▲' : '▼'}</span>
           </div>
 
@@ -235,7 +264,7 @@ function Momentum({ user }) {
       <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
         {!hideCd && daysLeft !== null && (
           <div className="card" onClick={() => setCdOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '12px 8px', borderColor: 'var(--forest)', margin: 0, cursor: 'pointer', position: 'relative' }}>
-            <span style={{ position: 'absolute', top: 7, right: 9, fontSize: 11, color: 'var(--subtle)', opacity: 0.8 }}>⤢</span>
+            <span style={{ position: 'absolute', top: 8, right: 11, fontSize: 15, fontWeight: 700, color: 'var(--subtle)', opacity: 0.9, lineHeight: 1 }}>›</span>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'var(--forest)', textTransform: 'uppercase' }}>Countdown</div>
             <div className="display-num" style={{ fontSize: 30, fontWeight: 700, color: 'var(--forest)', lineHeight: 1.15 }}>
               {daysLeft > 0 ? daysLeft : daysLeft === 0 ? 'Today' : '—'}
@@ -245,13 +274,13 @@ function Momentum({ user }) {
         )}
         {!hideSt && (
         <div className="card" onClick={() => setStOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '12px 8px', borderColor: 'var(--forest)', margin: 0, cursor: 'pointer', position: 'relative' }}>
-          <span style={{ position: 'absolute', top: 7, right: 9, fontSize: 11, color: 'var(--subtle)', opacity: 0.8 }}>⤢</span>
+          <span style={{ position: 'absolute', top: 8, right: 11, fontSize: 15, fontWeight: 700, color: 'var(--subtle)', opacity: 0.9, lineHeight: 1 }}>›</span>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'var(--forest)', textTransform: 'uppercase' }}>Study Streak</div>
           <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--rust)', lineHeight: 1.2, marginTop: 2 }}>
             <span style={{ fontSize: 18 }}>🔥</span> {streak}
           </div>
           {studiedToday ? (
-            <div className="sub" style={{ fontSize: 10, marginTop: 3, color: 'var(--forest)', fontWeight: 700 }}>✓ done today</div>
+            <div className="sub" style={{ fontSize: 10, marginTop: 3, color: 'var(--forest)', fontWeight: 700 }}>Streak safe ✓</div>
           ) : (
             <button onClick={(e) => { e.stopPropagation(); markStudy(); }} disabled={marking} style={{ marginTop: 4, fontSize: 11, fontWeight: 700, color: '#fff', background: 'var(--rust)', border: 'none', borderRadius: 999, padding: '5px 11px', cursor: 'pointer' }}>
               {marking ? '…' : 'Mark today ✓'}
@@ -400,8 +429,8 @@ export default function Home() {
         <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: 3, color: 'var(--rust)', textTransform: 'uppercase', marginBottom: 12 }}>
           For doctors, by doctors
         </div>
-        <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 34, fontWeight: 900, lineHeight: 1.02, letterSpacing: '-1.5px', color: 'var(--ink)', margin: 0 }}>
-          Find the right <em style={{ fontStyle: 'italic', color: 'var(--forest)' }}>study&nbsp;partner</em> for your medical exam.
+        <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontVariationSettings: '"opsz" 18', fontSize: 34, fontWeight: 900, lineHeight: 1.05, letterSpacing: '-1px', color: 'var(--ink)', margin: 0 }}>
+          Find the right <em style={{ fontStyle: 'italic', color: 'var(--forest)', paddingRight: '0.18em' }}>study&nbsp;partner</em> for your medical exam.
         </h1>
       </div>
 
