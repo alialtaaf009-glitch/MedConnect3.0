@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../context/Auth.jsx';
-import { otherPerson } from '../components/ChatBits.jsx';
+import { otherPerson, IcoTrash } from '../components/ChatBits.jsx';
 import GroupChat from '../components/GroupChat.jsx';
 import DirectChat from '../components/DirectChat.jsx';
 
@@ -31,20 +31,37 @@ function ConversationList({ nav, me }) {
   const [friends, setFriends] = useState([]);
   const [picked, setPicked] = useState([]);
 
-  // long-press to delete a chat
+  // delete a chat — reachable by long-press OR swipe-left
+  const [swipeId, setSwipeId] = useState(null);
+  const startX = useRef(0);
+  const dxRef = useRef(0);
   const pressTimer = useRef(null);
   const longFired = useRef(false);
-  const pressStart = (c) => {
+  const delChat = (c) => {
+    if (window.confirm(`Delete your chat with ${c.name}? This cannot be undone.`)) {
+      api.deleteChat(c.other_id).then(() => setConvos((v) => v.filter((x) => x.other_id !== c.other_id))).catch(() => {});
+    }
+    setSwipeId(null);
+  };
+  const pressStart = (c, x) => {
     longFired.current = false;
+    startX.current = x; dxRef.current = 0;
     pressTimer.current = setTimeout(() => {
       longFired.current = true;
       if (navigator.vibrate) { try { navigator.vibrate(18); } catch (e) {} }
-      if (window.confirm(`Delete your chat with ${c.name}? This cannot be undone.`)) {
-        api.deleteChat(c.other_id).then(() => setConvos((v) => v.filter((x) => x.other_id !== c.other_id))).catch(() => {});
-      }
+      delChat(c);
     }, 550);
   };
-  const pressEnd = () => clearTimeout(pressTimer.current);
+  const pressMove = (x) => {
+    dxRef.current = x - startX.current;
+    if (Math.abs(dxRef.current) > 12) clearTimeout(pressTimer.current); // swiping, not holding
+  };
+  const pressEnd = (c) => {
+    clearTimeout(pressTimer.current);
+    if (c && dxRef.current < -55) setSwipeId(c.other_id);      // swiped left -> reveal delete
+    else if (c && dxRef.current > 25) setSwipeId(null);        // swiped right -> hide
+    dxRef.current = 0;
+  };
 
   useEffect(() => {
     api.conversations().then((d) => {
@@ -88,16 +105,18 @@ function ConversationList({ nav, me }) {
               No conversations yet. Connect with a partner, then start chatting from the Connections tab.
             </p>
           )}
-          {convos.length > 0 && <p className="sub" style={{ fontSize: 11, marginBottom: 8 }}>Hold a chat to delete it.</p>}
+          {convos.length > 0 && <p className="sub" style={{ fontSize: 11, marginBottom: 8 }}>Swipe a chat left — or hold it — to delete.</p>}
           {convos.map((c) => {
             const init = (c.name || 'Dr').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('');
             const unread = c.last_sender == c.other_id && new Date(c.last_at).getTime() > Number(localStorage.getItem('chat_read_' + c.other_id) || 0);
             return (
-              <div key={c.other_id} className="row" style={{ cursor: 'pointer' }}
-                onTouchStart={() => pressStart(c)} onTouchEnd={pressEnd} onTouchMove={pressEnd}
-                onMouseDown={() => pressStart(c)} onMouseUp={pressEnd} onMouseLeave={pressEnd}
+              <div key={c.other_id} style={{ position: 'relative', marginBottom: 10 }}>
+                <button onClick={() => delChat(c)} aria-label="Delete chat" style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: 74, background: 'var(--rust)', color: '#fff', border: 'none', borderRadius: 20, display: 'grid', placeItems: 'center', cursor: 'pointer' }}><IcoTrash /></button>
+              <div className="row" style={{ cursor: 'pointer', marginBottom: 0, position: 'relative', zIndex: 1, transform: swipeId === c.other_id ? 'translateX(-82px)' : 'translateX(0)', transition: 'transform .22s ease' }}
+                onTouchStart={(e) => pressStart(c, e.touches[0].clientX)} onTouchEnd={() => pressEnd(c)} onTouchMove={(e) => pressMove(e.touches[0].clientX)}
+                onMouseDown={(e) => pressStart(c, e.clientX)} onMouseUp={() => pressEnd(c)} onMouseLeave={() => pressEnd(null)}
                 onContextMenu={(e) => e.preventDefault()}
-                onClick={() => { if (longFired.current) return; nav(`/chat?with=${c.other_id}&name=${encodeURIComponent(c.name)}&av=${encodeURIComponent(c.avatar || '')}`); }}>
+                onClick={() => { if (longFired.current) return; if (swipeId) { setSwipeId(null); return; } nav(`/chat?with=${c.other_id}&name=${encodeURIComponent(c.name)}&av=${encodeURIComponent(c.avatar || '')}`); }}>
                 <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: c.avatar ? 22 : 15, color: 'var(--forest)', fontWeight: 600, flexShrink: 0 }}>{c.avatar || init}</div>
                 <div className="grow">
                   <div className="name">{c.name}</div>
@@ -106,6 +125,7 @@ function ConversationList({ nav, me }) {
                   </div>
                 </div>
                 {unread && <span style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--rust)', flexShrink: 0 }} />}
+              </div>
               </div>
             );
           })}
@@ -157,4 +177,3 @@ function ConversationList({ nav, me }) {
     </div>
   );
 }
-
