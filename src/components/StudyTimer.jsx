@@ -46,7 +46,7 @@ export default function StudyTimer() {
     return (
       <div onClick={() => setFullscreen(false)} style={{ position: 'fixed', inset: 0, background: 'var(--paper)', zIndex: 1000, animation: 'fadeUp .3s cubic-bezier(0.34, 1.56, 0.64, 1) both', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 'calc(env(safe-area-inset-top, 0px) + 60px) 24px calc(env(safe-area-inset-bottom, 0px) + 40px)', cursor: 'pointer' }}>
         <ModeTabs />
-        <div style={{ fontFamily: "'Inter',system-ui,sans-serif", fontSize: 'min(22vw, 90px)', fontWeight: 900, color: t.done ? 'var(--rust)' : 'var(--forest)', lineHeight: 1, letterSpacing: 2 }}>
+        <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 'min(22vw, 90px)', fontWeight: 900, color: t.done ? 'var(--rust)' : 'var(--forest)', lineHeight: 1, letterSpacing: 2 }}>
           {mm}:{ss}
         </div>
         {t.done && <div style={{ color: 'var(--rust)', fontWeight: 700, fontSize: 18, marginTop: 10 }}>Time's up! 🎉</div>}
@@ -60,7 +60,7 @@ export default function StudyTimer() {
     <div className="card" onClick={() => setFullscreen(true)} style={{ marginBottom: 18, textAlign: 'center', borderColor: 'var(--forest)', minHeight: 280, cursor: 'pointer' }}>
       <ModeTabs />
 
-      <div style={{ fontFamily: "'Inter',system-ui,sans-serif", fontSize: 52, fontWeight: 900, color: t.done ? 'var(--rust)' : 'var(--forest)', lineHeight: 1.1, letterSpacing: 1 }}>
+      <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 52, fontWeight: 900, color: t.done ? 'var(--rust)' : 'var(--forest)', lineHeight: 1.1, letterSpacing: 1 }}>
         {mm}:{ss}
       </div>
       {t.done && <div style={{ color: 'var(--rust)', fontWeight: 700, fontSize: 14, marginTop: 2 }}>Time's up! 🎉</div>}
@@ -92,4 +92,3 @@ export default function StudyTimer() {
     </div>
   );
 }
-
