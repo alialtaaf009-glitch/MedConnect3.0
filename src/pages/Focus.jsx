@@ -25,10 +25,13 @@ function Breathe() {
   const grow = on && (phase === 0 || phase === 1); // big through inhale + hold
 
   return (
-    <div className="card" style={{ textAlign: 'center', marginTop: 18 }}>
+    <>
+    <div style={{ borderTop: '1px solid var(--line)', margin: '24px 0 16px' }} />
+    <div className="card" style={{ textAlign: 'center' }}>
       <div style={{ fontSize: 15, fontWeight: 700 }}>Take a break</div>
-      <p className="sub" style={{ fontSize: 12, marginTop: 2 }}>
-        60 seconds of box breathing — in 4, hold 4, out 4, hold 4. A quick reset for a busy mind.
+      <p className="sub" style={{ fontSize: 12, marginTop: 2, fontStyle: 'italic' }}>60 seconds of calm. No side effects.</p>
+      <p className="sub" style={{ fontSize: 11, marginTop: 2 }}>
+        Box breathing — in 4, hold 4, out 4, hold 4.
       </p>
       <div className="breathe-ball" style={{ transform: grow ? 'scale(1)' : 'scale(0.42)' }} />
       {on ? (
@@ -41,6 +44,7 @@ function Breathe() {
         <button className="btn" style={{ maxWidth: 200 }} onClick={() => setOn(true)}>Start breathing</button>
       )}
     </div>
+    </>
   );
 }
 
