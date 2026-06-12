@@ -108,6 +108,16 @@ export default function Home() {
   useEffect(() => { api.getStats().then((d) => setCounts(d.counts || {})).catch(() => {}); }, []);
   useEffect(() => { api.connections().then((d) => setNudges(d.nudges || [])).catch(() => {}); }, []);
 
+
+  // counts for a specific exam PART (best-effort mapping to users' exam strings)
+  const partCount = (exam, part) => {
+    const fam = exam.split(' ')[0];
+    const SPECIAL = { 'PLAB 1 / AKT': 'PLAB 1 / UKMLA AKT', 'PLAB 2 / CPSA': 'PLAB 2 / UKMLA CPSA' };
+    const candidates = [SPECIAL[part], `${exam} — ${part}`, `${fam} — ${part}`, exam === 'SMLE' ? 'SMLE' : null];
+    let n = 0;
+    for (const k of candidates) if (k && counts[k]) n = Math.max(n, counts[k]);
+    return n;
+  };
   const examCount = (label) => {
     const family = label.split(' ')[0];
     let n = 0;
@@ -229,6 +239,7 @@ export default function Home() {
                       <div key={part} className="exam-accent" style={{ '--ec': accents[pi % accents.length], padding: '11px 16px 11px 22px', borderTop: '1px solid var(--line)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                         onClick={() => nav(`/partners?exam=${encodeURIComponent(exam)}&part=${encodeURIComponent(part)}`)}>
                         <span style={{ fontWeight: 600, fontSize: 14, flex: 1 }}>{part}</span>
+                        {partCount(exam, part) >= 1 && <span style={{ fontSize: 10.5, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 6 }}>{partCount(exam, part)}</span>}
                         <span style={{ color: 'var(--subtle)', fontSize: 13 }}>›</span>
                       </div>
                     );
@@ -269,6 +280,7 @@ export default function Home() {
                     <div key={part} className="exam-accent" style={{ '--ec': ec, padding: '11px 16px 11px 22px', borderTop: '1px solid var(--line)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                       onClick={() => nav(`/partners?exam=${encodeURIComponent(exam)}&part=${encodeURIComponent(part)}`)}>
                       <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)', flex: 1 }}>{part}</span>
+                      {partCount(exam, part) >= 1 && <span style={{ fontSize: 10.5, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 6 }}>{partCount(exam, part)}</span>}
                       <span style={{ color: 'var(--subtle)', fontSize: 13 }}>›</span>
                     </div>
                   );
@@ -289,4 +301,3 @@ export default function Home() {
     </div>
   );
 }
-
