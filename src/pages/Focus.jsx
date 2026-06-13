@@ -55,10 +55,8 @@ function Breathe() {
   return (
     <>
     <div style={{ borderTop: '1px solid var(--line)', margin: '24px 0 16px' }} />
-    <div className="card tint-green" style={{ textAlign: 'center' }}>
-      <div style={{ fontSize: 15, fontWeight: 700, position: 'relative' }}>Take a break
-        <span onClick={() => setBig(true)} style={{ position: 'absolute', right: 0, top: 0, fontSize: 17, fontWeight: 700, color: 'var(--subtle)', cursor: 'pointer', lineHeight: 1 }}>›</span>
-      </div>
+    <div className="card tint-green" onClick={() => !on && setBig(true)} style={{ textAlign: 'center', cursor: 'pointer' }}>
+      <div style={{ fontSize: 15, fontWeight: 700 }}>Take a break</div>
       <p className="voice sub" style={{ fontSize: 14, marginTop: 2 }}>60 seconds of calm. No side effects.</p>
       <p className="sub" style={{ fontSize: 11, marginTop: 2 }}>
         Box breathing — in 4, hold 4, out 4, hold 4.
@@ -83,10 +81,11 @@ export default function Focus() {
     <div className="screen">
       <h1 className="h1">Focus ☕</h1>
       <p className="voice sub" style={{ marginBottom: 16, fontSize: 14.5 }}>
-        Coffee in hand? Good. Set a block, tap the box for full-screen, and guard it like an exam hall.
+        Coffee in hand? Good. Set a block, tap the timer for full-screen, and guard it like an exam hall.
       </p>
       <StudyTimer />
       <Breathe />
     </div>
   );
 }
+
