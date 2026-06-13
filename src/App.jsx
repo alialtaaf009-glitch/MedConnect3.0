@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route, Navigate, NavLink } from 'react-router-dom';
+import { Routes, Route, Navigate, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from './context/Auth.jsx';
 import { useTheme } from './context/Theme.jsx';
 import { useTimer } from './context/Timer.jsx';
@@ -30,6 +30,30 @@ function Icon({ name }) {
     profile: <><circle cx="12" cy="12" r="9" /><circle cx="12" cy="10" r="3" /><path d="M6.5 18.5c1-2.3 3.1-3.5 5.5-3.5s4.5 1.2 5.5 3.5" /></>,
   };
   return <svg {...common}>{paths[name]}</svg>;
+}
+
+
+function TopBar({ user }) {
+  const loc = useLocation();
+  const nav = useNavigate();
+  // top-level tabs show no back arrow; everything else does
+  const roots = ['/home', '/partners', '/osce', '/chat', '/focus'];
+  const showBack = !roots.includes(loc.pathname);
+  const onProfile = loc.pathname === '/profile';
+  const initials = (user?.name || 'Dr A').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('');
+  return (
+    <div className="topbar">
+      {showBack
+        ? <button className="topbar-back" onClick={() => nav(-1)} aria-label="Back">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+          </button>
+        : <span style={{ width: 24 }} />}
+      <div className="topbar-title">MedConnect</div>
+      {onProfile
+        ? <span style={{ width: 36 }} />
+        : <button className="topbar-avatar" onClick={() => nav('/profile')} aria-label="Profile">{user?.avatar || initials}</button>}
+    </div>
+  );
 }
 
 function TabBar() {
@@ -142,6 +166,7 @@ export default function App() {
   // main app
   return (
     <div className="app">
+      <TopBar user={user} />
       <Routes>
         <Route path="/home" element={<Home />} />
         <Route path="/partners" element={<Partners />} />
