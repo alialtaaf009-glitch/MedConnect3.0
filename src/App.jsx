@@ -43,11 +43,11 @@ function TopBar({ user }) {
   const initials = (user?.name || 'Dr A').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('');
   return (
     <div className="topbar">
-      {showBack
-        ? <button className="topbar-back" onClick={() => nav(-1)} aria-label="Back">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-          </button>
-        : <span style={{ width: 24 }} />}
+      {showBack && (
+        <button className="topbar-back" onClick={() => nav(-1)} aria-label="Back">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+        </button>
+      )}
       <div className="topbar-title">MedConnect</div>
       {onProfile
         ? <span style={{ width: 36 }} />
