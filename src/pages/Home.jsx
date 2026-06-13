@@ -182,7 +182,7 @@ function ExploreBrowse() {
                 </div>
               );
             })}
-        </>
+          </>
       )}
 
       {browseMode === 'country' && orderedCountries.map(([flag, country, exams]) => (
@@ -358,7 +358,7 @@ function Momentum({ user }) {
               </div>
               <div className="display-num" style={{ fontSize: 30, fontWeight: 700, color: 'var(--rust)', letterSpacing: 2, fontVariantNumeric: 'tabular-nums', margin: '6px 0 2px' }}>
                 {hh}:{mm2}:{ss}
-                </div>
+              </div>
               <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>hours · minutes · seconds</div>
               <div style={{ display: 'inline-block', fontSize: 12, fontWeight: 700, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 999, padding: '5px 14px', margin: '14px 0 2px' }}>{coachLine(dLeft)}</div>
               <button className="btn ghost" style={{ marginTop: 12 }} onClick={() => setCdOpen(false)}>Back to it</button>
@@ -486,8 +486,8 @@ export default function Home() {
         <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: 3, color: 'var(--rust)', textTransform: 'uppercase', marginBottom: 12 }}>
           For doctors, by doctors
         </div>
-        <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontVariationSettings: '"opsz" 18', fontSize: 34, fontWeight: 900, lineHeight: 1.05, letterSpacing: '-1px', color: 'var(--ink)', margin: 0 }}>
-          Find the right <em style={{ fontStyle: 'italic', color: 'var(--forest)', paddingRight: '0.18em' }}>study&nbsp;partner</em> for your medical exam.
+        <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontVariationSettings: '"opsz" 18', fontSize: 40, fontWeight: 900, lineHeight: 1.04, letterSpacing: '-1px', color: 'var(--ink)', margin: 0 }}>
+          Find your <em style={{ fontStyle: 'italic', color: 'var(--forest)', paddingRight: '0.18em' }}>study&nbsp;partner.</em>
         </h1>
       </div>
 
