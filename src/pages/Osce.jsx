@@ -99,12 +99,12 @@ export default function Osce() {
       {stations.map((st, i) => {
         const locked = !isPro && i >= FREE;
         return (
-          <div key={st} className="row" style={{ justifyContent:'space-between', opacity: locked ? .55 : 1, cursor:'pointer', borderLeft: `4px solid ${locked ? 'var(--line)' : 'var(--rust)'}`, gap: 10 }}
+          <div key={st} className="row" style={{ justifyContent:'space-between', opacity: locked ? .55 : 1, cursor:'pointer', gap: 10 }}
             onClick={() => { if (locked) { setShowPro(true); } else { setActive(st); } }}>
             <span style={{ width: 26, height: 26, borderRadius: '50%', background: locked ? 'var(--paper-2)' : 'var(--rust)', color: locked ? 'var(--subtle)' : '#fff', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 800, flexShrink: 0 }}>{i + 1}</span>
             <span style={{ fontWeight:600, flex: 1 }}>{st}</span>
             {locked ? <span style={{ color:'var(--subtle)', opacity:0.7 }}><LockIcon /></span>
-                    : <span className="link" style={{ color: 'var(--rust)', fontWeight: 700 }}>Practise ›</span>}
+                    : <span className="link" style={{ fontWeight: 700 }}>Practise ›</span>}
           </div>
         );
       })}
@@ -197,4 +197,3 @@ function Station({ name, minutes, onBack }) {
     </div>
   );
 }
-
