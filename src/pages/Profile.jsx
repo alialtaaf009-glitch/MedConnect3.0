@@ -34,7 +34,7 @@ export default function Profile() {
   const { mode, toggle } = useTheme();
   const [, setTilePrefs] = useState(0); // re-render when tile prefs change
   const [shareOpen, setShareOpen] = useState(false);
-  const shareLink = `https://med-connect3-0.vercel.app/?add=${user?.id}`;
+  const shareLink = `https://med-connect3-0.vercel.app/#/add/${user?.id}`;
   const shareProfile = async () => {
     try {
       if (navigator.share) { await navigator.share({ title: 'Add me on MedConnect', text: `Add me as a study partner on MedConnect — ${user?.name}`, url: shareLink }); return; }
@@ -145,8 +145,10 @@ export default function Profile() {
         <Row k="Registration" v={user?.reg_council ? `${user.reg_council} ${user.reg_number} (self-reported)` : '—'} />
       </div>
       <button className="btn" onClick={() => setEditing(true)}>Edit profile</button>
-      <button className="btn ghost" style={{ marginTop:10 }} onClick={() => setShareOpen(true)}>Share my profile</button>
-      <button className="btn ghost" style={{ marginTop:8 }} onClick={toggle}>{mode === 'dark' ? '☀️  Light mode' : '🌙  Dark mode'}</button>
+      <div style={{ display: 'flex', gap: 8, marginTop: 12, justifyContent: 'center' }}>
+        <button onClick={() => setShareOpen(true)} style={{ flex: 1, maxWidth: 160, fontSize: 12.5, fontWeight: 700, color: 'var(--forest)', background: 'transparent', border: '1.5px solid var(--line)', borderRadius: 999, padding: '8px 12px', cursor: 'pointer' }}>⤴ Share profile</button>
+        <button onClick={toggle} style={{ flex: 1, maxWidth: 160, fontSize: 12.5, fontWeight: 700, color: 'var(--forest)', background: 'transparent', border: '1.5px solid var(--line)', borderRadius: 999, padding: '8px 12px', cursor: 'pointer' }}>{mode === 'dark' ? '☀️ Light' : '🌙 Dark'}</button>
+      </div>
 
       {shareOpen && (
         <div onClick={() => setShareOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'grid', placeItems: 'center', zIndex: 100, padding: 24 }}>
