@@ -202,7 +202,7 @@ function ExploreBrowse() {
                       {partCount(exam, part) >= 1 && <span style={{ fontSize: 10.5, color: '#fff', background: examColor(exam), borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 6 }}>{partCount(exam, part)}</span>}
                       <span style={{ color: 'var(--subtle)', fontSize: 13 }}>›</span>
                     </div>
-                  );
+                    );
                 })}
               </div>
             );
@@ -474,7 +474,7 @@ export default function Home() {
       <ExploreBrowse />
 
       {/* invite a colleague — native share sheet (Android & iOS), clipboard fallback */}
-      <div className="card tint-gold" style={{ textAlign: 'center', marginTop: 20 }}>
+      <div className="card" style={{ textAlign: 'center', marginTop: 20 }}>
         <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Know a doctor who needs a study partner?</div>
         <p className="sub" style={{ fontSize: 13, marginBottom: 12 }}>MedConnect grows one colleague at a time.</p>
         <button className="btn btn-cta" onClick={inviteFriend}>Invite your friends</button>
