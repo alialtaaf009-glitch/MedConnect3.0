@@ -205,10 +205,22 @@ button:active { -webkit-tap-highlight-color: transparent; }
 .link { transition: transform .18s cubic-bezier(0.34, 1.56, 0.64, 1), color .18s ease; display: inline-block; }
 
 /* #1 cute animated favourite star */
-@keyframes starPop { 0% { transform: scale(1); } 40% { transform: scale(1.4) rotate(12deg); } 70% { transform: scale(0.9) rotate(-6deg); } 100% { transform: scale(1) rotate(0); } }
-.star-btn { transition: transform .2s cubic-bezier(0.34, 1.56, 0.64, 1), color .2s ease; cursor: pointer; }
-.star-btn:active { transform: scale(1.3); }
-.star-btn.on { animation: starPop .42s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes starPop {
+  0%   { transform: scale(1) rotate(0); }
+  25%  { transform: scale(1.55) rotate(-18deg); }
+  45%  { transform: scale(0.82) rotate(14deg); }
+  65%  { transform: scale(1.18) rotate(-8deg); }
+  82%  { transform: scale(0.94) rotate(4deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+@keyframes starGlow {
+  0%   { filter: drop-shadow(0 0 0 rgba(185,138,46,0)); }
+  40%  { filter: drop-shadow(0 0 8px rgba(185,138,46,0.7)); }
+  100% { filter: drop-shadow(0 0 0 rgba(185,138,46,0)); }
+}
+.star-btn { transition: transform .2s cubic-bezier(0.34, 1.56, 0.64, 1), color .25s ease; cursor: pointer; display: inline-block; }
+.star-btn:active { transform: scale(1.35) rotate(-10deg); }
+.star-btn.on { animation: starPop .55s cubic-bezier(0.34, 1.56, 0.64, 1), starGlow .6s ease; }
 
 /* #4 crisper rendering for flag images + emoji */
 .flag-circ img { image-rendering: -webkit-optimize-contrast; }
@@ -226,19 +238,19 @@ button:active { -webkit-tap-highlight-color: transparent; }
 /* app open splash — self-drawing caduceus + tagline */
 .splash-draw line, .splash-draw path, .splash-draw circle { fill: none; stroke: var(--forest); stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
 .splash-draw .snake { stroke: var(--rust); }
-.splash-draw line, .splash-draw path, .splash-draw circle { stroke-dasharray: 300; stroke-dashoffset: 300; animation: splashDraw 1.2s ease forwards; }
-.splash-draw .wings { animation-delay: 0.85s; }
-.splash-draw circle { animation-delay: 1.0s; }
+.splash-draw line, .splash-draw path, .splash-draw circle { stroke-dasharray: 300; stroke-dashoffset: 300; animation: splashDraw 0.9s ease forwards; }
+.splash-draw .wings { animation-delay: 0.6s; }
+.splash-draw circle { animation-delay: 0.75s; }
 @keyframes splashDraw { to { stroke-dashoffset: 0; } }
-.splash-brand { font-family: 'Fraunces', Georgia, serif; font-size: 30px; font-weight: 900; letter-spacing: -0.5px; color: var(--forest); opacity: 0; animation: splashFade .45s ease .5s forwards; }
+.splash-brand { font-family: 'Fraunces', Georgia, serif; font-size: 30px; font-weight: 900; letter-spacing: -0.5px; color: var(--forest); opacity: 0; animation: splashFade .4s ease .4s forwards; }
 .splash-tag { font-size: 12.5px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--rust); }
 .splash-tag span { opacity: 0; display: inline-block; animation: splashWord .5s ease forwards; }
-.splash-tag span:nth-child(1) { animation-delay: 0.9s; }
-.splash-tag span:nth-child(2) { animation-delay: 1.15s; }
-.splash-tag span:nth-child(3) { animation-delay: 1.4s; }
+.splash-tag span:nth-child(1) { animation-delay: 0.7s; }
+.splash-tag span:nth-child(2) { animation-delay: 0.95s; }
+.splash-tag span:nth-child(3) { animation-delay: 1.2s; }
 @keyframes splashFade { to { opacity: 1; } }
 @keyframes splashWord { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) {
   .splash-draw line, .splash-draw path, .splash-draw circle { animation: none; stroke-dashoffset: 0; }
   .splash-brand, .splash-tag span { animation: none; opacity: 1; }
-             }
+}
