@@ -66,7 +66,7 @@ function Flag({ country, emoji, size = 34 }) {
   if (!code || broken) return <span className="flag-circ" style={{ width: size, height: size, fontSize: size * 0.5, overflow: 'visible' }}>{emoji}</span>;
   return (
     <span className="flag-circ" style={{ width: size, height: size }}>
-      <img src={`https://flagcdn.com/w80/${code}.png`} alt={country + ' flag'} onError={() => setBroken(true)}
+      <img src={`https://flagcdn.com/w160/${code}.png`} alt={country + ' flag'} onError={() => setBroken(true)}
         style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
     </span>
   );
@@ -150,7 +150,7 @@ function ExploreBrowse() {
                         {examCount(exam)}
                       </span>
                     )}
-                    <span onClick={(e) => { e.stopPropagation(); togglePinE(key); }} style={{ padding: '0 5px', fontSize: 16, color: pinE.includes(key) ? 'var(--gold)' : 'var(--subtle)', cursor: 'pointer' }}>{pinE.includes(key) ? '★' : '☆'}</span>
+                    <span className={`star-btn ${pinE.includes(key) ? 'on' : ''}`} onClick={(e) => { e.stopPropagation(); togglePinE(key); }} style={{ padding: '0 5px', fontSize: 16, color: pinE.includes(key) ? 'var(--gold)' : 'var(--subtle)' }}>{pinE.includes(key) ? '★' : '☆'}</span>
                     <span className="meta" style={{ fontSize: 11 }}><span style={{ display: 'inline-block', transition: 'transform .25s ease', transform: openExam === key ? 'rotate(90deg)' : 'rotate(0deg)' }}>›</span></span>
                   </div>
                   {openExam === key && parts.map((part) => {
@@ -175,7 +175,7 @@ function ExploreBrowse() {
             onClick={() => setOpenCountry(openCountry === country ? '' : country)}>
             <Flag country={country} emoji={flag} />
             <span style={{ flex: 1, fontWeight: 600 }}>{country}</span>
-            <span onClick={(e) => { e.stopPropagation(); togglePinC(country); }} style={{ padding: '0 5px', fontSize: 16, color: pinC.includes(country) ? 'var(--gold)' : 'var(--subtle)', cursor: 'pointer' }}>{pinC.includes(country) ? '★' : '☆'}</span>
+            <span className={`star-btn ${pinC.includes(country) ? 'on' : ''}`} onClick={(e) => { e.stopPropagation(); togglePinC(country); }} style={{ padding: '0 5px', fontSize: 16, color: pinC.includes(country) ? 'var(--gold)' : 'var(--subtle)' }}>{pinC.includes(country) ? '★' : '☆'}</span>
             <span className="meta" style={{ fontSize: 17, fontWeight: 700, color: 'var(--subtle)', transition: 'transform .25s ease', transform: openCountry === country ? 'rotate(90deg)' : 'rotate(0deg)', display: 'inline-block' }}>›</span>
           </div>
 
@@ -284,7 +284,7 @@ function Momentum({ user }) {
       <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
         {!hideCd && daysLeft !== null && (
           <div className="card" onClick={() => setCdOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '12px 8px', borderColor: 'var(--forest)', margin: 0, cursor: 'pointer', position: 'relative' }}>
-            <span style={{ position: 'absolute', top: 8, right: 11, fontSize: 15, fontWeight: 700, color: 'var(--subtle)', opacity: 0.9, lineHeight: 1 }}>›</span>
+            <span style={{ position: 'absolute', top: '50%', right: 11, transform: 'translateY(-50%)', fontSize: 18, fontWeight: 700, color: 'var(--subtle)', opacity: 0.9, lineHeight: 1 }}>›</span>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'var(--forest)', textTransform: 'uppercase' }}>Countdown</div>
             <div className="display-num" style={{ fontSize: 30, fontWeight: 700, color: 'var(--forest)', lineHeight: 1.15 }}>
               {daysLeft > 0 ? daysLeft : daysLeft === 0 ? 'Today' : '—'}
@@ -294,7 +294,7 @@ function Momentum({ user }) {
         )}
         {!hideSt && (
         <div className="card" onClick={() => setStOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '12px 8px', borderColor: 'var(--forest)', margin: 0, cursor: 'pointer', position: 'relative' }}>
-          <span style={{ position: 'absolute', top: 8, right: 11, fontSize: 15, fontWeight: 700, color: 'var(--subtle)', opacity: 0.9, lineHeight: 1 }}>›</span>
+          <span style={{ position: 'absolute', top: '50%', right: 11, transform: 'translateY(-50%)', fontSize: 18, fontWeight: 700, color: 'var(--subtle)', opacity: 0.9, lineHeight: 1 }}>›</span>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'var(--forest)', textTransform: 'uppercase' }}>Study Streak</div>
           <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--rust)', lineHeight: 1.2, marginTop: 2 }}>
             <span style={{ fontSize: 18 }}>🔥</span> {streak}
@@ -352,7 +352,7 @@ function Momentum({ user }) {
       })()}
 
       {stOpen && (() => {
-      const best = Math.max(user?.longest_streak || 0, streak);
+        const best = Math.max(user?.longest_streak || 0, streak);
         const line = !studiedToday
           ? 'One tap keeps the flame alive.'
           : streak >= best && streak > 1
@@ -435,7 +435,7 @@ export default function Home() {
             <div className="card" onClick={() => nav('/profile')} style={{ cursor: 'pointer' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 13 }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, flexShrink: 0 }}>
-            <div style={{ width: 50, height: 50, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', color: 'var(--forest)', fontWeight: 600, fontSize: user?.avatar ? 26 : 18 }}>{user?.avatar || initials}</div>
+            <div className="avatar-idle" style={{ width: 50, height: 50, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', color: 'var(--forest)', fontWeight: 600, fontSize: user?.avatar ? 26 : 18 }}>{user?.avatar || initials}</div>
             <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--forest)' }}>Profile</span>
           </div>
           <div style={{ flex: 1 }}>
