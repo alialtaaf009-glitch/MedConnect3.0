@@ -364,6 +364,7 @@ function Momentum({ user }) {
                     <div className="sub" style={{ fontSize: 10.5, marginTop: 6 }}>
                       {fullTrees > 0 && `${fullTrees} week${fullTrees === 1 ? '' : 's'} grown`}{fullTrees > 0 && dayInWeek > 0 ? ' · ' : ''}{dayInWeek > 0 && `${7 - dayInWeek} day${7 - dayInWeek === 1 ? '' : 's'} to your next tree`}
                     </div>
+                    <div className="sub" style={{ fontSize: 10, marginTop: 8, opacity: 0.8 }}>🌱 → 🌳 Every 7 study days grows a new tree.</div>
                   </div>
                 );
               })()}
