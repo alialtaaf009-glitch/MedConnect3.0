@@ -53,6 +53,12 @@ export default async function handler(req, res) {
       await sql`UPDATE users SET medical_school = ${body.medicalSchool} WHERE id = ${uid}`;
     }
 
+    // current focus (self-creating column so no manual migration is needed)
+    if (body.focus !== undefined) {
+      await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS focus TEXT DEFAULT ''`;
+      await sql`UPDATE users SET focus = ${body.focus} WHERE id = ${uid}`;
+    }
+
     // exam date (clear or set)
     if (hasExamDate) {
       await sql`UPDATE users SET exam_date = ${examDateVal} WHERE id = ${uid}`;
@@ -64,4 +70,3 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Could not update profile [v3]: ' + (e.message || String(e)) });
   }
 }
-
