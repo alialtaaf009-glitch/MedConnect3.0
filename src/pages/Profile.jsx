@@ -12,6 +12,8 @@ const AVATARS = ['🩺','💉','🧬','🦴','🫀','🧠','👨‍⚕️','👩
 const COUNTRIES = ['Pakistan','United Kingdom','United States','Saudi Arabia / Gulf','Australia','India','Other'];
 const TIMEZONES = ['GMT-8 (US Pacific)','GMT-5 (US Eastern)','GMT+0 (UK)','GMT+1 (Europe)','GMT+3 (Gulf / Saudi)','GMT+5 (Pakistan)','GMT+5:30 (India)','GMT+8 (Singapore/China)','GMT+10 (Australia East)'];
 const QBANKS = ['PassMedicine','Pastest','BMJ OnExamination','Plabable','UWorld','AMBOSS','MRCPUK Question Bank','Marrow','PrepLadder','DAMS','Cerebellum','eGurukul','Other'];
+const STUDY_WHEN = ['🌅 Early bird', '☀️ Daytime', '🌆 Evening', '🦉 Night owl'];
+const FOCUS = ['Working full-time', 'Working part-time', 'Full-time study', 'On a break'];
 const TIMES = ['Early mornings','Daytime','Evenings','Late nights'];
 
 // chips that can be DESELECTED — tap a selected chip to clear it
@@ -49,6 +51,7 @@ export default function Profile() {
   const [timezone, setTimezone] = useState(user?.timezone || '');
   const [questionBank, setQuestionBank] = useState(user?.question_bank || '');
   const [studyTime, setStudyTime] = useState(user?.study_time || '');
+  const [focus, setFocus] = useState(user?.focus || '');
   const [attempt, setAttempt] = useState(user?.attempt || '');
   const [examDate, setExamDate] = useState(user?.exam_date ? user.exam_date.slice(0, 10) : '');
   const [regCouncil, setRegCouncil] = useState(user?.reg_council || '');
@@ -61,7 +64,7 @@ export default function Profile() {
   const save = async () => {
     setBusy(true);
     try {
-      const { user: updated } = await api.updateProfile({ name, avatar, country, timezone, questionBank, studyTime, examDate, attempt, regCouncil, regNumber, medicalSchool, bio });
+      const { user: updated } = await api.updateProfile({ name, avatar, country, timezone, questionBank, studyTime, examDate, attempt, regCouncil, regNumber, medicalSchool, bio, focus });
       setUser(updated);
       setEditing(false);
     } catch (e) {
@@ -105,6 +108,11 @@ export default function Profile() {
         <Chips label="Country" options={COUNTRIES} value={country} onChange={setCountry} />
         <Chips label="Timezone" options={TIMEZONES} value={timezone} onChange={setTimezone} optional />
         <Chips label="Question bank" options={QBANKS} value={questionBank} onChange={setQuestionBank} optional />
+        <Chips label="When do you study?" options={STUDY_WHEN} value={studyTime} onChange={setStudyTime} optional />
+        <Chips label="Current focus" options={FOCUS} value={focus} onChange={setFocus} optional />
+
+        <label className="label">Medical school <span style={{ textTransform: 'none', letterSpacing: 0, fontWeight: 400 }}>(optional)</span></label>
+        <input className="input" placeholder="e.g. King Edward Medical University" value={medicalSchool} onChange={(e) => setMedicalSchool(e.target.value)} />
 
         <label className="label">Medical registration <span style={{ textTransform: 'none', letterSpacing: 0, fontWeight: 400 }}>(self-reported)</span></label>
         <select className="select" value={regCouncil} onChange={(e) => setRegCouncil(e.target.value)}>
@@ -142,6 +150,9 @@ export default function Profile() {
         <Row k="Exam date" v={user?.exam_date ? user.exam_date.slice(0, 10) : '—'} />
         <Row k="Timezone" v={user?.timezone} />
         <Row k="Question bank" v={user?.question_bank} />
+        {user?.study_time && <Row k="Studies" v={user.study_time} />}
+        {user?.focus && <Row k="Current focus" v={user.focus} />}
+        {user?.medical_school && <Row k="Medical school" v={user.medical_school} />}
         <Row k="Registration" v={user?.reg_council ? `${user.reg_council} ${user.reg_number} (self-reported)` : '—'} />
       </div>
       <button className="btn" onClick={() => setEditing(true)}>Edit profile</button>
@@ -197,4 +208,3 @@ export default function Profile() {
     </div>
   );
 }
-
