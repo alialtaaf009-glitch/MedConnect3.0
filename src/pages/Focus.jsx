@@ -63,13 +63,13 @@ function Breathe() {
       </p>
       <div style={{ display: 'flex', justifyContent: 'center' }}><Lungs grow={grow} size={120} /></div>
       {on ? (
-        <>
+        <div onClick={(e) => e.stopPropagation()}>
           <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--forest)' }}>{LABELS[phase]}</div>
           <div className="sub" style={{ fontSize: 11, marginTop: 2 }}>{left}s left · tap to stop</div>
-          <button className="btn ghost" style={{ marginTop: 10, maxWidth: 160, margin: '10px auto 0' }} onClick={() => setOn(false)}>Stop</button>
-        </>
+          <button className="btn ghost" style={{ marginTop: 10, maxWidth: 160, margin: '10px auto 0' }} onClick={(e) => { e.stopPropagation(); setOn(false); }}>Stop</button>
+        </div>
       ) : (
-        <button className="btn" style={{ maxWidth: 200, margin: '0 auto' }} onClick={() => setOn(true)}>Start breathing</button>
+        <button className="btn" style={{ maxWidth: 200, margin: '0 auto' }} onClick={(e) => { e.stopPropagation(); setOn(true); }}>Start breathing</button>
       )}
     </div>
     </>
@@ -81,11 +81,10 @@ export default function Focus() {
     <div className="screen">
       <h1 className="h1">Focus ☕</h1>
       <p className="voice sub" style={{ marginBottom: 16, fontSize: 14.5 }}>
-        Coffee in hand? Good. Set a block, tap the timer for full-screen, and guard it like an exam hall.
+        Coffee in hand? Good. Set a block, tap the box for full-screen, and guard it like an exam hall.
       </p>
       <StudyTimer />
       <Breathe />
     </div>
   );
 }
-
