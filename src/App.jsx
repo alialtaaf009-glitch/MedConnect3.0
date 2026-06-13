@@ -93,7 +93,7 @@ export default function App() {
   // hold the splash long enough for the draw animation to finish, even if auth resolves instantly
   const [splashDone, setSplashDone] = useState(false);
   useEffect(() => {
-    const t = setTimeout(() => setSplashDone(true), 2000);
+    const t = setTimeout(() => setSplashDone(true), 1500);
     return () => clearTimeout(t);
   }, []);
 
