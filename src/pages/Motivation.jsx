@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { QUOTES, quoteOfTheDay } from '../lib/quotes';
 import { api } from '../lib/api';
 
 export default function Motivation() {
+  const nav = useNavigate();
   const today = quoteOfTheDay();
   const [favIds, setFavIds] = useState([]);
   const [tab, setTab] = useState('today');
@@ -60,6 +62,7 @@ export default function Motivation() {
 
   return (
     <div className="screen">
+      <button className="link" style={{ marginBottom: 8 }} onClick={() => nav('/home')}>‹ Back</button>
       <h1 className="h1">Daily Motivation</h1>
       <div className="tabs" style={{ marginTop: 14 }}>
         <button className={`tab ${tab === 'today' ? 'on' : ''}`} onClick={() => setTab('today')}>Today</button>
