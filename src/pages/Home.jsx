@@ -107,7 +107,9 @@ function ExploreBrowse() {
   const partCount = (exam, part) => {
     const fam = exam.split(' ')[0];
     const SPECIAL = { 'PLAB 1 / AKT': 'PLAB 1 / UKMLA AKT', 'PLAB 2 / CPSA': 'PLAB 2 / UKMLA CPSA' };
-    const candidates = [SPECIAL[part], `${exam} — ${part}`, `${fam} — ${part}`, exam === 'SMLE' ? 'SMLE' : null];
+    // signup stores e.g. "FCPS — Part 1 — Radiology"; the catalog label is "FCPS Part 1"
+    const dashed = exam.replace(/^(\w+)\s+(Part\s+\d+)$/, '$1 — $2'); // "FCPS Part 1" -> "FCPS — Part 1"
+    const candidates = [SPECIAL[part], `${exam} — ${part}`, `${dashed} — ${part}`, `${fam} — ${part}`, exam === 'SMLE' ? 'SMLE' : null];
     let n = 0;
     for (const k of candidates) if (k && counts[k]) n = Math.max(n, counts[k]);
     return n;
@@ -356,7 +358,7 @@ function Momentum({ user }) {
               </div>
               <div className="display-num" style={{ fontSize: 30, fontWeight: 700, color: 'var(--rust)', letterSpacing: 2, fontVariantNumeric: 'tabular-nums', margin: '6px 0 2px' }}>
                 {hh}:{mm2}:{ss}
-              </div>
+                </div>
               <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>hours · minutes · seconds</div>
               <div style={{ display: 'inline-block', fontSize: 12, fontWeight: 700, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 999, padding: '5px 14px', margin: '14px 0 2px' }}>{coachLine(dLeft)}</div>
               <button className="btn ghost" style={{ marginTop: 12 }} onClick={() => setCdOpen(false)}>Back to it</button>
@@ -461,7 +463,7 @@ export default function Home() {
       </div>
 
       {nudges.length > 0 && (
-      <div onClick={() => nav(`/chat?with=${nudges[0].id}&name=${encodeURIComponent(nudges[0].name)}&av=${encodeURIComponent(nudges[0].avatar || '')}`)}
+        <div onClick={() => nav(`/chat?with=${nudges[0].id}&name=${encodeURIComponent(nudges[0].name)}&av=${encodeURIComponent(nudges[0].avatar || '')}`)}
           style={{ cursor: 'pointer', marginTop: 12, padding: '12px 14px', borderRadius: 14, background: 'var(--forest)', color: '#fff', display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,.18)', display: 'grid', placeItems: 'center', fontSize: 20, flexShrink: 0 }}>{nudges[0].avatar || '👋'}</div>
           <div style={{ flex: 1, lineHeight: 1.35 }}>
