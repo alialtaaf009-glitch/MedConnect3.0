@@ -220,5 +220,6 @@ button:active { -webkit-tap-highlight-color: transparent; }
   94% { transform: rotate(8deg) scale(1.06); }
   97% { transform: rotate(-4deg) scale(1.03); }
 }
-.avatar-idle { animation: avatarIdle 6s ease-in-out infinite; transform-origin: center 70%; }
+.avatar-idle { animation: avatarIdle 9s ease-in-out infinite; transform-origin: center 70%; }
 @media (prefers-reduced-motion: reduce) { .avatar-idle { animation: none; } }
+        
