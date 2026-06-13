@@ -182,7 +182,7 @@ function ExploreBrowse() {
                 </div>
               );
             })}
-        </>
+          </>
       )}
 
       {browseMode === 'country' && orderedCountries.map(([flag, country, exams]) => (
@@ -243,7 +243,7 @@ function Momentum({ user }) {
   }
 
   // streak
-const [streak, setStreak] = useState(user?.current_streak || 0);
+  const [streak, setStreak] = useState(user?.current_streak || 0);
   // remember today's mark locally (keyed to the date) so the button doesn't revert on re-render
   const todayKey = 'studied_' + new Date().toISOString().slice(0, 10);
   const [studiedToday, setStudiedToday] = useState(user?.studied_today || localStorage.getItem(todayKey) === '1');
@@ -368,7 +368,7 @@ const [streak, setStreak] = useState(user?.current_streak || 0);
       })()}
 
       {stOpen && (() => {
-        const best = Math.max(user?.longest_streak || 0, streak);
+      const best = Math.max(user?.longest_streak || 0, streak);
         const line = !studiedToday
           ? 'One tap keeps the flame alive.'
           : streak >= best && streak > 1
@@ -463,7 +463,7 @@ export default function Home() {
       </div>
 
       {nudges.length > 0 && (
-      <div onClick={() => nav(`/chat?with=${nudges[0].id}&name=${encodeURIComponent(nudges[0].name)}&av=${encodeURIComponent(nudges[0].avatar || '')}`)}
+        <div onClick={() => nav(`/chat?with=${nudges[0].id}&name=${encodeURIComponent(nudges[0].name)}&av=${encodeURIComponent(nudges[0].avatar || '')}`)}
           style={{ cursor: 'pointer', marginTop: 12, padding: '12px 14px', borderRadius: 14, background: 'var(--forest)', color: '#fff', display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,.18)', display: 'grid', placeItems: 'center', fontSize: 20, flexShrink: 0 }}>{nudges[0].avatar || '👋'}</div>
           <div style={{ flex: 1, lineHeight: 1.35 }}>
@@ -482,12 +482,12 @@ export default function Home() {
         </div>
       )}
 
-      <div style={{ padding: '10px 4px 8px' }}>
-        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--rust)', textTransform: 'uppercase', marginBottom: 3 }}>
+      <div style={{ padding: '10px 4px 8px', textAlign: 'center' }}>
+        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--rust)', textTransform: 'uppercase', marginBottom: 4 }}>
           For doctors, by doctors
         </div>
-        <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontVariationSettings: '"opsz" 18', fontSize: 19, fontWeight: 700, lineHeight: 1.15, letterSpacing: '-0.3px', color: 'var(--ink)', margin: 0 }}>
-          Find your <em style={{ fontStyle: 'italic', color: 'var(--forest)' }}>study partner.</em>
+        <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontVariationSettings: '"opsz" 18', fontSize: 16, fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.2px', color: 'var(--ink)', margin: 0, whiteSpace: 'nowrap' }}>
+          Find the right <em style={{ fontStyle: 'italic', color: 'var(--forest)' }}>study partner</em> for your exam
         </h1>
       </div>
 
