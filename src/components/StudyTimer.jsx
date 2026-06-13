@@ -115,17 +115,18 @@ export default function StudyTimer() {
     <div className="card" onClick={() => setFullscreen(true)} style={{ marginBottom: 18, textAlign: 'center', borderColor: 'var(--forest)', minHeight: 280, cursor: 'pointer' }}>
       <ModeTabs />
 
-      <Ring frac={frac} size={210} danger={danger}>
-        <ClockFace big={false} />
-      </Ring>
-
-      {t.mode === 'timer' && !editing && (
-        <div className="chips" style={{ justifyContent: 'center', marginTop: 18, marginBottom: 4 }} onClick={(e) => e.stopPropagation()}>
-          {[25, 45, 60].map((m) => (
-            <button key={m} className={`chip ${t.target === m * 60 ? 'on' : ''}`} onClick={() => onPreset(m)}>{m} min</button>
-          ))}
-        </div>
-      )}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14 }}>
+        <Ring frac={frac} size={180} danger={danger}>
+          <ClockFace big={false} />
+        </Ring>
+        {t.mode === 'timer' && !editing && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} onClick={(e) => e.stopPropagation()}>
+            {[25, 45, 60].map((m) => (
+              <button key={m} className={`chip ${t.target === m * 60 ? 'on' : ''}`} style={{ minWidth: 62 }} onClick={() => onPreset(m)}>{m} min</button>
+            ))}
+          </div>
+        )}
+      </div>
 
       <Controls big={false} />
 
