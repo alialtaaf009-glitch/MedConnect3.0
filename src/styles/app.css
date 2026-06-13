@@ -183,3 +183,5 @@ h1, h2, h3, .h1, .name, .brand-name, .stat-num { font-family: 'Inter', system-ui
 /* v1 vibrancy: gold-tinted highlight card */
 .tint-gold { background:#fbf4e8; border-color: var(--gold, #b98a2e); }
 [data-theme="dark"] .tint-gold { background:#2a2415; }
+.tint-green { background:#eaf1ec; border-color:#cfe0d4; }
+[data-theme="dark"] .tint-green { background:#16241c; border-color:#234034; }
