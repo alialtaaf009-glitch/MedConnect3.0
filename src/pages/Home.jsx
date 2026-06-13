@@ -135,7 +135,7 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'exam' && (
-        <>
+      <>
           {orderedExams.map(({ flag, country, exam, parts }) => {
               const key = 'exam|' + country + '|' + exam;
               const ecx = examColor(exam);
@@ -202,7 +202,7 @@ function ExploreBrowse() {
                       {partCount(exam, part) >= 1 && <span style={{ fontSize: 10.5, color: '#fff', background: examColor(exam), borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 6 }}>{partCount(exam, part)}</span>}
                       <span style={{ color: 'var(--subtle)', fontSize: 13 }}>›</span>
                     </div>
-                    );
+                  );
                 })}
               </div>
             );
@@ -232,12 +232,30 @@ function Momentum({ user }) {
   const todayKey = 'studied_' + new Date().toISOString().slice(0, 10);
   const [studiedToday, setStudiedToday] = useState(user?.studied_today || localStorage.getItem(todayKey) === '1');
   const [marking, setMarking] = useState(false);
+  const burstConfetti = () => {
+    const colors = ['#a8442a', '#1f4d3f', '#b98a2e', '#2c6a55'];
+    for (let i = 0; i < 18; i++) {
+      const p = document.createElement('div');
+      p.className = 'confetti-piece';
+      p.style.background = colors[i % colors.length];
+      p.style.setProperty('--dx', (Math.random() * 240 - 120) + 'px');
+      p.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg');
+      p.style.left = (45 + Math.random() * 10) + '%';
+      p.style.animationDelay = (Math.random() * 0.15) + 's';
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 1300);
+    }
+  };
   const markStudy = async () => {
     if (marking || studiedToday) return;
     setMarking(true);
     try {
       const d = await api.markStudy();
-      if (d.user) { setStreak(d.user.current_streak || 0); setStudiedToday(true); localStorage.setItem(todayKey, '1'); }
+      if (d.user) {
+        setStreak(d.user.current_streak || 0); setStudiedToday(true); localStorage.setItem(todayKey, '1');
+        burstConfetti();
+        if (navigator.vibrate) { try { navigator.vibrate(20); } catch (e) {} }
+      }
     } catch (e) {} finally { setMarking(false); }
   };
 
@@ -334,11 +352,11 @@ function Momentum({ user }) {
       })()}
 
       {stOpen && (() => {
-        const best = Math.max(user?.longest_streak || 0, streak);
+      const best = Math.max(user?.longest_streak || 0, streak);
         const line = !studiedToday
           ? 'One tap keeps the flame alive.'
           : streak >= best && streak > 1
-            ? "Personal best territory. Don't look down."
+            ? "You're at your peak. Don't look down."
             : streak === 0
               ? 'Every legendary streak starts at day one.'
               : "Today's locked in. See you tomorrow, doctor.";
