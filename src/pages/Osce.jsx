@@ -89,17 +89,33 @@ export default function Osce() {
       <h1 className="h1">OSCE Practice</h1>
       <p className="sub" style={{ marginBottom:14 }}>Timed station practice — solo, or live with a partner over a Meet link.</p>
 
-      <div className="chips" style={{ marginBottom:16 }}>
-        {exams.map((e) => (
-          <button key={e} className={`chip ${exam === e ? 'on' : ''}`} onClick={() => setExam(e)}>{e}</button>
-        ))}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
+        {exams.map((e) => {
+          const on = exam === e;
+          return (
+            <button key={e} onClick={() => setExam(e)} style={{
+              display: 'flex', alignItems: 'center', gap: 12, width: '100%', textAlign: 'left',
+              padding: '16px 18px', borderRadius: 16, cursor: 'pointer',
+              border: on ? '2px solid var(--forest)' : '1.5px solid var(--line)',
+              background: on ? 'var(--forest)' : 'var(--card)',
+              color: on ? '#fff' : 'var(--ink)',
+              fontFamily: 'inherit', fontSize: 16, fontWeight: 700,
+              boxShadow: on ? '0 4px 14px rgba(31,77,63,.22)' : '0 1px 3px rgba(20,40,30,.05)',
+              transition: 'transform .2s cubic-bezier(0.34,1.56,0.64,1), background .2s ease, box-shadow .2s ease',
+            }}>
+              <span style={{ width: 34, height: 34, borderRadius: 10, background: on ? 'rgba(255,255,255,.18)' : 'var(--paper-2)', display: 'grid', placeItems: 'center', fontSize: 17, flexShrink: 0 }}>🩺</span>
+              <span style={{ flex: 1 }}>{e}</span>
+              <span style={{ fontSize: 18, opacity: on ? 1 : 0.4 }}>{on ? '✓' : '›'}</span>
+            </button>
+          );
+        })}
       </div>
       <h2 style={{ fontSize:18, fontWeight:700, fontFamily:"'Inter',system-ui,sans-serif" }}>{exam} stations</h2>
       {!isPro && <p className="sub" style={{ fontSize:12, marginBottom:10 }}>{FREE} free · unlock the rest with Pro</p>}
       {stations.map((st, i) => {
         const locked = !isPro && i >= FREE;
         return (
-          <div key={st} className="row" style={{ justifyContent:'space-between', opacity: locked ? .55 : 1, cursor:'pointer', gap: 10, borderRadius: 16, border: '1.5px solid var(--line)' }}
+          <div key={st} className="row" style={{ justifyContent:'space-between', opacity: locked ? .55 : 1, cursor:'pointer', gap: 10 }}
             onClick={() => { if (locked) { setShowPro(true); } else { setActive(st); } }}>
             <span style={{ width: 26, height: 26, borderRadius: '50%', background: locked ? 'var(--paper-2)' : 'var(--forest)', color: locked ? 'var(--subtle)' : '#fff', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 800, flexShrink: 0 }}>{i + 1}</span>
             <span style={{ fontWeight:600, flex: 1 }}>{st}</span>
