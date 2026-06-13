@@ -60,6 +60,20 @@ const EXAM_COLORS = {
 const examColor = (exam) => EXAM_COLORS[exam] || EXAM_COLORS[exam.split(' ')[0]] || 'var(--forest)';
 
 const FLAG_CODE = { 'United States': 'us', 'United Kingdom': 'gb', 'Pakistan': 'pk', 'Australia': 'au', 'Saudi Arabia': 'sa', 'India': 'in' };
+
+// cute rounded-point star — fills gold when active, soft outline when not
+function StarIcon({ filled }) {
+  return (
+    <svg width="19" height="19" viewBox="0 0 24 24"
+      fill={filled ? 'var(--gold)' : 'none'}
+      stroke={filled ? 'var(--gold)' : 'var(--subtle)'}
+      strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round"
+      style={{ display: 'block' }}>
+      <path d="M12 3.2c.4 0 .77.23.95.6l2.18 4.46 4.92.72c.83.12 1.16 1.14.56 1.72l-3.56 3.47.84 4.9c.14.82-.72 1.45-1.46 1.06L12 17.8l-4.4 2.32c-.74.39-1.6-.24-1.46-1.06l.84-4.9-3.56-3.47c-.6-.58-.27-1.6.56-1.72l4.92-.72L11.05 3.8c.18-.37.55-.6.95-.6z" />
+    </svg>
+  );
+}
+
 function Flag({ country, emoji, size = 34 }) {
   const code = FLAG_CODE[country];
   const [broken, setBroken] = useState(false);
@@ -135,7 +149,7 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'exam' && (
-      <>
+        <>
           {orderedExams.map(({ flag, country, exam, parts }) => {
               const key = 'exam|' + country + '|' + exam;
               const ecx = examColor(exam);
@@ -150,7 +164,7 @@ function ExploreBrowse() {
                         {examCount(exam)}
                       </span>
                     )}
-                    <span className={`star-btn ${pinE.includes(key) ? 'on' : ''}`} onClick={(e) => { e.stopPropagation(); togglePinE(key); }} style={{ padding: '0 5px', fontSize: 16, color: pinE.includes(key) ? 'var(--gold)' : 'var(--subtle)' }}>{pinE.includes(key) ? '★' : '☆'}</span>
+                    <span className={`star-btn ${pinE.includes(key) ? 'on twinkle' : ''}`} onClick={(e) => { e.stopPropagation(); togglePinE(key); }} style={{ padding: '0 5px', display: 'inline-flex' }}><StarIcon filled={pinE.includes(key)} /></span>
                     <span className="meta" style={{ fontSize: 11 }}><span style={{ display: 'inline-block', transition: 'transform .25s ease', transform: openExam === key ? 'rotate(90deg)' : 'rotate(0deg)' }}>›</span></span>
                   </div>
                   {openExam === key && parts.map((part) => {
@@ -175,7 +189,7 @@ function ExploreBrowse() {
             onClick={() => setOpenCountry(openCountry === country ? '' : country)}>
             <Flag country={country} emoji={flag} />
             <span style={{ flex: 1, fontWeight: 600 }}>{country}</span>
-            <span className={`star-btn ${pinC.includes(country) ? 'on' : ''}`} onClick={(e) => { e.stopPropagation(); togglePinC(country); }} style={{ padding: '0 5px', fontSize: 16, color: pinC.includes(country) ? 'var(--gold)' : 'var(--subtle)' }}>{pinC.includes(country) ? '★' : '☆'}</span>
+            <span className={`star-btn ${pinC.includes(country) ? 'on twinkle' : ''}`} onClick={(e) => { e.stopPropagation(); togglePinC(country); }} style={{ padding: '0 5px', display: 'inline-flex' }}><StarIcon filled={pinC.includes(country)} /></span>
             <span className="meta" style={{ fontSize: 17, fontWeight: 700, color: 'var(--subtle)', transition: 'transform .25s ease', transform: openCountry === country ? 'rotate(90deg)' : 'rotate(0deg)', display: 'inline-block' }}>›</span>
           </div>
 
@@ -447,7 +461,7 @@ export default function Home() {
       </div>
 
       {nudges.length > 0 && (
-        <div onClick={() => nav(`/chat?with=${nudges[0].id}&name=${encodeURIComponent(nudges[0].name)}&av=${encodeURIComponent(nudges[0].avatar || '')}`)}
+      <div onClick={() => nav(`/chat?with=${nudges[0].id}&name=${encodeURIComponent(nudges[0].name)}&av=${encodeURIComponent(nudges[0].avatar || '')}`)}
           style={{ cursor: 'pointer', marginTop: 12, padding: '12px 14px', borderRadius: 14, background: 'var(--forest)', color: '#fff', display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,.18)', display: 'grid', placeItems: 'center', fontSize: 20, flexShrink: 0 }}>{nudges[0].avatar || '👋'}</div>
           <div style={{ flex: 1, lineHeight: 1.35 }}>
