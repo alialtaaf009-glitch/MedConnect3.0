@@ -55,23 +55,23 @@ function Breathe() {
   return (
     <>
     <div style={{ borderTop: '1px solid var(--line)', margin: '24px 0 16px' }} />
-    <div className="card tint-gold" style={{ textAlign: 'center' }}>
+    <div className="card tint-green" style={{ textAlign: 'center' }}>
       <div style={{ fontSize: 15, fontWeight: 700, position: 'relative' }}>Take a break
-        <span onClick={() => setBig(true)} style={{ position: 'absolute', right: 0, top: 0, fontSize: 15, color: 'var(--subtle)', cursor: 'pointer' }}>⤢</span>
+        <span onClick={() => setBig(true)} style={{ position: 'absolute', right: 0, top: 0, fontSize: 17, fontWeight: 700, color: 'var(--subtle)', cursor: 'pointer', lineHeight: 1 }}>›</span>
       </div>
       <p className="voice sub" style={{ fontSize: 14, marginTop: 2 }}>60 seconds of calm. No side effects.</p>
       <p className="sub" style={{ fontSize: 11, marginTop: 2 }}>
         Box breathing — in 4, hold 4, out 4, hold 4.
       </p>
-      <Lungs grow={grow} size={120} />
+      <div style={{ display: 'flex', justifyContent: 'center' }}><Lungs grow={grow} size={120} /></div>
       {on ? (
         <>
           <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--forest)' }}>{LABELS[phase]}</div>
           <div className="sub" style={{ fontSize: 11, marginTop: 2 }}>{left}s left · tap to stop</div>
-          <button className="btn ghost" style={{ marginTop: 10, maxWidth: 160 }} onClick={() => setOn(false)}>Stop</button>
+          <button className="btn ghost" style={{ marginTop: 10, maxWidth: 160, margin: '10px auto 0' }} onClick={() => setOn(false)}>Stop</button>
         </>
       ) : (
-        <button className="btn" style={{ maxWidth: 200 }} onClick={() => setOn(true)}>Start breathing</button>
+        <button className="btn" style={{ maxWidth: 200, margin: '0 auto' }} onClick={() => setOn(true)}>Start breathing</button>
       )}
     </div>
     </>
