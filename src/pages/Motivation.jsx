@@ -62,7 +62,6 @@ export default function Motivation() {
 
   return (
     <div className="screen">
-      <button className="link" style={{ marginBottom: 8 }} onClick={() => nav('/home')}>‹ Back</button>
       <h1 className="h1">Daily Motivation</h1>
       <div className="tabs" style={{ marginTop: 14 }}>
         <button className={`tab ${tab === 'today' ? 'on' : ''}`} onClick={() => setTab('today')}>Today</button>
