@@ -182,7 +182,7 @@ function ExploreBrowse() {
                 </div>
               );
             })}
-          </>
+        </>
       )}
 
       {browseMode === 'country' && orderedCountries.map(([flag, country, exams]) => (
@@ -225,7 +225,7 @@ function ExploreBrowse() {
           })}
         </div>
       ))}
-    </>
+      </>
   );
 }
 
@@ -368,7 +368,7 @@ function Momentum({ user }) {
       })()}
 
       {stOpen && (() => {
-      const best = Math.max(user?.longest_streak || 0, streak);
+        const best = Math.max(user?.longest_streak || 0, streak);
         const line = !studiedToday
           ? 'One tap keeps the flame alive.'
           : streak >= best && streak > 1
@@ -448,17 +448,16 @@ export default function Home() {
 
   return (
     <div className="screen">
-            <div className="card" onClick={() => nav('/profile')} style={{ cursor: 'pointer' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 13 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, flexShrink: 0 }}>
-            <div className="avatar-idle" style={{ width: 50, height: 50, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', color: 'var(--forest)', fontWeight: 600, fontSize: user?.avatar ? 26 : 18 }}>{user?.avatar || initials}</div>
-            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--forest)' }}>Profile</span>
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 18, fontWeight: 600 }}>Welcome back, {user?.name}</div>
-            <div className="meta">{[user?.exam, user?.country].filter(Boolean).join(' · ') || 'Ready to match'}</div>
-          </div>
-          <span style={{ color: 'var(--subtle)', fontSize: 18, flexShrink: 0 }}>›</span>
+      <div onClick={() => nav('/motivation')} style={{ cursor: 'pointer', marginTop: 4, padding: '18px 18px', borderRadius: 18, background: 'linear-gradient(135deg, var(--forest) 0%, var(--forest-2) 100%)', color: '#fff', position: 'relative', overflow: 'hidden', boxShadow: '0 6px 20px rgba(31,77,63,.28)' }}>
+        <div style={{ position: 'absolute', top: -18, right: -8, fontSize: 90, opacity: 0.12, lineHeight: 1, transform: 'rotate(8deg)', fontFamily: 'Georgia, serif' }}>”</div>
+        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--gold)', marginBottom: 8, position: 'relative' }}>
+          Hi {(user?.name || '').replace(/^Dr\.?\s+/i, '').split(' ')[0] || 'Doctor'} — today's spark
+        </div>
+        <div style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: 17, fontWeight: 500, lineHeight: 1.4, position: 'relative', paddingRight: 20 }}>
+          {quote.text}
+        </div>
+        <div style={{ fontSize: 11, fontWeight: 600, opacity: 0.85, marginTop: 10, display: 'flex', alignItems: 'center', gap: 5 }}>
+          Daily Motivation <span style={{ fontSize: 13 }}>›</span>
         </div>
       </div>
 
