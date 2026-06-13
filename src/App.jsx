@@ -90,7 +90,14 @@ export default function App() {
   const { user, loading } = useAuth();
   const { mode, toggle } = useTheme();
 
-  if (loading) return (
+  // hold the splash long enough for the draw animation to finish, even if auth resolves instantly
+  const [splashDone, setSplashDone] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setSplashDone(true), 2000);
+    return () => clearTimeout(t);
+  }, []);
+
+  if (loading || !splashDone) return (
     <div className="app">
       <div className="center splash" style={{ flexDirection: 'column', gap: 16 }}>
         <svg className="splash-draw" width="92" height="92" viewBox="0 0 64 64" aria-label="MedConnect">
