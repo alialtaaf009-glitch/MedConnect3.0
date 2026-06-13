@@ -134,7 +134,9 @@ function ConversationList({ nav, me }) {
 
       {tab === 'groups' && (
         <>
-          <button className="btn" style={{ marginBottom: 14 }} onClick={openCreate}>＋ Create study group</button>
+          <button onClick={openCreate} aria-label="Create study group" style={{ position: 'fixed', bottom: 90, right: 'max(18px, calc(50vw - 222px))', width: 54, height: 54, borderRadius: '50%', background: 'var(--forest)', color: '#fff', border: 'none', boxShadow: '0 4px 14px rgba(31,77,63,.35)', display: 'grid', placeItems: 'center', cursor: 'pointer', zIndex: 50 }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><path d="M18 7v6M21 10h-6"/></svg>
+          </button>
           {groups.length === 0 && (
             <p className="sub" style={{ textAlign: 'center', marginTop: 20 }}>
               No study groups yet. Create one and invite your connections to study together.
