@@ -16,6 +16,7 @@ import Focus from './pages/Focus.jsx';
 import Motivation from './pages/Motivation.jsx';
 import Legal from './pages/Legal.jsx';
 import Reset from './pages/Reset.jsx';
+import AddPartner from './pages/AddPartner.jsx';
 
 function Icon({ name }) {
   const common = { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none',
@@ -106,6 +107,7 @@ export default function App() {
         <Routes>
           <Route path="/legal" element={<Legal />} />
           <Route path="/reset" element={<Reset />} />
+          <Route path="/add/:id" element={<SignIn />} />
           <Route path="*" element={<SignIn />} />
         </Routes>
       </div>
@@ -136,9 +138,11 @@ export default function App() {
         <Route path="/legal" element={<Legal />} />
         <Route path="/connections" element={<Connections />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/add/:id" element={<AddPartner />} />
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
       <TabBar />
     </div>
   );
 }
+
