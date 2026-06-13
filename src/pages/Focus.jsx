@@ -21,14 +21,29 @@ function Breathe() {
     return () => clearInterval(tick.current);
   }, [on]);
 
+  const [big, setBig] = useState(false);
   const LABELS = ['Breathe in…', 'Hold…', 'Breathe out…', 'Hold…'];
   const grow = on && (phase === 0 || phase === 1); // big through inhale + hold
+
+  if (big) {
+    return (
+      <div onClick={() => { setBig(false); setOn(false); }} style={{ position: 'fixed', inset: 0, background: 'var(--paper)', zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, cursor: 'pointer', animation: 'fadeUp .3s ease both' }}>
+        <div className="voice" style={{ fontSize: 16, color: 'var(--muted)', marginBottom: 8 }}>60 seconds of calm. No side effects.</div>
+        <div className="breathe-ball" style={{ width: 180, height: 180, transform: grow ? 'scale(1)' : 'scale(0.42)' }} />
+        <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--forest)', marginTop: 18 }}>{on ? LABELS[phase] : 'Tap to begin'}</div>
+        {on ? <div className="sub" style={{ marginTop: 4 }}>{left}s left · tap anywhere to stop</div>
+            : <button className="btn" style={{ marginTop: 16, maxWidth: 200 }} onClick={(e) => { e.stopPropagation(); setOn(true); }}>Start</button>}
+      </div>
+    );
+  }
 
   return (
     <>
     <div style={{ borderTop: '1px solid var(--line)', margin: '24px 0 16px' }} />
     <div className="card tint-gold" style={{ textAlign: 'center' }}>
-      <div style={{ fontSize: 15, fontWeight: 700 }}>Take a break</div>
+      <div style={{ fontSize: 15, fontWeight: 700, position: 'relative' }}>Take a break
+        <span onClick={() => setBig(true)} style={{ position: 'absolute', right: 0, top: 0, fontSize: 15, color: 'var(--subtle)', cursor: 'pointer' }}>⤢</span>
+      </div>
       <p className="voice sub" style={{ fontSize: 14, marginTop: 2 }}>60 seconds of calm. No side effects.</p>
       <p className="sub" style={{ fontSize: 11, marginTop: 2 }}>
         Box breathing — in 4, hold 4, out 4, hold 4.
@@ -60,3 +75,4 @@ export default function Focus() {
     </div>
   );
 }
+
