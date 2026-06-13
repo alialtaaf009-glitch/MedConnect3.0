@@ -1,6 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 import StudyTimer from '../components/StudyTimer.jsx';
 
+
+// anatomical minimal lungs that inflate on inhale, deflate on exhale (box-breathing)
+function Lungs({ grow, size = 120 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100" fill="none"
+      style={{ transformOrigin: 'center', transition: 'transform 3.9s ease-in-out', transform: grow ? 'scale(1)' : 'scale(0.55)', filter: 'drop-shadow(0 8px 18px rgba(168,68,42,.22))' }}>
+      <path d="M50 18 v34" stroke="var(--rust)" strokeWidth="4" strokeLinecap="round" />
+      <path d="M50 22 q-3 -8 -10 -8" stroke="var(--rust)" strokeWidth="3.4" strokeLinecap="round" />
+      <path d="M50 22 q3 -8 10 -8" stroke="var(--rust)" strokeWidth="3.4" strokeLinecap="round" />
+      <path d="M44 30 C28 32 20 48 22 68 C23 80 32 84 39 80 C45 76 46 66 46 56 C46 44 46 34 44 30 Z" fill="var(--rust)" fillOpacity="0.18" stroke="var(--rust)" strokeWidth="3.2" strokeLinejoin="round" />
+      <path d="M56 30 C72 32 80 48 78 68 C77 80 68 84 61 80 C55 76 54 66 54 56 C54 44 54 34 56 30 Z" fill="var(--rust)" fillOpacity="0.18" stroke="var(--rust)" strokeWidth="3.2" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 // 4-4-4-4 box breathing: a 60-second nervous-system reset between study blocks
 function Breathe() {
   const [on, setOn] = useState(false);
@@ -29,7 +44,7 @@ function Breathe() {
     return (
       <div onClick={() => { setBig(false); setOn(false); }} style={{ position: 'fixed', inset: 0, background: 'var(--paper)', zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, cursor: 'pointer', animation: 'fadeUp .3s ease both' }}>
         <div className="voice" style={{ fontSize: 16, color: 'var(--muted)', marginBottom: 8 }}>60 seconds of calm. No side effects.</div>
-        <div className="breathe-ball" style={{ width: 180, height: 180, transform: grow ? 'scale(1)' : 'scale(0.42)' }} />
+        <Lungs grow={grow} size={180} />
         <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--forest)', marginTop: 18 }}>{on ? LABELS[phase] : 'Tap to begin'}</div>
         {on ? <div className="sub" style={{ marginTop: 4 }}>{left}s left · tap anywhere to stop</div>
             : <button className="btn" style={{ marginTop: 16, maxWidth: 200 }} onClick={(e) => { e.stopPropagation(); setOn(true); }}>Start</button>}
@@ -48,7 +63,7 @@ function Breathe() {
       <p className="sub" style={{ fontSize: 11, marginTop: 2 }}>
         Box breathing — in 4, hold 4, out 4, hold 4.
       </p>
-      <div className="breathe-ball" style={{ transform: grow ? 'scale(1)' : 'scale(0.42)' }} />
+      <Lungs grow={grow} size={120} />
       {on ? (
         <>
           <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--forest)' }}>{LABELS[phase]}</div>
@@ -75,4 +90,3 @@ export default function Focus() {
     </div>
   );
 }
-
