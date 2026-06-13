@@ -92,9 +92,16 @@ export default function App() {
 
   if (loading) return (
     <div className="app">
-      <div className="center" style={{ flexDirection: 'column', gap: 14 }}>
-        <img src="/pwa-192.png" alt="MedConnect" style={{ width: 76, height: 76, borderRadius: 16 }} />
-        <div style={{ color: 'var(--muted)', fontSize: 13 }}>MedConnect</div>
+      <div className="center splash" style={{ flexDirection: 'column', gap: 16 }}>
+        <svg className="splash-draw" width="92" height="92" viewBox="0 0 64 64" aria-label="MedConnect">
+          <line x1="32" y1="8" x2="32" y2="58" />
+          <path className="snake" d="M32 16 q10 6 0 12 q-10 6 0 12 q10 6 0 10" />
+          <path className="wings" d="M32 14 q-10 -2 -16 4" />
+          <path className="wings" d="M32 14 q10 -2 16 4" />
+          <circle cx="32" cy="9" r="3" />
+        </svg>
+        <div className="splash-brand">MedConnect</div>
+        <div className="splash-tag"><span>Connect.</span> <span>Study.</span> <span>Succeed.</span></div>
       </div>
     </div>
   );
@@ -145,4 +152,3 @@ export default function App() {
     </div>
   );
 }
-
