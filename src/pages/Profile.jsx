@@ -159,6 +159,8 @@ export default function Profile() {
           <option value="IMC">IMC (Ireland)</option>
           <option value="SCFHS">SCFHS (Saudi)</option>
           <option value="AHPRA">AHPRA (Australia)</option>
+          <option value="ECFMG / NMC">ECFMG / State Board (USA)</option>
+          <option value="NMC India">NMC (India)</option>
           <option value="Other">Other</option>
         </select>
         <input className="input" placeholder="Registration number" value={regNumber} onChange={(e) => setRegNumber(e.target.value)} />
@@ -247,4 +249,3 @@ export default function Profile() {
     </div>
   );
 }
-
