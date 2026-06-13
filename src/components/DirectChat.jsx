@@ -54,7 +54,7 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
   const item = { display: 'flex', alignItems: 'center', gap: 9 };
 
   return (
-    <div className="screen" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100dvh - 76px)' }}>
+    <div className="screen" style={{ display: 'flex', flexDirection: 'column', height: '100dvh', paddingBottom: 76, boxSizing: 'border-box' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
         <button className="link" onClick={onBack}>‹ Back</button>
         <div style={{ flex: 1 }}>
@@ -115,4 +115,3 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
     </div>
   );
 }
-
