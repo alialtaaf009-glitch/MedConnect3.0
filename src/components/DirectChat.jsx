@@ -6,6 +6,7 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
   const [messages, setMessages] = useState([]);
   const [avatars, setAvatars] = useState({});
   const [peer, setPeer] = useState(null);
+  const [showPeer, setShowPeer] = useState(false);
   const myInit = (me?.name || 'Me').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('');
   const theirInit = (withName || 'Dr').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('');
   const Avatar = ({ emoji, init }) => (
@@ -57,7 +58,11 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
     <div className="screen" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100dvh - 76px)', overflow: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
         <button className="link" onClick={onBack}>‹ Back</button>
-        <div style={{ flex: 1 }}>
+        <div onClick={() => setShowPeer(true)} style={{ position: 'relative', cursor: 'pointer', flexShrink: 0 }}>
+          <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: withAv ? 20 : 13, color: 'var(--forest)', fontWeight: 700 }}>{withAv || theirInit}</div>
+          <span style={{ position: 'absolute', bottom: 0, right: 0, width: 11, height: 11, borderRadius: '50%', background: '#3aaa6f', border: '2px solid var(--paper)' }} />
+        </div>
+        <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => setShowPeer(true)}>
           <h2 style={{ fontSize: 17, fontWeight: 600 }}>{withName}</h2>
           {peer && <div className="meta" style={{ fontSize: 11 }}>{[peer.exam, peer.country, peer.timezone].filter(Boolean).join(' · ')}</div>}
         </div>
@@ -106,6 +111,17 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
         <div ref={endRef} />
       </div>
 
+      {showPeer && (
+        <div onClick={() => setShowPeer(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'grid', placeItems: 'center', zIndex: 200, padding: 24 }}>
+          <div onClick={(e) => e.stopPropagation()} className="card" style={{ maxWidth: 320, width: '100%', textAlign: 'center', animation: 'popIn .3s cubic-bezier(0.34, 1.56, 0.64, 1) both', margin: 0 }}>
+            <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--paper-2)', border: '2px solid var(--forest)', display: 'grid', placeItems: 'center', fontSize: 32, margin: '0 auto 10px' }}>{withAv || theirInit}</div>
+            <div style={{ fontSize: 18, fontWeight: 700 }}>{withName}</div>
+            {peer && <div className="meta" style={{ marginTop: 4, lineHeight: 1.6 }}>{[peer.exam, peer.country, peer.timezone].filter(Boolean).join(' · ')}</div>}
+            <button className="btn ghost" style={{ marginTop: 14 }} onClick={() => setShowPeer(false)}>Close</button>
+          </div>
+        </div>
+      )}
+
       <div style={{ display: 'flex', gap: 8, paddingTop: 10, borderTop: '1px solid var(--line)', background: 'var(--paper)', flexShrink: 0 }}>
         <input className="input" style={{ marginBottom: 0, flex: 1 }} placeholder="Type a message…"
           value={text} onChange={(e) => setText(e.target.value)}
@@ -115,4 +131,3 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
     </div>
   );
 }
-
