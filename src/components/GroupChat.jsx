@@ -48,7 +48,7 @@ export default function GroupChat({ me, groupId, onBack }) {
   const item = { display: 'flex', alignItems: 'center', gap: 9 };
 
   return (
-    <div className="screen" style={{ display: 'flex', flexDirection: 'column', height: '100dvh', paddingBottom: 76, boxSizing: 'border-box' }}>
+    <div className="screen" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100dvh - 76px)', overflow: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
         <button className="link" onClick={onBack}>‹ Back</button>
         <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => setMembersOpen(true)}>
@@ -122,7 +122,7 @@ export default function GroupChat({ me, groupId, onBack }) {
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: 8, paddingTop: 10, borderTop: '1px solid var(--line)', position: 'sticky', bottom: 0, background: 'var(--paper)' }}>
+      <div style={{ display: 'flex', gap: 8, paddingTop: 10, borderTop: '1px solid var(--line)', background: 'var(--paper)', flexShrink: 0 }}>
         <input className="input" style={{ marginBottom: 0, flex: 1 }} placeholder="Message the group…" value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') send(); }} />
         <button onClick={send} disabled={sending} aria-label="Send" style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--forest)', color: '#fff', border: 'none', display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0, opacity: sending ? 0.6 : 1 }}><SendIcon /></button>
       </div>
