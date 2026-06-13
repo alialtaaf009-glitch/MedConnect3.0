@@ -59,6 +59,12 @@ export default async function handler(req, res) {
       await sql`UPDATE users SET focus = ${body.focus} WHERE id = ${uid}`;
     }
 
+    // gender (optional, self-creating column)
+    if (body.gender !== undefined) {
+      await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS gender TEXT DEFAULT ''`;
+      await sql`UPDATE users SET gender = ${body.gender} WHERE id = ${uid}`;
+    }
+
     // exam date (clear or set)
     if (hasExamDate) {
       await sql`UPDATE users SET exam_date = ${examDateVal} WHERE id = ${uid}`;
