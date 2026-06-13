@@ -141,7 +141,11 @@ export default function Profile() {
         <input className="input" type="date" value={examDate} onChange={(e) => setExamDate(e.target.value)} />
 
         <Chips label="Country" options={COUNTRIES} value={country} onChange={setCountry} />
-        <Chips label="Timezone" options={TIMEZONES} value={timezone} onChange={setTimezone} optional />
+        <label className="label">Timezone  (optional)</label>
+        <select className="input" value={timezone} onChange={(e) => setTimezone(e.target.value)}>
+          <option value="">Select timezone</option>
+          {TIMEZONES.map((tz) => <option key={tz} value={tz}>{tz}</option>)}
+        </select>
         <Chips label="Question bank" options={QBANKS} value={questionBank} onChange={setQuestionBank} optional />
         <Chips label="When do you study?" options={STUDY_WHEN} value={studyTime} onChange={setStudyTime} optional />
         <Chips label="Current focus" options={FOCUS} value={focus} onChange={setFocus} optional />
