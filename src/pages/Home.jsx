@@ -151,7 +151,7 @@ function ExploreBrowse() {
                       </span>
                     )}
                     <span onClick={(e) => { e.stopPropagation(); togglePinE(key); }} style={{ padding: '0 5px', fontSize: 16, color: pinE.includes(key) ? 'var(--gold)' : 'var(--subtle)', cursor: 'pointer' }}>{pinE.includes(key) ? '★' : '☆'}</span>
-                    <span className="meta" style={{ fontSize: 11 }}>{openExam === key ? '▲' : '▼'}</span>
+                    <span className="meta" style={{ fontSize: 11 }}><span style={{ display: 'inline-block', transition: 'transform .25s ease', transform: openExam === key ? 'rotate(90deg)' : 'rotate(0deg)' }}>›</span></span>
                   </div>
                   {openExam === key && parts.map((part) => {
                     return (
@@ -168,6 +168,7 @@ function ExploreBrowse() {
             })}
         </>
       )}
+
       {browseMode === 'country' && orderedCountries.map(([flag, country, exams]) => (
         <div key={country} className="card" style={{ padding: 0, overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: 14, cursor: 'pointer' }}
@@ -175,7 +176,7 @@ function ExploreBrowse() {
             <Flag country={country} emoji={flag} />
             <span style={{ flex: 1, fontWeight: 600 }}>{country}</span>
             <span onClick={(e) => { e.stopPropagation(); togglePinC(country); }} style={{ padding: '0 5px', fontSize: 16, color: pinC.includes(country) ? 'var(--gold)' : 'var(--subtle)', cursor: 'pointer' }}>{pinC.includes(country) ? '★' : '☆'}</span>
-            <span className="meta">{openCountry === country ? '▲' : '▼'}</span>
+            <span className="meta" style={{ fontSize: 17, fontWeight: 700, color: 'var(--subtle)', transition: 'transform .25s ease', transform: openCountry === country ? 'rotate(90deg)' : 'rotate(0deg)', display: 'inline-block' }}>›</span>
           </div>
 
           {openCountry === country && exams.map(([exam, parts]) => {
@@ -190,7 +191,7 @@ function ExploreBrowse() {
                       {examCount(exam)} doctors
                     </span>
                   )}
-                  <span className="meta" style={{ fontSize: 11 }}>{openExam === key ? '▲' : '▼'}</span>
+                  <span className="meta" style={{ fontSize: 11 }}><span style={{ display: 'inline-block', transition: 'transform .25s ease', transform: openExam === key ? 'rotate(90deg)' : 'rotate(0deg)' }}>›</span></span>
                 </div>
                 {openExam === key && parts.map((part) => {
                   const ec = examColor(exam);
@@ -250,11 +251,11 @@ function Momentum({ user }) {
 
   // adaptive coach line — urgency without panic
   const coachLine = (d) => {
-    if (d > 60) return 'Plenty of runway. Build the habit now.';
-    if (d > 14) return 'This is the sharpening phase. Every block counts.';
-    if (d > 2)  return "Lock in. You've done the work — now protect it.";
-    if (d >= 0) return 'Trust your preparation. Sleep matters more than cramming now.';
-    return 'Exam day has passed — update your date in Profile when the next one is set.';
+    if (d > 60) return 'Plenty of runway.';
+    if (d > 14) return 'Sharpening phase.';
+    if (d > 2)  return 'Lock in.';
+    if (d >= 0) return 'Trust your prep. Rest well.';
+    return 'Update your exam date in Profile.';
   };
 
   return (
@@ -304,6 +305,9 @@ function Momentum({ user }) {
         return (
           <div onClick={() => setCdOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'grid', placeItems: 'center', zIndex: 100, padding: 24 }}>
             <div onClick={(e) => e.stopPropagation()} className="card" style={{ maxWidth: 340, width: '100%', textAlign: 'center', animation: 'popIn .3s cubic-bezier(0.34, 1.56, 0.64, 1) both', margin: 0 }}>
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--rust)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto 6px', display: 'block' }}>
+                <path d="M6 2h12M6 22h12M6 2c0 4 3 6 6 10 3-4 6-6 6-10M6 22c0-4 3-6 6-10" />
+              </svg>
               <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--rust)', textTransform: 'uppercase' }}>{user?.exam || 'Your exam'}</div>
               <div className="sub" style={{ fontSize: 12, marginTop: 2 }}>{new Date(user.exam_date).toDateString()}</div>
               <div style={{ display: 'flex', justifyContent: 'center', gap: 10, margin: '16px 0 4px' }}>
@@ -320,8 +324,8 @@ function Momentum({ user }) {
                 {hh}:{mm2}:{ss}
               </div>
               <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>hours · minutes · seconds</div>
-              <p className="voice" style={{ fontSize: 15, fontWeight: 500, color: 'var(--ink)', margin: '14px 6px 4px', lineHeight: 1.45 }}>{coachLine(dLeft)}</p>
-              <button className="btn ghost" style={{ marginTop: 10 }} onClick={() => setCdOpen(false)}>Back to it</button>
+              <div style={{ display: 'inline-block', fontSize: 12, fontWeight: 700, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 999, padding: '5px 14px', margin: '14px 0 2px' }}>{coachLine(dLeft)}</div>
+              <button className="btn ghost" style={{ marginTop: 12 }} onClick={() => setCdOpen(false)}>Back to it</button>
             </div>
           </div>
         );
@@ -347,6 +351,22 @@ function Momentum({ user }) {
                 <span style={{ fontSize: 15 }}>🏆</span>
                 <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--forest)' }}>Personal best: {best} day{best === 1 ? '' : 's'}</span>
               </div>
+              {(() => {
+                const fullTrees = Math.floor(streak / 7);
+                const dayInWeek = streak % 7;
+                const sprout = dayInWeek === 0 ? '' : dayInWeek < 3 ? '🌱' : dayInWeek < 6 ? '🌿' : '🌳';
+                return (
+                  <div style={{ marginTop: 14, padding: '12px 8px', background: 'var(--paper-2)', borderRadius: 12 }}>
+                    <div style={{ fontSize: 19, lineHeight: 1.5, wordBreak: 'break-word' }}>
+                      {fullTrees > 0 ? '🌳'.repeat(Math.min(fullTrees, 21)) : ''}{sprout}
+                      {fullTrees === 0 && dayInWeek === 0 && <span className="sub" style={{ fontSize: 12 }}>Study today to plant your first sprout 🌱</span>}
+                    </div>
+                    <div className="sub" style={{ fontSize: 10.5, marginTop: 6 }}>
+                      {fullTrees > 0 && `${fullTrees} week${fullTrees === 1 ? '' : 's'} grown`}{fullTrees > 0 && dayInWeek > 0 ? ' · ' : ''}{dayInWeek > 0 && `${7 - dayInWeek} day${7 - dayInWeek === 1 ? '' : 's'} to your next tree`}
+                    </div>
+                  </div>
+                );
+              })()}
               <p className="voice" style={{ fontSize: 15, fontWeight: 500, color: 'var(--ink)', margin: '12px 6px 4px', lineHeight: 1.45 }}>{line}</p>
               {!studiedToday && (
                 <button className="btn btn-cta" style={{ marginTop: 10 }} disabled={marking} onClick={markStudy}>
@@ -370,14 +390,22 @@ export default function Home() {
 
   const [nudges, setNudges] = useState([]);
 
-  // profile share links: opening med-connect3-0.vercel.app/?add=ID shows that doctor's card
+  // profile share links — read the target id from query OR hash (hash survives PWA launch),
+  // and persist it so it also survives a login redirect.
   const [addCard, setAddCard] = useState(null);   // { id, name, avatar, exam, country }
   const [addSent, setAddSent] = useState(false);
   useEffect(() => {
-    const addId = new URLSearchParams(window.location.search).get('add');
-    if (!addId || !user?.id) return;
-    window.history.replaceState({}, '', window.location.pathname); // run once
-    const target = parseInt(addId, 10);
+    const fromQuery = new URLSearchParams(window.location.search).get('add');
+    const hashMatch = (window.location.hash || '').match(/add[\/=](\d+)/i);
+    const fromHash = hashMatch ? hashMatch[1] : null;
+    const stored = localStorage.getItem('pending_add');
+    const raw = fromQuery || fromHash || stored;
+    if (!raw) return;
+    if (!user?.id) { localStorage.setItem('pending_add', raw); return; } // wait until logged in
+    // clear all sources so it only fires once
+    localStorage.removeItem('pending_add');
+    if (fromQuery || fromHash) window.history.replaceState({}, '', window.location.pathname);
+    const target = parseInt(raw, 10);
     if (!target) return;
     if (target === user.id) { window.alert("That's your own profile link — share it with a colleague so they can add you. 😄"); return; }
     api.publicProfile(target).then((d) => { if (d.user) setAddCard(d.user); }).catch(() => {});
@@ -497,3 +525,4 @@ export default function Home() {
     </div>
   );
 }
+
