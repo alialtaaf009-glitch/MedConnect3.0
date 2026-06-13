@@ -211,7 +211,7 @@ function ExploreBrowse() {
       ))}
     </>
   );
-  }
+}
 
 // Countdown + Study Streak tiles, each with a tap-to-expand pop-out.
 function Momentum({ user }) {
@@ -228,14 +228,16 @@ function Momentum({ user }) {
 
   // streak
   const [streak, setStreak] = useState(user?.current_streak || 0);
-  const [studiedToday, setStudiedToday] = useState(user?.studied_today || false);
+  // remember today's mark locally (keyed to the date) so the button doesn't revert on re-render
+  const todayKey = 'studied_' + new Date().toISOString().slice(0, 10);
+  const [studiedToday, setStudiedToday] = useState(user?.studied_today || localStorage.getItem(todayKey) === '1');
   const [marking, setMarking] = useState(false);
   const markStudy = async () => {
     if (marking || studiedToday) return;
     setMarking(true);
     try {
       const d = await api.markStudy();
-      if (d.user) { setStreak(d.user.current_streak || 0); setStudiedToday(true); }
+      if (d.user) { setStreak(d.user.current_streak || 0); setStudiedToday(true); localStorage.setItem(todayKey, '1'); }
     } catch (e) {} finally { setMarking(false); }
   };
 
