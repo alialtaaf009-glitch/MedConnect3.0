@@ -34,7 +34,7 @@ export default function Profile() {
   const { mode, toggle } = useTheme();
   const [, setTilePrefs] = useState(0); // re-render when tile prefs change
   const [shareOpen, setShareOpen] = useState(false);
-  const shareLink = `https://med-connect3-0.vercel.app/#/add/${user?.id}`;
+  const shareLink = `https://med-connect3-0.vercel.app/add/${user?.id}`;
   const shareProfile = async () => {
     try {
       if (navigator.share) { await navigator.share({ title: 'Add me on MedConnect', text: `Add me as a study partner on MedConnect — ${user?.name}`, url: shareLink }); return; }
