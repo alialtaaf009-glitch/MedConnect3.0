@@ -211,7 +211,7 @@ function ExploreBrowse() {
       ))}
     </>
   );
-}
+  }
 
 // Countdown + Study Streak tiles, each with a tap-to-expand pop-out.
 function Momentum({ user }) {
@@ -390,30 +390,6 @@ export default function Home() {
 
   const [nudges, setNudges] = useState([]);
 
-  // profile share links — read the target id from query OR hash (hash survives PWA launch),
-  // and persist it so it also survives a login redirect.
-  const [addCard, setAddCard] = useState(null);   // { id, name, avatar, exam, country }
-  const [addSent, setAddSent] = useState(false);
-  useEffect(() => {
-    const fromQuery = new URLSearchParams(window.location.search).get('add');
-    const hashMatch = (window.location.hash || '').match(/add[\/=](\d+)/i);
-    const fromHash = hashMatch ? hashMatch[1] : null;
-    const stored = localStorage.getItem('pending_add');
-    const raw = fromQuery || fromHash || stored;
-    if (!raw) return;
-    if (!user?.id) { localStorage.setItem('pending_add', raw); return; } // wait until logged in
-    // clear all sources so it only fires once
-    localStorage.removeItem('pending_add');
-    if (fromQuery || fromHash) window.history.replaceState({}, '', window.location.pathname);
-    const target = parseInt(raw, 10);
-    if (!target) return;
-    if (target === user.id) { window.alert("That's your own profile link — share it with a colleague so they can add you. 😄"); return; }
-    api.publicProfile(target).then((d) => { if (d.user) setAddCard(d.user); }).catch(() => {});
-  }, [user?.id]);
-  const sendAdd = async () => {
-    try { await api.sendRequest(addCard.id); setAddSent(true); }
-    catch (e) { window.alert('Could not send — you may already be connected.'); setAddCard(null); }
-  };
   const [invited, setInvited] = useState(false);
   useEffect(() => { api.connections().then((d) => setNudges(d.nudges || [])).catch(() => {}); }, []);
 
@@ -435,28 +411,7 @@ export default function Home() {
 
   return (
     <div className="screen">
-      {addCard && (
-        <div onClick={() => setAddCard(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'grid', placeItems: 'center', zIndex: 100, padding: 24 }}>
-          <div onClick={(e) => e.stopPropagation()} className="card" style={{ maxWidth: 320, width: '100%', textAlign: 'center', animation: 'popIn .3s cubic-bezier(0.34, 1.56, 0.64, 1) both', margin: 0 }}>
-            <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'var(--paper-2)', border: '2px solid var(--forest)', display: 'grid', placeItems: 'center', fontSize: 30, margin: '0 auto 10px' }}>{addCard.avatar || '🩺'}</div>
-            <div style={{ fontSize: 17, fontWeight: 700 }}>{addCard.name}</div>
-            <div className="meta" style={{ marginTop: 2 }}>{[addCard.exam, addCard.country].filter(Boolean).join(' · ')}</div>
-            {addSent ? (
-              <>
-                <p className="voice" style={{ fontSize: 14.5, margin: '12px 0 4px', color: 'var(--forest)' }}>Request sent — over to them now. 🩺</p>
-                <button className="btn ghost" style={{ marginTop: 8 }} onClick={() => { setAddCard(null); setAddSent(false); }}>Done</button>
-              </>
-            ) : (
-              <>
-                <p className="sub" style={{ fontSize: 12.5, margin: '10px 0 2px' }}>Wants to study with you on MedConnect.</p>
-                <button className="btn btn-cta" style={{ marginTop: 10 }} onClick={sendAdd}>Send connection request</button>
-                <button className="btn ghost" style={{ marginTop: 8 }} onClick={() => setAddCard(null)}>Not now</button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-      <div className="card" onClick={() => nav('/profile')} style={{ cursor: 'pointer' }}>
+            <div className="card" onClick={() => nav('/profile')} style={{ cursor: 'pointer' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 13 }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, flexShrink: 0 }}>
             <div style={{ width: 50, height: 50, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', color: 'var(--forest)', fontWeight: 600, fontSize: user?.avatar ? 26 : 18 }}>{user?.avatar || initials}</div>
@@ -525,4 +480,3 @@ export default function Home() {
     </div>
   );
 }
-
