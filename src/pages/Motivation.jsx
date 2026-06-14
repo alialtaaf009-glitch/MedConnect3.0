@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { QUOTES, quoteOfTheDay } from '../lib/quotes';
+import { QUOTES, quoteOfTheDay, quoteById } from '../lib/quotes';
 import { api } from '../lib/api';
 
 export default function Motivation() {
@@ -45,18 +45,18 @@ export default function Motivation() {
   ];
   const [theme, setTheme] = useState(THEMES[0]);
 
-  const downloadQuote = (text) => {
+  const downloadQuote = (text, author) => {
     const c = document.createElement('canvas');
     c.width = 1080; c.height = 1080;
     const x = c.getContext('2d');
-    // background (selected theme)
+    // clean solid background (selected theme) — no texture
     x.fillStyle = theme.bg; x.fillRect(0, 0, 1080, 1080);
-    // subtle dotted texture in the ink colour
-    x.globalAlpha = 0.06; x.fillStyle = theme.ink;
-    for (let i = 40; i < 1080; i += 44) for (let j = 40; j < 1080; j += 44) { x.beginPath(); x.arc(i, j, 2, 0, 7); x.fill(); }
-    x.globalAlpha = 1;
+    // decorative mark
+    x.fillStyle = theme.accent; x.textAlign = 'center';
+    x.font = '600 46px Georgia, serif';
+    x.fillText('✦', 540, 300);
     // quote text (wrapped)
-    x.fillStyle = theme.ink; x.textAlign = 'center';
+    x.fillStyle = theme.ink;
     x.font = '600 52px Georgia, serif';
     const words = ('“' + text + '”').split(' ');
     let line = '', lines = [];
@@ -67,7 +67,12 @@ export default function Motivation() {
     lines.push(line.trim());
     const startY = 540 - (lines.length * 35);
     lines.forEach((l, i) => x.fillText(l, 540, startY + i * 70));
-    // footer
+    // author (if any)
+    if (author) {
+      x.fillStyle = theme.accent; x.font = 'italic 36px Georgia, serif';
+      x.fillText('— ' + author, 540, startY + lines.length * 70 + 30);
+    }
+    // footer brand
     x.fillStyle = theme.accent; x.font = '700 34px Georgia, serif';
     x.fillText('MedConnect', 540, 980);
     const link = document.createElement('a');
@@ -86,27 +91,32 @@ export default function Motivation() {
 
       {tab === 'today' && (
         <>
-          <div className="card" style={{ padding: 24, textAlign: 'center', background: theme.bg, transition: 'background .3s ease' }}>
-            <div style={{ fontSize: 30, marginBottom: 12, color: theme.accent }}>✦</div>
-            <p style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: 21, fontWeight: 500, lineHeight: 1.4, marginBottom: 18, color: theme.ink, transition: 'color .3s ease' }}>
+          <div className="card" style={{ padding: 28, textAlign: 'center', background: theme.bg, transition: 'background .3s ease' }}>
+            <div style={{ fontSize: 28, marginBottom: 14, color: theme.accent }}>✦</div>
+            <p style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: 21, fontWeight: 500, lineHeight: 1.45, marginBottom: today.author ? 10 : 18, color: theme.ink, transition: 'color .3s ease' }}>
               “{today.text}”
             </p>
-            <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: 14, fontWeight: 700, color: theme.accent }}>MedConnect</div>
+            {today.author && <p style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: 14, fontStyle: 'italic', color: theme.accent, marginBottom: 16 }}>— {today.author}</p>}
+            <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: 13, fontWeight: 700, color: theme.accent, opacity: 0.85 }}>MedConnect</div>
           </div>
 
           {/* background theme picker */}
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 14 }}>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 16 }}>
             {THEMES.map((t) => (
               <button key={t.name} onClick={() => setTheme(t)} aria-label={t.name}
                 style={{ width: 30, height: 30, borderRadius: '50%', background: t.bg, border: theme.name === t.name ? '2.5px solid var(--forest)' : '1.5px solid var(--line)', cursor: 'pointer', transform: theme.name === t.name ? 'scale(1.12)' : 'scale(1)', transition: 'transform .2s ease' }} />
             ))}
           </div>
 
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', alignItems: 'center', marginTop: 16 }}>
+          {/* centered hero download button */}
+          <button className="btn" style={{ display: 'block', margin: '18px auto 0', maxWidth: 240 }} onClick={() => downloadQuote(today.text, today.author)}>⬇ Download wallpaper</button>
+
+          {/* secondary: save to favourites */}
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 7, marginTop: 12 }}>
             <Star id={today.id} />
-            <button className="btn ghost" onClick={() => downloadQuote(today.text)}>⬇ Download wallpaper</button>
+            <span className="sub" style={{ fontSize: 12 }}>Save to favourites</span>
           </div>
-          <div className="sub" style={{ fontSize: 12, marginTop: 8, textAlign: 'center' }}>Pick a colour, then save it as your wallpaper ✨</div>
+          <div className="sub" style={{ fontSize: 11.5, marginTop: 10, textAlign: 'center' }}>Pick a colour, then save it as your wallpaper ✨</div>
         </>
       )}
 
@@ -117,12 +127,18 @@ export default function Motivation() {
               <p className="sub">No favourites yet. Star quotes you love and they'll collect here.</p>
             </div>
           )}
-          {favIds.map((id) => (
-            <div key={id} className="card" style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-              <div style={{ flex: 1, fontFamily: "'Inter',system-ui,sans-serif", fontSize: 16, lineHeight: 1.45 }}>“{QUOTES[id]}”</div>
-              <Star id={id} />
-            </div>
-          ))}
+          {favIds.map((id) => {
+            const q = quoteById(id);
+            return (
+              <div key={id} className="card" style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: 16, lineHeight: 1.45 }}>“{q.text}”</div>
+                  {q.author && <div style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: 13, fontStyle: 'italic', color: 'var(--muted)', marginTop: 4 }}>— {q.author}</div>}
+                </div>
+                <Star id={id} />
+              </div>
+            );
+          })}
         </>
       )}
     </div>
