@@ -91,7 +91,7 @@ export default function LabValues() {
       <h1 className="h1" style={{ fontFamily: "'Fraunces',Georgia,serif", color: 'var(--forest)' }}>Lab Values</h1>
       <p className="sub" style={{ marginBottom: 12 }}>Quick reference for common normal ranges.</p>
 
-      <input className="input" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search — e.g. sodium, Hb, ABG…" style={{ marginBottom: 8 }} />
+      <input className="input" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search — e.g. sodium, Hb, ABG…" style={{ marginBottom: 8, borderRadius: 999, padding: "12px 18px" }} />
       <p className="sub" style={{ fontSize: 10.5, fontStyle: 'italic', textAlign: 'center', marginBottom: 16, color: 'var(--subtle)' }}>
         Reference ranges vary by lab and population. Always use your local reference range.
       </p>
@@ -117,3 +117,4 @@ export default function LabValues() {
     </div>
   );
 }
+
