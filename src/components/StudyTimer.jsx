@@ -31,6 +31,7 @@ export default function StudyTimer() {
   const [fullscreen, setFullscreen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [custom, setCustom] = useState('');
+  const [showOptions, setShowOptions] = useState(false);
   if (!t) return null;
 
   const onStartPause = () => { haptic(18); t.startPause(); };
@@ -95,10 +96,10 @@ export default function StudyTimer() {
       {!started ? (
         <button className="btn" style={{ maxWidth: big ? 220 : 180, padding: big ? '16px 52px' : '14px 44px' }} onClick={onStartPause}>Start</button>
       ) : (
-        <>
-          <button className="btn timer-reveal" style={{ maxWidth: big ? 170 : 140, padding: big ? '14px 34px' : '13px 28px' }} onClick={onStartPause}>{t.running ? 'Pause' : 'Resume'}</button>
-          <button className="btn ghost timer-reveal" style={{ maxWidth: big ? 130 : 110, padding: big ? '14px 28px' : '13px 24px', animationDelay: '.06s' }} onClick={onReset}>Reset</button>
-        </>
+        <div key="active-controls" style={{ display: 'flex', gap: 12, justifyContent: 'center' }} className="timer-reveal-once">
+          <button className="btn" style={{ maxWidth: big ? 170 : 140, padding: big ? '14px 34px' : '13px 28px' }} onClick={onStartPause}>{t.running ? 'Pause' : 'Resume'}</button>
+          <button className="btn ghost" style={{ maxWidth: big ? 130 : 110, padding: big ? '14px 28px' : '13px 24px' }} onClick={onReset}>Reset</button>
+        </div>
       )}
     </div>
   );
@@ -111,7 +112,7 @@ export default function StudyTimer() {
         <Ring frac={frac} size={fsSize} danger={danger}>
           <ClockFace big={true} />
         </Ring>
-        {t.done && <div style={{ color: 'var(--rust)', fontWeight: 700, fontSize: 18, marginTop: 16 }}>Time's up! 🎉</div>}
+        {t.done && <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}><span className="heart-beat" style={{ fontSize: 30 }}>🫀</span><span style={{ color: 'var(--rust)', fontWeight: 700, fontSize: 18 }}>Time's up!</span></div>}
         <Controls big={true} />
         <p className="sub" style={{ fontSize: 12, marginTop: 26 }}>Tap anywhere to exit full-screen</p>
       </div>
@@ -122,27 +123,40 @@ export default function StudyTimer() {
     <div className="card" onClick={() => setFullscreen(true)} style={{ marginBottom: 18, textAlign: 'center', borderColor: 'var(--forest)', minHeight: 280, cursor: 'pointer' }}>
       <ModeTabs />
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14 }}>
-        <Ring frac={frac} size={180} danger={danger}>
-          <ClockFace big={false} />
-        </Ring>
-        {t.mode === 'timer' && !editing && !started && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} onClick={(e) => e.stopPropagation()}>
-            {[25, 45, 60].map((m) => (
-              <button key={m} className={`chip ${t.target === m * 60 ? 'on' : ''}`} style={{ minWidth: 62 }} onClick={() => onPreset(m)}>{m} min</button>
-            ))}
-          </div>
-        )}
-      </div>
+      <Ring frac={frac} size={190} danger={danger}>
+        <ClockFace big={false} />
+      </Ring>
 
       <Controls big={false} />
 
-      <div style={{ marginTop: 14 }} onClick={(e) => e.stopPropagation()}>
-        <span className="sub" style={{ fontSize: 11, marginRight: 6 }}>Sound:</span>
-        {Object.entries(SOUNDS).map(([key, s]) => (
-          <button key={key} className={`chip ${t.sound === key ? 'on' : ''}`} style={{ fontSize: 11, padding: '4px 10px', marginRight: 4 }} onClick={() => onPickSound(key)}>{s.label}</button>
-        ))}
-      </div>
+      {/* collapsible options — keeps the clock minimal by default */}
+      {!started && (
+        <div style={{ marginTop: 16 }} onClick={(e) => e.stopPropagation()}>
+          <button onClick={() => setShowOptions((s) => !s)} className="link" style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)' }}>
+            {showOptions ? 'Hide options ▴' : '⚙ Options ▾'}
+          </button>
+          {showOptions && (
+            <div style={{ marginTop: 12, animation: 'fadeUp .25s ease both' }}>
+              {t.mode === 'timer' && (
+                <>
+                  <div className="sub" style={{ fontSize: 11, marginBottom: 6 }}>Length</div>
+                  <div className="chips" style={{ justifyContent: 'center', marginBottom: 14 }}>
+                    {[25, 45, 60].map((m) => (
+                      <button key={m} className={`chip ${t.target === m * 60 ? 'on' : ''}`} onClick={() => onPreset(m)}>{m} min</button>
+                    ))}
+                  </div>
+                </>
+              )}
+              <div className="sub" style={{ fontSize: 11, marginBottom: 6 }}>Alarm sound</div>
+              <div className="chips" style={{ justifyContent: 'center' }}>
+                {Object.entries(SOUNDS).map(([key, s]) => (
+                  <button key={key} className={`chip ${t.sound === key ? 'on' : ''}`} onClick={() => onPickSound(key)}>{s.label}</button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
