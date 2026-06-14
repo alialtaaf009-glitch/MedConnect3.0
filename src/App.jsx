@@ -18,6 +18,7 @@ import Legal from './pages/Legal.jsx';
 import Reset from './pages/Reset.jsx';
 import About from './pages/About.jsx';
 import LabValues from './pages/LabValues.jsx';
+import Formulas from './pages/Formulas.jsx';
 import Checklist from './components/Checklist.jsx';
 import AddPartner from './pages/AddPartner.jsx';
 
@@ -128,6 +129,9 @@ function Drawer({ open, onClose, user }) {
           <div className="drawer-sect">Tools</div>
           <button className="drawer-item" onClick={() => go('/labs')}>
             <svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v6.5L5.5 17a2 2 0 0 0 1.7 3h9.6a2 2 0 0 0 1.7-3L14 9.5V3" /><path d="M8 14h8" /></svg>Lab values
+          </button>
+          <button className="drawer-item" onClick={() => go('/formulas')}>
+            <svg viewBox="0 0 24 24"><path d="M4 4h16M4 4v16M9 9l4 4M13 9l-4 4M8 18h8" /></svg>Formulas
           </button>
           <div className="drawer-div" />
           <div className="drawer-sect">App</div>
@@ -299,6 +303,7 @@ export default function App() {
         <Route path="/legal" element={<Legal />} />
         <Route path="/about" element={<About />} />
         <Route path="/labs" element={<LabValues />} />
+        <Route path="/formulas" element={<Formulas />} />
         <Route path="/connections" element={<Connections />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/add/:id" element={<AddPartner />} />
