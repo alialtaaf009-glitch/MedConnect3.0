@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Navigate, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from './context/Auth.jsx';
 import { useTheme } from './context/Theme.jsx';
@@ -41,10 +41,53 @@ function Drawer({ open, onClose, user }) {
   const { logout } = useAuth();
   const go = (path) => { onClose(); nav(path); };
   const exam = [user?.exam, user?.country].filter(Boolean).join(' · ');
+
+  // swipe-to-close: follow the finger leftward, release to close or snap back
+  const [drag, setDrag] = useState(null); // current leftward px offset while dragging (>=0), or null
+  const startX = useRef(0);
+  const startY = useRef(0);
+  const horizontal = useRef(false);
+
+  const onTouchStart = (e) => {
+    const t = e.touches[0];
+    startX.current = t.clientX;
+    startY.current = t.clientY;
+    horizontal.current = false;
+    setDrag(0);
+  };
+  const onTouchMove = (e) => {
+    if (drag === null) return;
+    const t = e.touches[0];
+    const dx = t.clientX - startX.current;
+    const dy = t.clientY - startY.current;
+    // decide gesture direction once, so vertical scrolling of the checklist still works
+    if (!horizontal.current) {
+      if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+      horizontal.current = Math.abs(dx) > Math.abs(dy);
+      if (!horizontal.current) { setDrag(null); return; } // it's a vertical scroll — let it be
+    }
+    if (dx < 0) setDrag(-dx); // only track leftward (closing) movement
+  };
+  const onTouchEnd = () => {
+    if (drag === null) return;
+    const width = 310;
+    if (drag > width * 0.33) onClose(); // dragged past a third -> close
+    setDrag(null); // snap back (or stay closed)
+  };
+
+  // while dragging, move with the finger and kill the transition for 1:1 feel
+  const dragStyle = drag !== null && drag > 0
+    ? { transform: `translateX(${-drag}px)`, transition: 'none' }
+    : undefined;
+  const scrimStyle = drag !== null && drag > 0
+    ? { opacity: Math.max(0, 1 - drag / 310), transition: 'none' }
+    : undefined;
+
   return (
     <>
-      <div className={`drawer-scrim ${open ? 'show' : ''}`} onClick={onClose} />
-      <aside className={`drawer ${open ? 'open' : ''}`}>
+      <div className={`drawer-scrim ${open ? 'show' : ''}`} style={scrimStyle} onClick={onClose} />
+      <aside className={`drawer ${open ? 'open' : ''}`} style={dragStyle}
+        onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
         <div className="drawer-head">
           <button className="drawer-theme" onClick={toggle} aria-label="Toggle theme">{mode === 'dark' ? '🌙' : '☀️'}</button>
           <div style={{ flex: 1, minWidth: 0 }}>
