@@ -117,7 +117,7 @@ export default function StudyTimer() {
   if (fullscreen) {
     const fsSize = Math.min(300, (typeof window !== 'undefined' ? window.innerWidth : 360) - 80);
     return (
-      <div onClick={() => setFullscreen(false)} style={{ position: 'fixed', inset: 0, background: 'var(--paper)', zIndex: 1000, animation: 'fadeUp .3s cubic-bezier(0.34, 1.56, 0.64, 1) both', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 'calc(env(safe-area-inset-top, 0px) + 60px) 24px calc(env(safe-area-inset-bottom, 0px) + 40px)', cursor: 'pointer' }}>
+      <div onClick={() => setFullscreen(false)} style={{ position: 'fixed', inset: 0, background: 'var(--paper)', zIndex: 1000, animation: 'fadeUp .2s ease-out both', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 'calc(env(safe-area-inset-top, 0px) + 60px) 24px calc(env(safe-area-inset-bottom, 0px) + 40px)', cursor: 'pointer' }}>
         <ModeTabs />
         <Ring frac={frac} size={fsSize} danger={danger}>
           <ClockFace big={true} />
@@ -170,3 +170,4 @@ export default function StudyTimer() {
     </div>
   );
 }
+
