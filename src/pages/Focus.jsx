@@ -7,11 +7,19 @@ function Lungs({ grow, size = 120 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 100 100" fill="none"
       style={{ transformOrigin: 'center', transition: 'transform 3.9s ease-in-out', transform: grow ? 'scale(1)' : 'scale(0.55)', filter: 'drop-shadow(0 8px 18px rgba(168,68,42,.22))' }}>
-      <path d="M50 18 v34" stroke="var(--rust)" strokeWidth="4" strokeLinecap="round" />
-      <path d="M50 22 q-3 -8 -10 -8" stroke="var(--rust)" strokeWidth="3.4" strokeLinecap="round" />
-      <path d="M50 22 q3 -8 10 -8" stroke="var(--rust)" strokeWidth="3.4" strokeLinecap="round" />
-      <path d="M44 30 C28 32 20 48 22 68 C23 80 32 84 39 80 C45 76 46 66 46 56 C46 44 46 34 44 30 Z" fill="var(--rust)" fillOpacity="0.18" stroke="var(--rust)" strokeWidth="3.2" strokeLinejoin="round" />
-      <path d="M56 30 C72 32 80 48 78 68 C77 80 68 84 61 80 C55 76 54 66 54 56 C54 44 54 34 56 30 Z" fill="var(--rust)" fillOpacity="0.18" stroke="var(--rust)" strokeWidth="3.2" strokeLinejoin="round" />
+      {/* trachea with cartilage rings */}
+      <path d="M50 14 v30" stroke="var(--rust)" strokeWidth="3.6" strokeLinecap="round" />
+      <path d="M46 20 h8 M46 25 h8 M46 30 h8" stroke="var(--rust)" strokeWidth="1.4" strokeLinecap="round" opacity="0.55" />
+      {/* primary bronchi splitting into each lung */}
+      <path d="M50 42 q-7 3 -12 9" stroke="var(--rust)" strokeWidth="2.8" strokeLinecap="round" fill="none" />
+      <path d="M50 42 q7 3 12 9" stroke="var(--rust)" strokeWidth="2.8" strokeLinecap="round" fill="none" />
+      {/* secondary bronchi branches */}
+      <path d="M40 50 q-4 4 -5 10 M40 50 q-6 2 -9 6" stroke="var(--rust)" strokeWidth="1.8" strokeLinecap="round" opacity="0.7" />
+      <path d="M60 50 q4 4 5 10 M60 50 q6 2 9 6" stroke="var(--rust)" strokeWidth="1.8" strokeLinecap="round" opacity="0.7" />
+      {/* left lobe */}
+      <path d="M44 32 C27 35 18 50 21 69 C22 82 33 86 40 81 C46 77 47 66 47 56 C47 44 47 35 44 32 Z" fill="var(--rust)" fillOpacity="0.16" stroke="var(--rust)" strokeWidth="3" strokeLinejoin="round" />
+      {/* right lobe */}
+      <path d="M56 32 C73 35 82 50 79 69 C78 82 67 86 60 81 C54 77 53 66 53 56 C53 44 53 35 56 32 Z" fill="var(--rust)" fillOpacity="0.16" stroke="var(--rust)" strokeWidth="3" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -42,7 +50,7 @@ function Breathe() {
 
   if (big) {
     return (
-      <div onClick={() => { setBig(false); setOn(false); }} style={{ position: 'fixed', inset: 0, background: 'var(--paper)', zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, cursor: 'pointer', animation: 'fadeUp .3s ease both' }}>
+      <div onClick={() => { setBig(false); setOn(false); }} style={{ position: 'fixed', inset: 0, background: 'var(--paper)', zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, cursor: 'pointer', animation: 'fadeUp .2s ease-out both' }}>
         <div className="voice" style={{ fontSize: 16, color: 'var(--muted)', marginBottom: 8 }}>60 seconds of calm. No side effects.</div>
         <Lungs grow={grow} size={180} />
         <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--forest)', marginTop: 18 }}>{on ? LABELS[phase] : 'Tap to begin'}</div>
