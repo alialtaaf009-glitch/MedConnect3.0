@@ -30,7 +30,7 @@ const DATA = [
   ['🫀 Cardiology', [
     ['QTc (Bazett)', 'QT ÷ √(RR interval)', 'Prolonged if >440 ms (men) / >460 ms (women).'],
     ['CHA₂DS₂-VASc', 'CHF, HTN, Age≥75(2), DM, Stroke(2), Vascular, Age 65-74, Sex(F)', 'AF stroke risk; score ≥2 → consider anticoagulation.'],
-    ['Wells Score (PE)', 'DVT signs(3), PE likely(3), HR>100, immobile, prior VTE, haemoptysis, malignancy', '>4 → PE likely, image; ≤4 → D-dimer.'],
+    ['Wells Score (PE)', 'DVT signs(3), PE likely(3), HR>100, immobile, prior VTE, haemoptysis, malignancy', '>4 → PE likely, do CTPA; ≤4 → D-dimer.'],
     ['ABCD² (TIA)', 'Age≥60, BP≥140/90, Clinical, Duration, Diabetes', 'Stroke risk after TIA.'],
   ]],
   ['🔥 Surgery / Critical Care', [
