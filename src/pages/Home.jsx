@@ -455,7 +455,8 @@ export default function Home() {
         <div style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: 17, fontWeight: 500, lineHeight: 1.4, position: 'relative', paddingRight: 28 }}>
           {quote.text}
         </div>
-        <div style={{ position: 'absolute', bottom: 14, right: 16, width: 24, height: 24, borderRadius: '50%', background: 'rgba(255,255,255,0.14)', display: 'grid', placeItems: 'center', fontSize: 14, opacity: 0.9 }}>›</div>
+        {quote.author && <div style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: 13, fontStyle: 'italic', color: 'var(--gold)', marginTop: 6, paddingRight: 28 }}>— {quote.author}</div>}
+        <div style={{ position: 'absolute', top: '50%', right: 14, transform: 'translateY(-50%)', width: 26, height: 26, borderRadius: '50%', background: 'rgba(255,255,255,0.14)', display: 'grid', placeItems: 'center', fontSize: 15, opacity: 0.9 }}>›</div>
       </div>
 
       {nudges.length > 0 && (
@@ -512,4 +513,4 @@ export default function Home() {
       </div>
     </div>
   );
-}
+    }
