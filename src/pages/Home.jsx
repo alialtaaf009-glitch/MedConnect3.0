@@ -225,7 +225,7 @@ function ExploreBrowse() {
           })}
         </div>
       ))}
-      </>
+    </>
   );
 }
 
@@ -449,16 +449,13 @@ export default function Home() {
   return (
     <div className="screen">
       <div onClick={() => nav('/motivation')} style={{ cursor: 'pointer', marginTop: 4, padding: '18px 18px', borderRadius: 18, background: 'linear-gradient(135deg, var(--forest) 0%, var(--forest-2) 100%)', color: '#fff', position: 'relative', overflow: 'hidden', boxShadow: '0 6px 20px rgba(31,77,63,.28)' }}>
-        <div style={{ position: 'absolute', top: -18, right: -8, fontSize: 90, opacity: 0.12, lineHeight: 1, transform: 'rotate(8deg)', fontFamily: 'Georgia, serif' }}>”</div>
         <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--gold)', marginBottom: 8, position: 'relative' }}>
-          Hi {(user?.name || '').replace(/^Dr\.?\s+/i, '').split(' ')[0] || 'Doctor'} — today's spark
+          Hi Dr. {(user?.name || '').replace(/^Dr\.?\s+/i, '').split(' ')[0] || 'Doctor'} — a thought for today
         </div>
-        <div style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: 17, fontWeight: 500, lineHeight: 1.4, position: 'relative', paddingRight: 20 }}>
+        <div style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: 17, fontWeight: 500, lineHeight: 1.4, position: 'relative', paddingRight: 28 }}>
           {quote.text}
         </div>
-        <div style={{ fontSize: 11, fontWeight: 600, opacity: 0.85, marginTop: 10, display: 'flex', alignItems: 'center', gap: 5 }}>
-          Daily Motivation <span style={{ fontSize: 13 }}>›</span>
-        </div>
+        <div style={{ position: 'absolute', bottom: 14, right: 16, width: 24, height: 24, borderRadius: '50%', background: 'rgba(255,255,255,0.14)', display: 'grid', placeItems: 'center', fontSize: 14, opacity: 0.9 }}>›</div>
       </div>
 
       {nudges.length > 0 && (
