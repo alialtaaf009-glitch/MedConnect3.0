@@ -109,12 +109,12 @@ export default async function handler(req, res) {
              OR (sender = ${other} AND recipient = ${uid})
           ORDER BY created_at ASC`;
         // include both users' avatars + the other person's study profile for the chat header
-        const people = await sql`SELECT id, name, avatar, exam, country, timezone FROM users WHERE id = ${uid} OR id = ${other}`;
+        const people = await sql`SELECT id, name, avatar, exam, country, timezone, last_seen FROM users WHERE id = ${uid} OR id = ${other}`;
         const avatars = {};
         let peer = null;
         for (const p of people) {
           avatars[p.id] = p.avatar || '';
-          if (p.id == other) peer = { exam: p.exam, country: p.country, timezone: p.timezone };
+          if (p.id == other) peer = { exam: p.exam, country: p.country, timezone: p.timezone, last_seen: p.last_seen };
         }
         return res.status(200).json({ messages: msgs, avatars, peer });
       }
@@ -157,4 +157,3 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Messaging failed: ' + e.message });
   }
 }
-
