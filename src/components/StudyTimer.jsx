@@ -117,14 +117,16 @@ export default function StudyTimer() {
   if (fullscreen) {
     const fsSize = Math.min(300, (typeof window !== 'undefined' ? window.innerWidth : 360) - 80);
     return (
-      <div onClick={() => setFullscreen(false)} style={{ position: 'fixed', inset: 0, background: 'var(--paper)', zIndex: 1000, animation: 'fadeUp .2s ease-out both', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 'calc(env(safe-area-inset-top, 0px) + 60px) 24px calc(env(safe-area-inset-bottom, 0px) + 40px)', cursor: 'pointer' }}>
-        <ModeTabs />
-        <Ring frac={frac} size={fsSize} danger={danger}>
-          <ClockFace big={true} />
-        </Ring>
-        {t.done && <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}><span className="heart-beat" style={{ fontSize: 30 }}>🫀</span><span style={{ color: 'var(--rust)', fontWeight: 700, fontSize: 18 }}>Time's up!</span></div>}
-        <Controls big={true} />
-        <p className="sub" style={{ fontSize: 12, marginTop: 26 }}>Tap anywhere to exit full-screen</p>
+      <div onClick={() => setFullscreen(false)} className="fs-open" style={{ position: 'fixed', inset: 0, background: 'var(--paper)', zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 'calc(env(safe-area-inset-top, 0px) + 60px) 24px calc(env(safe-area-inset-bottom, 0px) + 40px)', cursor: 'pointer' }}>
+        <div className="fs-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <ModeTabs />
+          <Ring frac={frac} size={fsSize} danger={danger}>
+            <ClockFace big={true} />
+          </Ring>
+          {t.done && <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}><span className="heart-beat" style={{ fontSize: 30 }}>🫀</span><span style={{ color: 'var(--rust)', fontWeight: 700, fontSize: 18 }}>Time's up!</span></div>}
+          <Controls big={true} />
+          <p className="sub" style={{ fontSize: 12, marginTop: 26 }}>Tap anywhere to exit full-screen</p>
+        </div>
       </div>
     );
   }
