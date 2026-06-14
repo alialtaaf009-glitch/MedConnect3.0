@@ -234,10 +234,20 @@ function TabBar() {
     ['/chat', 'chat', 'Chat'],
     ['/focus', 'focus', 'Focus'],
   ];
+  const loc = useLocation();
+  // tapping the tab you're already on scrolls that page back to the top
+  const handleTab = (to) => (e) => {
+    if (loc.pathname === to) {
+      e.preventDefault();
+      const scroller = document.querySelector('.app-scroll') || window;
+      if (scroller === window) window.scrollTo({ top: 0, behavior: 'smooth' });
+      else scroller.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
   return (
     <nav className="tabbar">
       {tabs.map(([to, ic, label]) => (
-        <NavLink key={to} to={to} className={({ isActive }) => (isActive ? 'active' : '')}>
+        <NavLink key={to} to={to} onClick={handleTab(to)} className={({ isActive }) => (isActive ? 'active' : '')}>
           <span className="ic" style={{ position: 'relative' }}>
             <Icon name={ic} />
             {ic === 'chat' && hasUnread && <span className="badge-dot" />}
@@ -326,4 +336,4 @@ export default function App() {
       <TabBar />
     </div>
   );
-}
+        }
