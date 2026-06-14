@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { api } from '../lib/api';
 import { SendIcon, IcoTrash, IcoLeave, IcoBan, IcoFlag, Stamp } from './ChatBits.jsx';
+import { isOnline } from '../lib/presence';
 
 export default function DirectChat({ me, withId, withName, withAv, onBack }) {
   const [messages, setMessages] = useState([]);
@@ -60,7 +61,7 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
         <button className="link" onClick={onBack}>‹ Back</button>
         <div onClick={() => setShowPeer(true)} style={{ position: 'relative', cursor: 'pointer', flexShrink: 0 }}>
           <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: withAv ? 20 : 13, color: 'var(--forest)', fontWeight: 700 }}>{withAv || theirInit}</div>
-          <span style={{ position: 'absolute', bottom: 0, right: 0, width: 11, height: 11, borderRadius: '50%', background: '#3aaa6f', border: '2px solid var(--paper)' }} />
+          {peer && isOnline(peer.last_seen) && <span style={{ position: 'absolute', bottom: 0, right: 0, width: 11, height: 11, borderRadius: '50%', background: '#3aaa6f', border: '2px solid var(--paper)' }} />}
         </div>
         <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => setShowPeer(true)}>
           <h2 style={{ fontSize: 17, fontWeight: 600 }}>{withName}</h2>
