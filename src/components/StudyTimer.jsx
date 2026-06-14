@@ -130,7 +130,7 @@ export default function StudyTimer() {
   }
 
   return (
-    <div className="card" onClick={() => setFullscreen(true)} style={{ marginBottom: 18, textAlign: 'center', borderColor: 'var(--forest)', minHeight: 280, cursor: 'pointer' }}>
+    <div className="card" onClick={() => setFullscreen(true)} style={{ marginBottom: 18, textAlign: 'center', borderColor: 'var(--forest)', minHeight: 340, display: 'flex', flexDirection: 'column', justifyContent: 'center', cursor: 'pointer' }}>
       <ModeTabs />
 
       <Ring frac={frac} size={190} danger={danger}>
@@ -139,34 +139,34 @@ export default function StudyTimer() {
 
       <Controls big={false} />
 
-      {/* collapsible options — keeps the clock minimal by default */}
-      {!started && (
-        <div style={{ marginTop: 16 }} onClick={(e) => e.stopPropagation()}>
+      {/* options toggle always present (space reserved) so the card never resizes; panel only when idle */}
+      <div style={{ marginTop: 16, minHeight: 24 }} onClick={(e) => e.stopPropagation()}>
+        {!started && (
           <button onClick={() => setShowOptions((s) => !s)} className="link" style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)' }}>
             {showOptions ? 'Hide options ▴' : '⚙ Options ▾'}
           </button>
-          {showOptions && (
-            <div style={{ marginTop: 12, animation: 'fadeUp .25s ease both' }}>
-              {t.mode === 'timer' && (
-                <>
-                  <div className="sub" style={{ fontSize: 11, marginBottom: 6 }}>Length</div>
-                  <div className="chips" style={{ justifyContent: 'center', marginBottom: 14 }}>
-                    {[25, 45, 60].map((m) => (
-                      <button key={m} className={`chip ${t.target === m * 60 ? 'on' : ''}`} onClick={() => onPreset(m)}>{m} min</button>
-                    ))}
-                  </div>
-                </>
-              )}
-              <div className="sub" style={{ fontSize: 11, marginBottom: 6 }}>Alarm sound</div>
-              <div className="chips" style={{ justifyContent: 'center' }}>
-                {Object.entries(SOUNDS).map(([key, s]) => (
-                  <button key={key} className={`chip ${t.sound === key ? 'on' : ''}`} onClick={() => onPickSound(key)}>{s.label}</button>
-                ))}
-              </div>
+        )}
+        {!started && showOptions && (
+          <div style={{ marginTop: 12, animation: 'fadeUp .25s ease both' }}>
+            {t.mode === 'timer' && (
+              <>
+                <div className="sub" style={{ fontSize: 11, marginBottom: 6 }}>Length</div>
+                <div className="chips" style={{ justifyContent: 'center', marginBottom: 14 }}>
+                  {[25, 45, 60].map((m) => (
+                    <button key={m} className={`chip ${t.target === m * 60 ? 'on' : ''}`} onClick={() => onPreset(m)}>{m} min</button>
+                  ))}
+                </div>
+              </>
+            )}
+            <div className="sub" style={{ fontSize: 11, marginBottom: 6 }}>Alarm sound</div>
+            <div className="chips" style={{ justifyContent: 'center' }}>
+              {Object.entries(SOUNDS).map(([key, s]) => (
+                <button key={key} className={`chip ${t.sound === key ? 'on' : ''}`} onClick={() => onPickSound(key)}>{s.label}</button>
+              ))}
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
