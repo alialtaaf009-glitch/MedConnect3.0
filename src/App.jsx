@@ -16,6 +16,8 @@ import Focus from './pages/Focus.jsx';
 import Motivation from './pages/Motivation.jsx';
 import Legal from './pages/Legal.jsx';
 import Reset from './pages/Reset.jsx';
+import About from './pages/About.jsx';
+import Checklist from './components/Checklist.jsx';
 import AddPartner from './pages/AddPartner.jsx';
 
 function Icon({ name }) {
@@ -33,28 +35,71 @@ function Icon({ name }) {
 }
 
 
+function Drawer({ open, onClose, user }) {
+  const nav = useNavigate();
+  const { mode, toggle } = useTheme();
+  const { logout } = useAuth();
+  const go = (path) => { onClose(); nav(path); };
+  const exam = [user?.exam, user?.country].filter(Boolean).join(' · ');
+  return (
+    <>
+      <div className={`drawer-scrim ${open ? 'show' : ''}`} onClick={onClose} />
+      <aside className={`drawer ${open ? 'open' : ''}`}>
+        <div className="drawer-head">
+          <button className="drawer-theme" onClick={toggle} aria-label="Toggle theme">{mode === 'dark' ? '🌙' : '☀️'}</button>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 15, fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.name || 'Doctor'}</div>
+            {exam && <div style={{ fontSize: 11, opacity: 0.85, marginTop: 1 }}>{exam}</div>}
+          </div>
+        </div>
+        <div className="drawer-scroll">
+          <Checklist />
+          <div className="drawer-div" />
+          <div className="drawer-sect">App</div>
+          <button className="drawer-item" onClick={() => go('/about')}>
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg>About MedConnect
+          </button>
+          <button className="drawer-item" onClick={() => go('/legal')}>
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /></svg>Privacy &amp; Terms
+          </button>
+          <div className="drawer-div" />
+          <button className="drawer-item logout" onClick={() => { onClose(); logout(); }}>
+            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="M16 17l5-5-5-5M21 12H9" /></svg>Log out
+          </button>
+        </div>
+        <div className="drawer-foot">MedConnect v1.1.1 · Connect. Study. Succeed.</div>
+      </aside>
+    </>
+  );
+}
+
 function TopBar({ user }) {
   const loc = useLocation();
   const nav = useNavigate();
-  // top-level tabs show no back arrow; everything else does
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const roots = ['/home', '/partners', '/osce', '/chat', '/focus'];
   const showBack = !roots.includes(loc.pathname);
   const onProfile = loc.pathname === '/profile';
   const initials = (user?.name || 'Dr A').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('');
   return (
-    <div className="topbar">
-      <div style={{ width: 36, flexShrink: 0 }}>
-        {showBack && (
-          <button className="topbar-back" onClick={() => nav(-1)} aria-label="Back">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-          </button>
-        )}
+    <>
+      <div className="topbar">
+        <div style={{ width: 36, flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+          {showBack
+            ? <button className="topbar-back" onClick={() => nav(-1)} aria-label="Back">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+              </button>
+            : <button className="topbar-burger" onClick={() => setDrawerOpen(true)} aria-label="Menu">
+                <span /><span /><span />
+              </button>}
+        </div>
+        <div className="topbar-title">MedConnect</div>
+        {onProfile
+          ? <span style={{ width: 36 }} />
+          : <button className="topbar-avatar" onClick={() => nav('/profile')} aria-label="Profile">{user?.avatar || initials}</button>}
       </div>
-      <div className="topbar-title">MedConnect</div>
-      {onProfile
-        ? <span style={{ width: 36 }} />
-        : <button className="topbar-avatar" onClick={() => nav('/profile')} aria-label="Profile">{user?.avatar || initials}</button>}
-    </div>
+      <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} user={user} />
+    </>
   );
 }
 
@@ -177,6 +222,7 @@ export default function App() {
         <Route path="/focus" element={<Focus />} />
         <Route path="/motivation" element={<Motivation />} />
         <Route path="/legal" element={<Legal />} />
+        <Route path="/about" element={<About />} />
         <Route path="/connections" element={<Connections />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/add/:id" element={<AddPartner />} />
@@ -186,4 +232,3 @@ export default function App() {
     </div>
   );
 }
-
