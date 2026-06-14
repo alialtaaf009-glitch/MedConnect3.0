@@ -156,7 +156,11 @@ export default function Partners() {
                   <div className="name"><span className={isOnline(o.seen) ? 'dot-online' : 'dot-offline'}></span>{o.name}</div>
                   <div className="meta" style={{ color: examColor(o.exam), fontWeight: 700 }}>{o.exam}</div>
                 </div>
-                <button className="star-btn" onClick={() => toggleStar(o.id)} aria-label={starred ? 'Unstar' : 'Star'} style={{ background: 'none', border: 'none', fontSize: 18, cursor: 'pointer', color: starred ? 'var(--gold)' : 'var(--subtle)', marginRight: 4 }}>{starred ? '★' : '☆'}</button>
+                <button className="star-btn" onClick={() => toggleStar(o.id)} aria-label={starred ? 'Unstar' : 'Star'} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 6px', display: 'inline-flex', alignItems: 'center' }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill={starred ? 'var(--gold)' : 'none'} stroke={starred ? 'var(--gold)' : 'var(--subtle)'} strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" style={{ display: 'block' }}>
+                    <path d="M12 3.2c.4 0 .77.23.95.6l2.18 4.46 4.92.72c.83.12 1.16 1.14.56 1.72l-3.56 3.47.84 4.9c.14.82-.72 1.45-1.46 1.06L12 17.8l-4.4 2.32c-.74.39-1.6-.24-1.46-1.06l.84-4.9-3.56-3.47c-.6-.58-.27-1.6.56-1.72l4.92-.72L11.05 3.8c.18-.37.55-.6.95-.6z" />
+                  </svg>
+                </button>
                 <button className="btn-sm" onClick={() => nav(`/chat?with=${o.id}&name=${encodeURIComponent(o.name)}&av=${encodeURIComponent(o.avatar || '')}`)}>Message</button>
               </div>
             );
