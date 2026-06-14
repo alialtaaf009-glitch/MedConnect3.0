@@ -43,11 +43,38 @@ export const QUOTES = [
   "One day, this exam will be a story you tell. Write a good one.",
 ];
 
+// A small, hand-verified set of famous medical/learning quotes (figures whose
+// words are well-documented and safe to attribute). author shows under the quote.
+export const FAMOUS = [
+  ["The good physician treats the disease; the great physician treats the patient who has the disease.", "William Osler"],
+  ["Listen to your patient; he is telling you the diagnosis.", "William Osler"],
+  ["Medicine is a science of uncertainty and an art of probability.", "William Osler"],
+  ["Wherever the art of medicine is loved, there is also a love of humanity.", "Hippocrates"],
+  ["The greater the ignorance the greater the dogmatism.", "William Osler"],
+  ["He who studies medicine without books sails an uncharted sea.", "William Osler"],
+  ["The whole art of medicine is in observation.", "William Osler"],
+  ["Cure sometimes, treat often, comfort always.", "Hippocrates"],
+  ["It is much more important to know what sort of patient has a disease than what sort of disease a patient has.", "William Osler"],
+  ["Live neither in the past nor in the future, but let each day's work absorb your entire energies.", "William Osler"],
+];
+
+// Merge: original lines (no author) + famous lines (with author).
+const ALL = [
+  ...QUOTES.map((t) => ({ text: t, author: null })),
+  ...FAMOUS.map(([t, a]) => ({ text: t, author: a })),
+];
+
 // Deterministic daily pick: same quote for everyone on a given calendar day.
 export function quoteOfTheDay() {
   const now = new Date();
   const start = new Date(now.getFullYear(), 0, 0);
   const dayOfYear = Math.floor((now - start) / 86400000);
-  const idx = dayOfYear % QUOTES.length;
-  return { id: idx, text: QUOTES[idx] };
+  const idx = dayOfYear % ALL.length;
+  return { id: idx, text: ALL[idx].text, author: ALL[idx].author };
+}
+
+// Look up any quote by its merged-array id (used by favourites).
+export function quoteById(id) {
+  const q = ALL[id];
+  return q ? { id, text: q.text, author: q.author } : { id, text: '', author: null };
 }
