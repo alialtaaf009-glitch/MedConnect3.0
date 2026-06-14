@@ -48,8 +48,6 @@ export default function StudyTimer() {
     ? (t.target ? t.secondsLeft / t.target : 0)
     : (t.elapsed % 60) / 60;
 
-  const startLabel = t.running ? 'Pause'
-    : (t.mode === 'timer' && t.secondsLeft < t.target) || (t.mode === 'stopwatch' && t.elapsed > 0) ? 'Resume' : 'Start';
 
   const applyCustom = () => {
     const v = parseInt(custom, 10);
@@ -89,10 +87,19 @@ export default function StudyTimer() {
     );
   };
 
+  // idle = not running AND not yet started (fresh). active = running or paused mid-session.
+  const started = t.running || (t.mode === 'timer' && t.secondsLeft < t.target) || (t.mode === 'stopwatch' && t.elapsed > 0);
+
   const Controls = ({ big }) => (
-    <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: big ? 30 : 20 }} onClick={(e) => e.stopPropagation()}>
-      <button className="btn" style={{ flex: 1, maxWidth: big ? 200 : 150 }} onClick={onStartPause}>{startLabel}</button>
-      <button className="btn ghost" style={{ flex: 1, maxWidth: big ? 140 : 110 }} onClick={onReset}>Reset</button>
+    <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: big ? 30 : 20, minHeight: big ? 58 : 50, alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
+      {!started ? (
+        <button className="btn" style={{ maxWidth: big ? 220 : 180, padding: big ? '16px 52px' : '14px 44px' }} onClick={onStartPause}>Start</button>
+      ) : (
+        <>
+          <button className="btn timer-reveal" style={{ maxWidth: big ? 170 : 140, padding: big ? '14px 34px' : '13px 28px' }} onClick={onStartPause}>{t.running ? 'Pause' : 'Resume'}</button>
+          <button className="btn ghost timer-reveal" style={{ maxWidth: big ? 130 : 110, padding: big ? '14px 28px' : '13px 24px', animationDelay: '.06s' }} onClick={onReset}>Reset</button>
+        </>
+      )}
     </div>
   );
 
@@ -119,7 +126,7 @@ export default function StudyTimer() {
         <Ring frac={frac} size={180} danger={danger}>
           <ClockFace big={false} />
         </Ring>
-        {t.mode === 'timer' && !editing && (
+        {t.mode === 'timer' && !editing && !started && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} onClick={(e) => e.stopPropagation()}>
             {[25, 45, 60].map((m) => (
               <button key={m} className={`chip ${t.target === m * 60 ? 'on' : ''}`} style={{ minWidth: 62 }} onClick={() => onPreset(m)}>{m} min</button>
