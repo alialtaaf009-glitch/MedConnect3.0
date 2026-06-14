@@ -91,50 +91,25 @@ export default function StudyTimer() {
   // idle = not running AND not yet started (fresh). active = running or paused mid-session.
   const started = t.running || (t.mode === 'timer' && t.secondsLeft < t.target) || (t.mode === 'stopwatch' && t.elapsed > 0);
 
-  // one-shot bounce: animate the controls only on the transition idle->started, never on ticks
-  const [justRevealed, setJustRevealed] = useState(false);
-  const wasStarted = useRef(started);
-  useEffect(() => {
-    if (started && !wasStarted.current) {
-      setJustRevealed(true);
-      const tm = setTimeout(() => setJustRevealed(false), 450);
-      wasStarted.current = started;
-      return () => clearTimeout(tm);
-    }
-    wasStarted.current = started;
-  }, [started]);
-
   const Controls = ({ big }) => {
-    const sz = big ? 72 : 60;
-    const rsz = big ? 56 : 48;
+    const sz = big ? 66 : 56;
     const PlayPause = ({ paused }) => (
-      <svg width={big ? 30 : 26} height={big ? 30 : 26} viewBox="0 0 24 24" fill="#fff" stroke="none">
+      <svg width={big ? 28 : 24} height={big ? 28 : 24} viewBox="0 0 24 24" fill="#fff" stroke="none">
         {paused
           ? <path d="M8 5v14l11-7z" />
           : <><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></>}
       </svg>
     );
-    const ResetIcon = () => (
-      <svg width={big ? 24 : 20} height={big ? 24 : 20} viewBox="0 0 24 24" fill="none" stroke="var(--forest)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5" />
-      </svg>
-    );
     return (
-      <div style={{ display: 'flex', gap: 16, justifyContent: 'center', alignItems: 'center', marginTop: big ? 30 : 20, minHeight: big ? 72 : 60 }} onClick={(e) => e.stopPropagation()}>
-        {!started ? (
-          <button onClick={onStartPause} aria-label="Start" className="timer-iconbtn" style={{ width: sz, height: sz }}>
-            <PlayPause paused={true} />
-          </button>
-        ) : (
-          <div style={{ display: 'flex', gap: 16, alignItems: 'center' }} className={justRevealed ? 'timer-reveal-once' : ''}>
-            <button onClick={onStartPause} aria-label={t.running ? 'Pause' : 'Resume'} className="timer-iconbtn" style={{ width: sz, height: sz }}>
-              <PlayPause paused={!t.running} />
-            </button>
-            <button onClick={onReset} aria-label="Reset" className="timer-iconbtn ghost" style={{ width: rsz, height: rsz }}>
-              <ResetIcon />
-            </button>
-          </div>
-        )}
+      <div style={{ display: 'flex', gap: 16, justifyContent: 'center', alignItems: 'center', marginTop: big ? 30 : 20 }} onClick={(e) => e.stopPropagation()}>
+        <button onClick={onStartPause} aria-label={!started ? 'Start' : t.running ? 'Pause' : 'Resume'} className="timer-iconbtn" style={{ width: sz, height: sz }}>
+          <PlayPause paused={!t.running} />
+        </button>
+        <button onClick={onReset} aria-label="Reset" className="timer-iconbtn ghost" style={{ width: sz, height: sz }}>
+          <svg width={big ? 26 : 22} height={big ? 26 : 22} viewBox="0 0 24 24" fill="none" stroke="var(--forest)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5" />
+          </svg>
+        </button>
       </div>
     );
   };
