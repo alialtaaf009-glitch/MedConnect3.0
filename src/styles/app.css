@@ -335,3 +335,11 @@ button:active { -webkit-tap-highlight-color: transparent; }
   will-change: transform, opacity;
   transform-origin: center center;
 }
+
+/* lab values reference */
+.lab-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 11px 14px; border-bottom: 1px solid var(--line); }
+.lab-row:last-child { border-bottom: none; }
+.lab-nm { font-size: 13.5px; font-weight: 600; flex: 1; }
+.lab-ab { color: var(--subtle); font-weight: 500; font-size: 12px; }
+.lab-val { font-size: 13px; font-weight: 700; color: var(--forest); white-space: nowrap; text-align: right; }
+.lab-u { color: var(--muted); font-weight: 500; font-size: 11px; }
