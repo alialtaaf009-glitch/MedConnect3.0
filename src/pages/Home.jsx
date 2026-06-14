@@ -490,15 +490,6 @@ export default function Home() {
 
       <Momentum user={user} />
 
-      {/* slim motivation line with a clear tappable link */}
-      <div onClick={() => nav('/motivation')} style={{ cursor: 'pointer', padding: '4px 2px 0', marginBottom: 4 }}>
-        <p className="voice" style={{ fontSize: 15, lineHeight: 1.4, color: 'var(--muted)', marginBottom: 4 }}>
-          “{quote.text}”
-        </p>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12.5, fontWeight: 700, color: 'var(--forest)' }}>
-          ✦ Open the motivation wall <span style={{ fontSize: 14 }}>›</span>
-        </div>
-      </div>
 
       <h2 className="serif" style={{ fontSize: 18, fontWeight: 600, margin: '18px 0 12px' }}>Explore study partners</h2>
 
