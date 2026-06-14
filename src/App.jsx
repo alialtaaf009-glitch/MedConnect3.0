@@ -121,17 +121,17 @@ function Drawer({ open, onClose, user }) {
         <div className="drawer-scroll">
           <Checklist />
           <div className="drawer-div" />
-          <div className="drawer-sect">Grow</div>
-          <button className="drawer-item" onClick={inviteFriend}>
-            <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M19 8v6M22 11h-6" /></svg>Invite a colleague
-          </button>
-          <div className="drawer-div" />
           <div className="drawer-sect">Tools</div>
           <button className="drawer-item" onClick={() => go('/labs')}>
             <svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v6.5L5.5 17a2 2 0 0 0 1.7 3h9.6a2 2 0 0 0 1.7-3L14 9.5V3" /><path d="M8 14h8" /></svg>Lab values
           </button>
           <button className="drawer-item" onClick={() => go('/formulas')}>
             <svg viewBox="0 0 24 24"><path d="M4 4h16M4 4v16M9 9l4 4M13 9l-4 4M8 18h8" /></svg>Formulas
+          </button>
+          <div className="drawer-div" />
+          <div className="drawer-sect">Grow</div>
+          <button className="drawer-item" onClick={inviteFriend}>
+            <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M19 8v6M22 11h-6" /></svg>Invite a colleague
           </button>
           <div className="drawer-div" />
           <div className="drawer-sect">App</div>
@@ -313,3 +313,4 @@ export default function App() {
     </div>
   );
 }
+
