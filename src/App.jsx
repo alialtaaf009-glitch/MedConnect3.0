@@ -67,6 +67,7 @@ function Drawer({ open, onClose, user }) {
 
   // swipe-to-close: follow the finger leftward, release to close or snap back
   const [drag, setDrag] = useState(null); // current leftward px offset while dragging (>=0), or null
+  const [confirmLogout, setConfirmLogout] = useState(false);
   const startX = useRef(0);
   const startY = useRef(0);
   const horizontal = useRef(false);
@@ -142,12 +143,25 @@ function Drawer({ open, onClose, user }) {
             <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /></svg>Privacy &amp; Terms
           </button>
           <div className="drawer-div" />
-          <button className="drawer-item logout" onClick={() => { onClose(); logout(); }}>
+          <button className="drawer-item logout" onClick={() => setConfirmLogout(true)}>
             <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="M16 17l5-5-5-5M21 12H9" /></svg>Log out
           </button>
         </div>
         <div className="drawer-foot">MedConnect v1.1.1 · Connect. Study. Succeed.</div>
       </aside>
+
+      {confirmLogout && (
+        <div className="modal-scrim" onClick={() => setConfirmLogout(false)}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <div style={{ fontSize: 17, fontWeight: 800, marginBottom: 6 }}>Log out?</div>
+            <div className="sub" style={{ fontSize: 13, marginBottom: 18 }}>You'll need to sign in again to get back to your study partners.</div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button className="btn ghost" style={{ flex: 1 }} onClick={() => setConfirmLogout(false)}>Cancel</button>
+              <button className="btn" style={{ flex: 1, background: 'var(--rust)' }} onClick={() => { setConfirmLogout(false); onClose(); logout(); }}>Log out</button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -313,4 +327,3 @@ export default function App() {
     </div>
   );
 }
-
