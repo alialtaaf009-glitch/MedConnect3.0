@@ -3,7 +3,7 @@ import { useState } from 'react';
 // Common clinical formulas — reference only (no calculators). Grouped by specialty.
 // Each: [name, formula, note]
 const DATA = [
-  ['🫀 General Medicine', [
+  ['💊 General Medicine', [
     ['Body Mass Index (BMI)', 'weight (kg) ÷ height (m)²', 'Normal 18.5–24.9 · Overweight 25–29.9 · Obese ≥30'],
     ['Body Surface Area (Mosteller)', '√[(height cm × weight kg) ÷ 3600]', 'Used for drug dosing, e.g. chemotherapy.'],
     ['Anion Gap', '(Na⁺ + K⁺) − (Cl⁻ + HCO₃⁻)', 'Normal 8–16 mmol/L. Raised in lactic acidosis, DKA, toxins, renal failure.'],
@@ -27,7 +27,7 @@ const DATA = [
     ['Sodium Deficit', '0.6 × weight × (target − actual Na)', 'Guides correction; avoid >8–10 mmol/L/24h.'],
     ['Transtubular K Gradient (TTKG)', '(urine K ÷ plasma K) ÷ (urine osm ÷ plasma osm)', 'Assesses renal K handling. <3 suggests hypoaldosteronism in hyperkalaemia.'],
   ]],
-  ['❤️ Cardiology', [
+  ['🫀 Cardiology', [
     ['QTc (Bazett)', 'QT ÷ √(RR interval)', 'Prolonged if >440 ms (men) / >460 ms (women).'],
     ['CHA₂DS₂-VASc', 'CHF, HTN, Age≥75(2), DM, Stroke(2), Vascular, Age 65-74, Sex(F)', 'AF stroke risk; score ≥2 → consider anticoagulation.'],
     ['Wells Score (PE)', 'DVT signs(3), PE likely(3), HR>100, immobile, prior VTE, haemoptysis, malignancy', '>4 → PE likely, image; ≤4 → D-dimer.'],
@@ -89,9 +89,9 @@ export default function Formulas() {
           <div key={group} style={{ marginBottom: 16 }}>
             <button onClick={() => toggle(group)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px 8px', fontFamily: 'inherit' }}>
               <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 0.6, textTransform: 'uppercase', color: 'var(--gold)' }}>{group}</span>
-              <span style={{ fontSize: 13, color: 'var(--subtle)', transition: 'transform .25s ease', transform: isCollapsed ? 'rotate(0deg)' : 'rotate(90deg)', display: 'inline-block' }}>›</span>
+              <span style={{ fontSize: 13, color: 'var(--subtle)' }} className="group-chev" data-open={!isCollapsed}>›</span>
             </button>
-            {!isCollapsed && rows.map((r, i) => <Item key={i} nm={r[0]} formula={r[1]} note={r[2]} />)}
+            {!isCollapsed && <div className="group-content">{rows.map((r, i) => <Item key={i} nm={r[0]} formula={r[1]} note={r[2]} />)}</div>}
           </div>
         );
       })}
