@@ -42,6 +42,18 @@ function Drawer({ open, onClose, user }) {
   const go = (path) => { onClose(); nav(path); };
   const exam = [user?.exam, user?.country].filter(Boolean).join(' · ');
 
+  // native share sheet (same as the home invite card)
+  const inviteFriend = async () => {
+    const data = {
+      title: 'MedConnect',
+      text: "I'm using MedConnect to find study partners for medical exams — doctors only, matched by exam. Join me:",
+      url: 'https://med-connect3-0.vercel.app',
+    };
+    try { if (navigator.share) { await navigator.share(data); return; } }
+    catch (e) { if (e?.name === 'AbortError') return; }
+    try { await navigator.clipboard.writeText(`${data.text} ${data.url}`); window.alert('Invite link copied!'); } catch (e) {}
+  };
+
   // swipe-to-close: follow the finger leftward, release to close or snap back
   const [drag, setDrag] = useState(null); // current leftward px offset while dragging (>=0), or null
   const startX = useRef(0);
@@ -97,6 +109,11 @@ function Drawer({ open, onClose, user }) {
         </div>
         <div className="drawer-scroll">
           <Checklist />
+          <div className="drawer-div" />
+          <div className="drawer-sect">Grow</div>
+          <button className="drawer-item" onClick={inviteFriend}>
+            <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M19 8v6M22 11h-6" /></svg>Invite a colleague
+          </button>
           <div className="drawer-div" />
           <div className="drawer-sect">App</div>
           <button className="drawer-item" onClick={() => go('/about')}>
