@@ -483,8 +483,8 @@ export default function Home() {
         <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--rust)', textTransform: 'uppercase', marginBottom: 4 }}>
           For doctors, by doctors
         </div>
-        <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontVariationSettings: '"opsz" 18', fontSize: 16, fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.2px', color: 'var(--ink)', margin: 0, whiteSpace: 'nowrap' }}>
-          Find the right <em style={{ fontStyle: 'italic', color: 'var(--forest)' }}>study partner</em> for your exam
+        <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontVariationSettings: '"opsz" 18', fontSize: 16, fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.2px', color: 'var(--forest)', margin: 0, whiteSpace: 'nowrap' }}>
+          Find the right <em style={{ fontStyle: 'italic' }}>study partner</em> for your exam
         </h1>
       </div>
 
