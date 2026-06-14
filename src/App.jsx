@@ -18,6 +18,7 @@ import Reset from './pages/Reset.jsx';
 import About from './pages/About.jsx';
 import LabValues from './pages/LabValues.jsx';
 import Formulas from './pages/Formulas.jsx';
+import Pro from './pages/Pro.jsx';
 import Checklist from './components/Checklist.jsx';
 import AddPartner from './pages/AddPartner.jsx';
 
@@ -132,6 +133,10 @@ function Drawer({ open, onClose, user }) {
           <div className="drawer-sect">Grow</div>
           <button className="drawer-item" onClick={inviteFriend}>
             <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M19 8v6M22 11h-6" /></svg>Invite a colleague
+          </button>
+          <div className="drawer-div" />
+          <button className="drawer-item" onClick={() => go('/pro')} style={{ color: 'var(--gold)' }}>
+            <svg viewBox="0 0 24 24" style={{ stroke: 'var(--gold)' }}><rect x="4.5" y="10.5" width="15" height="10" rx="2.5" /><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" /></svg>MedConnect Pro
           </button>
           <div className="drawer-div" />
           <div className="drawer-sect">App</div>
@@ -327,6 +332,7 @@ export default function App() {
         <Route path="/about" element={<About />} />
         <Route path="/labs" element={<LabValues />} />
         <Route path="/formulas" element={<Formulas />} />
+        <Route path="/pro" element={<Pro />} />
         <Route path="/connections" element={<Navigate to="/partners?tab=mine" replace />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/add/:id" element={<AddPartner />} />
@@ -335,4 +341,4 @@ export default function App() {
       <TabBar />
     </div>
   );
-            }
+}
