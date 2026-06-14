@@ -104,10 +104,10 @@ export default function LabValues() {
           <div key={group} style={{ marginBottom: 16 }}>
             <button onClick={() => toggle(group)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px 8px', fontFamily: 'inherit' }}>
               <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 0.6, textTransform: 'uppercase', color: 'var(--gold)' }}>{group}</span>
-              <span style={{ fontSize: 13, color: 'var(--subtle)', transition: 'transform .25s ease', transform: isCollapsed ? 'rotate(0deg)' : 'rotate(90deg)', display: 'inline-block' }}>›</span>
+              <span style={{ fontSize: 13, color: 'var(--subtle)' }} className="group-chev" data-open={!isCollapsed}>›</span>
             </button>
             {!isCollapsed && (
-              <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+              <div className="card group-content" style={{ padding: 0, overflow: 'hidden' }}>
                 {rows.map((r, i) => <Row key={i} nm={r[0]} ab={r[1]} val={r[2]} unit={r[3]} />)}
               </div>
             )}
@@ -116,5 +116,4 @@ export default function LabValues() {
       })}
     </div>
   );
-}
-
+     }
