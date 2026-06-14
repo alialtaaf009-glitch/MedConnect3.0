@@ -453,7 +453,7 @@ export default function Home() {
           Hi Dr. {(user?.name || '').replace(/^Dr\.?\s+/i, '').split(' ')[0] || 'Doctor'} — a thought for today
         </div>
         <div style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: 17, fontWeight: 500, lineHeight: 1.4, position: 'relative', paddingRight: 28 }}>
-          {quote.text}
+          <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: 26, fontWeight: 700, color: 'var(--gold)', verticalAlign: '-9px', lineHeight: 0, marginRight: 1 }}>“</span>{quote.text}<span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: 26, fontWeight: 700, color: 'var(--gold)', verticalAlign: '-9px', lineHeight: 0, marginLeft: 1 }}>”</span>
         </div>
         {quote.author && <div style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: 13, fontStyle: 'italic', color: 'var(--gold)', marginTop: 6, paddingRight: 28 }}>— {quote.author}</div>}
         <div style={{ position: 'absolute', top: '50%', right: 14, transform: 'translateY(-50%)', width: 26, height: 26, borderRadius: '50%', background: 'rgba(255,255,255,0.14)', display: 'grid', placeItems: 'center', fontSize: 15, opacity: 0.9 }}>›</div>
@@ -513,4 +513,4 @@ export default function Home() {
       </div>
     </div>
   );
-    }
+}
