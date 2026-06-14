@@ -294,7 +294,9 @@ button:active { -webkit-tap-highlight-color: transparent; }
 .drawer-theme { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,.16); border: 1.5px solid rgba(255,255,255,.35);
   display: grid; place-items: center; font-size: 18px; flex-shrink: 0; cursor: pointer; transition: transform .2s cubic-bezier(0.34,1.56,0.64,1); }
 .drawer-theme:active { transform: scale(0.88) rotate(-15deg); }
-.drawer-scroll { flex: 1; overflow-y: auto; padding-bottom: 8px; }
+.drawer-scroll { flex: 1; overflow-y: auto; padding-bottom: 8px; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.drawer { overscroll-behavior: contain; }
+.drawer-scrim { touch-action: none; }
 .drawer-sect { font-size: 10.5px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: var(--subtle); padding: 10px 18px 4px; }
 .drawer-div { height: 1px; background: var(--line); margin: 4px 0; }
 .drawer-item { display: flex; align-items: center; gap: 13px; padding: 12px 18px; font-size: 14px; font-weight: 600; color: var(--ink);
