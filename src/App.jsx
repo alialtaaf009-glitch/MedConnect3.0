@@ -9,7 +9,6 @@ import Setup from './pages/Setup.jsx';
 import Home from './pages/Home.jsx';
 import Partners from './pages/Partners.jsx';
 import Osce from './pages/Osce.jsx';
-import Connections from './pages/Connections.jsx';
 import Profile from './pages/Profile.jsx';
 import Chat from './pages/Chat.jsx';
 import Focus from './pages/Focus.jsx';
@@ -328,7 +327,7 @@ export default function App() {
         <Route path="/about" element={<About />} />
         <Route path="/labs" element={<LabValues />} />
         <Route path="/formulas" element={<Formulas />} />
-        <Route path="/connections" element={<Connections />} />
+        <Route path="/connections" element={<Navigate to="/partners?tab=mine" replace />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/add/:id" element={<AddPartner />} />
         <Route path="*" element={<Navigate to="/home" replace />} />
@@ -336,4 +335,4 @@ export default function App() {
       <TabBar />
     </div>
   );
-        }
+            }
