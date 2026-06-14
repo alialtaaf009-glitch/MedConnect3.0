@@ -106,6 +106,7 @@ export default function StudyTimer() {
 
   const Controls = ({ big }) => {
     const sz = big ? 72 : 60;
+    const rsz = big ? 56 : 48;
     const PlayPause = ({ paused }) => (
       <svg width={big ? 30 : 26} height={big ? 30 : 26} viewBox="0 0 24 24" fill="#fff" stroke="none">
         {paused
@@ -113,20 +114,25 @@ export default function StudyTimer() {
           : <><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></>}
       </svg>
     );
+    const ResetIcon = () => (
+      <svg width={big ? 24 : 20} height={big ? 24 : 20} viewBox="0 0 24 24" fill="none" stroke="var(--forest)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5" />
+      </svg>
+    );
     return (
       <div style={{ display: 'flex', gap: 16, justifyContent: 'center', alignItems: 'center', marginTop: big ? 30 : 20, minHeight: big ? 72 : 60 }} onClick={(e) => e.stopPropagation()}>
         {!started ? (
-          <button onClick={onStartPause} aria-label="Start" className="timer-iconbtn"
-            style={{ width: sz, height: sz }}>
+          <button onClick={onStartPause} aria-label="Start" className="timer-iconbtn" style={{ width: sz, height: sz }}>
             <PlayPause paused={true} />
           </button>
         ) : (
           <div style={{ display: 'flex', gap: 16, alignItems: 'center' }} className={justRevealed ? 'timer-reveal-once' : ''}>
-            <button onClick={onStartPause} aria-label={t.running ? 'Pause' : 'Resume'} className="timer-iconbtn"
-              style={{ width: sz, height: sz }}>
+            <button onClick={onStartPause} aria-label={t.running ? 'Pause' : 'Resume'} className="timer-iconbtn" style={{ width: sz, height: sz }}>
               <PlayPause paused={!t.running} />
             </button>
-            <button className="btn ghost" style={{ maxWidth: big ? 130 : 110, padding: big ? '13px 26px' : '12px 22px' }} onClick={onReset}>Reset</button>
+            <button onClick={onReset} aria-label="Reset" className="timer-iconbtn ghost" style={{ width: rsz, height: rsz }}>
+              <ResetIcon />
+            </button>
           </div>
         )}
       </div>
@@ -189,4 +195,3 @@ export default function StudyTimer() {
     </div>
   );
 }
-
