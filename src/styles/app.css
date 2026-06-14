@@ -304,4 +304,3 @@ button:active { -webkit-tap-highlight-color: transparent; }
 .drawer-item.logout { color: var(--rust); }
 .drawer-item.logout svg { stroke: var(--rust); }
 .drawer-foot { padding: 12px 20px calc(env(safe-area-inset-bottom, 0px) + 12px); font-size: 11px; color: var(--subtle); border-top: 1px solid var(--line); }
-               
