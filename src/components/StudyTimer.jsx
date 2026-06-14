@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTimer, SOUNDS, playSound } from '../context/Timer.jsx';
 
 function haptic(ms = 25) {
@@ -91,18 +91,47 @@ export default function StudyTimer() {
   // idle = not running AND not yet started (fresh). active = running or paused mid-session.
   const started = t.running || (t.mode === 'timer' && t.secondsLeft < t.target) || (t.mode === 'stopwatch' && t.elapsed > 0);
 
-  const Controls = ({ big }) => (
-    <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: big ? 30 : 20, minHeight: big ? 58 : 50, alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
-      {!started ? (
-        <button className="btn" style={{ maxWidth: big ? 220 : 180, padding: big ? '16px 52px' : '14px 44px' }} onClick={onStartPause}>Start</button>
-      ) : (
-        <div key="active-controls" style={{ display: 'flex', gap: 12, justifyContent: 'center' }} className="timer-reveal-once">
-          <button className="btn" style={{ maxWidth: big ? 170 : 140, padding: big ? '14px 34px' : '13px 28px' }} onClick={onStartPause}>{t.running ? 'Pause' : 'Resume'}</button>
-          <button className="btn ghost" style={{ maxWidth: big ? 130 : 110, padding: big ? '14px 28px' : '13px 24px' }} onClick={onReset}>Reset</button>
-        </div>
-      )}
-    </div>
-  );
+  // one-shot bounce: animate the controls only on the transition idle->started, never on ticks
+  const [justRevealed, setJustRevealed] = useState(false);
+  const wasStarted = useRef(started);
+  useEffect(() => {
+    if (started && !wasStarted.current) {
+      setJustRevealed(true);
+      const tm = setTimeout(() => setJustRevealed(false), 450);
+      wasStarted.current = started;
+      return () => clearTimeout(tm);
+    }
+    wasStarted.current = started;
+  }, [started]);
+
+  const Controls = ({ big }) => {
+    const sz = big ? 72 : 60;
+    const PlayPause = ({ paused }) => (
+      <svg width={big ? 30 : 26} height={big ? 30 : 26} viewBox="0 0 24 24" fill="#fff" stroke="none">
+        {paused
+          ? <path d="M8 5v14l11-7z" />
+          : <><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></>}
+      </svg>
+    );
+    return (
+      <div style={{ display: 'flex', gap: 16, justifyContent: 'center', alignItems: 'center', marginTop: big ? 30 : 20, minHeight: big ? 72 : 60 }} onClick={(e) => e.stopPropagation()}>
+        {!started ? (
+          <button onClick={onStartPause} aria-label="Start" className="timer-iconbtn"
+            style={{ width: sz, height: sz }}>
+            <PlayPause paused={true} />
+          </button>
+        ) : (
+          <div style={{ display: 'flex', gap: 16, alignItems: 'center' }} className={justRevealed ? 'timer-reveal-once' : ''}>
+            <button onClick={onStartPause} aria-label={t.running ? 'Pause' : 'Resume'} className="timer-iconbtn"
+              style={{ width: sz, height: sz }}>
+              <PlayPause paused={!t.running} />
+            </button>
+            <button className="btn ghost" style={{ maxWidth: big ? 130 : 110, padding: big ? '13px 26px' : '12px 22px' }} onClick={onReset}>Reset</button>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   if (fullscreen) {
     const fsSize = Math.min(300, (typeof window !== 'undefined' ? window.innerWidth : 360) - 80);
@@ -160,3 +189,4 @@ export default function StudyTimer() {
     </div>
   );
 }
+
