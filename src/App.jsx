@@ -42,6 +42,15 @@ function Drawer({ open, onClose, user }) {
   const go = (path) => { onClose(); nav(path); };
   const exam = [user?.exam, user?.country].filter(Boolean).join(' · ');
 
+  // lock the background page from scrolling while the drawer is open (stops scroll bleed)
+  useEffect(() => {
+    if (open) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = prev; };
+    }
+  }, [open]);
+
   // native share sheet (same as the home invite card)
   const inviteFriend = async () => {
     const data = {
