@@ -1,10 +1,6 @@
-import { useNavigate } from 'react-router-dom';
-
 export default function Legal() {
-  const nav = useNavigate();
   return (
     <div className="screen">
-      <button className="link" onClick={() => nav(-1)}>‹ Back</button>
       <h1 className="h1" style={{ margin: '12px 0' }}>Privacy & Terms</h1>
 
       <div className="card">
@@ -18,7 +14,7 @@ export default function Legal() {
           study preferences, optional registration details, and the messages you send. We use this only
           to match you with study partners and run the service. We do not sell your data or use it for advertising.
           Your password is stored securely (hashed). You can edit or remove your information from your profile,
-          or request deletion of your account by contacting us.
+          or delete your account at any time using the Delete Account button in your profile settings.
         </p>
 
         <h2 style={{ fontSize: 17, fontWeight: 700, margin: '16px 0 6px' }}>Terms of Use</h2>
@@ -33,7 +29,7 @@ export default function Legal() {
 
         <h2 style={{ fontSize: 17, fontWeight: 700, margin: '16px 0 6px' }}>Contact</h2>
         <p style={{ fontSize: 14, lineHeight: 1.6 }}>
-          Questions about your data or these terms, or want your account deleted?
+          Questions about your data or these terms?
           Email us at <strong>medconnectsupport.io@gmail.com</strong> and we'll help.
         </p>
       </div>
