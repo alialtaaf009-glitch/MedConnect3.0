@@ -174,13 +174,13 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'exam' && (
-      <>
-          {orderedExams.map(({ flag, country, exam, parts }) => {
+        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+          {orderedExams.map(({ flag, country, exam, parts }, idx) => {
               const key = 'exam|' + country + '|' + exam;
               const ecx = examColor(exam);
               return (
-                <div key={key} style={{ padding: 0, overflow: 'hidden', background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: openExam === key ? 20 : 999, marginBottom: 11, boxShadow: '0 2px 8px rgba(20,40,30,.07)', transition: 'border-radius .25s ease' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '13px 18px', cursor: 'pointer' }}
+                <div key={key} style={{ borderTop: idx === 0 ? 'none' : '1px solid var(--line)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 18px', cursor: 'pointer' }}
                     onClick={() => setOpenExam(openExam === key ? '' : key)}>
                     <Flag country={country} emoji={flag} size={30} ring={flagColor(country)} />
                     <span style={{ flex: 1, fontWeight: 600 }}>{exam}</span>
@@ -194,7 +194,7 @@ function ExploreBrowse() {
                   </div>
                   {openExam === key && parts.map((part) => {
                     return (
-                      <div key={part} style={{ padding: '11px 16px', borderTop: '1px solid var(--line)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 11 }}
+                      <div key={part} style={{ padding: '11px 18px 11px 22px', borderTop: '1px solid var(--line)', background: 'var(--paper-2)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 11 }}
                         onClick={() => nav(`/partners?exam=${encodeURIComponent(exam)}&part=${encodeURIComponent(part)}`)}>
                         <DotRing color={ecx} size={20} />
                         <span style={{ fontWeight: 600, fontSize: 14, flex: 1 }}>{part}</span>
@@ -206,12 +206,14 @@ function ExploreBrowse() {
                 </div>
               );
             })}
-        </>
+        </div>
       )}
 
-      {browseMode === 'country' && orderedCountries.map(([flag, country, exams]) => (
-        <div key={country} style={{ padding: 0, overflow: 'hidden', background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: openCountry === country ? 20 : 999, marginBottom: 11, boxShadow: '0 2px 8px rgba(20,40,30,.07)', transition: 'border-radius .25s ease' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '13px 18px', cursor: 'pointer' }}
+      {browseMode === 'country' && (
+        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+        {orderedCountries.map(([flag, country, exams], idx) => (
+        <div key={country} style={{ borderTop: idx === 0 ? 'none' : '1px solid var(--line)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '14px 18px', cursor: 'pointer' }}
             onClick={() => setOpenCountry(openCountry === country ? '' : country)}>
             <Flag country={country} emoji={flag} ring={flagColor(country)} />
             <span style={{ flex: 1, fontWeight: 600 }}>{country}</span>
@@ -224,8 +226,8 @@ function ExploreBrowse() {
           {openCountry === country && exams.map(([exam, parts]) => {
             const key = country + '|' + exam;
             return (
-              <div key={exam} style={{ borderTop: '1px solid var(--line)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '12px 16px 12px 24px', cursor: 'pointer', fontWeight: 500, fontSize: 14 }}
+              <div key={exam} style={{ borderTop: '1px solid var(--line)', background: 'var(--paper-2)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '12px 18px 12px 24px', cursor: 'pointer', fontWeight: 500, fontSize: 14 }}
                   onClick={() => setOpenExam(openExam === key ? '' : key)}>
                   <DotRing color={examColor(exam)} size={20} />
                   <span style={{ flex: 1 }}>{exam}</span>
@@ -239,7 +241,7 @@ function ExploreBrowse() {
                 {openExam === key && parts.map((part) => {
                   const ec = examColor(exam);
                   return (
-                    <div key={part} style={{ padding: '11px 16px 11px 40px', borderTop: '1px solid var(--line)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
+                    <div key={part} style={{ padding: '11px 18px 11px 40px', borderTop: '1px solid var(--line)', background: 'var(--card)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
                       onClick={() => nav(`/partners?exam=${encodeURIComponent(exam)}&part=${encodeURIComponent(part)}`)}>
                       <DotRing color={ec} size={16} />
                       <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)', flex: 1 }}>{part}</span>
@@ -252,7 +254,9 @@ function ExploreBrowse() {
             );
           })}
         </div>
-      ))}
+        ))}
+        </div>
+      )}
     </>
   );
 }
@@ -323,7 +327,7 @@ function Momentum({ user }) {
   };
 
   return (
-    <>
+      <>
       {(!hideCd && daysLeft !== null) || !hideSt ? (
       <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
         {!hideCd && daysLeft !== null && (
@@ -535,4 +539,4 @@ export default function Home() {
       )}
     </div>
   );
-}
+            }
