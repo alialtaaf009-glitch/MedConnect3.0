@@ -10,6 +10,25 @@ const STAR_KEY = 'starred_partners_v1';
 const loadStars = () => { try { return JSON.parse(localStorage.getItem(STAR_KEY) || '[]'); } catch (e) { return []; } };
 const saveStars = (arr) => { try { localStorage.setItem(STAR_KEY, JSON.stringify(arr)); } catch (e) {} };
 
+// Empty-state card with a faint red+green medical caduceus watermark behind the text.
+function EmptyState({ title, sub }) {
+  return (
+    <div style={{ position: 'relative', overflow: 'hidden', textAlign: 'center', padding: '34px 22px', background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 20, boxShadow: '0 2px 10px rgba(20,40,30,.06)' }}>
+      <svg viewBox="0 0 64 64" width="150" height="150" style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', opacity: 0.07, pointerEvents: 'none' }} aria-hidden="true">
+        <line x1="32" y1="6" x2="32" y2="58" stroke="var(--forest)" strokeWidth="3" strokeLinecap="round" />
+        <path d="M32 12 C20 18, 20 26, 32 32 C44 38, 44 46, 32 52" fill="none" stroke="var(--rust)" strokeWidth="3" strokeLinecap="round" />
+        <path d="M32 12 C44 18, 44 26, 32 32 C20 38, 20 46, 32 52" fill="none" stroke="var(--forest)" strokeWidth="3" strokeLinecap="round" />
+        <circle cx="32" cy="9" r="3" fill="var(--rust)" />
+        <path d="M24 8 Q32 2, 40 8" fill="none" stroke="var(--gold)" strokeWidth="3" strokeLinecap="round" />
+      </svg>
+      <div style={{ position: 'relative' }}>
+        <p style={{ fontWeight: 700, fontSize: 16, marginBottom: 6 }}>{title}</p>
+        <p className="sub" style={{ fontSize: 13, lineHeight: 1.55 }}>{sub}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function Partners() {
   const { user } = useAuth();
   const nav = useNavigate();
@@ -112,16 +131,16 @@ export default function Partners() {
           {mStatus === 'loading' && <div className="center" style={{ minHeight: 160 }}><div className="spinner" /></div>}
           {mStatus === 'error' && <div className="center" style={{ flexDirection: 'column' }}><p>{err}</p><button className="link" onClick={loadMatches}>Try again</button></div>}
           {mStatus === 'ok' && visibleMatches.length === 0 && (
-            <div className="card" style={{ textAlign: 'center' }}>
-              <p style={{ fontWeight: 700, fontSize: 16, marginBottom: 6 }}>{examLabel ? `No ${examLabel} partners yet 🌱` : 'No new partners right now'}</p>
-              <p className="sub" style={{ fontSize: 13, lineHeight: 1.55 }}>
-                {examLabel ? "You're early! Be the first — or invite a colleague to study with you." : 'As more doctors join, new matches will show up here.'}
-              </p>
-            </div>
+            <EmptyState
+              title={examLabel ? `No ${examLabel} partners yet 🌱` : 'No new partners right now'}
+              sub={examLabel ? "You're early! Be the first — or invite a colleague to study with you." : 'As more doctors join, new matches will show up here.'}
+            />
           )}
-          {mStatus === 'ok' && visibleMatches.map((m) => (
-            <div key={m.user.id} className="row" style={{ borderLeft: `4px solid ${examColor(m.user.exam)}` }}>
-              <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--paper-2)', border: `2px solid ${examColor(m.user.exam)}`, display: 'grid', placeItems: 'center', fontSize: 22, flexShrink: 0 }}>{m.user.avatar || '🩺'}</div>
+          {mStatus === 'ok' && visibleMatches.length > 0 && (
+            <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+            {visibleMatches.map((m, i) => (
+            <div key={m.user.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 16px', borderTop: i === 0 ? 'none' : '1px solid var(--line)' }}>
+              <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', fontSize: 22, flexShrink: 0, boxShadow: `0 0 0 2.5px ${examColor(m.user.exam)}, 0 0 0 4.5px var(--card)` }}>{m.user.avatar || '🩺'}</div>
               <div className="grow">
                 <div className="name">
                   <span className={isOnline(m.user.last_seen) ? 'dot-online' : 'dot-offline'}></span>
@@ -134,9 +153,11 @@ export default function Partners() {
                   </span>
                 </div>
               </div>
-              <button className="btn-sm btn-cta" onClick={() => connect(m.user.id)}>Connect</button>
+              <button className="btn-sm btn-cta" onClick={() => connect(m.user.id)}>+ Add</button>
             </div>
-          ))}
+            ))}
+            </div>
+          )}
         </>
       )}
 
@@ -144,14 +165,16 @@ export default function Partners() {
         <>
           {cStatus === 'loading' && <div className="center" style={{ minHeight: 160 }}><div className="spinner" /></div>}
           {cStatus === 'ok' && myPartners.length === 0 && (conns.pending?.length || 0) === 0 && (
-            <p className="sub" style={{ textAlign: 'center', marginTop: 24 }}>No partners yet. Head to Discover to connect with someone!</p>
+            <EmptyState title="No partners yet 🌱" sub="Head to Discover to connect with someone preparing for your exam." />
           )}
-          {myPartners.map((c) => {
+          {myPartners.length > 0 && (
+          <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+          {myPartners.map((c, i) => {
             const o = other(c);
             const starred = stars.includes(o.id);
             return (
-              <div key={c.id} className="row">
-                <div onClick={() => setPeek({ name: o.name, exam: o.exam, avatar: o.avatar, bio: o.bio })} style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: o.avatar ? 22 : 15, color: 'var(--forest)', fontWeight: 600, flexShrink: 0, cursor: 'pointer' }}>{o.avatar || initials(o.name)}</div>
+              <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 16px', borderTop: i === 0 ? 'none' : '1px solid var(--line)' }}>
+                <div onClick={() => setPeek({ name: o.name, exam: o.exam, avatar: o.avatar, bio: o.bio })} style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', fontSize: o.avatar ? 22 : 15, color: 'var(--forest)', fontWeight: 600, flexShrink: 0, cursor: 'pointer', boxShadow: `0 0 0 2.5px ${examColor(o.exam)}, 0 0 0 4.5px var(--card)` }}>{o.avatar || initials(o.name)}</div>
                 <div className="grow">
                   <div className="name"><span className={isOnline(o.seen) ? 'dot-online' : 'dot-offline'}></span>{o.name}</div>
                   <div className="meta" style={{ color: examColor(o.exam), fontWeight: 700 }}>{o.exam}</div>
@@ -161,18 +184,21 @@ export default function Partners() {
                     <path d="M12 3.2c.4 0 .77.23.95.6l2.18 4.46 4.92.72c.83.12 1.16 1.14.56 1.72l-3.56 3.47.84 4.9c.14.82-.72 1.45-1.46 1.06L12 17.8l-4.4 2.32c-.74.39-1.6-.24-1.46-1.06l.84-4.9-3.56-3.47c-.6-.58-.27-1.6.56-1.72l4.92-.72L11.05 3.8c.18-.37.55-.6.95-.6z" />
                   </svg>
                 </button>
-                <button className="btn-sm" onClick={() => nav(`/chat?with=${o.id}&name=${encodeURIComponent(o.name)}&av=${encodeURIComponent(o.avatar || '')}`)}>Message</button>
+                <button className="btn-sm" onClick={() => nav(`/chat?with=${o.id}&name=${encodeURIComponent(o.name)}&av=${encodeURIComponent(o.avatar || '')}`)}>Chat</button>
               </div>
             );
           })}
+          </div>
+          )}
           {(conns.pending?.length || 0) > 0 && (
             <>
               <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 0.5, textTransform: 'uppercase', color: 'var(--subtle)', margin: '18px 2px 8px' }}>Awaiting their reply</div>
-              {conns.pending.map((c) => {
+              <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+              {conns.pending.map((c, i) => {
                 const o = other(c);
                 return (
-                  <div key={c.id} className="row">
-                    <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: o.avatar ? 22 : 15, color: 'var(--forest)', fontWeight: 600, flexShrink: 0 }}>{o.avatar || initials(o.name)}</div>
+                  <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 16px', borderTop: i === 0 ? 'none' : '1px solid var(--line)' }}>
+                    <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', fontSize: o.avatar ? 22 : 15, color: 'var(--forest)', fontWeight: 600, flexShrink: 0, boxShadow: `0 0 0 2.5px ${examColor(o.exam)}, 0 0 0 4.5px var(--card)` }}>{o.avatar || initials(o.name)}</div>
                     <div className="grow">
                       <div className="name">{o.name}</div>
                       <div className="meta" style={{ color: examColor(o.exam), fontWeight: 700 }}>{o.exam}</div>
@@ -181,6 +207,7 @@ export default function Partners() {
                   </div>
                 );
               })}
+              </div>
             </>
           )}
         </>
@@ -190,13 +217,15 @@ export default function Partners() {
         <>
           {cStatus === 'loading' && <div className="center" style={{ minHeight: 160 }}><div className="spinner" /></div>}
           {cStatus === 'ok' && reqCount === 0 && (
-            <p className="sub" style={{ textAlign: 'center', marginTop: 24 }}>No requests right now. When someone asks to study with you, they'll appear here.</p>
+            <EmptyState title="No requests right now" sub="When someone asks to study with you, they'll appear here." />
           )}
-          {conns.requests.map((c) => {
+          {conns.requests.length > 0 && (
+          <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+          {conns.requests.map((c, i) => {
             const o = other(c);
             return (
-              <div key={c.id} className="row">
-                <div onClick={() => setPeek({ name: o.name, exam: o.exam, avatar: o.avatar, bio: o.bio })} style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: o.avatar ? 22 : 15, color: 'var(--forest)', fontWeight: 600, flexShrink: 0, cursor: 'pointer' }}>{o.avatar || initials(o.name)}</div>
+              <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 16px', borderTop: i === 0 ? 'none' : '1px solid var(--line)' }}>
+                <div onClick={() => setPeek({ name: o.name, exam: o.exam, avatar: o.avatar, bio: o.bio })} style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', fontSize: o.avatar ? 22 : 15, color: 'var(--forest)', fontWeight: 600, flexShrink: 0, cursor: 'pointer', boxShadow: `0 0 0 2.5px ${examColor(o.exam)}, 0 0 0 4.5px var(--card)` }}>{o.avatar || initials(o.name)}</div>
                 <div className="grow">
                   <div className="name">{o.name}</div>
                   <div className="meta" style={{ color: examColor(o.exam), fontWeight: 700 }}>{o.exam}</div>
@@ -208,6 +237,8 @@ export default function Partners() {
               </div>
             );
           })}
+          </div>
+          )}
         </>
       )}
 
@@ -224,4 +255,4 @@ export default function Partners() {
       )}
     </div>
   );
-}
+                  }
