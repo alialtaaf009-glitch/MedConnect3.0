@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import StudyTimer from '../components/StudyTimer.jsx';
+import { useBack } from '../context/Back.jsx';
 
 
 // anatomical minimal lungs that inflate on inhale, deflate on exhale (box-breathing)
@@ -45,6 +46,8 @@ function Breathe() {
   }, [on]);
 
   const [big, setBig] = useState(false);
+  const { enterImmersive, exitImmersive } = useBack();
+  useEffect(() => { if (big) { enterImmersive(); return () => exitImmersive(); } }, [big, enterImmersive, exitImmersive]);
   const LABELS = ['Breathe in…', 'Hold…', 'Breathe out…', 'Hold…'];
   const grow = on && (phase === 0 || phase === 1); // big through inhale + hold
 
@@ -98,3 +101,4 @@ export default function Focus() {
     </div>
   );
 }
+
