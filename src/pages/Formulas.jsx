@@ -89,7 +89,7 @@ export default function Formulas() {
           <div key={group} style={{ marginBottom: 16 }}>
             <button onClick={() => toggle(group)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px 8px', fontFamily: 'inherit' }}>
               <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 0.6, textTransform: 'uppercase', color: 'var(--gold)' }}>{group}</span>
-              <span style={{ fontSize: 13, color: 'var(--subtle)' }} className="group-chev" data-open={!isCollapsed}>›</span>
+              <span className="chev-round group-chev" data-open={!isCollapsed}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg></span>
             </button>
             {!isCollapsed && <div className="group-content">{rows.map((r, i) => <Item key={i} nm={r[0]} formula={r[1]} note={r[2]} />)}</div>}
           </div>
