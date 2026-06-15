@@ -13,18 +13,17 @@ const saveStars = (arr) => { try { localStorage.setItem(STAR_KEY, JSON.stringify
 // Empty-state card with a faint red+green medical caduceus watermark behind the text.
 function EmptyState({ title, sub }) {
   return (
-    <div style={{ position: 'relative', overflow: 'hidden', textAlign: 'center', padding: '40px 22px', background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 20, boxShadow: '0 2px 10px rgba(20,40,30,.06)' }}>
-      <svg viewBox="0 0 64 64" width="110" height="110" style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', opacity: 0.08, pointerEvents: 'none' }} aria-hidden="true">
-        <line x1="32" y1="8" x2="32" y2="56" stroke="var(--forest)" strokeWidth="3" strokeLinecap="round" />
-        <path d="M32 14 C20 19, 20 27, 32 32 C44 37, 44 45, 32 50" fill="none" stroke="var(--rust)" strokeWidth="3" strokeLinecap="round" />
-        <path d="M32 14 C44 19, 44 27, 32 32 C20 37, 20 45, 32 50" fill="none" stroke="var(--forest)" strokeWidth="3" strokeLinecap="round" />
-        <circle cx="32" cy="11" r="2.5" fill="var(--rust)" />
-        <path d="M25 10 Q32 5, 39 10" fill="none" stroke="var(--gold)" strokeWidth="3" strokeLinecap="round" />
+    <div style={{ textAlign: 'center', padding: '36px 24px', background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 20, boxShadow: '0 2px 10px rgba(20,40,30,.06)' }}>
+      <svg viewBox="0 0 64 64" width="64" height="64" style={{ display: 'block', margin: '0 auto' }} aria-hidden="true">
+        <circle cx="32" cy="32" r="30" fill="none" stroke="var(--line)" strokeWidth="1.5" />
+        <line x1="32" y1="12" x2="32" y2="52" stroke="var(--forest)" strokeWidth="3" strokeLinecap="round" />
+        <path d="M32 17 C22 21, 22 28, 32 32 C42 36, 42 43, 32 47" fill="none" stroke="var(--rust)" strokeWidth="3" strokeLinecap="round" />
+        <path d="M32 17 C42 21, 42 28, 32 32 C22 36, 22 43, 32 47" fill="none" stroke="var(--forest)" strokeWidth="3" strokeLinecap="round" />
+        <circle cx="32" cy="14.5" r="2.5" fill="var(--rust)" />
+        <path d="M25 14 Q32 9, 39 14" fill="none" stroke="var(--gold)" strokeWidth="3" strokeLinecap="round" />
       </svg>
-      <div style={{ position: 'relative' }}>
-        <p style={{ fontWeight: 700, fontSize: 16, marginBottom: 6 }}>{title}</p>
-        <p className="sub" style={{ fontSize: 13, lineHeight: 1.55 }}>{sub}</p>
-      </div>
+      <p style={{ fontWeight: 700, fontSize: 16, margin: '14px 0 6px' }}>{title}</p>
+      <p className="sub" style={{ fontSize: 13, lineHeight: 1.55 }}>{sub}</p>
     </div>
   );
 }
@@ -141,7 +140,7 @@ export default function Partners() {
             {visibleMatches.map((m, i) => (
             <div key={m.user.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 16px', borderTop: i === 0 ? 'none' : '1px solid var(--line)' }}>
               <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', fontSize: 22, flexShrink: 0, boxShadow: `0 0 0 2.5px ${examColor(m.user.exam)}, 0 0 0 4.5px var(--card)` }}>{m.user.avatar || '🩺'}</div>
-              <div className="grow">
+              <div className="grow" style={{ flex: 1, minWidth: 0 }}>
                 <div className="name">
                   <span className={isOnline(m.user.last_seen) ? 'dot-online' : 'dot-offline'}></span>
                   {m.user.name}
@@ -175,16 +174,18 @@ export default function Partners() {
             return (
               <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 16px', borderTop: i === 0 ? 'none' : '1px solid var(--line)' }}>
                 <div onClick={() => setPeek({ name: o.name, exam: o.exam, avatar: o.avatar, bio: o.bio })} style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', fontSize: o.avatar ? 22 : 15, color: 'var(--forest)', fontWeight: 600, flexShrink: 0, cursor: 'pointer', boxShadow: `0 0 0 2.5px ${examColor(o.exam)}, 0 0 0 4.5px var(--card)` }}>{o.avatar || initials(o.name)}</div>
-                <div className="grow">
+                <div className="grow" style={{ flex: 1, minWidth: 0 }}>
                   <div className="name"><span className={isOnline(o.seen) ? 'dot-online' : 'dot-offline'}></span>{o.name}</div>
                   <div className="meta" style={{ color: examColor(o.exam), fontWeight: 700 }}>{o.exam}</div>
                 </div>
-                <button className="star-btn" onClick={() => toggleStar(o.id)} aria-label={starred ? 'Unstar' : 'Star'} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center', flexShrink: 0 }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill={starred ? 'var(--gold)' : 'none'} stroke={starred ? 'var(--gold)' : 'var(--subtle)'} strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" style={{ display: 'block' }}>
-                    <path d="M12 3.2c.4 0 .77.23.95.6l2.18 4.46 4.92.72c.83.12 1.16 1.14.56 1.72l-3.56 3.47.84 4.9c.14.82-.72 1.45-1.46 1.06L12 17.8l-4.4 2.32c-.74.39-1.6-.24-1.46-1.06l.84-4.9-3.56-3.47c-.6-.58-.27-1.6.56-1.72l4.92-.72L11.05 3.8c.18-.37.55-.6.95-.6z" />
-                  </svg>
-                </button>
-                <button className="btn-sm" onClick={() => nav(`/chat?with=${o.id}&name=${encodeURIComponent(o.name)}&av=${encodeURIComponent(o.avatar || '')}`)} style={{ flexShrink: 0 }}>Chat</button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, marginLeft: 'auto' }}>
+                  <button className="star-btn" onClick={() => toggleStar(o.id)} aria-label={starred ? 'Unstar' : 'Star'} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center', flexShrink: 0 }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill={starred ? 'var(--gold)' : 'none'} stroke={starred ? 'var(--gold)' : 'var(--subtle)'} strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" style={{ display: 'block' }}>
+                      <path d="M12 3.2c.4 0 .77.23.95.6l2.18 4.46 4.92.72c.83.12 1.16 1.14.56 1.72l-3.56 3.47.84 4.9c.14.82-.72 1.45-1.46 1.06L12 17.8l-4.4 2.32c-.74.39-1.6-.24-1.46-1.06l.84-4.9-3.56-3.47c-.6-.58-.27-1.6.56-1.72l4.92-.72L11.05 3.8c.18-.37.55-.6.95-.6z" />
+                    </svg>
+                  </button>
+                  <button className="btn-sm" onClick={() => nav(`/chat?with=${o.id}&name=${encodeURIComponent(o.name)}&av=${encodeURIComponent(o.avatar || '')}`)} style={{ flexShrink: 0, width: 72 }}>Chat</button>
+                </div>
               </div>
             );
           })}
@@ -199,7 +200,7 @@ export default function Partners() {
                 return (
                   <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 16px', borderTop: i === 0 ? 'none' : '1px solid var(--line)' }}>
                     <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', fontSize: o.avatar ? 22 : 15, color: 'var(--forest)', fontWeight: 600, flexShrink: 0, boxShadow: `0 0 0 2.5px ${examColor(o.exam)}, 0 0 0 4.5px var(--card)` }}>{o.avatar || initials(o.name)}</div>
-                    <div className="grow">
+                    <div className="grow" style={{ flex: 1, minWidth: 0 }}>
                       <div className="name">{o.name}</div>
                       <div className="meta" style={{ color: examColor(o.exam), fontWeight: 700 }}>{o.exam}</div>
                     </div>
@@ -226,7 +227,7 @@ export default function Partners() {
             return (
               <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 16px', borderTop: i === 0 ? 'none' : '1px solid var(--line)' }}>
                 <div onClick={() => setPeek({ name: o.name, exam: o.exam, avatar: o.avatar, bio: o.bio })} style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', fontSize: o.avatar ? 22 : 15, color: 'var(--forest)', fontWeight: 600, flexShrink: 0, cursor: 'pointer', boxShadow: `0 0 0 2.5px ${examColor(o.exam)}, 0 0 0 4.5px var(--card)` }}>{o.avatar || initials(o.name)}</div>
-                <div className="grow">
+                <div className="grow" style={{ flex: 1, minWidth: 0 }}>
                   <div className="name">{o.name}</div>
                   <div className="meta" style={{ color: examColor(o.exam), fontWeight: 700 }}>{o.exam}</div>
                 </div>
@@ -255,4 +256,4 @@ export default function Partners() {
       )}
     </div>
   );
-                              }
+                                                                                                                                                                                                                                      }
