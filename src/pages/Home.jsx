@@ -381,34 +381,24 @@ function Momentum({ user }) {
         return (
           <div onClick={() => setStOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'grid', placeItems: 'center', zIndex: 100, padding: 24 }}>
             <div onClick={(e) => e.stopPropagation()} className="card" style={{ maxWidth: 340, width: '100%', textAlign: 'center', animation: 'popIn .3s cubic-bezier(0.34, 1.56, 0.64, 1) both', margin: 0 }}>
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--rust)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto 6px', display: 'block' }}>
+                <path d="M12 2c1 4-2 5-2 8a4 4 0 0 0 8 0c0-1-.5-2-1-3 .5 3-2 3-2 1 0-2-1-4-3-6z" />
+                <path d="M8.5 12c-.8 1-1.5 2.2-1.5 3.8a5 5 0 0 0 10 0c0-1.2-.4-2.3-1-3.2" />
+              </svg>
               <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--rust)', textTransform: 'uppercase' }}>Study Streak</div>
-              <div style={{ fontSize: 52, lineHeight: 1.1, marginTop: 8 }}>🔥</div>
-              <div className="display-num" style={{ fontSize: 40, fontWeight: 700, color: 'var(--rust)', lineHeight: 1.1 }}>{streak}</div>
-              <div className="sub" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 }}>day{streak === 1 ? '' : 's'} in a row</div>
-              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, marginTop: 12 }}>
-                <span style={{ fontSize: 15 }}>🏆</span>
-                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--forest)' }}>Personal best: {best} day{best === 1 ? '' : 's'}</span>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 10, margin: '16px 0 4px' }}>
+                <div style={{ flex: 1, maxWidth: 90 }}>
+                  <div className="display-num" style={{ fontSize: 34, fontWeight: 700, color: 'var(--rust)', lineHeight: 1 }}>{streak}</div>
+                  <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>day{streak === 1 ? '' : 's'} in a row</div>
+                </div>
+                <div style={{ flex: 1, maxWidth: 90 }}>
+                  <div className="display-num" style={{ fontSize: 34, fontWeight: 700, color: 'var(--forest)', lineHeight: 1 }}>{best}</div>
+                  <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>personal best</div>
+                </div>
               </div>
-              {(() => {
-                const fullTrees = Math.floor(streak / 7);
-                const dayInWeek = streak % 7;
-                const sprout = dayInWeek === 0 ? '' : dayInWeek < 3 ? '🌱' : dayInWeek < 6 ? '🌿' : '🌳';
-                return (
-                  <div style={{ marginTop: 14, padding: '12px 8px', background: 'var(--paper-2)', borderRadius: 12 }}>
-                    <div style={{ fontSize: 19, lineHeight: 1.5, wordBreak: 'break-word' }}>
-                      {fullTrees > 0 ? '🌳'.repeat(Math.min(fullTrees, 21)) : ''}{sprout}
-                      {fullTrees === 0 && dayInWeek === 0 && <span className="sub" style={{ fontSize: 12 }}>Study today to plant your first sprout 🌱</span>}
-                    </div>
-                    <div className="sub" style={{ fontSize: 10.5, marginTop: 6 }}>
-                      {fullTrees > 0 && `${fullTrees} week${fullTrees === 1 ? '' : 's'} grown`}{fullTrees > 0 && dayInWeek > 0 ? ' · ' : ''}{dayInWeek > 0 && `${7 - dayInWeek} day${7 - dayInWeek === 1 ? '' : 's'} to your next tree`}
-                    </div>
-                    <div className="sub" style={{ fontSize: 10, marginTop: 8, opacity: 0.8 }}>🌱 → 🌳 Every 7 study days grows a new tree.</div>
-                  </div>
-                );
-              })()}
-              <p className="voice" style={{ fontSize: 15, fontWeight: 500, color: 'var(--ink)', margin: '12px 6px 4px', lineHeight: 1.45 }}>{line}</p>
+              <div style={{ display: 'inline-block', fontSize: 12, fontWeight: 700, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 999, padding: '5px 14px', margin: '14px 0 2px' }}>{line}</div>
               {!studiedToday && (
-                <button className="btn btn-cta" style={{ marginTop: 10 }} disabled={marking} onClick={markStudy}>
+                <button className="btn btn-cta" style={{ marginTop: 12 }} disabled={marking} onClick={markStudy}>
                   {marking ? '…' : 'Mark today ✓'}
                 </button>
               )}
