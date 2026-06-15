@@ -13,13 +13,13 @@ const saveStars = (arr) => { try { localStorage.setItem(STAR_KEY, JSON.stringify
 // Empty-state card with a faint red+green medical caduceus watermark behind the text.
 function EmptyState({ title, sub }) {
   return (
-    <div style={{ position: 'relative', overflow: 'hidden', textAlign: 'center', padding: '34px 22px', background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 20, boxShadow: '0 2px 10px rgba(20,40,30,.06)' }}>
-      <svg viewBox="0 0 64 64" width="150" height="150" style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', opacity: 0.07, pointerEvents: 'none' }} aria-hidden="true">
-        <line x1="32" y1="6" x2="32" y2="58" stroke="var(--forest)" strokeWidth="3" strokeLinecap="round" />
-        <path d="M32 12 C20 18, 20 26, 32 32 C44 38, 44 46, 32 52" fill="none" stroke="var(--rust)" strokeWidth="3" strokeLinecap="round" />
-        <path d="M32 12 C44 18, 44 26, 32 32 C20 38, 20 46, 32 52" fill="none" stroke="var(--forest)" strokeWidth="3" strokeLinecap="round" />
-        <circle cx="32" cy="9" r="3" fill="var(--rust)" />
-        <path d="M24 8 Q32 2, 40 8" fill="none" stroke="var(--gold)" strokeWidth="3" strokeLinecap="round" />
+    <div style={{ position: 'relative', overflow: 'hidden', textAlign: 'center', padding: '40px 22px', background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 20, boxShadow: '0 2px 10px rgba(20,40,30,.06)' }}>
+      <svg viewBox="0 0 64 64" width="110" height="110" style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', opacity: 0.08, pointerEvents: 'none' }} aria-hidden="true">
+        <line x1="32" y1="8" x2="32" y2="56" stroke="var(--forest)" strokeWidth="3" strokeLinecap="round" />
+        <path d="M32 14 C20 19, 20 27, 32 32 C44 37, 44 45, 32 50" fill="none" stroke="var(--rust)" strokeWidth="3" strokeLinecap="round" />
+        <path d="M32 14 C44 19, 44 27, 32 32 C20 37, 20 45, 32 50" fill="none" stroke="var(--forest)" strokeWidth="3" strokeLinecap="round" />
+        <circle cx="32" cy="11" r="2.5" fill="var(--rust)" />
+        <path d="M25 10 Q32 5, 39 10" fill="none" stroke="var(--gold)" strokeWidth="3" strokeLinecap="round" />
       </svg>
       <div style={{ position: 'relative' }}>
         <p style={{ fontWeight: 700, fontSize: 16, marginBottom: 6 }}>{title}</p>
@@ -153,7 +153,7 @@ export default function Partners() {
                   </span>
                 </div>
               </div>
-              <button className="btn-sm btn-cta" onClick={() => connect(m.user.id)}>+ Add</button>
+              <button className="btn-sm btn-cta" onClick={() => connect(m.user.id)}>Add</button>
             </div>
             ))}
             </div>
@@ -179,12 +179,12 @@ export default function Partners() {
                   <div className="name"><span className={isOnline(o.seen) ? 'dot-online' : 'dot-offline'}></span>{o.name}</div>
                   <div className="meta" style={{ color: examColor(o.exam), fontWeight: 700 }}>{o.exam}</div>
                 </div>
-                <button className="star-btn" onClick={() => toggleStar(o.id)} aria-label={starred ? 'Unstar' : 'Star'} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 6px', display: 'inline-flex', alignItems: 'center' }}>
+                <button className="star-btn" onClick={() => toggleStar(o.id)} aria-label={starred ? 'Unstar' : 'Star'} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center', flexShrink: 0 }}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill={starred ? 'var(--gold)' : 'none'} stroke={starred ? 'var(--gold)' : 'var(--subtle)'} strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" style={{ display: 'block' }}>
                     <path d="M12 3.2c.4 0 .77.23.95.6l2.18 4.46 4.92.72c.83.12 1.16 1.14.56 1.72l-3.56 3.47.84 4.9c.14.82-.72 1.45-1.46 1.06L12 17.8l-4.4 2.32c-.74.39-1.6-.24-1.46-1.06l.84-4.9-3.56-3.47c-.6-.58-.27-1.6.56-1.72l4.92-.72L11.05 3.8c.18-.37.55-.6.95-.6z" />
                   </svg>
                 </button>
-                <button className="btn-sm" onClick={() => nav(`/chat?with=${o.id}&name=${encodeURIComponent(o.name)}&av=${encodeURIComponent(o.avatar || '')}`)}>Chat</button>
+                <button className="btn-sm" onClick={() => nav(`/chat?with=${o.id}&name=${encodeURIComponent(o.name)}&av=${encodeURIComponent(o.avatar || '')}`)} style={{ flexShrink: 0 }}>Chat</button>
               </div>
             );
           })}
@@ -255,4 +255,4 @@ export default function Partners() {
       )}
     </div>
   );
-                  }
+                              }
