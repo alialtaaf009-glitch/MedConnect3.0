@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTimer, SOUNDS, playSound } from '../context/Timer.jsx';
+import { useBack } from '../context/Back.jsx';
 
 function haptic(ms = 25) {
   try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {}
@@ -29,6 +30,8 @@ function Ring({ frac, size, danger, children }) {
 export default function StudyTimer() {
   const t = useTimer();
   const [fullscreen, setFullscreen] = useState(false);
+  const { enterImmersive, exitImmersive } = useBack();
+  useEffect(() => { if (fullscreen) { enterImmersive(); return () => exitImmersive(); } }, [fullscreen, enterImmersive, exitImmersive]);
   const [editing, setEditing] = useState(false);
   const [custom, setCustom] = useState('');
   const [showOptions, setShowOptions] = useState(false);
