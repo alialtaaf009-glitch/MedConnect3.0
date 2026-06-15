@@ -533,7 +533,7 @@ export default function Home() {
       {invited && <p className="sub" style={{ fontSize: 12, marginTop: 8, textAlign: 'center', color: 'var(--forest)', fontWeight: 700 }}>Link copied — paste it anywhere! ✓</p>}
 
       {showMotivation && (
-        <div className="fs-open" style={{ position: 'fixed', inset: 0, background: 'var(--paper)', zIndex: 1000, overflowY: 'auto', WebkitOverflowScrolling: 'touch', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 20px)' }}>
+        <div className="fs-open" style={{ position: 'fixed', inset: 0, background: 'var(--paper)', zIndex: 1000, overflowY: 'auto', WebkitOverflowScrolling: 'touch', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 72px)' }}>
           <div className="fs-content" style={{ minHeight: '100%', position: 'relative' }}>
             <Motivation onBack={() => setShowMotivation(false)} />
           </div>
@@ -541,4 +541,5 @@ export default function Home() {
       )}
     </div>
   );
-}
+                              }
+                                             
