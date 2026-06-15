@@ -120,17 +120,17 @@ export default function Osce() {
       <h1 className="h1">OSCE Practice</h1>
       <p className="sub" style={{ marginBottom:14 }}>Timed station practice — solo, or live with a partner over a video link.</p>
 
-      {/* exam selector — small pills, horizontal scroll */}
-      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 6, marginBottom: 16, WebkitOverflowScrolling: 'touch' }}>
+      {/* exam selector — 2-column grid of pills */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9, marginBottom: 16 }}>
         {exams.map((e) => {
           const on = exam === e;
           return (
             <button key={e} onClick={() => setExam(e)} style={{
-              flexShrink: 0, padding: '9px 16px', borderRadius: 999, cursor: 'pointer',
+              padding: '12px 10px', borderRadius: 999, cursor: 'pointer',
               border: on ? 'none' : '1.5px solid var(--line)',
               background: on ? 'var(--forest)' : 'var(--card)',
               color: on ? '#fff' : 'var(--muted)',
-              fontFamily: 'inherit', fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap',
+              fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700, lineHeight: 1.2,
               boxShadow: on ? '0 3px 10px rgba(31,77,63,.25)' : 'none',
               transition: 'all .2s ease',
             }}>{e}</button>
