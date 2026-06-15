@@ -342,44 +342,6 @@ function Momentum({ user }) {
         return (
           <div onClick={() => setCdOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'grid', placeItems: 'center', zIndex: 100, padding: 24 }}>
             <div onClick={(e) => e.stopPropagation()} className="card" style={{ maxWidth: 340, width: '100%', textAlign: 'center', animation: 'popIn .3s cubic-bezier(0.34, 1.56, 0.64, 1) both', margin: 0 }}>
-              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--rust)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto 6px', display: 'block' }}>
-                <path d="M6 2h12M6 22h12M6 2c0 4 3 6 6 10 3-4 6-6 6-10M6 22c0-4 3-6 6-10" />
-              </svg>
-              <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--rust)', textTransform: 'uppercase' }}>{user?.exam || 'Your exam'}</div>
-              <div className="sub" style={{ fontSize: 12, marginTop: 2 }}>{new Date(user.exam_date).toDateString()}</div>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: 10, margin: '16px 0 4px' }}>
-                <div style={{ flex: 1, maxWidth: 90 }}>
-                  <div className="display-num" style={{ fontSize: 34, fontWeight: 700, color: 'var(--forest)', lineHeight: 1 }}>{weeks}</div>
-                  <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>weeks</div>
-                </div>
-                <div style={{ flex: 1, maxWidth: 90 }}>
-                  <div className="display-num" style={{ fontSize: 34, fontWeight: 700, color: 'var(--forest)', lineHeight: 1 }}>{days}</div>
-                  <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>days</div>
-                </div>
-              </div>
-              <div className="display-num" style={{ fontSize: 30, fontWeight: 700, color: 'var(--rust)', letterSpacing: 2, fontVariantNumeric: 'tabular-nums', margin: '6px 0 2px' }}>
-                {hh}:{mm2}:{ss}
-              </div>
-              <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>hours · minutes · seconds</div>
-              <div style={{ display: 'inline-block', fontSize: 12, fontWeight: 700, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 999, padding: '5px 14px', margin: '14px 0 2px' }}>{coachLine(dLeft)}</div>
-              <button className="btn ghost" style={{ marginTop: 12 }} onClick={() => setCdOpen(false)}>Back to it</button>
-            </div>
-          </div>
-        );
-      })()}
-
-      {stOpen && (() => {
-        const best = Math.max(user?.longest_streak || 0, streak);
-        const line = !studiedToday
-          ? 'One tap keeps the flame alive.'
-          : streak >= best && streak > 1
-            ? "You're at your peak. Don't look down."
-            : streak === 0
-              ? 'Every legendary streak starts at day one.'
-              : "Today's locked in. See you tomorrow, doctor.";
-        return (
-          <div onClick={() => setStOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'grid', placeItems: 'center', zIndex: 100, padding: 24 }}>
-            <div onClick={(e) => e.stopPropagation()} className="card" style={{ maxWidth: 340, width: '100%', textAlign: 'center', animation: 'popIn .3s cubic-bezier(0.34, 1.56, 0.64, 1) both', margin: 0 }}>
               <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--rust)', textTransform: 'uppercase' }}>Study Streak</div>
               <div style={{ fontSize: 52, lineHeight: 1.1, marginTop: 8 }}>🔥</div>
               <div className="display-num" style={{ fontSize: 40, fontWeight: 700, color: 'var(--rust)', lineHeight: 1.1 }}>{streak}</div>
@@ -507,10 +469,12 @@ export default function Home() {
 
       {showMotivation && (
         <div className="fs-open" style={{ position: 'fixed', inset: 0, background: 'var(--paper)', zIndex: 1000, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
-          <div className="fs-content" style={{ minHeight: '100%' }}>
-            <button onClick={() => setShowMotivation(false)} aria-label="Close"
-              style={{ position: 'sticky', top: 0, zIndex: 5, width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: 'calc(env(safe-area-inset-top, 0px) + 14px) 18px 12px', background: 'var(--paper)', border: 'none', cursor: 'pointer', fontFamily: 'inherit', color: 'var(--forest)', fontWeight: 700, fontSize: 15 }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+          <div className="fs-content" style={{ minHeight: '100%', position: 'relative' }}>
+            <button onClick={() => setShowMotivation(false)} aria-label="Back"
+              style={{ position: 'sticky', top: 0, zIndex: 5, display: 'flex', alignItems: 'center', gap: 7, padding: 'calc(env(safe-area-inset-top, 0px) + 14px) 18px 10px', width: '100%', background: 'var(--paper)', border: 'none', cursor: 'pointer', fontFamily: 'inherit', color: 'var(--forest)', fontWeight: 700, fontSize: 15 }}>
+              <span style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+              </span>
               Back
             </button>
             <Motivation />
