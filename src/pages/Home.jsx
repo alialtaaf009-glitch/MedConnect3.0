@@ -301,26 +301,26 @@ function Momentum({ user }) {
       {(!hideCd && daysLeft !== null) || !hideSt ? (
       <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
         {!hideCd && daysLeft !== null && (
-          <div className="card" onClick={() => setCdOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '12px 8px', borderColor: 'var(--forest)', margin: 0, cursor: 'pointer', position: 'relative' }}>
-            <span style={{ position: 'absolute', top: '50%', right: 11, transform: 'translateY(-50%)', fontSize: 18, fontWeight: 700, color: 'var(--subtle)', opacity: 0.9, lineHeight: 1 }}>›</span>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'var(--forest)', textTransform: 'uppercase' }}>Countdown</div>
-            <div className="display-num" style={{ fontSize: 30, fontWeight: 700, color: 'var(--forest)', lineHeight: 1.15 }}>
+          <div className="card stat-press" onClick={() => setCdOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '18px 12px', border: 'none', borderRadius: 18, margin: 0, cursor: 'pointer', position: 'relative', overflow: 'hidden', color: '#fff', background: 'linear-gradient(145deg, #1f4d3f 0%, #2c6a55 100%)', boxShadow: '0 5px 16px rgba(31,77,63,.25)' }}>
+            <span style={{ position: 'absolute', right: -6, bottom: -18, fontSize: 88, opacity: 0.12, lineHeight: 1, pointerEvents: 'none' }}>⏳</span>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'rgba(255,255,255,.82)', textTransform: 'uppercase', position: 'relative' }}>Countdown</div>
+            <div className="display-num" style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: daysLeft > 99 ? 38 : 42, fontWeight: 900, color: '#fff', lineHeight: 1.1, position: 'relative' }}>
               {daysLeft > 0 ? daysLeft : daysLeft === 0 ? 'Today' : '—'}
             </div>
-            <div className="sub" style={{ fontSize: 10, marginTop: 0 }}>{daysLeft > 0 ? 'days to exam' : daysLeft === 0 ? 'exam day!' : 'passed'}</div>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,.82)', marginTop: 1, position: 'relative' }}>{daysLeft > 0 ? 'days to exam' : daysLeft === 0 ? 'exam day!' : 'passed'}</div>
           </div>
         )}
         {!hideSt && (
-        <div className="card" onClick={() => setStOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '12px 8px', borderColor: 'var(--forest)', margin: 0, cursor: 'pointer', position: 'relative' }}>
-          <span style={{ position: 'absolute', top: '50%', right: 11, transform: 'translateY(-50%)', fontSize: 18, fontWeight: 700, color: 'var(--subtle)', opacity: 0.9, lineHeight: 1 }}>›</span>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'var(--forest)', textTransform: 'uppercase' }}>Study Streak</div>
-          <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--rust)', lineHeight: 1.2, marginTop: 2 }}>
-            <span style={{ fontSize: 18 }}>🔥</span> {streak}
+        <div className="card stat-press" onClick={() => setStOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '18px 12px', border: 'none', borderRadius: 18, margin: 0, cursor: 'pointer', position: 'relative', overflow: 'hidden', color: '#fff', background: 'linear-gradient(145deg, #a8442a 0%, #c25a3d 100%)', boxShadow: '0 5px 16px rgba(168,68,42,.25)' }}>
+          <span style={{ position: 'absolute', right: -6, bottom: -16, fontSize: 84, opacity: 0.14, lineHeight: 1, pointerEvents: 'none' }}>🔥</span>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'rgba(255,255,255,.82)', textTransform: 'uppercase', position: 'relative' }}>Study Streak</div>
+          <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 42, fontWeight: 900, color: '#fff', lineHeight: 1.1, position: 'relative' }}>
+            {streak}
           </div>
           {studiedToday ? (
-            <div style={{ marginTop: 5 }}><span className="match-pill pill-exc">✓ done today</span></div>
+            <div style={{ marginTop: 4, position: 'relative' }}><span style={{ fontSize: 10, fontWeight: 800, padding: '3px 10px', borderRadius: 999, background: 'rgba(255,255,255,.22)', color: '#fff' }}>✓ done today</span></div>
           ) : (
-            <button onClick={(e) => { e.stopPropagation(); markStudy(); }} disabled={marking} style={{ marginTop: 4, fontSize: 11, fontWeight: 700, color: '#fff', background: 'var(--rust)', border: 'none', borderRadius: 999, padding: '5px 11px', cursor: 'pointer' }}>
+            <button onClick={(e) => { e.stopPropagation(); markStudy(); }} disabled={marking} style={{ marginTop: 4, fontSize: 11, fontWeight: 700, color: 'var(--rust)', background: '#fff', border: 'none', borderRadius: 999, padding: '5px 12px', cursor: 'pointer', position: 'relative' }}>
               {marking ? '…' : 'Mark today ✓'}
             </button>
           )}
@@ -439,7 +439,7 @@ export default function Home() {
 
   // native share sheet on Android & iOS; clipboard fallback elsewhere
   const inviteFriend = async () => {
-  const data = {
+    const data = {
       title: 'MedConnect',
       text: "I'm using MedConnect to find study partners for medical exams — doctors only, matched by exam. Join me:",
       url: 'https://med-connect3-0.vercel.app',
