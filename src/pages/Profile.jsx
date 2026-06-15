@@ -201,10 +201,10 @@ export default function Profile() {
         <Row k="Registration" v={user?.reg_council ? `${user.reg_council} ${user.reg_number} (self-reported)` : '—'} />
       </div>
       <button className="btn" onClick={() => setEditing(true)}>Edit profile</button>
-      <div style={{ display: 'flex', gap: 8, marginTop: 12, justifyContent: 'center' }}>
-        <button onClick={() => setShareOpen(true)} style={{ flex: 1, maxWidth: 160, fontSize: 12.5, fontWeight: 700, color: 'var(--forest)', background: 'transparent', border: '1.5px solid var(--line)', borderRadius: 999, padding: '8px 12px', cursor: 'pointer' }}>⤴ Share profile</button>
-        <button onClick={toggle} style={{ flex: 1, maxWidth: 160, fontSize: 12.5, fontWeight: 700, color: 'var(--forest)', background: 'transparent', border: '1.5px solid var(--line)', borderRadius: 999, padding: '8px 12px', cursor: 'pointer' }}>{mode === 'dark' ? '☀️ Light' : '🌙 Dark'}</button>
-      </div>
+      <button onClick={() => setShareOpen(true)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', marginTop: 10, fontSize: 13.5, fontWeight: 700, color: 'var(--forest)', background: 'transparent', border: '1.5px solid var(--line)', borderRadius: 999, padding: '11px 12px', cursor: 'pointer' }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7" /><path d="M16 6l-4-4-4 4" /><path d="M12 2v13" /></svg>
+        Share profile
+      </button>
 
       {shareOpen && (
         <div onClick={() => setShareOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'grid', placeItems: 'center', zIndex: 100, padding: 24 }}>
