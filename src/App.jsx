@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Navigate, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from './context/Auth.jsx';
 import { useTheme } from './context/Theme.jsx';
+import { useBack } from './context/Back.jsx';
 import { useTimer } from './context/Timer.jsx';
 import { api } from './lib/api';
 import SignIn from './pages/SignIn.jsx';
@@ -174,8 +175,11 @@ function TopBar({ user }) {
   const loc = useLocation();
   const nav = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { backHandler } = useBack();
   const roots = ['/home', '/partners', '/osce', '/chat', '/focus'];
-  const showBack = !roots.includes(loc.pathname);
+  // show back arrow if: on an inner route, OR an overlay registered a back handler
+  const showBack = !roots.includes(loc.pathname) || !!backHandler;
+  const goBack = () => { if (backHandler) backHandler(); else nav(-1); };
   const onProfile = loc.pathname === '/profile';
   const initials = (user?.name || 'Dr A').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('');
   return (
@@ -183,7 +187,7 @@ function TopBar({ user }) {
       <div className="topbar">
         <div style={{ width: 36, flexShrink: 0, display: 'flex', alignItems: 'center' }}>
           {showBack
-            ? <button className="topbar-back" onClick={() => nav(-1)} aria-label="Back">
+            ? <button className="topbar-back" onClick={goBack} aria-label="Back">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
               </button>
             : <button className="topbar-burger" onClick={() => setDrawerOpen(true)} aria-label="Menu">
@@ -342,3 +346,4 @@ export default function App() {
     </div>
   );
 }
+
