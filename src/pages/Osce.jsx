@@ -109,7 +109,7 @@ export default function Osce() {
         </div>
       )}
       <h1 className="h1">OSCE Practice</h1>
-      <p className="sub" style={{ marginBottom:14 }}>Timed station practice — solo, or live with a partner over a Meet link.</p>
+      <p className="sub" style={{ marginBottom:14 }}>Timed station practice — solo, or live with a partner over a video link.</p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
         {exams.map((e) => {
@@ -239,8 +239,7 @@ function Station({ name, minutes, onBack }) {
         <p style={{ fontSize:15, lineHeight:1.6, whiteSpace:'pre-line' }}>{scenario}</p>
       </div>
       <button className="btn" style={{ background:'var(--violet)', marginTop: 28 }} onClick={startVideo}>📹 Practise live with a partner</button>
-      <p className="sub" style={{ fontSize:12, marginTop:8 }}>Opens a Google Meet and lets you send the link to a connected partner — one of you plays candidate, the other examiner.</p>
+      <p className="sub" style={{ fontSize:12, marginTop:8 }}>Opens a free, private video room and lets you send the link to a connected partner — one of you plays candidate, the other examiner.</p>
     </div>
   );
 }
-
