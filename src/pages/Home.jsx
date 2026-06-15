@@ -174,7 +174,7 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'exam' && (
-      <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
           {orderedExams.map(({ flag, country, exam, parts }, idx) => {
               const key = 'exam|' + country + '|' + exam;
               const ecx = examColor(exam);
@@ -527,13 +527,10 @@ export default function Home() {
         );
       })()}
 
-      <div style={{ padding: '10px 4px 8px', textAlign: 'center' }}>
-        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--rust)', textTransform: 'uppercase', marginBottom: 4 }}>
+      <div style={{ padding: '6px 4px 2px', textAlign: 'center' }}>
+        <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: 1.8, color: 'var(--subtle)', textTransform: 'uppercase' }}>
           For doctors, by doctors
         </div>
-        <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontVariationSettings: '"opsz" 18', fontSize: 16, fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.2px', color: 'var(--forest)', margin: 0, whiteSpace: 'nowrap' }}>
-          Find the right <em style={{ fontStyle: 'italic' }}>study partner</em> for your exam
-        </h1>
       </div>
 
       <Momentum user={user} />
@@ -562,4 +559,4 @@ export default function Home() {
       )}
     </div>
   );
-            }
+}
