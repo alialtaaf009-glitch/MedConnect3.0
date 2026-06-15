@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/Auth.jsx';
 import { quoteOfTheDay } from '../lib/quotes';
+import Motivation from './Motivation.jsx';
 import { api } from '../lib/api';
 
 // country -> exams -> parts (three levels, like the prototype)
@@ -424,6 +425,7 @@ export default function Home() {
   const nav = useNavigate();
   const initials = (user?.name || 'Dr A').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map(x => x[0]?.toUpperCase()).join('');
   const quote = quoteOfTheDay();
+  const [showMotivation, setShowMotivation] = useState(false);
 
   const [nudges, setNudges] = useState([]);
 
@@ -448,7 +450,7 @@ export default function Home() {
 
   return (
     <div className="screen">
-      <div onClick={() => nav('/motivation')} style={{ cursor: 'pointer', marginTop: 4, padding: '18px 18px', borderRadius: 18, background: 'linear-gradient(135deg, var(--forest) 0%, var(--forest-2) 100%)', color: '#fff', position: 'relative', overflow: 'hidden', boxShadow: '0 6px 20px rgba(31,77,63,.28)' }}>
+      <div onClick={() => setShowMotivation(true)} style={{ cursor: 'pointer', marginTop: 4, padding: '18px 18px', borderRadius: 18, background: 'linear-gradient(135deg, var(--forest) 0%, var(--forest-2) 100%)', color: '#fff', position: 'relative', overflow: 'hidden', boxShadow: '0 6px 20px rgba(31,77,63,.28)' }}>
         <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--gold)', marginBottom: 8, position: 'relative' }}>
           Hi Dr. {(user?.name || '').replace(/^Dr\.?\s+/i, '').split(' ')[0] || 'Doctor'} — a thought for today
         </div>
@@ -502,6 +504,19 @@ export default function Home() {
         <button className="btn btn-cta" onClick={inviteFriend}>Invite your friends</button>
         {invited && <p className="sub" style={{ fontSize: 12, marginTop: 8, color: 'var(--forest)', fontWeight: 700 }}>Link copied — paste it anywhere! ✓</p>}
       </div>
+
+      {showMotivation && (
+        <div className="fs-open" style={{ position: 'fixed', inset: 0, background: 'var(--paper)', zIndex: 1000, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <div className="fs-content" style={{ minHeight: '100%' }}>
+            <button onClick={() => setShowMotivation(false)} aria-label="Close"
+              style={{ position: 'sticky', top: 0, zIndex: 5, width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: 'calc(env(safe-area-inset-top, 0px) + 14px) 18px 12px', background: 'var(--paper)', border: 'none', cursor: 'pointer', fontFamily: 'inherit', color: 'var(--forest)', fontWeight: 700, fontSize: 15 }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+              Back
+            </button>
+            <Motivation />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
