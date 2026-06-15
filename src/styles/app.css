@@ -359,3 +359,7 @@ button:active { -webkit-tap-highlight-color: transparent; }
 /* notification dot on a tab (Requests) */
 .tab-dot { position: absolute; top: 6px; right: 10px; width: 7px; height: 7px; border-radius: 50%; background: var(--rust); }
 .tab.on .tab-dot { background: #fff; }
+
+/* premium stat cards: gentle press feedback instead of arrows */
+.stat-press { transition: transform .15s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.stat-press:active { transform: scale(0.97); }
