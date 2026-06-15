@@ -5,6 +5,7 @@ import App from './App.jsx';
 import { AuthProvider } from './context/Auth.jsx';
 import { ThemeProvider } from './context/Theme.jsx';
 import { TimerProvider } from './context/Timer.jsx';
+import { BackProvider } from './context/Back.jsx';
 import './styles/app.css';
 
 createRoot(document.getElementById('root')).render(
@@ -12,12 +13,13 @@ createRoot(document.getElementById('root')).render(
     <ThemeProvider>
       <AuthProvider>
         <TimerProvider>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
+          <BackProvider>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </BackProvider>
         </TimerProvider>
       </AuthProvider>
     </ThemeProvider>
   </React.StrictMode>
 );
-
