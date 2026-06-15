@@ -470,14 +470,7 @@ export default function Home() {
       {showMotivation && (
         <div className="fs-open" style={{ position: 'fixed', inset: 0, background: 'var(--paper)', zIndex: 1000, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
           <div className="fs-content" style={{ minHeight: '100%', position: 'relative' }}>
-            <button onClick={() => setShowMotivation(false)} aria-label="Back"
-              style={{ position: 'sticky', top: 0, zIndex: 5, display: 'flex', alignItems: 'center', gap: 7, padding: 'calc(env(safe-area-inset-top, 0px) + 14px) 18px 10px', width: '100%', background: 'var(--paper)', border: 'none', cursor: 'pointer', fontFamily: 'inherit', color: 'var(--forest)', fontWeight: 700, fontSize: 15 }}>
-              <span style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-              </span>
-              Back
-            </button>
-            <Motivation />
+            <Motivation onBack={() => setShowMotivation(false)} />
           </div>
         </div>
       )}
