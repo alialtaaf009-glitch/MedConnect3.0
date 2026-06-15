@@ -37,8 +37,8 @@ export default function Motivation() {
 
   // selectable background themes for the quote card & download
   const THEMES = [
-    { name: 'Ivory', bg: '#f4f1e8', ink: '#15201c', accent: '#1f4d3f' },
     { name: 'Forest', bg: '#1f4d3f', ink: '#f4f1e8', accent: '#b98a2e' },
+    { name: 'Ivory', bg: '#f4f1e8', ink: '#15201c', accent: '#1f4d3f' },
     { name: 'Rust', bg: '#a8442a', ink: '#fdf6f2', accent: '#f4d9c5' },
     { name: 'Gold', bg: '#b98a2e', ink: '#1f1404', accent: '#1f4d3f' },
     { name: 'Slate', bg: '#2c3a36', ink: '#eef2f0', accent: '#b98a2e' },
@@ -94,7 +94,7 @@ export default function Motivation() {
           <div className="card" style={{ padding: 28, textAlign: 'center', background: theme.bg, transition: 'background .3s ease' }}>
             <div style={{ fontSize: 28, marginBottom: 14, color: theme.accent }}>✦</div>
             <p style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: 21, fontWeight: 500, lineHeight: 1.45, marginBottom: today.author ? 10 : 18, color: theme.ink, transition: 'color .3s ease' }}>
-              “{today.text}”
+              <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: 30, fontWeight: 700, color: theme.accent, verticalAlign: '-11px', lineHeight: 0, marginRight: 2 }}>“</span>{today.text}<span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: 30, fontWeight: 700, color: theme.accent, verticalAlign: '-11px', lineHeight: 0, marginLeft: 2 }}>”</span>
             </p>
             {today.author && <p style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: 14, fontStyle: 'italic', color: theme.accent, marginBottom: 16 }}>— {today.author}</p>}
             <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: 13, fontWeight: 700, color: theme.accent, opacity: 0.85 }}>MedConnect</div>
