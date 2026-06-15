@@ -7,16 +7,18 @@ const BackCtx = createContext(null);
 
 export function BackProvider({ children }) {
   const [handler, setHandler] = useState(null); // function | null
+  const [immersive, setImmersive] = useState(false); // hide top bar + nav
 
   const registerBack = useCallback((fn) => setHandler(() => fn), []);
   const clearBack = useCallback(() => setHandler(null), []);
+  const enterImmersive = useCallback(() => setImmersive(true), []);
+  const exitImmersive = useCallback(() => setImmersive(false), []);
 
   return (
-    <BackCtx.Provider value={{ backHandler: handler, registerBack, clearBack }}>
+    <BackCtx.Provider value={{ backHandler: handler, registerBack, clearBack, immersive, enterImmersive, exitImmersive }}>
       {children}
     </BackCtx.Provider>
   );
 }
 
-export const useBack = () => useContext(BackCtx) || { backHandler: null, registerBack: () => {}, clearBack: () => {} };
-
+export const useBack = () => useContext(BackCtx) || { backHandler: null, registerBack: () => {}, clearBack: () => {}, immersive: false, enterImmersive: () => {}, exitImmersive: () => {} };
