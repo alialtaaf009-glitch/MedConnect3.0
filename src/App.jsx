@@ -271,6 +271,7 @@ function TabBar() {
 export default function App() {
   const { user, loading } = useAuth();
   const { mode, toggle } = useTheme();
+  const { immersive } = useBack();
 
   // hold the splash long enough for the draw animation to finish, even if auth resolves instantly
   const [splashDone, setSplashDone] = useState(false);
@@ -323,8 +324,8 @@ export default function App() {
 
   // main app
   return (
-    <div className="app">
-      <TopBar user={user} />
+    <div className={`app ${immersive ? 'immersive' : ''}`}>
+      {!immersive && <TopBar user={user} />}
       <Routes>
         <Route path="/home" element={<Home />} />
         <Route path="/partners" element={<Partners />} />
@@ -342,7 +343,7 @@ export default function App() {
         <Route path="/add/:id" element={<AddPartner />} />
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
-      <TabBar />
+      {!immersive && <TabBar />}
     </div>
   );
 }
