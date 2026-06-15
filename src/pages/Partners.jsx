@@ -120,6 +120,7 @@ export default function Partners() {
 
       <Tabs />
 
+      <div key={tab} className="tab-pop">
       {tab === 'discover' && (
         <>
           {examLabel && (
@@ -242,6 +243,7 @@ export default function Partners() {
           )}
         </>
       )}
+      </div>
 
       {peek && (
         <div onClick={() => setPeek(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'grid', placeItems: 'center', zIndex: 100, padding: 24 }}>
@@ -256,4 +258,4 @@ export default function Partners() {
       )}
     </div>
   );
-                                                                                                                                                                                                                                      }
+}
