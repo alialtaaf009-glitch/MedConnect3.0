@@ -180,7 +180,7 @@ function ExploreBrowse() {
               const ecx = examColor(exam);
               return (
                 <div key={key} style={{ borderTop: idx === 0 ? 'none' : '1px solid var(--line)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 18px', cursor: 'pointer' }}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 18px', cursor: 'pointer' }}
                     onClick={() => setOpenExam(openExam === key ? '' : key)}>
                     <Flag country={country} emoji={flag} size={30} ring={flagColor(country)} />
                     <span style={{ flex: 1, fontWeight: 600 }}>{exam}</span>
@@ -213,7 +213,7 @@ function ExploreBrowse() {
         <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
         {orderedCountries.map(([flag, country, exams], idx) => (
         <div key={country} style={{ borderTop: idx === 0 ? 'none' : '1px solid var(--line)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '14px 18px', cursor: 'pointer' }}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '11px 18px', cursor: 'pointer' }}
             onClick={() => setOpenCountry(openCountry === country ? '' : country)}>
             <Flag country={country} emoji={flag} ring={flagColor(country)} />
             <span style={{ flex: 1, fontWeight: 600 }}>{country}</span>
@@ -518,7 +518,7 @@ export default function Home() {
       <Momentum user={user} />
 
 
-      <h2 className="serif" style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 21, fontWeight: 900, letterSpacing: '-0.3px', color: 'var(--forest)', margin: '14px 0 12px' }}>Explore Study Partners</h2>
+      <h2 className="serif" style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 21, fontWeight: 900, letterSpacing: '-0.3px', color: 'var(--forest)', margin: '10px 0 12px' }}>Explore Study Partners</h2>
 
       <ExploreBrowse />
 
