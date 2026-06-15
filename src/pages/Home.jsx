@@ -522,16 +522,18 @@ export default function Home() {
 
       <ExploreBrowse />
 
-      {/* invite a colleague — native share sheet (Android & iOS), clipboard fallback */}
-      <div className="card" style={{ textAlign: 'center', marginTop: 20 }}>
-        <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Know a doctor who needs a study partner?</div>
-        <p className="sub" style={{ fontSize: 13, marginBottom: 12 }}>MedConnect grows one colleague at a time.</p>
-        <button className="btn btn-cta" onClick={inviteFriend}>Invite your friends</button>
-        {invited && <p className="sub" style={{ fontSize: 12, marginTop: 8, color: 'var(--forest)', fontWeight: 700 }}>Link copied — paste it anywhere! ✓</p>}
+      {/* invite a colleague — slim rust pill, native share sheet (Android & iOS), clipboard fallback */}
+      <div onClick={inviteFriend} style={{ display: 'flex', alignItems: 'center', gap: 12, borderRadius: 999, padding: '12px 16px', marginTop: 20, cursor: 'pointer', background: 'linear-gradient(135deg, #a8442a 0%, #c25a3d 100%)', color: '#fff', boxShadow: '0 4px 14px rgba(168,68,42,.25)' }}>
+        <span style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,.2)', display: 'grid', placeItems: 'center', fontSize: 19, flexShrink: 0 }}>🤝</span>
+        <span style={{ flex: 1, fontSize: 13.5, fontWeight: 700, lineHeight: 1.3 }}>Study better, together — invite a colleague</span>
+        <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,.22)', display: 'grid', placeItems: 'center', flexShrink: 0, color: '#fff' }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+        </span>
       </div>
+      {invited && <p className="sub" style={{ fontSize: 12, marginTop: 8, textAlign: 'center', color: 'var(--forest)', fontWeight: 700 }}>Link copied — paste it anywhere! ✓</p>}
 
       {showMotivation && (
-        <div className="fs-open" style={{ position: 'fixed', inset: 0, background: 'var(--paper)', zIndex: 1000, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <div className="fs-open" style={{ position: 'fixed', inset: 0, background: 'var(--paper)', zIndex: 1000, overflowY: 'auto', WebkitOverflowScrolling: 'touch', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 20px)' }}>
           <div className="fs-content" style={{ minHeight: '100%', position: 'relative' }}>
             <Motivation onBack={() => setShowMotivation(false)} />
           </div>
@@ -540,3 +542,4 @@ export default function Home() {
     </div>
   );
 }
+
