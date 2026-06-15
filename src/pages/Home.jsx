@@ -453,6 +453,12 @@ export default function Home() {
   }, [showMotivation, registerBack, clearBack]);
 
   const [nudges, setNudges] = useState([]);
+  const [nudgesOpen, setNudgesOpen] = useState(false);
+  const [dismissed, setDismissed] = useState(() => { try { return JSON.parse(localStorage.getItem('dismissed_nudges') || '[]'); } catch (e) { return []; } });
+  const dismissNudge = (id) => {
+    setDismissed((prev) => { const next = [...new Set([...prev, id])]; try { localStorage.setItem('dismissed_nudges', JSON.stringify(next)); } catch (e) {} return next; });
+  };
+  const liveNudges = nudges.filter((n) => !dismissed.includes(n.id));
 
   const [invited, setInvited] = useState(false);
   useEffect(() => { api.connections().then((d) => setNudges(d.nudges || [])).catch(() => {}); }, []);
@@ -486,25 +492,40 @@ export default function Home() {
         <div style={{ position: 'absolute', top: '50%', right: 14, transform: 'translateY(-50%)', width: 26, height: 26, borderRadius: '50%', background: 'rgba(255,255,255,0.14)', display: 'grid', placeItems: 'center', fontSize: 15, opacity: 0.9 }}>›</div>
       </div>
 
-      {nudges.length > 0 && (
-        <div onClick={() => nav(`/chat?with=${nudges[0].id}&name=${encodeURIComponent(nudges[0].name)}&av=${encodeURIComponent(nudges[0].avatar || '')}`)}
-          style={{ cursor: 'pointer', marginTop: 12, padding: '12px 14px', borderRadius: 14, background: 'var(--forest)', color: '#fff', display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,.18)', display: 'grid', placeItems: 'center', fontSize: 20, flexShrink: 0 }}>{nudges[0].avatar || '👋'}</div>
-          <div style={{ flex: 1, lineHeight: 1.35 }}>
-            <div style={{ fontWeight: 700, fontSize: 14 }}>Say hi to {nudges[0].name}! 👋</div>
-            <div style={{ fontSize: 12, opacity: 0.9 }}>
-              {nudges.length === 1
-                ? (nudges[0].exam && nudges[0].exam === user?.exam
-                    ? `You matched — also preparing for ${nudges[0].exam}. Break the ice before your next study slot.`
-                    : nudges[0].exam
-                      ? `You matched — they're preparing for ${nudges[0].exam}. Break the ice and say hello.`
-                      : `You matched! Break the ice and say hello.`)
-                : `You have ${nudges.length} new matches waiting to hear from you.`}
+      {liveNudges.length > 0 && (() => {
+        const first = liveNudges[0];
+        const rest = liveNudges.slice(1);
+        const Row = ({ n, divided }) => (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '12px 14px', borderTop: divided ? '1px solid rgba(255,255,255,.15)' : 'none' }}>
+            <div onClick={() => nav(`/chat?with=${n.id}&name=${encodeURIComponent(n.name)}&av=${encodeURIComponent(n.avatar || '')}`)} style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,.18)', display: 'grid', placeItems: 'center', fontSize: 20, flexShrink: 0, cursor: 'pointer' }}>{n.avatar || '👋'}</div>
+            <div style={{ flex: 1, minWidth: 0, lineHeight: 1.3, cursor: 'pointer' }} onClick={() => nav(`/chat?with=${n.id}&name=${encodeURIComponent(n.name)}&av=${encodeURIComponent(n.avatar || '')}`)}>
+              <div style={{ fontWeight: 700, fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{n.name}</div>
+              {n.exam && <div style={{ fontSize: 11.5, opacity: 0.82 }}>{n.exam}</div>}
             </div>
+            <button onClick={() => nav(`/chat?with=${n.id}&name=${encodeURIComponent(n.name)}&av=${encodeURIComponent(n.avatar || '')}`)} style={{ background: '#fff', color: 'var(--forest)', border: 'none', borderRadius: 999, padding: '7px 14px', fontSize: 12, fontWeight: 800, cursor: 'pointer', flexShrink: 0, fontFamily: 'inherit' }}>Say hi</button>
+            <button onClick={() => dismissNudge(n.id)} aria-label="Dismiss" style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.55)', cursor: 'pointer', padding: 4, flexShrink: 0, display: 'grid', placeItems: 'center' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+            </button>
           </div>
-          <span style={{ fontSize: 18 }}>›</span>
-        </div>
-      )}
+        );
+        return (
+          <div style={{ marginTop: 12, borderRadius: 16, overflow: 'hidden', background: 'linear-gradient(135deg, var(--forest) 0%, var(--forest-2) 100%)', color: '#fff', boxShadow: '0 4px 14px rgba(31,77,63,.25)' }}>
+            <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--gold)', padding: '11px 14px 0' }}>
+              🎉 {liveNudges.length === 1 ? 'New study partner' : `${liveNudges.length} new study partners`}
+            </div>
+            <Row n={first} />
+            {rest.length > 0 && nudgesOpen && rest.map((n) => <Row key={n.id} n={n} divided />)}
+            {rest.length > 0 && (
+              <button onClick={() => setNudgesOpen(!nudgesOpen)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '10px', borderTop: '1px solid rgba(255,255,255,.15)', background: 'rgba(255,255,255,.08)', border: 'none', color: '#fff', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+                {nudgesOpen ? 'Show less' : `Show ${rest.length} more`}
+                <span style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(255,255,255,.2)', display: 'grid', placeItems: 'center', transition: 'transform .25s ease', transform: nudgesOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+                </span>
+              </button>
+            )}
+          </div>
+        );
+      })()}
 
       <div style={{ padding: '10px 4px 8px', textAlign: 'center' }}>
         <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--rust)', textTransform: 'uppercase', marginBottom: 4 }}>
@@ -524,22 +545,4 @@ export default function Home() {
 
       {/* invite a colleague — slim rust pill, native share sheet (Android & iOS), clipboard fallback */}
       <div onClick={inviteFriend} style={{ display: 'flex', alignItems: 'center', gap: 12, borderRadius: 999, padding: '12px 16px', marginTop: 20, cursor: 'pointer', background: 'linear-gradient(135deg, #1f4d3f 0%, #2c6a55 100%)', color: '#fff', boxShadow: '0 4px 14px rgba(31,77,63,.25)' }}>
-        <span style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,.2)', display: 'grid', placeItems: 'center', fontSize: 19, flexShrink: 0 }}>👋</span>
-        <span style={{ flex: 1, fontSize: 13.5, fontWeight: 700, lineHeight: 1.3 }}>Study better, together — invite a colleague</span>
-        <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,.22)', display: 'grid', placeItems: 'center', flexShrink: 0, color: '#fff' }}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
-        </span>
-      </div>
-      {invited && <p className="sub" style={{ fontSize: 12, marginTop: 8, textAlign: 'center', color: 'var(--forest)', fontWeight: 700 }}>Link copied — paste it anywhere! ✓</p>}
-
-      {showMotivation && (
-        <div className="fs-open" style={{ position: 'fixed', inset: 0, background: 'var(--paper)', zIndex: 1000, overflowY: 'auto', WebkitOverflowScrolling: 'touch', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 72px)' }}>
-          <div className="fs-content" style={{ minHeight: '100%', position: 'relative' }}>
-            <Motivation onBack={() => setShowMotivation(false)} />
-          </div>
-        </div>
-      )}
-    </div>
-  );
-                              }
-                                             
+        <span style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,.2)', display: 'grid', placeItems: 'center', fontSize: 
