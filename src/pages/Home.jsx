@@ -523,8 +523,8 @@ export default function Home() {
       <ExploreBrowse />
 
       {/* invite a colleague — slim rust pill, native share sheet (Android & iOS), clipboard fallback */}
-      <div onClick={inviteFriend} style={{ display: 'flex', alignItems: 'center', gap: 12, borderRadius: 999, padding: '12px 16px', marginTop: 20, cursor: 'pointer', background: 'linear-gradient(135deg, #a8442a 0%, #c25a3d 100%)', color: '#fff', boxShadow: '0 4px 14px rgba(168,68,42,.25)' }}>
-        <span style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,.2)', display: 'grid', placeItems: 'center', fontSize: 19, flexShrink: 0 }}>🤝</span>
+      <div onClick={inviteFriend} style={{ display: 'flex', alignItems: 'center', gap: 12, borderRadius: 999, padding: '12px 16px', marginTop: 20, cursor: 'pointer', background: 'linear-gradient(135deg, #1f4d3f 0%, #2c6a55 100%)', color: '#fff', boxShadow: '0 4px 14px rgba(31,77,63,.25)' }}>
+        <span style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,.2)', display: 'grid', placeItems: 'center', fontSize: 19, flexShrink: 0 }}>👋</span>
         <span style={{ flex: 1, fontSize: 13.5, fontWeight: 700, lineHeight: 1.3 }}>Study better, together — invite a colleague</span>
         <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,.22)', display: 'grid', placeItems: 'center', flexShrink: 0, color: '#fff' }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
@@ -542,4 +542,3 @@ export default function Home() {
     </div>
   );
 }
-
