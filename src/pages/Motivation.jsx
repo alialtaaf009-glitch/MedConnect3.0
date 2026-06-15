@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { QUOTES, quoteOfTheDay, quoteById } from '../lib/quotes';
 import { api } from '../lib/api';
 
-export default function Motivation() {
+export default function Motivation({ onBack }) {
   const nav = useNavigate();
   const today = quoteOfTheDay();
   const [favIds, setFavIds] = useState([]);
@@ -83,7 +83,14 @@ export default function Motivation() {
 
   return (
     <div className="screen">
-      <h1 className="h1">Daily Motivation</h1>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+        {onBack && (
+          <button onClick={onBack} aria-label="Back" style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--paper-2)', border: 'none', display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0, color: 'var(--forest)' }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+          </button>
+        )}
+        <h1 className="h1" style={{ margin: 0 }}>Daily Motivation</h1>
+      </div>
       <div className="tabs" style={{ marginTop: 14 }}>
         <button className={`tab ${tab === 'today' ? 'on' : ''}`} onClick={() => setTab('today')}>Today</button>
         <button className={`tab ${tab === 'favs' ? 'on' : ''}`} onClick={() => setTab('favs')}>Favourites {favIds.length || ''}</button>
@@ -144,3 +151,4 @@ export default function Motivation() {
     </div>
   );
 }
+
