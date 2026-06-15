@@ -174,7 +174,7 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'exam' && (
-        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+      <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
           {orderedExams.map(({ flag, country, exam, parts }, idx) => {
               const key = 'exam|' + country + '|' + exam;
               const ecx = examColor(exam);
@@ -327,24 +327,24 @@ function Momentum({ user }) {
   };
 
   return (
-      <>
+    <>
       {(!hideCd && daysLeft !== null) || !hideSt ? (
-      <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
+      <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
         {!hideCd && daysLeft !== null && (
-          <div className="card stat-press" onClick={() => setCdOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '18px 12px', border: 'none', borderRadius: 18, margin: 0, cursor: 'pointer', position: 'relative', overflow: 'hidden', color: '#fff', background: 'linear-gradient(145deg, #1f4d3f 0%, #2c6a55 100%)', boxShadow: '0 5px 16px rgba(31,77,63,.25)' }}>
+          <div className="card stat-press" onClick={() => setCdOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '13px 12px', border: 'none', borderRadius: 16, margin: 0, cursor: 'pointer', position: 'relative', overflow: 'hidden', color: '#fff', background: 'linear-gradient(145deg, #1f4d3f 0%, #2c6a55 100%)', boxShadow: '0 4px 12px rgba(31,77,63,.22)' }}>
             <span style={{ position: 'absolute', right: -6, bottom: -18, fontSize: 88, opacity: 0.12, lineHeight: 1, pointerEvents: 'none' }}>⏳</span>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'rgba(255,255,255,.82)', textTransform: 'uppercase', position: 'relative' }}>Countdown</div>
-            <div className="display-num" style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: daysLeft > 99 ? 38 : 42, fontWeight: 900, color: '#fff', lineHeight: 1.1, position: 'relative' }}>
+            <div className="display-num" style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: daysLeft > 99 ? 32 : 36, fontWeight: 900, color: '#fff', lineHeight: 1.05, position: 'relative' }}>
               {daysLeft > 0 ? daysLeft : daysLeft === 0 ? 'Today' : '—'}
             </div>
             <div style={{ fontSize: 10, color: 'rgba(255,255,255,.82)', marginTop: 1, position: 'relative' }}>{daysLeft > 0 ? 'days to exam' : daysLeft === 0 ? 'exam day!' : 'passed'}</div>
           </div>
         )}
         {!hideSt && (
-        <div className="card stat-press" onClick={() => setStOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '18px 12px', border: 'none', borderRadius: 18, margin: 0, cursor: 'pointer', position: 'relative', overflow: 'hidden', color: '#fff', background: 'linear-gradient(145deg, #a8442a 0%, #c25a3d 100%)', boxShadow: '0 5px 16px rgba(168,68,42,.25)' }}>
+        <div className="card stat-press" onClick={() => setStOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '13px 12px', border: 'none', borderRadius: 16, margin: 0, cursor: 'pointer', position: 'relative', overflow: 'hidden', color: '#fff', background: 'linear-gradient(145deg, #a8442a 0%, #c25a3d 100%)', boxShadow: '0 4px 12px rgba(168,68,42,.22)' }}>
           <span style={{ position: 'absolute', right: -6, bottom: -16, fontSize: 84, opacity: 0.14, lineHeight: 1, pointerEvents: 'none' }}>🔥</span>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'rgba(255,255,255,.82)', textTransform: 'uppercase', position: 'relative' }}>Study Streak</div>
-          <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 42, fontWeight: 900, color: '#fff', lineHeight: 1.1, position: 'relative' }}>
+          <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 36, fontWeight: 900, color: '#fff', lineHeight: 1.05, position: 'relative' }}>
             {streak}
           </div>
           {studiedToday ? (
@@ -539,4 +539,4 @@ export default function Home() {
       )}
     </div>
   );
-            }
+                }
