@@ -61,6 +61,17 @@ const EXAM_COLORS = {
 };
 const examColor = (exam) => EXAM_COLORS[exam] || EXAM_COLORS[exam.split(' ')[0]] || 'var(--forest)';
 
+// one clean representative colour per country (for the ring accent)
+const FLAG_COLOR = {
+  'United States': '#3c3b6e',
+  'United Kingdom': '#C8102E',
+  'Pakistan': '#01411C',
+  'Australia': '#00247D',
+  'Saudi Arabia': '#006C35',
+  'India': '#FF9933',
+};
+const flagColor = (country) => FLAG_COLOR[country] || 'var(--forest)';
+
 const FLAG_CODE = { 'United States': 'us', 'United Kingdom': 'gb', 'Pakistan': 'pk', 'Australia': 'au', 'Saudi Arabia': 'sa', 'India': 'in' };
 
 // cute rounded-point star — fills gold when active, soft outline when not
@@ -76,14 +87,24 @@ function StarIcon({ filled }) {
   );
 }
 
-function Flag({ country, emoji, size = 34 }) {
+function Flag({ country, emoji, size = 34, ring }) {
   const code = FLAG_CODE[country];
   const [broken, setBroken] = useState(false);
-  if (!code || broken) return <span className="flag-circ" style={{ width: size, height: size, fontSize: size * 0.5, overflow: 'visible' }}>{emoji}</span>;
+  const ringStyle = ring ? { boxShadow: `0 0 0 2.5px ${ring}, 0 0 0 4.5px var(--card)` } : {};
+  if (!code || broken) return <span className="flag-circ" style={{ width: size, height: size, fontSize: size * 0.5, overflow: 'visible', ...ringStyle }}>{emoji}</span>;
   return (
-    <span className="flag-circ" style={{ width: size, height: size }}>
+    <span className="flag-circ" style={{ width: size, height: size, ...ringStyle }}>
       <img src={`https://flagcdn.com/w160/${code}.png`} alt={country + ' flag'} onError={() => setBroken(true)}
         style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+    </span>
+  );
+}
+
+// small ringed dot used as the exam accent token
+function DotRing({ color, size = 30 }) {
+  return (
+    <span style={{ width: size, height: size, borderRadius: '50%', display: 'grid', placeItems: 'center', flexShrink: 0, boxShadow: `0 0 0 2.5px ${color}, 0 0 0 4.5px var(--card)` }}>
+      <span style={{ width: size * 0.4, height: size * 0.4, borderRadius: '50%', background: color }} />
     </span>
   );
 }
@@ -94,9 +115,10 @@ function ExploreBrowse() {
   const [openCountry, setOpenCountry] = useState('');
   const [openExam, setOpenExam] = useState('');
   const [browseMode, setBrowseMode] = useState('country'); // 'country' | 'exam'
-  // starred countries/exams float to the top; full list stays visible
+  // starred countries/exams float to the top; a toggle lets you show only your pinned set
   const [pinC, setPinC] = useState(() => { try { return JSON.parse(localStorage.getItem('pin_countries') || '[]'); } catch (e) { return []; } });
   const [pinE, setPinE] = useState(() => { try { return JSON.parse(localStorage.getItem('pin_exams') || '[]'); } catch (e) { return []; } });
+  const [pinnedOnly, setPinnedOnly] = useState(false);
   const togglePinC = (name) => setPinC((p) => { const n = p.includes(name) ? p.filter((x) => x !== name) : [...p, name]; localStorage.setItem('pin_countries', JSON.stringify(n)); return n; });
   const togglePinE = (key) => setPinE((p) => { const n = p.includes(key) ? p.filter((x) => x !== key) : [...p, key]; localStorage.setItem('pin_exams', JSON.stringify(n)); return n; });
 
@@ -126,14 +148,14 @@ function ExploreBrowse() {
   const orderedCountries = (() => {
     const p = CATALOG.filter((x) => pinC.includes(x[1]));
     const r = CATALOG.filter((x) => !pinC.includes(x[1]));
-    return [...p, ...r];
+    return pinnedOnly && pinC.length ? p : [...p, ...r];
   })();
   const allExams = CATALOG.flatMap(([flag, country, exams]) => exams.map(([exam, parts]) => ({ flag, country, exam, parts })));
   const orderedExams = (() => {
     const kk = (x) => 'exam|' + x.country + '|' + x.exam;
     const p = allExams.filter((x) => pinE.includes(kk(x)));
     const r = allExams.filter((x) => !pinE.includes(kk(x)));
-    return [...p, ...r];
+    return pinnedOnly && pinE.length ? p : [...p, ...r];
   })();
 
   return (
@@ -143,16 +165,24 @@ function ExploreBrowse() {
         <button className={`tab ${browseMode === 'exam' ? 'on' : ''}`} onClick={() => { setBrowseMode('exam'); setOpenExam(''); }}>By Exam</button>
       </div>
 
+      {((browseMode === 'country' && pinC.length > 0) || (browseMode === 'exam' && pinE.length > 0)) && (
+        <button onClick={() => setPinnedOnly(!pinnedOnly)}
+          style={{ display: 'flex', alignItems: 'center', gap: 7, margin: '0 auto 16px', padding: '7px 15px', borderRadius: 999, border: '1.5px solid var(--line)', background: pinnedOnly ? 'var(--forest)' : 'transparent', color: pinnedOnly ? '#fff' : 'var(--forest)', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', transition: 'all .2s' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill={pinnedOnly ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15 8.5 22 9.3 17 14 18.3 21 12 17.5 5.7 21 7 14 2 9.3 9 8.5 12 2" /></svg>
+          {pinnedOnly ? 'Showing your starred' : 'Show starred only'}
+        </button>
+      )}
+
       {browseMode === 'exam' && (
-        <>
+      <>
           {orderedExams.map(({ flag, country, exam, parts }) => {
               const key = 'exam|' + country + '|' + exam;
               const ecx = examColor(exam);
               return (
-                <div key={key} className="card" style={{ padding: 0, overflow: 'hidden', borderLeft: `4px solid ${ecx}` }}>
+                <div key={key} className="card" style={{ padding: 0, overflow: 'hidden' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 14, cursor: 'pointer' }}
                     onClick={() => setOpenExam(openExam === key ? '' : key)}>
-                    <Flag country={country} emoji={flag} size={30} />
+                    <Flag country={country} emoji={flag} size={30} ring={flagColor(country)} />
                     <span style={{ flex: 1, fontWeight: 600 }}>{exam}</span>
                     {examCount(exam) >= 2 && (
                       <span style={{ fontSize: 11, color: '#fff', background: ecx, borderRadius: 20, padding: '3px 9px', fontWeight: 700 }}>
@@ -164,8 +194,9 @@ function ExploreBrowse() {
                   </div>
                   {openExam === key && parts.map((part) => {
                     return (
-                      <div key={part} className="exam-accent" style={{ '--ec': ecx, padding: '11px 16px 11px 22px', borderTop: '1px solid var(--line)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                      <div key={part} style={{ padding: '11px 16px', borderTop: '1px solid var(--line)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 11 }}
                         onClick={() => nav(`/partners?exam=${encodeURIComponent(exam)}&part=${encodeURIComponent(part)}`)}>
+                        <DotRing color={ecx} size={20} />
                         <span style={{ fontWeight: 600, fontSize: 14, flex: 1 }}>{part}</span>
                         {partCount(exam, part) >= 1 && <span style={{ fontSize: 10.5, color: '#fff', background: examColor(exam), borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 6 }}>{partCount(exam, part)}</span>}
                         <span className="chev-round" style={{ width: 24, height: 24 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg></span>
@@ -182,7 +213,7 @@ function ExploreBrowse() {
         <div key={country} className="card" style={{ padding: 0, overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: 14, cursor: 'pointer' }}
             onClick={() => setOpenCountry(openCountry === country ? '' : country)}>
-            <Flag country={country} emoji={flag} />
+            <Flag country={country} emoji={flag} ring={flagColor(country)} />
             <span style={{ flex: 1, fontWeight: 600 }}>{country}</span>
             <span className={`star-btn ${pinC.includes(country) ? 'on twinkle' : ''}`} onClick={(e) => { e.stopPropagation(); togglePinC(country); }} style={{ padding: '0 5px', display: 'inline-flex' }}><StarIcon filled={pinC.includes(country)} /></span>
             <span className={`chev-round ${openCountry === country ? 'open' : ''}`}>
@@ -193,9 +224,10 @@ function ExploreBrowse() {
           {openCountry === country && exams.map(([exam, parts]) => {
             const key = country + '|' + exam;
             return (
-              <div key={exam} style={{ borderTop: '1px solid var(--line)', borderLeft: `4px solid ${examColor(exam)}` }}>
-                <div style={{ display: 'flex', alignItems: 'center', padding: '12px 16px 12px 40px', cursor: 'pointer', fontWeight: 500, fontSize: 14 }}
+              <div key={exam} style={{ borderTop: '1px solid var(--line)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '12px 16px 12px 24px', cursor: 'pointer', fontWeight: 500, fontSize: 14 }}
                   onClick={() => setOpenExam(openExam === key ? '' : key)}>
+                  <DotRing color={examColor(exam)} size={20} />
                   <span style={{ flex: 1 }}>{exam}</span>
                   {examCount(exam) >= 2 && (
                     <span style={{ fontSize: 11, color: '#fff', background: examColor(exam), borderRadius: 20, padding: '3px 9px', marginRight: 8, fontWeight: 700 }}>
@@ -207,8 +239,9 @@ function ExploreBrowse() {
                 {openExam === key && parts.map((part) => {
                   const ec = examColor(exam);
                   return (
-                    <div key={part} className="exam-accent" style={{ '--ec': ec, padding: '11px 16px 11px 22px', borderTop: '1px solid var(--line)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                    <div key={part} style={{ padding: '11px 16px 11px 40px', borderTop: '1px solid var(--line)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
                       onClick={() => nav(`/partners?exam=${encodeURIComponent(exam)}&part=${encodeURIComponent(part)}`)}>
+                      <DotRing color={ec} size={16} />
                       <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)', flex: 1 }}>{part}</span>
                       {partCount(exam, part) >= 1 && <span style={{ fontSize: 10.5, color: '#fff', background: examColor(exam), borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 6 }}>{partCount(exam, part)}</span>}
                       <span className="chev-round" style={{ width: 24, height: 24 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg></span>
@@ -479,8 +512,6 @@ export default function Home() {
       </div>
 
       <Momentum user={user} />
-
-
       <h2 className="serif" style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 21, fontWeight: 900, letterSpacing: '-0.3px', color: 'var(--forest)', margin: '18px 0 16px' }}>Explore Study Partners</h2>
 
       <ExploreBrowse />
