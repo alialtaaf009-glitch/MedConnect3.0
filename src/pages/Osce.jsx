@@ -121,7 +121,9 @@ export default function Osce() {
             <span style={{ width: 26, height: 26, borderRadius: '50%', background: locked ? 'var(--paper-2)' : 'var(--forest)', color: locked ? 'var(--subtle)' : '#fff', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 800, flexShrink: 0 }}>{i + 1}</span>
             <span style={{ fontWeight:600, flex: 1 }}>{st}</span>
             {locked ? <span style={{ color:'var(--subtle)', opacity:0.7 }}><LockIcon /></span>
-                    : <span className="link" style={{ fontWeight: 700, color: 'var(--forest)' }}>Practise ›</span>}
+                    : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 700, color: 'var(--forest)', fontSize: 13 }}>Practise
+                        <span className="chev-round" style={{ width: 24, height: 24 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg></span>
+                      </span>}
           </div>
         );
       })}
@@ -214,4 +216,4 @@ function Station({ name, minutes, onBack }) {
       <p className="sub" style={{ fontSize:12, marginTop:8 }}>Opens a Google Meet and lets you send the link to a connected partner — one of you plays candidate, the other examiner.</p>
     </div>
   );
-                                         }
+}
