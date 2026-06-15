@@ -363,3 +363,11 @@ button:active { -webkit-tap-highlight-color: transparent; }
 /* premium stat cards: gentle press feedback instead of arrows */
 .stat-press { transition: transform .15s cubic-bezier(0.34, 1.56, 0.64, 1); }
 .stat-press:active { transform: scale(0.97); }
+
+/* active toggle tab gets soft depth */
+.tabs .tab.on { box-shadow: 0 3px 10px rgba(31,77,63,.25); }
+
+/* reusable rounded chevron button (premium tappable affordance) */
+.chev-round { width: 28px; height: 28px; border-radius: 50%; background: var(--paper-2); display: grid; place-items: center; flex-shrink: 0; color: var(--forest); transition: transform .25s ease; }
+.chev-round svg { display: block; }
+.chev-round.open { transform: rotate(90deg); }
