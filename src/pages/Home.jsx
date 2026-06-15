@@ -475,7 +475,7 @@ export default function Home() {
 
   return (
     <div className="screen">
-      <div onClick={() => setShowMotivation(true)} style={{ cursor: 'pointer', marginTop: 4, padding: '18px 18px', borderRadius: 18, background: 'linear-gradient(135deg, var(--forest) 0%, var(--forest-2) 100%)', color: '#fff', position: 'relative', overflow: 'hidden', boxShadow: '0 6px 20px rgba(31,77,63,.28)' }}>
+      <div onClick={() => setShowMotivation(true)} style={{ cursor: 'pointer', marginTop: 0, padding: '15px 18px', borderRadius: 18, background: 'linear-gradient(135deg, var(--forest) 0%, var(--forest-2) 100%)', color: '#fff', position: 'relative', overflow: 'hidden', boxShadow: '0 6px 20px rgba(31,77,63,.28)' }}>
         <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--gold)', marginBottom: 8, position: 'relative' }}>
           Hi Dr. {(user?.name || '').replace(/^Dr\.?\s+/i, '').split(' ')[0] || 'Doctor'} — a thought for today
         </div>
@@ -485,58 +485,4 @@ export default function Home() {
         {quote.author && <div style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: 13, fontStyle: 'italic', color: 'var(--gold)', marginTop: 6, paddingRight: 28 }}>— {quote.author}</div>}
         <div style={{ position: 'absolute', top: '50%', right: 14, transform: 'translateY(-50%)', width: 26, height: 26, borderRadius: '50%', background: 'rgba(255,255,255,0.14)', display: 'grid', placeItems: 'center', fontSize: 15, opacity: 0.9 }}>›</div>
       </div>
-
-      {nudges.length > 0 && (
-        <div onClick={() => nav(`/chat?with=${nudges[0].id}&name=${encodeURIComponent(nudges[0].name)}&av=${encodeURIComponent(nudges[0].avatar || '')}`)}
-          style={{ cursor: 'pointer', marginTop: 12, padding: '12px 14px', borderRadius: 14, background: 'var(--forest)', color: '#fff', display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,.18)', display: 'grid', placeItems: 'center', fontSize: 20, flexShrink: 0 }}>{nudges[0].avatar || '👋'}</div>
-          <div style={{ flex: 1, lineHeight: 1.35 }}>
-            <div style={{ fontWeight: 700, fontSize: 14 }}>Say hi to {nudges[0].name}! 👋</div>
-            <div style={{ fontSize: 12, opacity: 0.9 }}>
-              {nudges.length === 1
-                ? (nudges[0].exam && nudges[0].exam === user?.exam
-                    ? `You matched — also preparing for ${nudges[0].exam}. Break the ice before your next study slot.`
-                    : nudges[0].exam
-                      ? `You matched — they're preparing for ${nudges[0].exam}. Break the ice and say hello.`
-                      : `You matched! Break the ice and say hello.`)
-                : `You have ${nudges.length} new matches waiting to hear from you.`}
-            </div>
-          </div>
-          <span style={{ fontSize: 18 }}>›</span>
-        </div>
-      )}
-
-      <div style={{ padding: '10px 4px 8px', textAlign: 'center' }}>
-        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--rust)', textTransform: 'uppercase', marginBottom: 4 }}>
-          For doctors, by doctors
-        </div>
-        <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontVariationSettings: '"opsz" 18', fontSize: 16, fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.2px', color: 'var(--forest)', margin: 0, whiteSpace: 'nowrap' }}>
-          Find the right <em style={{ fontStyle: 'italic' }}>study partner</em> for your exam
-        </h1>
-      </div>
-
-      <Momentum user={user} />
-
-
-      <h2 className="serif" style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 21, fontWeight: 900, letterSpacing: '-0.3px', color: 'var(--forest)', margin: '18px 0 16px' }}>Explore Study Partners</h2>
-
-      <ExploreBrowse />
-
-      {/* invite a colleague — native share sheet (Android & iOS), clipboard fallback */}
-      <div className="card" style={{ textAlign: 'center', marginTop: 20 }}>
-        <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Know a doctor who needs a study partner?</div>
-        <p className="sub" style={{ fontSize: 13, marginBottom: 12 }}>MedConnect grows one colleague at a time.</p>
-        <button className="btn btn-cta" onClick={inviteFriend}>Invite your friends</button>
-        {invited && <p className="sub" style={{ fontSize: 12, marginTop: 8, color: 'var(--forest)', fontWeight: 700 }}>Link copied — paste it anywhere! ✓</p>}
-      </div>
-
-      {showMotivation && (
-        <div className="fs-open" style={{ position: 'fixed', inset: 0, background: 'var(--paper)', zIndex: 1000, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
-          <div className="fs-content" style={{ minHeight: '100%', position: 'relative' }}>
-            <Motivation onBack={() => setShowMotivation(false)} />
-          </div>
-        </div>
-      )}
-    </div>
-  );
-                }
+      
