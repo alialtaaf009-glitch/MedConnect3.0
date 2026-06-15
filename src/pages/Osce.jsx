@@ -7,6 +7,9 @@ const STATIONS = {
   'MRCP — PACES': ['Breathlessness history','Thyroid eye disease','Breaking bad news','Abdominal exam','Mixed valve disease','Acromegaly consult'],
   'MRCS — Part B (OSCE)': ['Anatomy — brachial plexus','Consent for chole','Examine neck lump','Surgical suturing','Inguinal hernia','Post-op sepsis'],
   'PLAB 2 / UKMLA CPSA': ['Chest pain history','Explain diabetes dx','Cranial nerve exam','Manage anaphylaxis','Post-op fever call','Discuss HRT risks'],
+  'FCPS — IMM / Clinical': ['Examine the cardiovascular system','Take a fever history','Counsel on warfarin','Examine the chest','Diabetic foot assessment','Explain a CT head finding'],
+  'MRCEM / FRCEM — OSCE': ['Manage the breathless patient','ECG interpretation','Trauma primary survey','Breaking bad news in ED','Joint aspiration consent','Paediatric fever assessment'],
+  'MRCGP — SCA / CSA': ['Tired all the time','Manage a worried parent','Contraception counselling','Low mood consultation','Explain a new diagnosis','Telephone triage call'],
 };
 const FREE = 3;
 
@@ -15,6 +18,9 @@ const EXAM_MINUTES = {
   'MRCP — PACES': 10,            // PACES encounters run ~10 min (history/communication)
   'MRCS — Part B (OSCE)': 9,     // MRCS Part B stations ~9 min
   'PLAB 2 / UKMLA CPSA': 8,         // PLAB 2 / UKMLA CPSA stations ~8 min
+  'FCPS — IMM / Clinical': 10,   // FCPS clinical/long-short cases
+  'MRCEM / FRCEM — OSCE': 7,     // MRCEM OSCE stations ~7 min
+  'MRCGP — SCA / CSA': 12,       // GP consultations run ~12 min
 };
 
 // what MedConnect Pro unlocks (shown under locked stations)
@@ -29,6 +35,9 @@ const TOTAL_STATIONS = {
   'MRCP — PACES': '200+',
   'MRCS — Part B (OSCE)': '150+',
   'PLAB 2 / UKMLA CPSA': '250+',
+  'FCPS — IMM / Clinical': '120+',
+  'MRCEM / FRCEM — OSCE': '150+',
+  'MRCGP — SCA / CSA': '180+',
 };
 
 // fuller scenario text — sets the scene and the task clearly (still the candidate's task only)
@@ -45,6 +54,18 @@ const SCENARIOS = {
   'Chest pain history': 'A 45-year-old has presented to the Emergency Department with central chest pain that began two hours ago. Take a focused history to characterise the pain and screen for red flags and cardiac risk factors, then summarise and give your differential and immediate plan.',
   'Explain diabetes dx': 'A 50-year-old has attended to discuss recent blood tests, which confirm a new diagnosis of type 2 diabetes. Explain the diagnosis in accessible terms, discuss what it means for them, cover the initial management and monitoring, and address their concerns.',
   'Cranial nerve exam': 'A 60-year-old has presented with a new facial droop noticed this morning. Perform a cranial nerve examination, narrating what you are testing, then present your findings and suggest where the lesion might be.',
+  // ---- FCPS — IMM / Clinical ----
+  'Examine the cardiovascular system': 'A 55-year-old has been admitted with exertional breathlessness and ankle swelling. Perform a focused cardiovascular examination, commenting on your findings as you proceed, then present your findings and your differential to the examiner.',
+  'Take a fever history': 'A 28-year-old presents with a two-week history of intermittent fever, night sweats and weight loss. Take a focused history to build a differential, paying attention to TB, enteric fever and other locally relevant causes, then summarise and outline your initial investigations.',
+  'Counsel on warfarin': 'A patient is being started on warfarin after a diagnosis of atrial fibrillation. Counsel them: explain why it is needed, how INR monitoring works, key dietary and drug interactions, signs of bleeding, and what to do if a dose is missed — and answer their questions.',
+  // ---- MRCEM / FRCEM — OSCE ----
+  'Manage the breathless patient': 'A 64-year-old is brought to resus acutely breathless and unable to speak in full sentences. Assess them using an ABCDE approach, narrating your actions and the immediate management you would initiate at each step, and state the investigations you would request.',
+  'ECG interpretation': 'You are handed the ECG of a 70-year-old with chest pain. Interpret it systematically, state your diagnosis, and outline the immediate management and disposition for this patient in the Emergency Department.',
+  'Trauma primary survey': 'A young adult arrives by ambulance following a high-speed road traffic collision. Perform a primary survey using the <C>ABCDE approach, verbalising the life-threatening problems you are looking for and the interventions you would make at each stage.',
+  // ---- MRCGP — SCA / CSA ----
+  'Tired all the time': 'A 34-year-old attends your GP surgery saying they have felt exhausted for the last three months. Take a focused history exploring physical, psychological and social causes, agree a shared management plan, and safety-net appropriately within the consultation.',
+  'Manage a worried parent': 'A parent has brought their 3-year-old to your GP clinic with a few days of fever and reduced appetite, and is very anxious. Take a focused history, address their concerns and ideas, explain your assessment, and agree a safe plan together including clear safety-netting.',
+  'Contraception counselling': 'A 24-year-old attends to discuss starting contraception. Explore their needs and preferences, take a relevant history including any contraindications, explain the suitable options in a balanced way, and support them to reach a shared decision.',
 };
 
 const LockIcon = ({ size = 14 }) => (
@@ -151,9 +172,13 @@ function Station({ name, minutes, onBack }) {
   const scenario = SCENARIOS[name] || 'Read the station title and practise your structured approach: introduce yourself, take a focused history or perform the task, summarise, and give a differential and plan.';
 
   const startVideo = async () => {
-    const url = 'https://meet.google.com/new';
-    window.open(url, '_blank');
+    // build a unique, hard-to-guess Jitsi room — the URL IS the room, so it's
+    // truly shareable (same link works for everyone) and opens in the browser.
+    const slug = name.replace(/[^a-zA-Z0-9]+/g, '').slice(0, 18);
+    const rand = Math.random().toString(36).slice(2, 8);
+    const url = `https://meet.jit.si/MedConnect-${slug}-${rand}`;
     setMeetUrl(url);
+    window.open(url, '_blank');
     // load connected friends to offer sharing the link
     try {
       const d = await api.connections();
@@ -183,10 +208,10 @@ function Station({ name, minutes, onBack }) {
       {showShare && (
         <div onClick={() => setShowShare(false)} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.5)', display:'grid', placeItems:'center', zIndex:100, padding:24 }}>
           <div className="card" onClick={(e) => e.stopPropagation()} style={{ maxWidth:340, width:'100%' }}>
-            <h2 className="serif" style={{ fontSize:18, fontWeight:700, marginBottom:6 }}>📹 Share the video link</h2>
-            <p className="sub" style={{ fontSize:13, marginBottom:12 }}>A Google Meet opened in a new tab. Copy your room's link from Meet, paste it below, then send it to a partner — they'll get it in your chat.</p>
+            <h2 className="serif" style={{ fontSize:18, fontWeight:700, marginBottom:6 }}>📹 Share the video room</h2>
+            <p className="sub" style={{ fontSize:13, marginBottom:12 }}>Your private video room is ready and open in a new tab. Send the link to a partner below — they'll get it in your chat and join the same room.</p>
             <div style={{ display:'flex', gap:8, marginBottom:12 }}>
-              <input className="input" placeholder="Paste your Meet room link" value={meetUrl} onChange={(e) => setMeetUrl(e.target.value)} style={{ marginBottom:0, flex:1, fontSize:13 }} onFocus={(e) => e.target.select()} />
+              <input className="input" value={meetUrl} readOnly style={{ marginBottom:0, flex:1, fontSize:13 }} onFocus={(e) => e.target.select()} />
               <button className="btn-sm" onClick={() => { navigator.clipboard?.writeText(meetUrl); window.alert('Link copied!'); }}>Copy</button>
             </div>
             {friends.length === 0 ? (
