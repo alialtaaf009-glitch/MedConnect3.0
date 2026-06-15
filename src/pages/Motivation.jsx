@@ -82,11 +82,12 @@ export default function Motivation({ onBack }) {
   };
 
   return (
-    <div className="screen">
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-        <button onClick={() => (onBack ? onBack() : nav('/home'))} aria-label="Back" style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--paper-2)', border: 'none', display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0, color: 'var(--forest)' }}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-        </button>
+    <div className="screen" style={{ position: 'relative' }}>
+      <button onClick={() => (onBack ? onBack() : nav('/home'))} aria-label="Back"
+        style={{ position: 'fixed', top: 'calc(env(safe-area-inset-top, 0px) + 70px)', left: 14, zIndex: 1100, width: 40, height: 40, borderRadius: '50%', background: '#fff', boxShadow: '0 3px 12px rgba(0,0,0,.18)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', cursor: 'pointer', color: 'var(--forest)' }}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+      </button>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4, paddingLeft: 48 }}>
         <h1 className="h1" style={{ margin: 0 }}>Daily Motivation</h1>
       </div>
       <div className="tabs" style={{ marginTop: 14 }}>
