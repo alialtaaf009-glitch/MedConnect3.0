@@ -1,8 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
 import { api } from '../lib/api';
 import { SendIcon, IcoPlus, IcoUsers, IcoLeave, IcoTrash, otherPerson, Stamp } from './ChatBits.jsx';
+import { useBack } from '../context/Back.jsx';
 
 export default function GroupChat({ me, groupId, onBack }) {
+  const { registerBack, clearBack } = useBack();
+  useEffect(() => { registerBack(() => onBack()); return () => clearBack(); }, [onBack, registerBack, clearBack]);
   const [data, setData] = useState({ messages: [], members: [], group: null });
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
@@ -50,7 +53,6 @@ export default function GroupChat({ me, groupId, onBack }) {
   return (
     <div className="screen" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100dvh - 76px - 60px)', overflow: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-        <button className="link" onClick={onBack}>‹ Back</button>
         <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => setMembersOpen(true)}>
           <h2 style={{ fontSize: 17, fontWeight: 600 }}>{data.group?.name || 'Group'}</h2>
           <div className="meta">{(data.members || []).length} members · tap to view</div>
