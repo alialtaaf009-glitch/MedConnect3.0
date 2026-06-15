@@ -197,7 +197,7 @@ function Station({ name, minutes, onBack }) {
 
   const shareTo = async (friendId) => {
     try {
-      await api.sendMessage(friendId, `📹 Join me for OSCE practice — "${name}". Video room: ${meetUrl}`);
+      await api.sendMessage(friendId, `📹 Join me for OSCE practice — "${name}". Free private video room, no sign-up needed: ${meetUrl}`);
       window.alert('Invite sent in your chat with them.');
     } catch (e) {}
     setShowShare(false);
@@ -209,7 +209,8 @@ function Station({ name, minutes, onBack }) {
         <div onClick={() => setShowShare(false)} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.5)', display:'grid', placeItems:'center', zIndex:100, padding:24 }}>
           <div className="card" onClick={(e) => e.stopPropagation()} style={{ maxWidth:340, width:'100%' }}>
             <h2 className="serif" style={{ fontSize:18, fontWeight:700, marginBottom:6 }}>📹 Share the video room</h2>
-            <p className="sub" style={{ fontSize:13, marginBottom:12 }}>Your private video room is ready and open in a new tab. Send the link to a partner below — they'll get it in your chat and join the same room.</p>
+            <p className="sub" style={{ fontSize:13, marginBottom:6 }}>Your private video room is ready and open in a new tab. Send the link to a partner below — they'll get it in your chat and join the same room.</p>
+            <p className="sub" style={{ fontSize:11.5, marginBottom:12, color:'var(--subtle)' }}>🔒 Free, private room — no sign-up or app needed (powered by Jitsi, an open-source video tool).</p>
             <div style={{ display:'flex', gap:8, marginBottom:12 }}>
               <input className="input" value={meetUrl} readOnly style={{ marginBottom:0, flex:1, fontSize:13 }} onFocus={(e) => e.target.select()} />
               <button className="btn-sm" onClick={() => { navigator.clipboard?.writeText(meetUrl); window.alert('Link copied!'); }}>Copy</button>
@@ -242,3 +243,4 @@ function Station({ name, minutes, onBack }) {
     </div>
   );
 }
+
