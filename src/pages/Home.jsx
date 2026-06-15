@@ -94,11 +94,9 @@ function ExploreBrowse() {
   const [openCountry, setOpenCountry] = useState('');
   const [openExam, setOpenExam] = useState('');
   const [browseMode, setBrowseMode] = useState('country'); // 'country' | 'exam'
-  // "lock in" pins: chosen countries/exams float to top; others collapse behind Show all
+  // starred countries/exams float to the top; full list stays visible
   const [pinC, setPinC] = useState(() => { try { return JSON.parse(localStorage.getItem('pin_countries') || '[]'); } catch (e) { return []; } });
   const [pinE, setPinE] = useState(() => { try { return JSON.parse(localStorage.getItem('pin_exams') || '[]'); } catch (e) { return []; } });
-  const [showAllC, setShowAllC] = useState(false);
-  const [showAllE, setShowAllE] = useState(false);
   const togglePinC = (name) => setPinC((p) => { const n = p.includes(name) ? p.filter((x) => x !== name) : [...p, name]; localStorage.setItem('pin_countries', JSON.stringify(n)); return n; });
   const togglePinE = (key) => setPinE((p) => { const n = p.includes(key) ? p.filter((x) => x !== key) : [...p, key]; localStorage.setItem('pin_exams', JSON.stringify(n)); return n; });
 
@@ -128,29 +126,22 @@ function ExploreBrowse() {
   const orderedCountries = (() => {
     const p = CATALOG.filter((x) => pinC.includes(x[1]));
     const r = CATALOG.filter((x) => !pinC.includes(x[1]));
-    return pinC.length && !showAllC ? p : [...p, ...r];
+    return [...p, ...r];
   })();
   const allExams = CATALOG.flatMap(([flag, country, exams]) => exams.map(([exam, parts]) => ({ flag, country, exam, parts })));
   const orderedExams = (() => {
     const kk = (x) => 'exam|' + x.country + '|' + x.exam;
     const p = allExams.filter((x) => pinE.includes(kk(x)));
     const r = allExams.filter((x) => !pinE.includes(kk(x)));
-    return pinE.length && !showAllE ? p : [...p, ...r];
+    return [...p, ...r];
   })();
 
   return (
     <>
       <div className="tabs" style={{ marginBottom: 14 }}>
-        <button className={`tab ${browseMode === 'country' ? 'on' : ''}`} onClick={() => { setBrowseMode('country'); setOpenExam(''); }}>By country</button>
-        <button className={`tab ${browseMode === 'exam' ? 'on' : ''}`} onClick={() => { setBrowseMode('exam'); setOpenExam(''); }}>By exam</button>
+        <button className={`tab ${browseMode === 'country' ? 'on' : ''}`} onClick={() => { setBrowseMode('country'); setOpenExam(''); }}>By Country</button>
+        <button className={`tab ${browseMode === 'exam' ? 'on' : ''}`} onClick={() => { setBrowseMode('exam'); setOpenExam(''); }}>By Exam</button>
       </div>
-
-      {((browseMode === 'country' && pinC.length > 0) || (browseMode === 'exam' && pinE.length > 0)) && (
-        <button className="link" style={{ display: 'block', margin: '0 auto 12px', fontSize: 12.5, fontWeight: 700 }}
-          onClick={() => browseMode === 'country' ? setShowAllC(!showAllC) : setShowAllE(!showAllE)}>
-          {(browseMode === 'country' ? showAllC : showAllE) ? 'Show pinned only ▴' : 'Show all ▾'}
-        </button>
-      )}
 
       {browseMode === 'exam' && (
         <>
@@ -169,7 +160,7 @@ function ExploreBrowse() {
                       </span>
                     )}
                     <span className={`star-btn ${pinE.includes(key) ? 'on twinkle' : ''}`} onClick={(e) => { e.stopPropagation(); togglePinE(key); }} style={{ padding: '0 5px', display: 'inline-flex' }}><StarIcon filled={pinE.includes(key)} /></span>
-                    <span className="meta" style={{ fontSize: 11 }}><span style={{ display: 'inline-block', transition: 'transform .25s ease', transform: openExam === key ? 'rotate(90deg)' : 'rotate(0deg)' }}>›</span></span>
+                    <span className={`chev-round ${openExam === key ? 'open' : ''}`} style={{ width: 24, height: 24 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg></span>
                   </div>
                   {openExam === key && parts.map((part) => {
                     return (
@@ -177,7 +168,7 @@ function ExploreBrowse() {
                         onClick={() => nav(`/partners?exam=${encodeURIComponent(exam)}&part=${encodeURIComponent(part)}`)}>
                         <span style={{ fontWeight: 600, fontSize: 14, flex: 1 }}>{part}</span>
                         {partCount(exam, part) >= 1 && <span style={{ fontSize: 10.5, color: '#fff', background: examColor(exam), borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 6 }}>{partCount(exam, part)}</span>}
-                        <span style={{ color: 'var(--subtle)', fontSize: 13 }}>›</span>
+                        <span className="chev-round" style={{ width: 24, height: 24 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg></span>
                       </div>
                     );
                   })}
@@ -194,7 +185,9 @@ function ExploreBrowse() {
             <Flag country={country} emoji={flag} />
             <span style={{ flex: 1, fontWeight: 600 }}>{country}</span>
             <span className={`star-btn ${pinC.includes(country) ? 'on twinkle' : ''}`} onClick={(e) => { e.stopPropagation(); togglePinC(country); }} style={{ padding: '0 5px', display: 'inline-flex' }}><StarIcon filled={pinC.includes(country)} /></span>
-            <span className="meta" style={{ fontSize: 17, fontWeight: 700, color: 'var(--subtle)', transition: 'transform .25s ease', transform: openCountry === country ? 'rotate(90deg)' : 'rotate(0deg)', display: 'inline-block' }}>›</span>
+            <span className={`chev-round ${openCountry === country ? 'open' : ''}`}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+            </span>
           </div>
 
           {openCountry === country && exams.map(([exam, parts]) => {
@@ -209,7 +202,7 @@ function ExploreBrowse() {
                       {examCount(exam)} doctors
                     </span>
                   )}
-                  <span className="meta" style={{ fontSize: 11 }}><span style={{ display: 'inline-block', transition: 'transform .25s ease', transform: openExam === key ? 'rotate(90deg)' : 'rotate(0deg)' }}>›</span></span>
+                  <span className={`chev-round ${openExam === key ? 'open' : ''}`} style={{ width: 24, height: 24 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg></span>
                 </div>
                 {openExam === key && parts.map((part) => {
                   const ec = examColor(exam);
@@ -218,7 +211,7 @@ function ExploreBrowse() {
                       onClick={() => nav(`/partners?exam=${encodeURIComponent(exam)}&part=${encodeURIComponent(part)}`)}>
                       <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)', flex: 1 }}>{part}</span>
                       {partCount(exam, part) >= 1 && <span style={{ fontSize: 10.5, color: '#fff', background: examColor(exam), borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 6 }}>{partCount(exam, part)}</span>}
-                      <span style={{ color: 'var(--subtle)', fontSize: 13 }}>›</span>
+                      <span className="chev-round" style={{ width: 24, height: 24 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg></span>
                     </div>
                   );
                 })}
@@ -488,7 +481,7 @@ export default function Home() {
       <Momentum user={user} />
 
 
-      <h2 className="serif" style={{ fontSize: 18, fontWeight: 600, margin: '18px 0 12px' }}>Explore study partners</h2>
+      <h2 className="serif" style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 21, fontWeight: 900, letterSpacing: '-0.3px', color: 'var(--forest)', margin: '18px 0 16px' }}>Explore Study Partners</h2>
 
       <ExploreBrowse />
 
