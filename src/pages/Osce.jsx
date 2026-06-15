@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/Auth.jsx';
+import { useBack } from '../context/Back.jsx';
 import { api } from '../lib/api';
 
 const STATIONS = {
@@ -130,6 +131,8 @@ export default function Osce() {
 
 function Station({ name, minutes, onBack }) {
   const { user: stnMe } = useAuth();
+  const { registerBack, clearBack } = useBack();
+  useEffect(() => { registerBack(() => onBack()); return () => clearBack(); }, [onBack, registerBack, clearBack]);
   const total = (minutes || 8) * 60;
   const [seconds, setSeconds] = useState(total);
   const [running, setRunning] = useState(false);
@@ -195,7 +198,6 @@ function Station({ name, minutes, onBack }) {
           </div>
         </div>
       )}
-      <button className="link" onClick={onBack}>‹ Back to stations</button>
       <h1 className="h1" style={{ fontSize:24, margin:'12px 0 6px' }}>{name}</h1>
       <div className="card" style={{ textAlign:'center' }}>
         <div style={{ fontFamily:"'Inter',system-ui,sans-serif", fontSize:44, fontWeight:900, color: seconds === 0 ? 'var(--rust)' : 'var(--forest)' }}>{mm}:{ss}</div>
@@ -212,4 +214,4 @@ function Station({ name, minutes, onBack }) {
       <p className="sub" style={{ fontSize:12, marginTop:8 }}>Opens a Google Meet and lets you send the link to a connected partner — one of you plays candidate, the other examiner.</p>
     </div>
   );
-}
+                                         }
