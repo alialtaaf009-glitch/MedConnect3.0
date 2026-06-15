@@ -179,8 +179,8 @@ function ExploreBrowse() {
               const key = 'exam|' + country + '|' + exam;
               const ecx = examColor(exam);
               return (
-                <div key={key} className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 14, cursor: 'pointer' }}
+                <div key={key} style={{ padding: 0, overflow: 'hidden', background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: openExam === key ? 20 : 999, marginBottom: 11, boxShadow: '0 2px 8px rgba(20,40,30,.07)', transition: 'border-radius .25s ease' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '13px 18px', cursor: 'pointer' }}
                     onClick={() => setOpenExam(openExam === key ? '' : key)}>
                     <Flag country={country} emoji={flag} size={30} ring={flagColor(country)} />
                     <span style={{ flex: 1, fontWeight: 600 }}>{exam}</span>
@@ -210,8 +210,8 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'country' && orderedCountries.map(([flag, country, exams]) => (
-        <div key={country} className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: 14, cursor: 'pointer' }}
+        <div key={country} style={{ padding: 0, overflow: 'hidden', background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: openCountry === country ? 20 : 999, marginBottom: 11, boxShadow: '0 2px 8px rgba(20,40,30,.07)', transition: 'border-radius .25s ease' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '13px 18px', cursor: 'pointer' }}
             onClick={() => setOpenCountry(openCountry === country ? '' : country)}>
             <Flag country={country} emoji={flag} ring={flagColor(country)} />
             <span style={{ flex: 1, fontWeight: 600 }}>{country}</span>
@@ -512,6 +512,8 @@ export default function Home() {
       </div>
 
       <Momentum user={user} />
+
+
       <h2 className="serif" style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 21, fontWeight: 900, letterSpacing: '-0.3px', color: 'var(--forest)', margin: '18px 0 16px' }}>Explore Study Partners</h2>
 
       <ExploreBrowse />
