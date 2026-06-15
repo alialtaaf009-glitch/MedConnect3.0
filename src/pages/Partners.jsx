@@ -44,6 +44,8 @@ export default function Partners() {
   const [cStatus, setCStatus] = useState('loading');
   const [err, setErr] = useState('');
   const [peek, setPeek] = useState(null);
+  const [toast, setToast] = useState('');
+  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 2600); };
   const [stars, setStars] = useState(loadStars());
 
   const loadMatches = () => {
@@ -59,8 +61,9 @@ export default function Partners() {
   useEffect(() => { loadMatches(); loadConns(); }, []);
 
   const connect = async (id) => {
+    const person = matches.find((x) => x.user.id === id);
     setMatches((m) => m.filter((x) => x.user.id !== id));
-    try { await api.sendRequest(id); loadConns(); } catch (e) {}
+    try { await api.sendRequest(id); loadConns(); showToast(`Request sent to ${person?.user?.name || 'them'} ✓`); } catch (e) { showToast('Could not send request — try again'); }
   };
   const respond = async (id, action) => { try { await api.respond(id, action); loadConns(); } catch (e) {} };
 
@@ -115,6 +118,11 @@ export default function Partners() {
 
   return (
     <div className="screen">
+      {toast && (
+        <div style={{ position: 'fixed', left: '50%', bottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)', transform: 'translateX(-50%)', zIndex: 200, background: 'var(--forest)', color: '#fff', fontSize: 13, fontWeight: 700, padding: '11px 20px', borderRadius: 999, boxShadow: '0 6px 20px rgba(20,40,30,.3)', maxWidth: '90%', textAlign: 'center', animation: 'tabPop .3s ease both' }}>
+          {toast}
+        </div>
+      )}
       <h1 className="h1" style={{ fontFamily: "'Fraunces',Georgia,serif", color: 'var(--forest)' }}>Study Partners</h1>
       <p className="sub" style={{ marginBottom: 14 }}>Find, connect, and study together.</p>
 
@@ -258,4 +266,4 @@ export default function Partners() {
       )}
     </div>
   );
-}
+                                                                                                                                                                           }
