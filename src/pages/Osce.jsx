@@ -13,6 +13,15 @@ const STATIONS = {
 };
 const FREE = 3;
 
+// Capitalise each word for station titles ("breathless history" -> "Breathless History"),
+// while keeping small joining words and existing capitals/acronyms sensible.
+const SMALL = new Set(['a','an','the','and','or','of','to','in','on','for','with','de']);
+const titleCase = (s) => s.split(' ').map((w, i) => {
+  if (w === w.toUpperCase() && w.length > 1) return w; // keep acronyms (ECG, ED, CT, HRT)
+  if (i > 0 && SMALL.has(w.toLowerCase())) return w.toLowerCase();
+  return w.charAt(0).toUpperCase() + w.slice(1);
+}).join(' ');
+
 // realistic per-exam station durations (minutes)
 const EXAM_MINUTES = {
   'MRCP — PACES': 10,            // PACES encounters run ~10 min (history/communication)
@@ -111,36 +120,35 @@ export default function Osce() {
       <h1 className="h1">OSCE Practice</h1>
       <p className="sub" style={{ marginBottom:14 }}>Timed station practice — solo, or live with a partner over a video link.</p>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
+      {/* exam selector — small pills, horizontal scroll */}
+      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 6, marginBottom: 16, WebkitOverflowScrolling: 'touch' }}>
         {exams.map((e) => {
           const on = exam === e;
           return (
             <button key={e} onClick={() => setExam(e)} style={{
-              display: 'flex', alignItems: 'center', gap: 12, width: '100%', textAlign: 'left',
-              padding: '16px 18px', borderRadius: 16, cursor: 'pointer',
-              border: on ? '2px solid var(--forest)' : '1.5px solid var(--line)',
+              flexShrink: 0, padding: '9px 16px', borderRadius: 999, cursor: 'pointer',
+              border: on ? 'none' : '1.5px solid var(--line)',
               background: on ? 'var(--forest)' : 'var(--card)',
-              color: on ? '#fff' : 'var(--ink)',
-              fontFamily: 'inherit', fontSize: 16, fontWeight: 700,
-              boxShadow: on ? '0 4px 14px rgba(31,77,63,.22)' : '0 1px 3px rgba(20,40,30,.05)',
-              transition: 'transform .2s cubic-bezier(0.34,1.56,0.64,1), background .2s ease, box-shadow .2s ease',
-            }}>
-              <span style={{ width: 34, height: 34, borderRadius: 10, background: on ? 'rgba(255,255,255,.18)' : 'var(--paper-2)', display: 'grid', placeItems: 'center', fontSize: 17, flexShrink: 0 }}>🩺</span>
-              <span style={{ flex: 1 }}>{e}</span>
-              <span style={{ fontSize: 18, opacity: on ? 1 : 0.4 }}>{on ? '✓' : '›'}</span>
-            </button>
+              color: on ? '#fff' : 'var(--muted)',
+              fontFamily: 'inherit', fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap',
+              boxShadow: on ? '0 3px 10px rgba(31,77,63,.25)' : 'none',
+              transition: 'all .2s ease',
+            }}>{e}</button>
           );
         })}
       </div>
+
       <h2 style={{ fontSize:18, fontWeight:700, fontFamily:"'Inter',system-ui,sans-serif" }}>{exam} stations</h2>
       {!isPro && <p className="sub" style={{ fontSize:12, marginBottom:10 }}>{FREE} free · unlock the rest with Pro</p>}
+
+      <div key={exam} className="tab-pop" style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)', marginTop: 10 }}>
       {stations.map((st, i) => {
         const locked = !isPro && i >= FREE;
         return (
-          <div key={st} className="row" style={{ justifyContent:'space-between', opacity: locked ? .55 : 1, cursor:'pointer', gap: 10 }}
+          <div key={st} style={{ display: 'flex', alignItems: 'center', justifyContent:'space-between', gap: 10, padding: '14px 16px', borderTop: i === 0 ? 'none' : '1px solid var(--line)', opacity: locked ? .6 : 1, cursor:'pointer' }}
             onClick={() => { if (locked) { setShowPro(true); } else { setActive(st); } }}>
             <span style={{ width: 26, height: 26, borderRadius: '50%', background: locked ? 'var(--paper-2)' : 'var(--forest)', color: locked ? 'var(--subtle)' : '#fff', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 800, flexShrink: 0 }}>{i + 1}</span>
-            <span style={{ fontWeight:600, flex: 1 }}>{st}</span>
+            <span style={{ fontWeight:600, flex: 1 }}>{titleCase(st)}</span>
             {locked ? <span style={{ color:'var(--subtle)', opacity:0.7 }}><LockIcon /></span>
                     : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 700, color: 'var(--forest)', fontSize: 13 }}>Practise
                         <span className="chev-round" style={{ width: 24, height: 24 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg></span>
@@ -148,6 +156,7 @@ export default function Osce() {
           </div>
         );
       })}
+      </div>
     </div>
   );
 }
@@ -226,17 +235,17 @@ function Station({ name, minutes, onBack }) {
           </div>
         </div>
       )}
-      <h1 className="h1" style={{ fontSize:24, margin:'12px 0 6px' }}>{name}</h1>
+      <h1 className="h1" style={{ fontSize:24, margin:'12px 0 6px' }}>{titleCase(name)}</h1>
+      <div className="card">
+        <div className="label" style={{ marginTop:0 }}>The scenario</div>
+        <p style={{ fontSize:15, lineHeight:1.6, whiteSpace:'pre-line' }}>{scenario}</p>
+      </div>
       <div className="card" style={{ textAlign:'center' }}>
         <div style={{ fontFamily:"'Inter',system-ui,sans-serif", fontSize:44, fontWeight:900, color: seconds === 0 ? 'var(--rust)' : 'var(--forest)' }}>{mm}:{ss}</div>
         <div style={{ display:'flex', gap:10, marginTop:12 }}>
           <button className="btn" onClick={() => setRunning(!running)}>{running ? 'Pause' : 'Start'}</button>
           <button className="btn ghost" onClick={() => { setRunning(false); setSeconds(total); }}>Reset</button>
         </div>
-      </div>
-      <div className="card">
-        <div className="label" style={{ marginTop:0 }}>The scenario</div>
-        <p style={{ fontSize:15, lineHeight:1.6, whiteSpace:'pre-line' }}>{scenario}</p>
       </div>
       <button className="btn" style={{ background:'var(--violet)', marginTop: 28 }} onClick={startVideo}>📹 Practise live with a partner</button>
       <p className="sub" style={{ fontSize:12, marginTop:8 }}>Opens a free, private video room and lets you send the link to a connected partner — one of you plays candidate, the other examiner.</p>
