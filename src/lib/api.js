@@ -28,6 +28,7 @@ export const api = {
   conversations: () => req('/messages'),
   conversation: (withId) => req(`/messages?with=${withId}`),
   sendMessage: (to, body) => req('/messages', { method: 'POST', body: { to, body } }),
+  createRoom: (slug) => req('/messages', { method: 'POST', body: { action: 'create_room', slug } }),
   // group chats (folded into the messages function via ?scope=groups)
   groups: () => req('/messages?scope=groups'),
   group: (id) => req(`/messages?scope=groups&group=${id}`),
