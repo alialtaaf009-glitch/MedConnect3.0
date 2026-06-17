@@ -28,10 +28,10 @@ function Icon({ name }) {
     stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round' };
   const paths = {
     home: <><path d="M3 11l9-8 9 8" /><path d="M5 10v10h14V10" /></>,
-    partners: <><circle cx="9" cy="8" r="3.2" /><path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5" /><circle cx="17" cy="9" r="2.6" /><path d="M16 14.2c2.4.3 4.2 2.1 4.2 4.8" /></>,
-    osce: <><rect x="4" y="5" width="16" height="11" rx="1" /><path d="M9 20h6M12 16v4" /></>,
-    chat: <><path d="M4 5h16v11H7l-3 3z" /></>,
-    focus: <><circle cx="12" cy="13" r="8" /><path d="M12 13V9" /><path d="M9 2h6" /><path d="M12 2v3" /></>,
+    partners: <><circle cx="6" cy="6.5" r="2" /><circle cx="18" cy="7.5" r="2" /><circle cx="12" cy="17" r="2" /><path d="M7.7 7.7l8.6 8.6M16.3 9l-8.4 6.6M8 6.8l8-.6" /></>,
+    osce: <><path d="M6 2.5v5.5a4 4 0 0 0 8 0V2.5" /><path d="M4.5 2.5h3M12.5 2.5h3" /><circle cx="18" cy="16.5" r="2.8" /><path d="M18 13.7V12" /><path d="M10 12v2.5a6 6 0 0 0 5.3 5.95" /><circle cx="18" cy="16.5" r="1" /></>,
+    chat: <><path d="M4 5h16v11H7l-3 3z" /><path d="M8 11.5h2l1-2 1.5 4 1-2h2.5" /></>,
+    focus: <><path d="M12 4.5C10.5 3 8 3.3 7 5c-1.8.2-2.8 1.7-2.4 3.2C3.4 9.2 3.3 11 4.6 12c-.6 1.4 0 3 1.5 3.5.3 1.6 2 2.5 3.5 1.8.7.8 2 .9 2.4 0" /><path d="M12 4.5C13.5 3 16 3.3 17 5c1.8.2 2.8 1.7 2.4 3.2C20.6 9.2 20.7 11 19.4 12c.6 1.4 0 3-1.5 3.5-.3 1.6-2 2.5-3.5 1.8-.7.8-2 .9-2.4 0" /><path d="M12 4.5v13" /><path d="M7 8c1.2.3 2 1.2 2.2 2.5M17 8c-1.2.3-2 1.2-2.2 2.5" /></>,
     profile: <><circle cx="12" cy="12" r="9" /><circle cx="12" cy="10" r="3" /><path d="M6.5 18.5c1-2.3 3.1-3.5 5.5-3.5s4.5 1.2 5.5 3.5" /></>,
   };
   return <svg {...common}>{paths[name]}</svg>;
@@ -389,7 +389,7 @@ export default function App() {
   );
 
   // not signed in
-  if (!user) {
+if (!user) {
     return (
       <div className="app">
         <button className="themebtn" onClick={toggle}>{mode === 'dark' ? '☀️' : '🌙'}</button>
