@@ -84,14 +84,18 @@ export default function Checklist() {
         );
       })}
 
-      <div style={{ display: 'flex', gap: 8, marginTop: 10, alignItems: 'center' }}>
-        <input value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') add(); }}
-          placeholder="Add a study task…" className="input"
-          style={{ flex: 1, marginBottom: 0, padding: '9px 11px', fontSize: 13 }} />
-        {/* color picker for new item */}
-        <ColorPicker selected={draftColor} onPick={setDraftColor} />
-        <button onClick={add} aria-label="Add task" className="btn-sm"
-          style={{ width: 38, fontSize: 20, padding: 0, borderRadius: 10, flexShrink: 0 }}>+</button>
+      <div style={{ marginTop: 10 }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <input value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') add(); }}
+            placeholder="Add a study task…" className="input"
+            style={{ flex: 1, marginBottom: 0, padding: '9px 11px', fontSize: 13 }} />
+          <button onClick={add} aria-label="Add task" className="btn-sm"
+            style={{ width: 38, fontSize: 20, padding: 0, borderRadius: 10, flexShrink: 0 }}>+</button>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, paddingLeft: 2 }}>
+          <span style={{ fontSize: 11, color: 'var(--subtle)', fontWeight: 600 }}>Colour:</span>
+          <ColorPicker selected={draftColor} onPick={setDraftColor} />
+        </div>
       </div>
     </div>
   );
