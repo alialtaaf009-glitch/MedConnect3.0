@@ -213,7 +213,7 @@ function TopBar({ user }) {
         </div>
         <div className="topbar-title">MedConnect</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {user && (
+          {user && !onProfile && (
             <button onClick={() => setBellOpen(!bellOpen)} aria-label="Notifications"
               style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer', color: '#fff', display: 'grid', placeItems: 'center', width: 32, height: 32, borderRadius: '50%', opacity: totalCount > 0 ? 1 : 0.65 }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -239,23 +239,24 @@ function TopBar({ user }) {
           {/* scrim */}
           <div onClick={() => setBellOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 150 }} />
           {/* panel */}
-          <div style={{ position: 'fixed', top: 64, right: 12, width: 300, maxWidth: 'calc(100vw - 24px)', background: 'var(--card)', borderRadius: 18, boxShadow: '0 8px 32px rgba(0,0,0,.22)', zIndex: 151, overflow: 'hidden', animation: 'tabPop .25s ease both' }}>
-            <div style={{ padding: '14px 16px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--line)' }}>
-              <span style={{ fontWeight: 800, fontSize: 14 }}>Notifications</span>
+          <div style={{ position: 'fixed', top: 60, right: 12, left: 12, maxWidth: 380, marginLeft: 'auto', maxHeight: '55vh', display: 'flex', flexDirection: 'column', background: 'var(--card)', borderRadius: 18, boxShadow: '0 8px 32px rgba(0,0,0,.22)', zIndex: 151, overflow: 'hidden', animation: 'tabPop .25s ease both' }}>
+            <div style={{ padding: '15px 18px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--line)', flexShrink: 0 }}>
+              <span style={{ fontWeight: 800, fontSize: 15 }}>Notifications</span>
               {totalCount > 0 && <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--rust)' }}>{totalCount} new</span>}
             </div>
 
+            <div style={{ overflowY: 'auto', flex: 1 }}>
             {notifs.requests.length === 0 && (
-              <div style={{ padding: '28px 16px', textAlign: 'center' }}>
-                <div style={{ fontSize: 28, marginBottom: 8 }}>🔔</div>
-                <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>You're all caught up</p>
-                <p className="sub" style={{ fontSize: 12 }}>Connection requests and updates will appear here.</p>
+              <div style={{ padding: '44px 18px', textAlign: 'center' }}>
+                <div style={{ fontSize: 32, marginBottom: 10 }}>🔔</div>
+                <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>You're all caught up</p>
+                <p className="sub" style={{ fontSize: 12.5 }}>Connection requests and updates will appear here.</p>
               </div>
             )}
 
             {notifs.requests.length > 0 && (
               <div>
-                <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 0.5, textTransform: 'uppercase', color: 'var(--subtle)', padding: '10px 16px 4px' }}>
+                <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 0.5, textTransform: 'uppercase', color: 'var(--subtle)', padding: '12px 18px 4px' }}>
                   Connection Requests
                 </div>
                 {notifs.requests.map((c) => {
@@ -264,22 +265,26 @@ function TopBar({ user }) {
                   const av = c.requester_avatar || '🩺';
                   return (
                     <div key={c.id} onClick={() => { setBellOpen(false); nav('/partners?tab=requests'); }}
-                      style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '11px 16px', cursor: 'pointer', borderTop: '1px solid var(--line)' }}
+                      style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 18px', cursor: 'pointer', borderTop: '1px solid var(--line)' }}
                       onMouseEnter={(e) => e.currentTarget.style.background = 'var(--paper-2)'}
                       onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
-                      <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', fontSize: 20, flexShrink: 0 }}>{av}</div>
+                      <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', fontSize: 21, flexShrink: 0 }}>{av}</div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 700, fontSize: 13.5 }}>{name}</div>
+                        <div style={{ fontWeight: 700, fontSize: 14 }}>{name}</div>
                         <div style={{ fontSize: 12, color: 'var(--muted)' }}>wants to study with you{exam ? ` · ${exam}` : ''}</div>
                       </div>
                       <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--rust)', flexShrink: 0 }} />
                     </div>
                   );
                 })}
-                <div onClick={() => { setBellOpen(false); nav('/partners?tab=requests'); }}
-                  style={{ padding: '12px 16px', textAlign: 'center', borderTop: '1px solid var(--line)', fontSize: 13, fontWeight: 700, color: 'var(--forest)', cursor: 'pointer' }}>
-                  View all requests →
-                </div>
+              </div>
+            )}
+            </div>
+
+            {notifs.requests.length > 0 && (
+              <div onClick={() => { setBellOpen(false); nav('/partners?tab=requests'); }}
+                style={{ padding: '13px 18px', textAlign: 'center', borderTop: '1px solid var(--line)', fontSize: 13, fontWeight: 700, color: 'var(--forest)', cursor: 'pointer', flexShrink: 0, background: 'var(--card)' }}>
+                View all requests →
               </div>
             )}
           </div>
