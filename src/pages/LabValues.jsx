@@ -13,7 +13,7 @@ const DATA = [
     ['Reticulocytes', '', '0.5–2.5', '%'],
     ['ESR', '', '<20 (age-dependent)', 'mm/hr'],
   ]],
-  ['🧂 Electrolytes', [
+  ['Electrolytes', [
     ['Sodium', 'Na', '135–145', 'mmol/L'],
     ['Potassium', 'K', '3.5–5.0', 'mmol/L'],
     ['Chloride', 'Cl', '95–105', 'mmol/L'],
@@ -22,7 +22,7 @@ const DATA = [
     ['Magnesium', 'Mg', '0.7–1.0', 'mmol/L'],
     ['Phosphate', 'PO₄', '0.8–1.5', 'mmol/L'],
   ]],
-  ['💧 Renal', [
+  ['Renal', [
     ['Urea', '', '2.5–7.8', 'mmol/L'],
     ['Creatinine', 'Cr', '60–120', 'µmol/L'],
     ['eGFR', '', '>90', 'mL/min/1.73m²'],
@@ -36,7 +36,7 @@ const DATA = [
     ['Albumin', '', '35–50', 'g/L'],
     ['Amylase', '', '<100', 'U/L'],
   ]],
-  ['🫁 Arterial blood gas', [
+  ['Arterial Blood Gas', [
     ['pH', '', '7.35–7.45', ''],
     ['PaCO₂', '', '4.7–6.0', 'kPa'],
     ['PaO₂', '', '11–13', 'kPa'],
@@ -44,7 +44,7 @@ const DATA = [
     ['Base excess', 'BE', '−2 to +2', 'mmol/L'],
     ['Lactate', '', '0.5–2.2', 'mmol/L'],
   ]],
-  ['🦋 Endocrine & Metabolic', [
+  ['Endocrine & Metabolic', [
     ['Fasting glucose', '', '3.5–5.5', 'mmol/L'],
     ['HbA1c (target)', '', '<48', 'mmol/mol'],
     ['TSH', '', '0.4–4.0', 'mU/L'],
