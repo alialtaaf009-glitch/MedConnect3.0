@@ -87,30 +87,53 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
 
       <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 10 }}>
         {messages.length === 0 && <p className="sub" style={{ textAlign: 'center', marginTop: 20 }}>Say hello 👋</p>}
-        {messages.map((m) => {
-          const mine = m.sender == me.id;
-          const parts = m.body.split(/(https?:\/\/[^\s]+)/g);
-          return (
-            <div key={m.id} style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', alignItems: 'flex-end', gap: 7, marginBottom: 8 }}>
-              {!mine && <Avatar emoji={avatars[m.sender] || withAv} init={theirInit} />}
-              <div style={{
-                maxWidth: '72%', padding: '10px 13px', borderRadius: 14, fontSize: 14,
-                background: mine ? 'var(--forest)' : 'var(--card)',
-                color: mine ? '#ffffff' : 'var(--ink)',
-                border: mine ? 'none' : '1.5px solid var(--line)',
-                whiteSpace: 'pre-line', wordBreak: 'break-word',
-              }}>
-                {parts.map((p, i) =>
-                  /^https?:\/\//.test(p)
-                    ? <a key={i} href={p} target="_blank" rel="noreferrer" style={{ color: mine ? '#cdeee2' : 'var(--forest)', textDecoration: 'underline' }}>{p}</a>
-                    : p
+        {(() => {
+          const getDateLabel = (ts) => {
+            const d = new Date(ts);
+            const today = new Date(); today.setHours(0,0,0,0);
+            const msgDay = new Date(d); msgDay.setHours(0,0,0,0);
+            const diff = Math.round((today - msgDay) / 86400000);
+            if (diff === 0) return 'Today';
+            if (diff === 1) return 'Yesterday';
+            if (diff < 7) return `${diff} days ago`;
+            return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: d.getFullYear() !== today.getFullYear() ? 'numeric' : undefined });
+          };
+          let lastLabel = null;
+          return messages.map((m) => {
+            const mine = m.sender == me.id;
+            const parts = m.body.split(/(https?:\/\/[^\s]+)/g);
+            const label = m.created_at ? getDateLabel(m.created_at) : null;
+            const showLabel = label && label !== lastLabel;
+            if (showLabel) lastLabel = label;
+            return (
+              <div key={m.id}>
+                {showLabel && (
+                  <div style={{ textAlign: 'center', margin: '12px 0 8px' }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--subtle)', background: 'var(--paper-2)', padding: '4px 12px', borderRadius: 999 }}>{label}</span>
+                  </div>
                 )}
-                <Stamp ts={m.created_at} light={mine} />
+                <div style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', alignItems: 'flex-end', gap: 7, marginBottom: 8 }}>
+                  {!mine && <Avatar emoji={avatars[m.sender] || withAv} init={theirInit} />}
+                  <div style={{
+                    maxWidth: '72%', padding: '10px 13px', borderRadius: 14, fontSize: 14,
+                    background: mine ? 'var(--forest)' : 'var(--card)',
+                    color: mine ? '#ffffff' : 'var(--ink)',
+                    border: mine ? 'none' : '1.5px solid var(--line)',
+                    whiteSpace: 'pre-line', wordBreak: 'break-word',
+                  }}>
+                    {parts.map((p, i) =>
+                      /^https?:\/\//.test(p)
+                        ? <a key={i} href={p} target="_blank" rel="noreferrer" style={{ color: mine ? '#cdeee2' : 'var(--forest)', textDecoration: 'underline' }}>{p}</a>
+                        : p
+                    )}
+                    <Stamp ts={m.created_at} light={mine} />
+                  </div>
+                  {mine && <Avatar emoji={avatars[m.sender] || me?.avatar} init={myInit} />}
+                </div>
               </div>
-              {mine && <Avatar emoji={avatars[m.sender] || me?.avatar} init={myInit} />}
-            </div>
-          );
-        })}
+            );
+          });
+        })()}
         <div ref={endRef} />
       </div>
 
