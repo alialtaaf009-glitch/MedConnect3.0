@@ -3,7 +3,7 @@ import { useState } from 'react';
 // Common clinical formulas — reference only (no calculators). Grouped by specialty.
 // Each: [name, formula, note]
 const DATA = [
-  ['💊 General Medicine', [
+  ['General Medicine', [
     ['Body Mass Index (BMI)', 'weight (kg) ÷ height (m)²', 'Normal 18.5–24.9 · Overweight 25–29.9 · Obese ≥30'],
     ['Body Surface Area (Mosteller)', '√[(height cm × weight kg) ÷ 3600]', 'Used for drug dosing, e.g. chemotherapy.'],
     ['Anion Gap', '(Na⁺ + K⁺) − (Cl⁻ + HCO₃⁻)', 'Normal 8–16 mmol/L. Raised in lactic acidosis, DKA, toxins, renal failure.'],
@@ -13,13 +13,13 @@ const DATA = [
     ['Osmolar Gap', 'measured − calculated osmolality', 'Normal <10. Raised: methanol, ethylene glycol, ethanol.'],
     ['Mean Arterial Pressure (MAP)', 'DBP + ⅓(SBP − DBP)', 'Target ≥65 mmHg in sepsis.'],
   ]],
-  ['🫁 Respiratory', [
+  ['Respiratory', [
     ['A–a Gradient', 'PAO₂ − PaO₂', 'PAO₂ = (FiO₂ × [Patm − 6.3]) − (PaCO₂ ÷ 0.8). Normal ≈ (age÷4)+4.'],
     ["Winter's Formula", 'expected PaCO₂ = 1.5×HCO₃ + 8 (±2)', 'Checks respiratory compensation in metabolic acidosis (kPa: ×0.133).'],
     ['CURB-65', 'Confusion, Urea>7, RR≥30, BP<90/60, Age≥65', 'Pneumonia severity; ≥3 → consider ICU.'],
     ["Light's Criteria", 'pleural exudate if any: protein ratio >0.5, LDH ratio >0.6, LDH >⅔ ULN', 'Distinguishes exudate from transudate.'],
   ]],
-  ['💧 Renal & Fluids', [
+  ['Renal & Fluids', [
     ['Fractional Excretion of Na (FENa)', '(UNa × PCr) ÷ (PNa × UCr) × 100', '<1% pre-renal · >2% intrinsic (ATN).'],
     ['Creatinine Clearance (Cockcroft-Gault)', '[(140−age) × weight × (0.85 if F)] ÷ (72 × serum Cr mg/dL)', 'Estimates renal function for drug dosing.'],
     ['eGFR (concept)', 'based on creatinine, age, sex (CKD-EPI)', 'Use a validated calculator clinically; shown here for recall.'],
@@ -27,18 +27,18 @@ const DATA = [
     ['Sodium Deficit', '0.6 × weight × (target − actual Na)', 'Guides correction; avoid >8–10 mmol/L/24h.'],
     ['Transtubular K Gradient (TTKG)', '(urine K ÷ plasma K) ÷ (urine osm ÷ plasma osm)', 'Assesses renal K handling. <3 suggests hypoaldosteronism in hyperkalaemia.'],
   ]],
-  ['🫀 Cardiology', [
+  ['Cardiology', [
     ['QTc (Bazett)', 'QT ÷ √(RR interval)', 'Prolonged if >440 ms (men) / >460 ms (women).'],
     ['CHA₂DS₂-VASc', 'CHF, HTN, Age≥75(2), DM, Stroke(2), Vascular, Age 65-74, Sex(F)', 'AF stroke risk; score ≥2 → consider anticoagulation.'],
     ['Wells Score (PE)', 'DVT signs(3), PE likely(3), HR>100, immobile, prior VTE, haemoptysis, malignancy', '>4 → PE likely, do CTPA; ≤4 → D-dimer.'],
     ['ABCD² (TIA)', 'Age≥60, BP≥140/90, Clinical, Duration, Diabetes', 'Stroke risk after TIA.'],
   ]],
-  ['🔥 Surgery / Critical Care', [
+  ['Surgery / Critical Care', [
     ['Parkland Formula (burns)', '4 mL × weight (kg) × % TBSA burned', 'First 24h crystalloid. Give ½ over first 8h, ½ over next 16h. Reference only.'],
     ['Glasgow Coma Scale', 'Eyes (4) + Verbal (5) + Motor (6)', 'Range 3–15. ≤8 → consider airway protection.'],
     ['Child-Pugh Score', 'bilirubin, albumin, INR, ascites, encephalopathy', 'Grades cirrhosis severity (A/B/C).'],
   ]],
-  ['🤰 Obs & Gynae', [
+  ['Obs & Gynae', [
     ["Estimated Due Date (Naegele's)", 'LMP − 3 months + 7 days + 1 year', 'Assumes regular 28-day cycle.'],
     ['Bishop Score', 'dilation + effacement + station + consistency + position', '≥8 favourable for induction.'],
     ['APGAR Score', 'Appearance, Pulse, Grimace, Activity, Respiration (0–2 each)', 'Assessed at 1 & 5 min. ≥7 reassuring.'],
