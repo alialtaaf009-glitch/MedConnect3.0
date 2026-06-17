@@ -43,7 +43,7 @@ const DATA = [
     ['Bishop Score', 'dilation + effacement + station + consistency + position', '≥8 favourable for induction.'],
     ['APGAR Score', 'Appearance, Pulse, Grimace, Activity, Respiration (0–2 each)', 'Assessed at 1 & 5 min. ≥7 reassuring.'],
   ]],
-  ['🧸 Paediatrics', [
+  ['Paediatrics', [
     ['Estimated Weight (APLS)', '(age + 4) × 2', 'For children 1–10 years.'],
     ['ETT Internal Diameter', '(age ÷ 4) + 4 mm (uncuffed)', 'Reference only — airway decisions need clinical judgement.'],
     ['Fluid Bolus', '10–20 mL/kg crystalloid', 'Reassess after each bolus.'],
