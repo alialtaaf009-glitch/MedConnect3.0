@@ -176,12 +176,26 @@ function TopBar({ user }) {
   const nav = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { backHandler } = useBack();
+  const [reqCount, setReqCount] = useState(0);
   const roots = ['/home', '/partners', '/osce', '/chat', '/focus'];
-  // show back arrow if: on an inner route, OR an overlay registered a back handler
   const showBack = !roots.includes(loc.pathname) || !!backHandler;
   const goBack = () => { if (backHandler) backHandler(); else nav(-1); };
   const onProfile = loc.pathname === '/profile';
   const initials = (user?.name || 'Dr A').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('');
+
+  useEffect(() => {
+    if (!user) return;
+    const load = () => {
+      fetch('/api/connections', { credentials: 'include' })
+        .then((r) => r.json())
+        .then((d) => setReqCount((d.requests || []).length))
+        .catch(() => {});
+    };
+    load();
+    const t = setInterval(load, 30000); // refresh every 30s
+    return () => clearInterval(t);
+  }, [user]);
+
   return (
     <>
       <div className="topbar">
@@ -195,9 +209,25 @@ function TopBar({ user }) {
               </button>}
         </div>
         <div className="topbar-title">MedConnect</div>
-        {onProfile
-          ? <span style={{ width: 36 }} />
-          : <button className="topbar-avatar" onClick={() => nav('/profile')} aria-label="Profile">{user?.avatar || initials}</button>}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {user && (
+            <button onClick={() => nav('/partners?tab=requests')} aria-label={`${reqCount} requests`}
+              style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer', color: '#fff', display: 'grid', placeItems: 'center', width: 32, height: 32, borderRadius: '50%', opacity: reqCount > 0 ? 1 : 0.65 }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              {reqCount > 0 && (
+                <span style={{ position: 'absolute', top: 2, right: 2, width: 14, height: 14, borderRadius: '50%', background: 'var(--rust)', color: '#fff', fontSize: 9, fontWeight: 800, display: 'grid', placeItems: 'center', border: '1.5px solid var(--forest)' }}>
+                  {reqCount > 9 ? '9+' : reqCount}
+                </span>
+              )}
+            </button>
+          )}
+          {onProfile
+            ? <span style={{ width: 36 }} />
+            : <button className="topbar-avatar" onClick={() => nav('/profile')} aria-label="Profile">{user?.avatar || initials}</button>}
+        </div>
       </div>
       <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} user={user} />
     </>
@@ -347,4 +377,3 @@ export default function App() {
     </div>
   );
 }
-
