@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 // Standard UK / SI reference ranges. Values vary by lab — shown with a disclaimer.
 const DATA = [
-  ['🩸 Haematology', [
+  ['Haematology', [
     ['Haemoglobin (male)', 'Hb', '130–170', 'g/L'],
     ['Haemoglobin (female)', 'Hb', '115–155', 'g/L'],
     ['White cell count', 'WCC', '4.0–11.0', '×10⁹/L'],
@@ -27,7 +27,7 @@ const DATA = [
     ['Creatinine', 'Cr', '60–120', 'µmol/L'],
     ['eGFR', '', '>90', 'mL/min/1.73m²'],
   ]],
-  ['🫀 Liver & Pancreas', [
+  ['Liver & Pancreas', [
     ['Bilirubin', '', '<21', 'µmol/L'],
     ['ALT', '', '<40', 'U/L'],
     ['AST', '', '<40', 'U/L'],
@@ -51,13 +51,13 @@ const DATA = [
     ['Free T4', '', '9–25', 'pmol/L'],
     ['CRP', '', '<5', 'mg/L'],
   ]],
-  ['❤️ Cardiac & Lipids', [
+  ['Cardiac & Lipids', [
     ['Troponin', '', 'assay-specific', ''],
     ['Total cholesterol', '', '<5.0', 'mmol/L'],
     ['LDL', '', '<3.0', 'mmol/L'],
     ['Triglycerides', '', '<1.7', 'mmol/L'],
   ]],
-  ['🩺 Coagulation', [
+  ['Coagulation', [
     ['INR', '', '0.8–1.1', ''],
     ['APTT', '', '30–40', 's'],
     ['Fibrinogen', '', '2.0–4.0', 'g/L'],
