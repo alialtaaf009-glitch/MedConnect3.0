@@ -142,7 +142,34 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
-      const { to, body } = readBody(req);
+      const payload = readBody(req);
+
+      // ---- Daily.co video room creation (folded here to respect the function limit) ----
+      if (payload.action === 'create_room') {
+        const key = process.env.DAILY_API_KEY;
+        if (!key) return res.status(500).json({ error: 'Video not configured' });
+        // unique, short-lived room; expires in 2 hours
+        const exp = Math.floor(Date.now() / 1000) + 2 * 60 * 60;
+        const slug = ('osce-' + (payload.slug || '') + '-' + Math.random().toString(36).slice(2, 8)).replace(/[^a-zA-Z0-9-]/g, '').slice(0, 40);
+        try {
+          const r = await fetch('https://api.daily.co/v1/rooms', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: slug,
+              privacy: 'public',
+              properties: { exp, enable_chat: true, enable_screenshare: true, max_participants: 4 },
+            }),
+          });
+          const data = await r.json();
+          if (!r.ok) return res.status(502).json({ error: data?.info || 'Could not create room' });
+          return res.status(200).json({ url: data.url, name: data.name });
+        } catch (err) {
+          return res.status(502).json({ error: 'Video service unreachable' });
+        }
+      }
+
+      const { to, body } = payload;
       const toId = parseInt(to, 10);
       if (!toId || !body || !body.trim()) return res.status(400).json({ error: 'to and body required' });
       const rows = await sql`
@@ -157,3 +184,4 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Messaging failed: ' + e.message });
   }
 }
+
