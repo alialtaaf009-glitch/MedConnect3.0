@@ -195,8 +195,8 @@ function Station({ name, minutes, onBack }) {
       return;
     }
     setMeetUrl(url);
-    window.open(url, '_blank');
-    // load connected friends to offer sharing the link
+    // load connected friends to offer sharing the link (don't auto-open the room —
+    // show the share options first so they can invite a partner, then join when ready)
     try {
       const d = await api.connections();
       const rows = (d.connected || d.connections || []).filter((c) => (c.status ? c.status === 'accepted' : true));
@@ -213,12 +213,13 @@ function Station({ name, minutes, onBack }) {
     setShowShare(true);
   };
 
+  const [sentTo, setSentTo] = useState(null);
   const shareTo = async (friendId) => {
     try {
-      await api.sendMessage(friendId, `📹 Join me for OSCE practice — "${name}". Free private video room, no sign-up needed: ${meetUrl}`);
-      window.alert('Invite sent in your chat with them.');
+      await api.sendMessage(friendId, `📹 Join me for OSCE practice — "${name}". Private video room: ${meetUrl}`);
+      setSentTo(friendId);
+      setTimeout(() => setSentTo(null), 2500);
     } catch (e) {}
-    setShowShare(false);
   };
 
   return (
@@ -226,21 +227,31 @@ function Station({ name, minutes, onBack }) {
       {showShare && (
         <div onClick={() => setShowShare(false)} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.5)', display:'grid', placeItems:'center', zIndex:100, padding:24 }}>
           <div className="card" onClick={(e) => e.stopPropagation()} style={{ maxWidth:340, width:'100%' }}>
-            <h2 className="serif" style={{ fontSize:18, fontWeight:700, marginBottom:6 }}>📹 Share the video room</h2>
-            <p className="sub" style={{ fontSize:13, marginBottom:6 }}>Your private video room is ready and open in a new tab. Send the link to a partner below — they'll get it in your chat and join the same room.</p>
-            <p className="sub" style={{ fontSize:11.5, marginBottom:12, color:'var(--subtle)' }}>🔒 Free, private room — no sign-up or app needed. Opens in your browser.</p>
-            <div style={{ display:'flex', gap:8, marginBottom:12 }}>
-              <input className="input" value={meetUrl} readOnly style={{ marginBottom:0, flex:1, fontSize:13 }} onFocus={(e) => e.target.select()} />
-              <button className="btn-sm" onClick={() => { navigator.clipboard?.writeText(meetUrl); window.alert('Link copied!'); }}>Copy</button>
+            <h2 className="serif" style={{ fontSize:18, fontWeight:700, marginBottom:6 }}>📹 Practise with a partner</h2>
+            <p className="sub" style={{ fontSize:13, marginBottom:6 }}>Your private video room is ready. Invite a partner first, then join when you're both set.</p>
+            <p className="sub" style={{ fontSize:11.5, marginBottom:14, color:'var(--subtle)' }}>🔒 Free, private room — no sign-up or app needed.</p>
+
+            {friends.length > 0 && (
+              <>
+                <div style={{ fontSize:11, fontWeight:800, letterSpacing:0.5, textTransform:'uppercase', color:'var(--subtle)', marginBottom:8 }}>Invite a partner</div>
+                {friends.map((f) => (
+                  <button key={f.id || f.other_id} className="menu-item" onClick={() => shareTo(f.id || f.other_id)}>
+                    {(f.avatar || '🩺')} {f.name} <span className="link" style={{ marginLeft:'auto', color: sentTo === (f.id || f.other_id) ? 'var(--forest)' : undefined }}>{sentTo === (f.id || f.other_id) ? 'Sent ✓' : 'Send invite ›'}</span>
+                  </button>
+                ))}
+              </>
+            )}
+            {friends.length === 0 && (
+              <p className="sub" style={{ fontSize:13, marginBottom:10 }}>No connections yet. Connect with a partner first, or copy the link below to share anywhere.</p>
+            )}
+
+            <div style={{ display:'flex', gap:8, margin:'12px 0' }}>
+              <input className="input" value={meetUrl} readOnly style={{ marginBottom:0, flex:1, fontSize:12 }} onFocus={(e) => e.target.select()} />
+              <button className="btn-sm" onClick={() => { navigator.clipboard?.writeText(meetUrl); window.alert('Link copied!'); }}>Copy link</button>
             </div>
-            {friends.length === 0 ? (
-              <p className="sub" style={{ fontSize:13 }}>No connections yet. Connect with a partner first, then invite them here.</p>
-            ) : friends.map((f) => (
-              <button key={f.id || f.other_id} className="menu-item" onClick={() => shareTo(f.id || f.other_id)}>
-                {(f.avatar || '🩺')} {f.name} <span className="link" style={{ marginLeft:'auto' }}>Send invite ›</span>
-              </button>
-            ))}
-            <button className="btn ghost" style={{ marginTop:12 }} onClick={() => setShowShare(false)}>Close</button>
+
+            <button className="btn" style={{ background:'var(--forest)', width:'100%', marginTop:4 }} onClick={() => window.open(meetUrl, '_blank')}>Join the room →</button>
+            <button className="btn ghost" style={{ marginTop:8, width:'100%' }} onClick={() => setShowShare(false)}>Cancel</button>
           </div>
         </div>
       )}
