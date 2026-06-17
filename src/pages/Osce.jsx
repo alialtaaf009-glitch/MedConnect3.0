@@ -180,12 +180,20 @@ function Station({ name, minutes, onBack }) {
   const ss = String(seconds % 60).padStart(2, '0');
   const scenario = SCENARIOS[name] || 'Read the station title and practise your structured approach: introduce yourself, take a focused history or perform the task, summarise, and give a differential and plan.';
 
+  const [creatingRoom, setCreatingRoom] = useState(false);
   const startVideo = async () => {
-    // build a unique, hard-to-guess Jitsi room — the URL IS the room, so it's
-    // truly shareable (same link works for everyone) and opens in the browser.
-    const slug = name.replace(/[^a-zA-Z0-9]+/g, '').slice(0, 18);
-    const rand = Math.random().toString(36).slice(2, 8);
-    const url = `https://meet.jit.si/MedConnect-${slug}-${rand}`;
+    setCreatingRoom(true);
+    let url = '';
+    try {
+      // create a real, private, shareable Daily.co room (server-side, key stays secret)
+      const slug = name.replace(/[^a-zA-Z0-9]+/g, '').slice(0, 18);
+      const d = await api.createRoom(slug);
+      url = d.url;
+    } catch (e) {
+      setCreatingRoom(false);
+      window.alert('Could not start the video room. Please try again.');
+      return;
+    }
     setMeetUrl(url);
     window.open(url, '_blank');
     // load connected friends to offer sharing the link
@@ -201,6 +209,7 @@ function Station({ name, minutes, onBack }) {
         };
       }));
     } catch (e) { setFriends([]); }
+    setCreatingRoom(false);
     setShowShare(true);
   };
 
@@ -219,7 +228,7 @@ function Station({ name, minutes, onBack }) {
           <div className="card" onClick={(e) => e.stopPropagation()} style={{ maxWidth:340, width:'100%' }}>
             <h2 className="serif" style={{ fontSize:18, fontWeight:700, marginBottom:6 }}>📹 Share the video room</h2>
             <p className="sub" style={{ fontSize:13, marginBottom:6 }}>Your private video room is ready and open in a new tab. Send the link to a partner below — they'll get it in your chat and join the same room.</p>
-            <p className="sub" style={{ fontSize:11.5, marginBottom:12, color:'var(--subtle)' }}>🔒 Free, private room — no sign-up or app needed (powered by Jitsi, an open-source video tool).</p>
+            <p className="sub" style={{ fontSize:11.5, marginBottom:12, color:'var(--subtle)' }}>🔒 Free, private room — no sign-up or app needed. Opens in your browser.</p>
             <div style={{ display:'flex', gap:8, marginBottom:12 }}>
               <input className="input" value={meetUrl} readOnly style={{ marginBottom:0, flex:1, fontSize:13 }} onFocus={(e) => e.target.select()} />
               <button className="btn-sm" onClick={() => { navigator.clipboard?.writeText(meetUrl); window.alert('Link copied!'); }}>Copy</button>
@@ -247,7 +256,7 @@ function Station({ name, minutes, onBack }) {
           <button className="btn ghost" onClick={() => { setRunning(false); setSeconds(total); }}>Reset</button>
         </div>
       </div>
-      <button className="btn" style={{ background:'var(--violet)', marginTop: 28 }} onClick={startVideo}>📹 Practise live with a partner</button>
+      <button className="btn" style={{ background:"var(--violet)", marginTop: 28, opacity: creatingRoom ? 0.7 : 1 }} onClick={startVideo} disabled={creatingRoom}>{creatingRoom ? "Starting room…" : "📹 Practise live with a partner"}</button>
       <p className="sub" style={{ fontSize:12, marginTop:8 }}>Opens a free, private video room and lets you send the link to a connected partner — one of you plays candidate, the other examiner.</p>
     </div>
   );
