@@ -181,6 +181,37 @@ function Station({ name, minutes, onBack }) {
   const scenario = SCENARIOS[name] || 'Read the station title and practise your structured approach: introduce yourself, take a focused history or perform the task, summarise, and give a differential and plan.';
 
   const [creatingRoom, setCreatingRoom] = useState(false);
+  const [inCall, setInCall] = useState(false);
+  const callFrameRef = useRef(null);
+  const callWrapRef = useRef(null);
+
+  // join the Daily room embedded INSIDE the app (no browser URL bar)
+  const joinRoom = () => {
+    setShowShare(false);
+    setInCall(true);
+    // wait for the overlay container to mount, then attach Daily's iframe
+    setTimeout(() => {
+      try {
+        if (!window.DailyIframe || !callWrapRef.current) { window.open(meetUrl, '_blank'); setInCall(false); return; }
+        const frame = window.DailyIframe.createFrame(callWrapRef.current, {
+          showLeaveButton: true,
+          iframeStyle: { width: '100%', height: '100%', border: '0', borderRadius: '0' },
+        });
+        callFrameRef.current = frame;
+        frame.on('left-meeting', () => leaveCall());
+        frame.join({ url: meetUrl });
+      } catch (e) {
+        window.open(meetUrl, '_blank'); setInCall(false);
+      }
+    }, 50);
+  };
+
+  const leaveCall = () => {
+    try { callFrameRef.current?.destroy(); } catch (e) {}
+    callFrameRef.current = null;
+    setInCall(false);
+  };
+
   const startVideo = async () => {
     setCreatingRoom(true);
     let url = '';
@@ -224,6 +255,15 @@ function Station({ name, minutes, onBack }) {
 
   return (
     <div className="screen">
+      {inCall && (
+        <div style={{ position:'fixed', inset:0, zIndex:2000, background:'#0b0f0d', display:'flex', flexDirection:'column' }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 16px', paddingTop:'calc(env(safe-area-inset-top, 0px) + 12px)', background:'#11201b', color:'#fff', flexShrink:0 }}>
+            <span style={{ fontWeight:700, fontSize:14 }}>📹 {titleCase(name)}</span>
+            <button onClick={leaveCall} style={{ background:'var(--rust)', color:'#fff', border:'none', borderRadius:999, padding:'7px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>Leave</button>
+          </div>
+          <div ref={callWrapRef} style={{ flex:1, width:'100%', background:'#0b0f0d' }} />
+        </div>
+      )}
       {showShare && (
         <div onClick={() => setShowShare(false)} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.5)', display:'grid', placeItems:'center', zIndex:100, padding:24 }}>
           <div className="card" onClick={(e) => e.stopPropagation()} style={{ maxWidth:340, width:'100%' }}>
@@ -242,7 +282,7 @@ function Station({ name, minutes, onBack }) {
               </>
             )}
             {friends.length === 0 && (
-              <p className="sub" style={{ fontSize:13, marginBottom:10 }}>No connections yet. Connect with a partner first, or copy the link below to share anywhere.</p>
+          <p className="sub" style={{ fontSize:13, marginBottom:10 }}>No connections yet. Connect with a partner first, or copy the link below to share anywhere.</p>
             )}
 
             <div style={{ display:'flex', gap:8, margin:'12px 0' }}>
@@ -250,7 +290,7 @@ function Station({ name, minutes, onBack }) {
               <button className="btn-sm" onClick={() => { navigator.clipboard?.writeText(meetUrl); window.alert('Link copied!'); }}>Copy link</button>
             </div>
 
-            <button className="btn" style={{ background:'var(--forest)', width:'100%', marginTop:4 }} onClick={() => window.open(meetUrl, '_blank')}>Join the room →</button>
+            <button className="btn" style={{ background:'var(--forest)', width:'100%', marginTop:4 }} onClick={joinRoom}>Join the room →</button>
             <button className="btn ghost" style={{ marginTop:8, width:'100%' }} onClick={() => setShowShare(false)}>Cancel</button>
           </div>
         </div>
