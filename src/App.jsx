@@ -175,24 +175,27 @@ function TopBar({ user }) {
   const loc = useLocation();
   const nav = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [bellOpen, setBellOpen] = useState(false);
+  const [notifs, setNotifs] = useState({ requests: [], nudges: [] });
   const { backHandler } = useBack();
-  const [reqCount, setReqCount] = useState(0);
   const roots = ['/home', '/partners', '/osce', '/chat', '/focus'];
   const showBack = !roots.includes(loc.pathname) || !!backHandler;
   const goBack = () => { if (backHandler) backHandler(); else nav(-1); };
   const onProfile = loc.pathname === '/profile';
   const initials = (user?.name || 'Dr A').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('');
+  const reqCount = notifs.requests.length;
+  const totalCount = reqCount;
 
   useEffect(() => {
     if (!user) return;
     const load = () => {
       fetch('/api/connections', { credentials: 'include' })
         .then((r) => r.json())
-        .then((d) => setReqCount((d.requests || []).length))
+        .then((d) => setNotifs({ requests: d.requests || [], nudges: d.nudges || [] }))
         .catch(() => {});
     };
     load();
-    const t = setInterval(load, 30000); // refresh every 30s
+    const t = setInterval(load, 30000);
     return () => clearInterval(t);
   }, [user]);
 
@@ -211,15 +214,15 @@ function TopBar({ user }) {
         <div className="topbar-title">MedConnect</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {user && (
-            <button onClick={() => nav('/partners?tab=requests')} aria-label={`${reqCount} requests`}
-              style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer', color: '#fff', display: 'grid', placeItems: 'center', width: 32, height: 32, borderRadius: '50%', opacity: reqCount > 0 ? 1 : 0.65 }}>
+            <button onClick={() => setBellOpen(!bellOpen)} aria-label="Notifications"
+              style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer', color: '#fff', display: 'grid', placeItems: 'center', width: 32, height: 32, borderRadius: '50%', opacity: totalCount > 0 ? 1 : 0.65 }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                 <path d="M13.73 21a2 2 0 0 1-3.46 0" />
               </svg>
-              {reqCount > 0 && (
+              {totalCount > 0 && (
                 <span style={{ position: 'absolute', top: 2, right: 2, width: 14, height: 14, borderRadius: '50%', background: 'var(--rust)', color: '#fff', fontSize: 9, fontWeight: 800, display: 'grid', placeItems: 'center', border: '1.5px solid var(--forest)' }}>
-                  {reqCount > 9 ? '9+' : reqCount}
+                  {totalCount > 9 ? '9+' : totalCount}
                 </span>
               )}
             </button>
@@ -229,6 +232,60 @@ function TopBar({ user }) {
             : <button className="topbar-avatar" onClick={() => nav('/profile')} aria-label="Profile">{user?.avatar || initials}</button>}
         </div>
       </div>
+
+      {/* notification panel */}
+      {bellOpen && (
+        <div>
+          {/* scrim */}
+          <div onClick={() => setBellOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 150 }} />
+          {/* panel */}
+          <div style={{ position: 'fixed', top: 64, right: 12, width: 300, maxWidth: 'calc(100vw - 24px)', background: 'var(--card)', borderRadius: 18, boxShadow: '0 8px 32px rgba(0,0,0,.22)', zIndex: 151, overflow: 'hidden', animation: 'tabPop .25s ease both' }}>
+            <div style={{ padding: '14px 16px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--line)' }}>
+              <span style={{ fontWeight: 800, fontSize: 14 }}>Notifications</span>
+              {totalCount > 0 && <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--rust)' }}>{totalCount} new</span>}
+            </div>
+
+            {notifs.requests.length === 0 && (
+              <div style={{ padding: '28px 16px', textAlign: 'center' }}>
+                <div style={{ fontSize: 28, marginBottom: 8 }}>🔔</div>
+                <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>You're all caught up</p>
+                <p className="sub" style={{ fontSize: 12 }}>Connection requests and updates will appear here.</p>
+              </div>
+            )}
+
+            {notifs.requests.length > 0 && (
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 0.5, textTransform: 'uppercase', color: 'var(--subtle)', padding: '10px 16px 4px' }}>
+                  Connection Requests
+                </div>
+                {notifs.requests.map((c) => {
+                  const name = c.requester_name || 'Someone';
+                  const exam = c.requester_exam || '';
+                  const av = c.requester_avatar || '🩺';
+                  return (
+                    <div key={c.id} onClick={() => { setBellOpen(false); nav('/partners?tab=requests'); }}
+                      style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '11px 16px', cursor: 'pointer', borderTop: '1px solid var(--line)' }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--paper-2)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                      <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', fontSize: 20, flexShrink: 0 }}>{av}</div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 700, fontSize: 13.5 }}>{name}</div>
+                        <div style={{ fontSize: 12, color: 'var(--muted)' }}>wants to study with you{exam ? ` · ${exam}` : ''}</div>
+                      </div>
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--rust)', flexShrink: 0 }} />
+                    </div>
+                  );
+                })}
+                <div onClick={() => { setBellOpen(false); nav('/partners?tab=requests'); }}
+                  style={{ padding: '12px 16px', textAlign: 'center', borderTop: '1px solid var(--line)', fontSize: 13, fontWeight: 700, color: 'var(--forest)', cursor: 'pointer' }}>
+                  View all requests →
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} user={user} />
     </>
   );
