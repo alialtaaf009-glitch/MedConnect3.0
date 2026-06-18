@@ -1,5 +1,5 @@
 // MedConnect service worker — enables PWA install + a basic offline shell.
-const CACHE = 'medconnect-v3';
+const CACHE = 'medconnect-v4';
 const APP_SHELL = ['/', '/index.html'];
 
 self.addEventListener('install', (event) => {
@@ -52,7 +52,7 @@ self.addEventListener('push', (event) => {
   const options = {
     body: data.body || '',
     icon: '/pwa-192.png',
-    badge: '/pwa-192.png',
+    badge: '/notification-icon.png',
     data: { url: data.url || '/home' },
     tag: data.tag || undefined,
     renotify: !!data.tag,
