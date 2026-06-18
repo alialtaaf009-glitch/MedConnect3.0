@@ -14,6 +14,34 @@ export default async function handler(req, res) {
   }
   // GET /api/profile?user=ID -> public mini-card for QR / share links
   if (req.method === 'GET') {
+    // ---- Qbank tracker: GET /api/profile?qbank=1 ----
+    if (req.query.qbank) {
+      try {
+        await ensureQbankTables();
+        const mine = await sql`SELECT bank, topic, done, total, correct FROM qbank_progress WHERE user_id = ${uid} ORDER BY topic`;
+        // partners I've granted access to see me, and who grants access to me
+        const grantsOut = await sql`SELECT grantee_id, bank FROM share_grants WHERE grantor_id = ${uid}`;
+        const grantsIn = await sql`SELECT grantor_id, bank FROM share_grants WHERE grantee_id = ${uid}`;
+        return res.status(200).json({ progress: mine, sharingWith: grantsOut, sharedToMe: grantsIn });
+      } catch (e) {
+        return res.status(500).json({ error: 'Qbank load failed: ' + (e.message || e) });
+      }
+    }
+    // ---- Qbank comparison: GET /api/profile?compare=PARTNER_ID&bank=BANK ----
+    if (req.query.compare) {
+      try {
+        await ensureQbankTables();
+        const partner = parseInt(req.query.compare, 10);
+        const bank = req.query.bank || '';
+        // only return partner data if THEY granted ME access for this bank
+        const grant = await sql`SELECT 1 FROM share_grants WHERE grantor_id = ${partner} AND grantee_id = ${uid} AND bank = ${bank} LIMIT 1`;
+        if (!grant.length) return res.status(403).json({ error: 'Not shared', progress: [] });
+        const rows = await sql`SELECT bank, topic, done, total, correct FROM qbank_progress WHERE user_id = ${partner} AND bank = ${bank} ORDER BY topic`;
+        return res.status(200).json({ progress: rows });
+      } catch (e) {
+        return res.status(500).json({ error: 'Compare failed', progress: [] });
+      }
+    }
     const target = parseInt(req.query.user, 10);
     if (!target) return res.status(400).json({ error: 'user id required' });
     try {
@@ -24,6 +52,48 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Lookup failed' });
     }
   }
+  // ---- Qbank tracker writes: POST /api/profile ----
+  if (req.method === 'POST') {
+    try {
+      await ensureQbankTables();
+      const body = readBody(req);
+
+      // save/update a topic row
+      if (body.action === 'save_progress') {
+        const { bank, topic, done, total, correct } = body;
+        if (!bank || !topic) return res.status(400).json({ error: 'bank and topic required' });
+        await sql`
+          INSERT INTO qbank_progress (user_id, bank, topic, done, total, correct)
+          VALUES (${uid}, ${bank}, ${topic}, ${done || 0}, ${total || 0}, ${correct || 0})
+          ON CONFLICT (user_id, bank, topic)
+          DO UPDATE SET done = ${done || 0}, total = ${total || 0}, correct = ${correct || 0}`;
+        return res.status(200).json({ ok: true });
+      }
+
+      // delete a topic row
+      if (body.action === 'delete_topic') {
+        await sql`DELETE FROM qbank_progress WHERE user_id = ${uid} AND bank = ${body.bank} AND topic = ${body.topic}`;
+        return res.status(200).json({ ok: true });
+      }
+
+      // toggle sharing with a partner for a bank: grant on = insert, off = delete row
+      if (body.action === 'set_share') {
+        const grantee = parseInt(body.partnerId, 10);
+        if (!grantee || !body.bank) return res.status(400).json({ error: 'partnerId and bank required' });
+        if (body.on) {
+          await sql`INSERT INTO share_grants (grantor_id, grantee_id, bank) VALUES (${uid}, ${grantee}, ${body.bank}) ON CONFLICT (grantor_id, grantee_id, bank) DO NOTHING`;
+        } else {
+          await sql`DELETE FROM share_grants WHERE grantor_id = ${uid} AND grantee_id = ${grantee} AND bank = ${body.bank}`;
+        }
+        return res.status(200).json({ ok: true });
+      }
+
+      return res.status(400).json({ error: 'Unknown action' });
+    } catch (e) {
+      return res.status(500).json({ error: 'Qbank write failed: ' + (e.message || e) });
+    }
+  }
+
   if (req.method !== 'PUT') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
@@ -81,4 +151,26 @@ export default async function handler(req, res) {
   } catch (e) {
     return res.status(500).json({ error: 'Could not update profile [v3]: ' + (e.message || String(e)) });
   }
+}
+
+// Self-creating tables (no manual migration needed), matching the existing pattern.
+async function ensureQbankTables() {
+  await sql`
+    CREATE TABLE IF NOT EXISTS qbank_progress (
+      user_id INTEGER NOT NULL,
+      bank TEXT NOT NULL,
+      topic TEXT NOT NULL,
+      done INTEGER DEFAULT 0,
+      total INTEGER DEFAULT 0,
+      correct INTEGER DEFAULT 0,
+      PRIMARY KEY (user_id, bank, topic)
+    )`;
+  await sql`
+    CREATE TABLE IF NOT EXISTS share_grants (
+      grantor_id INTEGER NOT NULL,
+      grantee_id INTEGER NOT NULL,
+      bank TEXT NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT now(),
+      PRIMARY KEY (grantor_id, grantee_id, bank)
+    )`;
 }
