@@ -271,10 +271,13 @@ function NotifToggle() {
   const flip = async () => {
     if (busy) return;
     setBusy(true); setErr('');
+    const target = !on;
+    setOn(target); // optimistic — flip immediately
     try {
-      if (on) { await unsubscribePush(); setOn(false); }
-      else { await subscribePush(); setOn(true); }
+      if (target) { await subscribePush(); }
+      else { await unsubscribePush(); }
     } catch (e) {
+      setOn(!target); // revert on failure
       setErr(e.message || 'Could not change notifications.');
     }
     setBusy(false);
