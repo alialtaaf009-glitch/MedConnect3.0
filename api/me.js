@@ -30,6 +30,29 @@ export default async function handler(req, res) {
       await sql`DELETE FROM push_subs WHERE user_id = ${uid} AND endpoint = ${body.endpoint}`;
       return res.status(200).json({ ok: true });
     }
+
+    // diagnostic: report push system health + send a test push to myself
+    if (body.action === 'push_debug') {
+      await ensurePushTable();
+      const mySubs = await sql`SELECT endpoint FROM push_subs WHERE user_id = ${uid}`;
+      const diag = {
+        vapid_public_set: !!process.env.VAPID_PUBLIC_KEY,
+        vapid_private_set: !!process.env.VAPID_PRIVATE_KEY,
+        vapid_subject_set: !!process.env.VAPID_SUBJECT,
+        my_subscription_count: mySubs.length,
+      };
+      let sendResult = 'skipped';
+      if (mySubs.length && diag.vapid_public_set && diag.vapid_private_set) {
+        try {
+          const { sendPushToUser } = await import('./_shared/push.js');
+          await sendPushToUser(uid, { title: 'MedConnect test 🔔', body: 'If you see this, push works!', url: '/home', tag: 'test' });
+          sendResult = 'attempted — check your device for a notification';
+        } catch (e) {
+          sendResult = 'error: ' + (e.message || String(e));
+        }
+      }
+      return res.status(200).json({ diag, sendResult });
+    }
     const offsetMin = parseTzOffsetMinutes(u.timezone);
     const todayKey = localDayKey(new Date(), offsetMin);
     const lastKey = u.last_study_day ? localDayKey(new Date(u.last_study_day), offsetMin) : null;
