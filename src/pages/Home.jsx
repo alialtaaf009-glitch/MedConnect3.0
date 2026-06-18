@@ -266,7 +266,7 @@ function Momentum({ user }) {
   // user-hideable tiles (Profile -> Home screen)
   const hideCd = localStorage.getItem('hide_countdown') === '1';
   const hideSt = localStorage.getItem('hide_streak') === '1';
-    // exam countdown
+  // exam countdown
   let daysLeft = null;
   if (user?.exam_date) {
     const t = new Date(user.exam_date).getTime();
@@ -564,7 +564,8 @@ export default function Home() {
 
 // Slim Qbank summary card — shows overall progress, taps through to the full tracker.
 function QbankCard({ nav }) {
-  const [stats, setStats] = useState(null);
+  const [stats, setStats] = useState({ loading: true });
+  const [pressed, setPressed] = useState(false);
   useEffect(() => {
     let active = true;
     api.qbankGet().then((d) => {
@@ -574,28 +575,32 @@ function QbankCard({ nav }) {
       const t = rows.reduce((a, r) => ({ done: a.done + (r.done || 0), total: a.total + (r.total || 0), correct: a.correct + (r.correct || 0) }), { done: 0, total: 0, correct: 0 });
       const acc = t.done ? Math.round((t.correct / t.done) * 100) : 0;
       setStats({ done: t.done, acc, banks: [...new Set(rows.map((r) => r.bank))].length });
-    }).catch(() => setStats({ empty: true }));
+    }).catch(() => { if (active) setStats({ empty: true }); });
     return () => { active = false; };
   }, []);
 
-  if (!stats) return null;
+  const subtitle = stats.loading
+    ? 'Loading…'
+    : stats.empty
+      ? 'Start tracking your question progress'
+      : `${stats.done} done · ${stats.acc}% accuracy${stats.banks > 1 ? ` · ${stats.banks} banks` : ''}`;
 
   return (
-    <button onClick={() => nav('/qbank')} style={{
-      width: '100%', display: 'flex', alignItems: 'center', gap: 13, margin: '4px 0 6px', padding: '13px 15px',
-      background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 16, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
-      boxShadow: '0 2px 8px rgba(20,40,30,.05)',
-    }}>
+    <button onClick={() => nav('/qbank')}
+      onPointerDown={() => setPressed(true)} onPointerUp={() => setPressed(false)} onPointerLeave={() => setPressed(false)}
+      style={{
+        width: '100%', display: 'flex', alignItems: 'center', gap: 13, margin: '4px 0 6px', padding: '13px 15px',
+        background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 16, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
+        boxShadow: '0 2px 8px rgba(20,40,30,.05)', transform: pressed ? 'scale(0.97)' : 'scale(1)', transition: 'transform .12s ease',
+      }}>
       <div style={{ width: 42, height: 42, borderRadius: 12, background: 'var(--paper-2)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--forest)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5h16v14H4zM4 9h16M9 9v10" /></svg>
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontWeight: 800, fontSize: 14.5 }}>Qbank Tracker</div>
-        {stats.empty
-          ? <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 1 }}>Start tracking your question progress</div>
-          : <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 1 }}>{stats.done} done · {stats.acc}% accuracy{stats.banks > 1 ? ` · ${stats.banks} banks` : ''}</div>}
+        <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 1 }}>{subtitle}</div>
       </div>
       <span style={{ width: 26, height: 26, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', color: 'var(--forest)', fontWeight: 800, flexShrink: 0 }}>›</span>
     </button>
   );
-}
+          }
