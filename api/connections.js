@@ -1,4 +1,5 @@
 import { sql, getUserId, readBody } from './_shared/util.js';
+import { sendPushToUser } from './_shared/push.js';
 
 export default async function handler(req, res) {
   const uid = getUserId(req);
@@ -53,6 +54,15 @@ export default async function handler(req, res) {
         const rows = await sql`
           INSERT INTO connections (requester, recipient, status)
           VALUES (${uid}, ${recipientId}, 'pending') RETURNING *`;
+        try {
+          const me = await sql`SELECT name FROM users WHERE id = ${uid}`;
+          await sendPushToUser(Number(recipientId), {
+            title: 'New study partner request',
+            body: `${me[0]?.name || 'Someone'} wants to study with you`,
+            url: '/partners?tab=requests',
+            tag: 'request',
+          });
+        } catch (e) {}
         return res.status(201).json({ connection: rows[0] });
       } catch (e) {
         return res.status(409).json({ error: 'Request already exists' });
@@ -75,4 +85,3 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Connection action failed' });
   }
 }
-
