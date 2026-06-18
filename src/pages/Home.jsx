@@ -266,7 +266,7 @@ function Momentum({ user }) {
   // user-hideable tiles (Profile -> Home screen)
   const hideCd = localStorage.getItem('hide_countdown') === '1';
   const hideSt = localStorage.getItem('hide_streak') === '1';
-  // exam countdown
+    // exam countdown
   let daysLeft = null;
   if (user?.exam_date) {
     const t = new Date(user.exam_date).getTime();
@@ -603,4 +603,4 @@ function QbankCard({ nav }) {
       <span style={{ width: 26, height: 26, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', color: 'var(--forest)', fontWeight: 800, flexShrink: 0 }}>›</span>
     </button>
   );
-          }
+      }
