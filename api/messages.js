@@ -194,6 +194,21 @@ export default async function handler(req, res) {
 
       const { to, body } = payload;
       const toId = parseInt(to, 10);
+      if (payload.action === 'mark_all_read') {
+        await sql`CREATE TABLE IF NOT EXISTS message_reads (user_id INTEGER NOT NULL, other_id INTEGER NOT NULL, last_read TIMESTAMPTZ DEFAULT now(), PRIMARY KEY (user_id, other_id))`;
+        // mark every sender who has messaged me as read up to now
+        const senders = await sql`SELECT DISTINCT sender FROM messages WHERE recipient = ${uid}`;
+        for (const s of senders) {
+          await sql`INSERT INTO message_reads (user_id, other_id, last_read) VALUES (${uid}, ${s.sender}, now()) ON CONFLICT (user_id, other_id) DO UPDATE SET last_read = now()`;
+        }
+        return res.status(200).json({ ok: true });
+      }
+      if (payload.action === 'mark_read_one') {
+        const other = parseInt(payload.other, 10);
+        await sql`CREATE TABLE IF NOT EXISTS message_reads (user_id INTEGER NOT NULL, other_id INTEGER NOT NULL, last_read TIMESTAMPTZ DEFAULT now(), PRIMARY KEY (user_id, other_id))`;
+        await sql`INSERT INTO message_reads (user_id, other_id, last_read) VALUES (${uid}, ${other}, now()) ON CONFLICT (user_id, other_id) DO UPDATE SET last_read = now()`;
+        return res.status(200).json({ ok: true });
+      }
       if (!toId || !body || !body.trim()) return res.status(400).json({ error: 'to and body required' });
       const rows = await sql`
         INSERT INTO messages (sender, recipient, body)
