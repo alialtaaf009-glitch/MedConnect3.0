@@ -69,7 +69,11 @@ export default function Qbank() {
     setAdding(false);
     load();
   };
-  const delTopic = async (topic) => { await api.qbankDeleteTopic(bank, topic); load(); };
+  const delTopic = async (topic) => {
+    // optimistic: remove from screen instantly, then sync to server in background
+    setRows((prev) => prev.filter((r) => !(r.bank === bank && r.topic === topic)));
+    try { await api.qbankDeleteTopic(bank, topic); } catch (e) {}
+  };
 
   const addBank = () => {
     const name = newBankVal.trim();
@@ -234,7 +238,7 @@ export default function Qbank() {
           <div key={r.topic} style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 14, padding: 14, marginBottom: 8 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span style={{ fontWeight: 700, fontSize: 14 }}>{r.topic}</span>
-              <button onClick={() => delTopic(r.topic)} style={{ background: 'none', border: 'none', color: 'var(--subtle)', cursor: 'pointer', fontSize: 16 }}>×</button>
+              <button onClick={() => delTopic(r.topic)} style={{ background: 'none', border: 'none', color: 'var(--subtle)', cursor: 'pointer', fontSize: 18, padding: '0 4px', lineHeight: 1, transition: 'transform .1s', }} onPointerDown={(e) => e.currentTarget.style.transform = 'scale(0.8)'} onPointerUp={(e) => e.currentTarget.style.transform = 'scale(1)'} onPointerLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>×</button>
             </div>
             <div style={{ display: 'flex', gap: 14, marginTop: 6, fontSize: 12, color: 'var(--muted)' }}>
               <span>{r.done}/{r.total || '?'} done</span>
@@ -341,4 +345,4 @@ function SharedToMe({ bank, grants, compareId, compareName, compareRows, bankRow
     </div>
   );
 }
-      
+           
