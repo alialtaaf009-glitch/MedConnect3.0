@@ -253,9 +253,8 @@ export default function Qbank() {
       {/* SHARE MODAL — bottom sheet with bouncy slide + scroll */}
       {shareOpen && (
         <div onClick={() => setShareOpen(false)} className="qbank-overlay">
-          <div className="sheet-up qbank-sheet" onClick={(e) => e.stopPropagation()}>
+          <div className="qbank-sheet" style={{ animation: "modalPop .26s cubic-bezier(0.34, 1.56, 0.64, 1) both" }} onClick={(e) => e.stopPropagation()}>
             <div style={{ padding: '16px 18px 10px', flexShrink: 0 }}>
-              <div style={{ width: 38, height: 4, borderRadius: 999, background: 'var(--line)', margin: '0 auto 14px' }} />
               <h2 className="serif" style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>Share “{bank}”</h2>
               <p className="sub" style={{ fontSize: 12.5, marginBottom: 4 }}>Private by default. Turn a partner on to let them see your chapter accuracy for this bank. Off anytime — stops instantly.</p>
               <p className="sub" style={{ fontSize: 11, color: 'var(--subtle)' }}>🔒 Shows accuracy only — never your actual questions.</p>
@@ -289,9 +288,8 @@ export default function Qbank() {
       {/* COMPARE MODAL — paired bars (you vs them) */}
       {compareId && (
         <div onClick={() => setCompareId(null)} className="qbank-overlay">
-          <div className="sheet-up qbank-sheet" onClick={(e) => e.stopPropagation()}>
+          <div className="qbank-sheet" style={{ animation: "modalPop .26s cubic-bezier(0.34, 1.56, 0.64, 1) both" }} onClick={(e) => e.stopPropagation()}>
             <div style={{ padding: '16px 18px 10px', flexShrink: 0 }}>
-              <div style={{ width: 38, height: 4, borderRadius: 999, background: 'var(--line)', margin: '0 auto 14px' }} />
               <h2 className="serif" style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>You vs {compareName}</h2>
               <p className="sub" style={{ fontSize: 12, marginBottom: 2 }}>{bank} · accuracy by topic</p>
               <div style={{ display: 'flex', gap: 14, marginTop: 8, fontSize: 11.5, fontWeight: 700 }}>
@@ -377,4 +375,3 @@ function SharedToMe({ bank, grants, onCompare }) {
     </div>
   );
 }
-               
