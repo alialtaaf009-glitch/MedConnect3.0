@@ -304,15 +304,26 @@ function NotifToggle() {
       {on && (
         <div style={{ padding: '0 14px 6px' }}>
           <button className="link" style={{ fontSize: 12, fontWeight: 700 }} onClick={async () => {
+            // First: test if THIS device can show a notification at all (via the service worker)
+            try {
+              const reg = await navigator.serviceWorker.ready;
+              await reg.showNotification('MedConnect local test 🔔', { body: 'If you see THIS, your device can show notifications. (This is a local test.)', icon: '/pwa-192.png' });
+            } catch (e) {
+              alert('Local notification failed: ' + (e.message || e) + '\n\nThis means notifications are blocked at the device/browser level.');
+              return;
+            }
+            // Then: test the full server → push path
             try {
               const r = await api.pushDebug();
               const d = r.diag || {};
               alert(
-                'Push diagnostic:\n' +
-                '• Server keys set: ' + (d.vapid_public_set && d.vapid_private_set ? 'YES' : 'NO ❌') + '\n' +
-                '• Subject set: ' + (d.vapid_subject_set ? 'yes' : 'no') + '\n' +
-                '• Your saved devices: ' + (d.my_subscription_count ?? 0) + '\n' +
-                '• Test send: ' + (r.sendResult || '—')
+                'Did you see a "local test" notification just now?\n\n' +
+                'If YES → your device works; the server push is being sent too.\n' +
+                'If NO → notifications are blocked in your phone settings.\n\n' +
+                'Server diagnostic:\n' +
+                '• Keys set: ' + (d.vapid_public_set && d.vapid_private_set ? 'YES' : 'NO') + '\n' +
+                '• Saved devices: ' + (d.my_subscription_count ?? 0) + '\n' +
+                '• Server send: ' + (r.sendResult || '—')
               );
             } catch (e) { alert('Debug failed: ' + (e.message || e)); }
           }}>Send me a test notification</button>
