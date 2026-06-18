@@ -35,6 +35,8 @@ export const api = {
   qbankSetShare: (partnerId, bank, on) => req('/profile', { method: 'POST', body: { action: 'set_share', partnerId, bank, on } }),
   qbankCompare: (partnerId, bank) => req(`/profile?compare=${partnerId}&bank=${encodeURIComponent(bank)}`),
   unreadMessages: () => req('/messages?scope=unread'),
+  markAllRead: () => req('/messages', { method: 'POST', body: { action: 'mark_all_read' } }),
+  markReadOne: (other) => req('/messages', { method: 'POST', body: { action: 'mark_read_one', other } }),
   // group chats (folded into the messages function via ?scope=groups)
   groups: () => req('/messages?scope=groups'),
   group: (id) => req(`/messages?scope=groups&group=${id}`),
