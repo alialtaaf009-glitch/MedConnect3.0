@@ -266,8 +266,7 @@ function Momentum({ user }) {
   // user-hideable tiles (Profile -> Home screen)
   const hideCd = localStorage.getItem('hide_countdown') === '1';
   const hideSt = localStorage.getItem('hide_streak') === '1';
-
-  // exam countdown
+    // exam countdown
   let daysLeft = null;
   if (user?.exam_date) {
     const t = new Date(user.exam_date).getTime();
@@ -527,6 +526,8 @@ export default function Home() {
         );
       })()}
 
+      <QbankCard nav={nav} />
+
       <div style={{ padding: '6px 4px 2px', textAlign: 'center' }}>
         <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: 1.8, color: 'var(--subtle)', textTransform: 'uppercase' }}>
           For doctors, by doctors
@@ -558,5 +559,43 @@ export default function Home() {
         </div>
       )}
     </div>
+  );
+}
+
+// Slim Qbank summary card — shows overall progress, taps through to the full tracker.
+function QbankCard({ nav }) {
+  const [stats, setStats] = useState(null);
+  useEffect(() => {
+    let active = true;
+    api.qbankGet().then((d) => {
+      if (!active) return;
+      const rows = d.progress || [];
+      if (!rows.length) { setStats({ empty: true }); return; }
+      const t = rows.reduce((a, r) => ({ done: a.done + (r.done || 0), total: a.total + (r.total || 0), correct: a.correct + (r.correct || 0) }), { done: 0, total: 0, correct: 0 });
+      const acc = t.done ? Math.round((t.correct / t.done) * 100) : 0;
+      setStats({ done: t.done, acc, banks: [...new Set(rows.map((r) => r.bank))].length });
+    }).catch(() => setStats({ empty: true }));
+    return () => { active = false; };
+  }, []);
+
+  if (!stats) return null;
+
+  return (
+    <button onClick={() => nav('/qbank')} style={{
+      width: '100%', display: 'flex', alignItems: 'center', gap: 13, margin: '4px 0 6px', padding: '13px 15px',
+      background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 16, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
+      boxShadow: '0 2px 8px rgba(20,40,30,.05)',
+    }}>
+      <div style={{ width: 42, height: 42, borderRadius: 12, background: 'var(--paper-2)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--forest)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5h16v14H4zM4 9h16M9 9v10" /></svg>
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontWeight: 800, fontSize: 14.5 }}>Qbank Tracker</div>
+        {stats.empty
+          ? <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 1 }}>Start tracking your question progress</div>
+          : <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 1 }}>{stats.done} done · {stats.acc}% accuracy{stats.banks > 1 ? ` · ${stats.banks} banks` : ''}</div>}
+      </div>
+      <span style={{ width: 26, height: 26, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', color: 'var(--forest)', fontWeight: 800, flexShrink: 0 }}>›</span>
+    </button>
   );
 }
