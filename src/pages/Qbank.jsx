@@ -4,57 +4,103 @@ import { api } from '../lib/api.js';
 import { examColor } from '../lib/examColors.js';
 
 // Qbank progress tracker — solo by default, optional per-partner sharing.
-// Tracks per topic: done / total / correct. Overall is derived.
+// Users can keep multiple named qbanks (PassMedicine, Pastest, UWorld...) and rename them.
 export default function Qbank() {
   const { user } = useAuth();
-  const [bank, setBank] = useState(user?.question_bank || user?.exam || 'My Qbank');
-  const [rows, setRows] = useState([]);          // [{bank, topic, done, total, correct}]
-  const [sharingWith, setSharingWith] = useState([]); // [{grantee_id, bank}]
+  const color = examColor(user?.exam) || '#1f4d3f';
+
+  const [rows, setRows] = useState([]);               // [{bank, topic, done, total, correct}]
+  const [banks, setBanks] = useState([]);             // list of bank names
+  const [bank, setBank] = useState('');               // active bank
+  const [sharingWith, setSharingWith] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState({ topic: '', done: '', total: '', correct: '' });
+
   const [shareOpen, setShareOpen] = useState(false);
   const [partners, setPartners] = useState([]);
+  const [partnersLoading, setPartnersLoading] = useState(false);
+
   const [compareId, setCompareId] = useState(null);
   const [compareRows, setCompareRows] = useState([]);
   const [compareName, setCompareName] = useState('');
+
+  const [renaming, setRenaming] = useState(false);
+  const [renameVal, setRenameVal] = useState('');
+  const [newBankOpen, setNewBankOpen] = useState(false);
+  const [newBankVal, setNewBankVal] = useState('');
 
   const load = async () => {
     setLoading(true);
     try {
       const d = await api.qbankGet();
-      setRows(d.progress || []);
+      const pr = d.progress || [];
+      setRows(pr);
       setSharingWith(d.sharingWith || []);
+      // derive bank list; include any locally-added empty banks
+      const found = [...new Set(pr.map((r) => r.bank))];
+      setBanks((prev) => {
+        const merged = [...new Set([...prev, ...found])];
+        return merged.length ? merged : [user?.question_bank || 'PassMedicine'];
+      });
+      setBank((b) => b || found[0] || user?.question_bank || 'PassMedicine');
     } catch (e) {}
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
 
   const bankRows = rows.filter((r) => r.bank === bank);
-  const banks = [...new Set([bank, ...rows.map((r) => r.bank)])];
-
   const totals = bankRows.reduce((a, r) => ({
     done: a.done + (r.done || 0), total: a.total + (r.total || 0), correct: a.correct + (r.correct || 0),
   }), { done: 0, total: 0, correct: 0 });
   const pctDone = totals.total ? Math.round((totals.done / totals.total) * 100) : 0;
   const pctAcc = totals.done ? Math.round((totals.correct / totals.done) * 100) : 0;
-
-  const color = examColor(user?.exam) || '#1f4d3f';
+  const accColor = (p) => p >= 70 ? '#2c7a4b' : p >= 50 ? '#b98a2e' : '#a8442a';
 
   const saveTopic = async () => {
     if (!draft.topic.trim()) return;
     const done = parseInt(draft.done, 10) || 0;
     const total = parseInt(draft.total, 10) || 0;
-    const correct = parseInt(draft.correct, 10) || 0;
-    await api.qbankSave(bank, draft.topic.trim(), done, total, Math.min(correct, done));
+    const correct = Math.min(parseInt(draft.correct, 10) || 0, done);
+    await api.qbankSave(bank, draft.topic.trim(), done, total, correct);
     setDraft({ topic: '', done: '', total: '', correct: '' });
     setAdding(false);
     load();
   };
   const delTopic = async (topic) => { await api.qbankDeleteTopic(bank, topic); load(); };
 
+  const addBank = () => {
+    const name = newBankVal.trim();
+    if (!name) return;
+    setBanks((prev) => [...new Set([...prev, name])]);
+    setBank(name);
+    setNewBankVal(''); setNewBankOpen(false);
+    setAdding(true); // jump straight to adding a topic
+  };
+
+  const doRename = async () => {
+    const name = renameVal.trim();
+    if (!name || name === bank) { setRenaming(false); return; }
+    // re-save each topic under the new bank name, delete old
+    for (const r of bankRows) {
+      await api.qbankSave(name, r.topic, r.done, r.total, r.correct);
+      await api.qbankDeleteTopic(bank, r.topic);
+    }
+    // migrate shares
+    for (const g of sharingWith.filter((g) => g.bank === bank)) {
+      await api.qbankSetShare(g.grantee_id, name, true);
+      await api.qbankSetShare(g.grantee_id, bank, false);
+    }
+    setBanks((prev) => prev.map((b) => (b === bank ? name : b)));
+    setBank(name);
+    setRenaming(false);
+    load();
+  };
+
   const openShare = async () => {
     setShareOpen(true);
+    setPartnersLoading(true);
     try {
       const d = await api.connections();
       const me = user?.id;
@@ -64,45 +110,60 @@ export default function Qbank() {
       });
       setPartners(list);
     } catch (e) { setPartners([]); }
+    setPartnersLoading(false);
   };
 
   const isSharedWith = (pid) => sharingWith.some((g) => g.grantee_id == pid && g.bank === bank);
-  const toggleShare = async (pid, on) => {
-    await api.qbankSetShare(pid, bank, on);
-    load();
-  };
+  const toggleShare = async (pid, on) => { await api.qbankSetShare(pid, bank, on); load(); };
 
   const openCompare = async (pid, name) => {
     setCompareId(pid); setCompareName(name); setCompareRows([]);
-    try {
-      const d = await api.qbankCompare(pid, bank);
-      setCompareRows(d.progress || []);
-    } catch (e) { setCompareRows([]); }
+    try { const d = await api.qbankCompare(pid, bank); setCompareRows(d.progress || []); } catch (e) { setCompareRows([]); }
   };
 
-  const accColor = (p) => p >= 70 ? '#2c7a4b' : p >= 50 ? '#b98a2e' : '#a8442a';
+  const shareCount = sharingWith.filter((g) => g.bank === bank).length;
 
   return (
     <div className="screen">
-      <h1 className="serif" style={{ fontSize: 24, fontWeight: 700, marginBottom: 2 }}>Qbank Tracker</h1>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
+        <h1 className="serif" style={{ fontSize: 24, fontWeight: 700 }}>Qbank Tracker</h1>
+      </div>
       <p className="sub" style={{ marginBottom: 16 }}>Track your question-bank progress, solo or shared.</p>
 
-      {/* bank selector */}
-      {banks.length > 1 && (
-        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 14, paddingBottom: 4 }}>
-          {banks.map((b) => (
-            <button key={b} onClick={() => setBank(b)} style={{
-              flexShrink: 0, padding: '7px 14px', borderRadius: 999, fontSize: 12.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-              border: bank === b ? 'none' : '1.5px solid var(--line)', background: bank === b ? color : 'var(--card)', color: bank === b ? '#fff' : 'var(--muted)',
-            }}>{b}</button>
-          ))}
+      {/* bank selector — pills + new */}
+      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 14, paddingBottom: 4, alignItems: 'center' }}>
+        {banks.map((b) => (
+          <button key={b} onClick={() => setBank(b)} style={{
+            flexShrink: 0, padding: '7px 14px', borderRadius: 999, fontSize: 12.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+            border: bank === b ? 'none' : '1.5px solid var(--line)', background: bank === b ? color : 'var(--card)', color: bank === b ? '#fff' : 'var(--muted)',
+          }}>{b}</button>
+        ))}
+        <button onClick={() => setNewBankOpen(true)} style={{ flexShrink: 0, padding: '7px 13px', borderRadius: 999, fontSize: 12.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', border: '1.5px dashed var(--line)', background: 'transparent', color: 'var(--muted)' }}>+ New</button>
+      </div>
+
+      {newBankOpen && (
+        <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+          <input className="input" autoFocus placeholder="Qbank name (e.g. PassMedicine, Pastest, UWorld)" value={newBankVal} onChange={(e) => setNewBankVal(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') addBank(); }} style={{ marginBottom: 0, flex: 1, fontSize: 13 }} />
+          <button onClick={addBank} className="btn-sm">Add</button>
         </div>
       )}
 
       {/* overall summary card */}
-      <div style={{ borderRadius: 18, padding: 18, marginBottom: 16, background: `linear-gradient(135deg, ${color}, ${color}cc)`, color: '#fff' }}>
-        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 0.5, textTransform: 'uppercase', opacity: 0.85, marginBottom: 10 }}>{bank} · Overall</div>
-        <div style={{ display: 'flex', gap: 20 }}>
+      <div style={{ borderRadius: 18, padding: 18, marginBottom: 14, background: `linear-gradient(135deg, ${color}, ${color}cc)`, color: '#fff' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          {renaming ? (
+            <div style={{ display: 'flex', gap: 6, flex: 1 }}>
+              <input className="input" autoFocus value={renameVal} onChange={(e) => setRenameVal(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') doRename(); }} style={{ marginBottom: 0, flex: 1, fontSize: 13, padding: '6px 9px' }} />
+              <button onClick={doRename} style={{ background: 'rgba(255,255,255,.25)', color: '#fff', border: 'none', borderRadius: 8, padding: '0 12px', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Save</button>
+            </div>
+          ) : (
+            <>
+              <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 0.5, textTransform: 'uppercase', opacity: 0.85 }}>{bank} · Overall</div>
+              <button onClick={() => { setRenameVal(bank); setRenaming(true); }} style={{ background: 'none', border: 'none', color: '#fff', opacity: 0.8, fontSize: 11, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>Rename</button>
+            </>
+          )}
+        </div>
+        <div style={{ display: 'flex', gap: 24 }}>
           <div>
             <div className="serif" style={{ fontSize: 30, fontWeight: 900, lineHeight: 1 }}>{totals.done}<span style={{ fontSize: 16, opacity: 0.7 }}>/{totals.total || '?'}</span></div>
             <div style={{ fontSize: 11, opacity: 0.85, marginTop: 2 }}>questions done</div>
@@ -122,11 +183,7 @@ export default function Qbank() {
       {/* share button */}
       <button onClick={openShare} className="btn ghost" style={{ width: '100%', marginBottom: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
         👥 Manage sharing
-        {sharingWith.filter((g) => g.bank === bank).length > 0 && (
-          <span style={{ background: color, color: '#fff', fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '2px 8px' }}>
-            Sharing with {sharingWith.filter((g) => g.bank === bank).length}
-          </span>
-        )}
+        {shareCount > 0 && <span style={{ background: color, color: '#fff', fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '2px 8px' }}>Sharing with {shareCount}</span>}
       </button>
 
       {/* topics */}
@@ -136,7 +193,6 @@ export default function Qbank() {
       </div>
 
       {loading && <div className="spinner" style={{ margin: '20px auto' }} />}
-
       {!loading && bankRows.length === 0 && !adding && (
         <p className="sub" style={{ fontStyle: 'italic', padding: '8px 0 16px' }}>No topics yet. Add your first chapter to start tracking.</p>
       )}
@@ -165,11 +221,11 @@ export default function Qbank() {
 
       {adding && (
         <div style={{ background: 'var(--card)', border: `1.5px solid ${color}`, borderRadius: 14, padding: 14, marginBottom: 8 }}>
-          <input className="input" placeholder="Topic / chapter (e.g. Cardiology)" value={draft.topic} onChange={(e) => setDraft({ ...draft, topic: e.target.value })} style={{ marginBottom: 8 }} />
+          <input className="input" autoFocus placeholder="Topic / chapter (e.g. Cardiology)" value={draft.topic} onChange={(e) => setDraft({ ...draft, topic: e.target.value })} style={{ marginBottom: 8 }} />
           <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-            <input className="input" type="number" placeholder="Done" value={draft.done} onChange={(e) => setDraft({ ...draft, done: e.target.value })} style={{ marginBottom: 0, flex: 1 }} />
-            <input className="input" type="number" placeholder="Total" value={draft.total} onChange={(e) => setDraft({ ...draft, total: e.target.value })} style={{ marginBottom: 0, flex: 1 }} />
-            <input className="input" type="number" placeholder="Correct" value={draft.correct} onChange={(e) => setDraft({ ...draft, correct: e.target.value })} style={{ marginBottom: 0, flex: 1 }} />
+            <input className="input" type="number" inputMode="numeric" placeholder="Done" value={draft.done} onChange={(e) => setDraft({ ...draft, done: e.target.value })} style={{ marginBottom: 0, flex: 1 }} />
+            <input className="input" type="number" inputMode="numeric" placeholder="Total" value={draft.total} onChange={(e) => setDraft({ ...draft, total: e.target.value })} style={{ marginBottom: 0, flex: 1 }} />
+            <input className="input" type="number" inputMode="numeric" placeholder="Correct" value={draft.correct} onChange={(e) => setDraft({ ...draft, correct: e.target.value })} style={{ marginBottom: 0, flex: 1 }} />
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button onClick={saveTopic} className="btn" style={{ background: color, flex: 1, padding: '9px' }}>Save</button>
@@ -178,64 +234,93 @@ export default function Qbank() {
         </div>
       )}
 
-      {/* SHARE MODAL */}
+      {/* partners who share WITH me */}
+      <SharedToMe bank={bank} onCompare={openCompare} />
+
+      {/* SHARE MODAL — bottom sheet with bouncy slide + scroll */}
       {shareOpen && (
-        <div className="overlay" onClick={() => setShareOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-          <div className="card" onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 440, borderRadius: '18px 18px 0 0', maxHeight: '80vh', overflowY: 'auto' }}>
-            <h2 className="serif" style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>Share “{bank}” progress</h2>
-            <p className="sub" style={{ fontSize: 12.5, marginBottom: 6 }}>Private by default. Turn a partner on to let them see your chapter accuracy for this bank. Turn off anytime — it stops instantly.</p>
-            <p className="sub" style={{ fontSize: 11, color: 'var(--subtle)', marginBottom: 14 }}>🔒 Shares accuracy only — never your actual questions.</p>
-            {partners.length === 0 && <p className="sub">No connected partners yet.</p>}
-            {partners.map((p) => {
-              const on = isSharedWith(p.id);
-              const theyShare = false; // could be derived from sharedToMe
-              return (
-                <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 0', borderBottom: '1px solid var(--line)' }}>
-                  <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', fontSize: 19 }}>{p.avatar || '🩺'}</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: 14 }}>{p.name}</div>
-                    <div style={{ fontSize: 11.5, color: on ? '#2c7a4b' : 'var(--subtle)' }}>{on ? 'You share with them' : 'Not sharing'}</div>
+        <div onClick={() => setShareOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+          <div className="sheet-up" onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 480, background: 'var(--paper)', borderRadius: '20px 20px 0 0', maxHeight: '78vh', display: 'flex', flexDirection: 'column', boxShadow: '0 -8px 30px rgba(0,0,0,.2)' }}>
+            <div style={{ padding: '16px 18px 10px', flexShrink: 0 }}>
+              <div style={{ width: 38, height: 4, borderRadius: 999, background: 'var(--line)', margin: '0 auto 14px' }} />
+              <h2 className="serif" style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>Share “{bank}”</h2>
+              <p className="sub" style={{ fontSize: 12.5, marginBottom: 4 }}>Private by default. Turn a partner on to let them see your chapter accuracy for this bank. Off anytime — stops instantly.</p>
+              <p className="sub" style={{ fontSize: 11, color: 'var(--subtle)' }}>🔒 Shows accuracy only — never your actual questions.</p>
+            </div>
+            <div style={{ overflowY: 'auto', flex: 1, padding: '4px 18px 0' }}>
+              {partnersLoading && <div className="spinner" style={{ margin: '24px auto' }} />}
+              {!partnersLoading && partners.length === 0 && <p className="sub" style={{ padding: '10px 0' }}>No connected partners yet.</p>}
+              {partners.map((p) => {
+                const on = isSharedWith(p.id);
+                return (
+                  <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 0', borderBottom: '1px solid var(--line)' }}>
+                    <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', fontSize: 19, flexShrink: 0 }}>{p.avatar || '🩺'}</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: 14 }}>{p.name}</div>
+                      <div style={{ fontSize: 11.5, color: on ? '#2c7a4b' : 'var(--subtle)' }}>{on ? 'You share with them' : 'Not sharing'}</div>
+                    </div>
+                    <button onClick={() => toggleShare(p.id, !on)} style={{ width: 46, height: 27, borderRadius: 999, border: 'none', cursor: 'pointer', position: 'relative', background: on ? color : 'var(--line)', transition: 'background .2s', flexShrink: 0 }}>
+                      <span style={{ position: 'absolute', top: 3, left: on ? 22 : 3, width: 21, height: 21, borderRadius: '50%', background: '#fff', transition: 'left .2s' }} />
+                    </button>
                   </div>
-                  <button onClick={() => toggleShare(p.id, !on)} style={{
-                    width: 46, height: 27, borderRadius: 999, border: 'none', cursor: 'pointer', position: 'relative',
-                    background: on ? color : 'var(--line)', transition: 'background .2s',
-                  }}>
-                    <span style={{ position: 'absolute', top: 3, left: on ? 22 : 3, width: 21, height: 21, borderRadius: '50%', background: '#fff', transition: 'left .2s' }} />
-                  </button>
-                </div>
-              );
-            })}
-            <button onClick={() => setShareOpen(false)} className="btn ghost" style={{ width: '100%', marginTop: 14 }}>Done</button>
+                );
+              })}
+            </div>
+            <div style={{ padding: '12px 18px', flexShrink: 0 }}>
+              <button onClick={() => setShareOpen(false)} className="btn ghost" style={{ width: '100%' }}>Done</button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* partners who share WITH me → compare */}
-      <SharedToMe bank={bank} onCompare={openCompare} />
-
-      {/* COMPARE MODAL */}
+      {/* COMPARE MODAL — paired bars (you vs them) */}
       {compareId && (
-        <div className="overlay" onClick={() => setCompareId(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-          <div className="card" onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 440, borderRadius: '18px 18px 0 0', maxHeight: '80vh', overflowY: 'auto' }}>
-            <h2 className="serif" style={{ fontSize: 18, fontWeight: 700, marginBottom: 10 }}>{compareName} · {bank}</h2>
-            {compareRows.length === 0 && <p className="sub">No shared progress for this bank yet.</p>}
-            {compareRows.map((r) => {
-              const acc = r.done ? Math.round((r.correct / r.done) * 100) : 0;
-              const mine = bankRows.find((m) => m.topic === r.topic);
-              const myAcc = mine && mine.done ? Math.round((mine.correct / mine.done) * 100) : null;
-              return (
-                <div key={r.topic} style={{ padding: '10px 0', borderBottom: '1px solid var(--line)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, fontWeight: 700, marginBottom: 5 }}>
-                    <span>{r.topic}</span>
-                    <span style={{ color: accColor(acc) }}>{acc}%{myAcc !== null && <span style={{ color: 'var(--subtle)', fontWeight: 400 }}> · you {myAcc}%</span>}</span>
-                  </div>
-                  <div style={{ height: 5, borderRadius: 999, background: 'var(--paper-2)', overflow: 'hidden' }}>
-                    <div style={{ width: `${acc}%`, height: '100%', background: accColor(acc) }} />
-                  </div>
-                </div>
-              );
-            })}
-            <button onClick={() => setCompareId(null)} className="btn ghost" style={{ width: '100%', marginTop: 14 }}>Close</button>
+        <div onClick={() => setCompareId(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+          <div className="sheet-up" onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 480, background: 'var(--paper)', borderRadius: '20px 20px 0 0', maxHeight: '78vh', display: 'flex', flexDirection: 'column', boxShadow: '0 -8px 30px rgba(0,0,0,.2)' }}>
+            <div style={{ padding: '16px 18px 10px', flexShrink: 0 }}>
+              <div style={{ width: 38, height: 4, borderRadius: 999, background: 'var(--line)', margin: '0 auto 14px' }} />
+              <h2 className="serif" style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>You vs {compareName}</h2>
+              <p className="sub" style={{ fontSize: 12, marginBottom: 2 }}>{bank} · accuracy by topic</p>
+              <div style={{ display: 'flex', gap: 14, marginTop: 8, fontSize: 11.5, fontWeight: 700 }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 11, height: 11, borderRadius: 3, background: color, display: 'inline-block' }} />You</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 11, height: 11, borderRadius: 3, background: 'var(--gold)', display: 'inline-block' }} />{compareName}</span>
+              </div>
+            </div>
+            <div style={{ overflowY: 'auto', flex: 1, padding: '6px 18px 0' }}>
+              {compareRows.length === 0 && <p className="sub" style={{ padding: '10px 0' }}>No shared progress for this bank yet.</p>}
+              {(() => {
+                // union of topics: theirs + mine
+                const topics = [...new Set([...compareRows.map((r) => r.topic), ...bankRows.map((r) => r.topic)])];
+                return topics.map((topic) => {
+                  const theirs = compareRows.find((r) => r.topic === topic);
+                  const mine = bankRows.find((r) => r.topic === topic);
+                  const theirAcc = theirs && theirs.done ? Math.round((theirs.correct / theirs.done) * 100) : null;
+                  const myAcc = mine && mine.done ? Math.round((mine.correct / mine.done) * 100) : null;
+                  return (
+                    <div key={topic} style={{ padding: '11px 0', borderBottom: '1px solid var(--line)' }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 7 }}>{topic}</div>
+                      {/* my bar */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
+                        <div style={{ flex: 1, height: 14, borderRadius: 999, background: 'var(--paper-2)', overflow: 'hidden' }}>
+                          <div style={{ width: `${myAcc ?? 0}%`, height: '100%', background: color, borderRadius: 999, transition: 'width .4s' }} />
+                        </div>
+                        <span style={{ fontSize: 11.5, fontWeight: 700, width: 60, textAlign: 'right', color: myAcc === null ? 'var(--subtle)' : color }}>{myAcc === null ? '—' : myAcc + '%'}</span>
+                      </div>
+                      {/* their bar */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ flex: 1, height: 14, borderRadius: 999, background: 'var(--paper-2)', overflow: 'hidden' }}>
+                          <div style={{ width: `${theirAcc ?? 0}%`, height: '100%', background: 'var(--gold)', borderRadius: 999, transition: 'width .4s' }} />
+                        </div>
+                        <span style={{ fontSize: 11.5, fontWeight: 700, width: 60, textAlign: 'right', color: theirAcc === null ? 'var(--subtle)' : 'var(--gold)' }}>{theirAcc === null ? '—' : theirAcc + '%'}</span>
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+            <div style={{ padding: '12px 18px', flexShrink: 0 }}>
+              <button onClick={() => setCompareId(null)} className="btn ghost" style={{ width: '100%' }}>Close</button>
+            </div>
           </div>
         </div>
       )}
@@ -243,7 +328,6 @@ export default function Qbank() {
   );
 }
 
-// partners who have granted ME access for this bank
 function SharedToMe({ bank, onCompare }) {
   const [list, setList] = useState([]);
   useEffect(() => {
@@ -280,5 +364,4 @@ function SharedToMe({ bank, onCompare }) {
       ))}
     </div>
   );
-            }
-
+}
