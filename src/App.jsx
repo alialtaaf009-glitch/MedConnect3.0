@@ -188,6 +188,15 @@ function TopBar({ user }) {
   const msgCount = (notifs.unread || []).reduce((a, r) => a + (r.unread || 0), 0);
   const totalCount = reqCount + msgCount;
 
+  // keep the home-screen app icon badge in sync with the in-app count
+  useEffect(() => {
+    if (!('setAppBadge' in navigator)) return;
+    try {
+      if (totalCount > 0) navigator.setAppBadge(totalCount);
+      else navigator.clearAppBadge();
+    } catch (e) {}
+  }, [totalCount]);
+
   const loadNotifs = useRef(() => {});
   useEffect(() => {
     if (!user) return;
@@ -201,8 +210,8 @@ function TopBar({ user }) {
     };
     loadNotifs.current = load;
     load();
-    const t = setInterval(load, 8000); // poll every 8s
-    // refresh instantly when the app regains focus (e.g. returning from another app)
+    // poll gently every 30s, and only when the app is actually visible (push covers urgency)
+    const t = setInterval(() => { if (document.visibilityState === 'visible') load(); }, 30000);
     const onVis = () => { if (document.visibilityState === 'visible') load(); };
     document.addEventListener('visibilitychange', onVis);
     window.addEventListener('focus', load);
@@ -332,147 +341,3 @@ function TopBar({ user }) {
   );
 }
 
-function TabBar() {
-  const timer = useTimer();
-  const timerRunning = !!timer?.running;
-  const [hasUnread, setHasUnread] = useState(false);
-  const [hasRequests, setHasRequests] = useState(false);
-
-  // poll conversations; show a dot on Chat if any incoming message is newer
-  // than what we've marked as read (stored locally per the helper).
-  useEffect(() => {
-    let alive = true;
-    const check = async () => {
-      try {
-        const d = await api.conversations();
-        const anyUnread = (d.conversations || []).some((c) =>
-          c.last_sender == c.other_id &&
-          new Date(c.last_at).getTime() > Number(localStorage.getItem('chat_read_' + c.other_id) || 0)
-        );
-        if (alive) setHasUnread(anyUnread);
-      } catch (e) {}
-      try {
-        const cd = await api.connections();
-        // incoming pending requests = someone asked to connect with me
-        const pending = (cd.incoming || cd.requests || cd.pending || []).length;
-        if (alive) setHasRequests(pending > 0);
-      } catch (e) {}
-    };
-    check();
-    const t = setInterval(check, 8000);
-    return () => { alive = false; clearInterval(t); };
-  }, []);
-
-  const tabs = [
-    ['/home', 'home', 'Home'],
-    ['/partners', 'partners', 'Partners'],
-    ['/osce', 'osce', 'OSCE'],
-    ['/chat', 'chat', 'Chat'],
-    ['/focus', 'focus', 'Focus'],
-  ];
-  const loc = useLocation();
-  // tapping the tab you're already on scrolls that page back to the top
-  const handleTab = (to) => (e) => {
-    if (loc.pathname === to) {
-      e.preventDefault();
-      const scroller = document.querySelector('.app-scroll') || window;
-      if (scroller === window) window.scrollTo({ top: 0, behavior: 'smooth' });
-      else scroller.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
-  return (
-    <nav className="tabbar">
-      {tabs.map(([to, ic, label]) => (
-        <NavLink key={to} to={to} onClick={handleTab(to)} className={({ isActive }) => (isActive ? 'active' : '')}>
-          <span className="ic" style={{ position: 'relative' }}>
-            <Icon name={ic} />
-            {ic === 'chat' && hasUnread && <span className="badge-dot" />}
-            {ic === 'partners' && hasRequests && <span className="badge-dot" />}
-            {ic === 'focus' && timerRunning && <span className="timer-live" />}
-          </span>{label}
-        </NavLink>
-      ))}
-    </nav>
-  );
-}
-
-export default function App() {
-  const { user, loading } = useAuth();
-  const { mode, toggle } = useTheme();
-  const { immersive } = useBack();
-
-  // hold the splash long enough for the draw animation to finish, even if auth resolves instantly
-  const [splashDone, setSplashDone] = useState(false);
-  useEffect(() => {
-    const t = setTimeout(() => setSplashDone(true), 1500);
-    return () => clearTimeout(t);
-  }, []);
-
-  if (loading || !splashDone) return (
-    <div className="app">
-      <div className="center splash" style={{ flexDirection: 'column', gap: 16 }}>
-        <svg className="splash-draw" width="92" height="92" viewBox="0 0 64 64" aria-label="MedConnect">
-          <line x1="32" y1="8" x2="32" y2="58" />
-          <path className="snake" d="M32 16 q10 6 0 12 q-10 6 0 12 q10 6 0 10" />
-          <path className="wings" d="M32 14 q-10 -2 -16 4" />
-          <path className="wings" d="M32 14 q10 -2 16 4" />
-          <circle cx="32" cy="9" r="3" />
-        </svg>
-        <div className="splash-brand">MedConnect</div>
-        <div className="splash-tag"><span>Connect.</span> <span>Study.</span> <span>Succeed.</span></div>
-      </div>
-    </div>
-  );
-
-  // not signed in
-  if (!user) {
-    return (
-      <div className="app">
-        <button className="themebtn" onClick={toggle}>{mode === 'dark' ? '☀️' : '🌙'}</button>
-        <Routes>
-          <Route path="/legal" element={<Legal />} />
-          <Route path="/reset" element={<Reset />} />
-          <Route path="/add/:id" element={<SignIn />} />
-          <Route path="*" element={<SignIn />} />
-        </Routes>
-      </div>
-    );
-  }
-
-  // signed in but profile not set up
-  if (!user.profile_complete) {
-    return (
-      <div className="app">
-        <Routes>
-          <Route path="*" element={<Setup />} />
-        </Routes>
-      </div>
-    );
-  }
-
-  // main app
-  return (
-    <div className={`app ${immersive ? 'immersive' : ''}`}>
-      {!immersive && <TopBar user={user} />}
-      <Routes>
-        <Route path="/home" element={<Home />} />
-        <Route path="/partners" element={<Partners />} />
-        <Route path="/osce" element={<Osce />} />
-        <Route path="/chat" element={<Chat />} />
-        <Route path="/focus" element={<Focus />} />
-        <Route path="/motivation" element={<Motivation />} />
-        <Route path="/legal" element={<Legal />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/labs" element={<LabValues />} />
-        <Route path="/formulas" element={<Formulas />} />
-        <Route path="/qbank" element={<Qbank />} />
-        <Route path="/pro" element={<Pro />} />
-        <Route path="/connections" element={<Navigate to="/partners?tab=mine" replace />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/add/:id" element={<AddPartner />} />
-        <Route path="*" element={<Navigate to="/home" replace />} />
-      </Routes>
-      {!immersive && <TabBar />}
-    </div>
-  );
-}
