@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
+import { pushSupported, isSubscribed, subscribePush, unsubscribePush } from '../lib/push.js';
 import { useAuth } from '../context/Auth.jsx';
 import { useTheme } from '../context/Theme.jsx';
 
@@ -231,6 +232,7 @@ export default function Profile() {
           </span>
         </div>
       ))}
+      <NotifToggle />
       <button className="btn ghost" style={{ marginTop:10, color:'var(--rust)', borderColor:'var(--rust)' }} onClick={logout}>Log out</button>
 
       <div style={{ textAlign:'center', marginTop:18 }}>
@@ -250,6 +252,55 @@ export default function Profile() {
       )}
 
       <p className="meta" style={{ textAlign:'center', marginTop:20, fontSize:11, opacity:0.7 }}>MedConnect v{APP_VERSION}</p>
+    </div>
+  );
+}
+
+// Push notifications opt-in toggle
+function NotifToggle() {
+  const [on, setOn] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [supported, setSupported] = useState(true);
+  const [err, setErr] = useState('');
+
+  useEffect(() => {
+    setSupported(pushSupported());
+    isSubscribed().then(setOn);
+  }, []);
+
+  const flip = async () => {
+    if (busy) return;
+    setBusy(true); setErr('');
+    try {
+      if (on) { await unsubscribePush(); setOn(false); }
+      else { await subscribePush(); setOn(true); }
+    } catch (e) {
+      setErr(e.message || 'Could not change notifications.');
+    }
+    setBusy(false);
+  };
+
+  if (!supported) {
+    return (
+      <div className="row" style={{ padding: '12px 14px', opacity: 0.7 }}>
+        <span style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>Push notifications
+          <span style={{ display: 'block', fontSize: 11.5, fontWeight: 400, color: 'var(--subtle)' }}>Not supported on this device/browser. On iPhone, install the app to your Home Screen first.</span>
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="row" style={{ padding: '12px 14px', cursor: 'pointer' }} onClick={flip}>
+        <span style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>Push notifications
+          <span style={{ display: 'block', fontSize: 11.5, fontWeight: 400, color: 'var(--subtle)' }}>Get alerted about new messages & requests</span>
+        </span>
+        <span style={{ width: 40, height: 23, borderRadius: 999, background: on ? 'var(--forest)' : 'var(--line)', position: 'relative', transition: 'background .2s ease', flexShrink: 0, opacity: busy ? 0.6 : 1 }}>
+          <span style={{ position: 'absolute', top: 2.5, left: on ? 19 : 3, width: 18, height: 18, borderRadius: '50%', background: '#fff', transition: 'left .2s ease' }} />
+        </span>
+      </div>
+      {err && <p className="sub" style={{ color: 'var(--rust)', fontSize: 11.5, padding: '0 14px 8px' }}>{err}</p>}
     </div>
   );
 }
