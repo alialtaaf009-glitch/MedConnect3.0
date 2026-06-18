@@ -219,11 +219,21 @@ export default async function handler(req, res) {
       try {
         const me = await sql`SELECT name FROM users WHERE id = ${uid}`;
         const senderName = me[0]?.name || 'Someone';
+        // recipient's total unread messages, for the app-icon badge
+        let badgeCount = 0;
+        try {
+          const cnt = await sql`
+            SELECT COUNT(*)::int AS n FROM messages m
+            LEFT JOIN message_reads r ON r.user_id = ${toId} AND r.other_id = m.sender
+            WHERE m.recipient = ${toId} AND (r.last_read IS NULL OR m.created_at > r.last_read)`;
+          badgeCount = cnt[0]?.n || 0;
+        } catch (e) {}
         await sendPushToUser(toId, {
           title: senderName,
           body: body.trim().slice(0, 120),
           url: `/chat?with=${uid}`,
           tag: `msg-${uid}`,
+          badgeCount,
         });
       } catch (e) {}
       return res.status(201).json({ message: rows[0] });
