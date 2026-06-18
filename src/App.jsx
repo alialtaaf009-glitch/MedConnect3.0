@@ -193,8 +193,7 @@ function TopBar({ user }) {
   useEffect(() => {
     if (!user) return;
     const load = () => {
-      fetch('/api/connections', { credentials: 'include' })
-        .then((r) => r.json())
+      api.connections()
         .then((d) => setNotifs({ requests: d.requests || [], nudges: d.nudges || [] }))
         .catch(() => {});
     };
@@ -393,7 +392,7 @@ export default function App() {
   );
 
   // not signed in
- if (!user) {
+  if (!user) {
     return (
       <div className="app">
         <button className="themebtn" onClick={toggle}>{mode === 'dark' ? '☀️' : '🌙'}</button>
