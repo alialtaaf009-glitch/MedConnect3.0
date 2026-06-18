@@ -19,6 +19,7 @@ import Reset from './pages/Reset.jsx';
 import About from './pages/About.jsx';
 import LabValues from './pages/LabValues.jsx';
 import Formulas from './pages/Formulas.jsx';
+import Qbank from './pages/Qbank.jsx';
 import Pro from './pages/Pro.jsx';
 import Checklist from './components/Checklist.jsx';
 import AddPartner from './pages/AddPartner.jsx';
@@ -129,6 +130,9 @@ function Drawer({ open, onClose, user }) {
           </button>
           <button className="drawer-item" onClick={() => go('/formulas')}>
             <svg viewBox="0 0 24 24"><path d="M4 4h16M4 4v16M9 9l4 4M13 9l-4 4M8 18h8" /></svg>Formulas
+          </button>
+          <button className="drawer-item" onClick={() => go('/qbank')}>
+            <svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM4 9h16M9 9v10" /></svg>Qbank tracker
           </button>
           <div className="drawer-div" />
           <div className="drawer-sect">Grow</div>
@@ -389,7 +393,7 @@ export default function App() {
   );
 
   // not signed in
-if (!user) {
+ if (!user) {
     return (
       <div className="app">
         <button className="themebtn" onClick={toggle}>{mode === 'dark' ? '☀️' : '🌙'}</button>
@@ -429,6 +433,7 @@ if (!user) {
         <Route path="/about" element={<About />} />
         <Route path="/labs" element={<LabValues />} />
         <Route path="/formulas" element={<Formulas />} />
+        <Route path="/qbank" element={<Qbank />} />
         <Route path="/pro" element={<Pro />} />
         <Route path="/connections" element={<Navigate to="/partners?tab=mine" replace />} />
         <Route path="/profile" element={<Profile />} />
