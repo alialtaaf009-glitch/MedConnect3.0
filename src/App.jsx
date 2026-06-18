@@ -191,6 +191,7 @@ function TopBar({ user }) {
   const msgCount = (notifs.unread || []).reduce((a, r) => a + (r.unread || 0), 0);
   const totalCount = reqCount + msgCount;
 
+  const loadNotifs = useRef(() => {});
   useEffect(() => {
     if (!user) return;
     const load = () => {
@@ -201,9 +202,14 @@ function TopBar({ user }) {
         .then((d) => setNotifs((n) => ({ ...n, unread: d.unread || [] })))
         .catch(() => {});
     };
+    loadNotifs.current = load;
     load();
-    const t = setInterval(load, 30000);
-    return () => clearInterval(t);
+    const t = setInterval(load, 8000); // poll every 8s
+    // refresh instantly when the app regains focus (e.g. returning from another app)
+    const onVis = () => { if (document.visibilityState === 'visible') load(); };
+    document.addEventListener('visibilitychange', onVis);
+    window.addEventListener('focus', load);
+    return () => { clearInterval(t); document.removeEventListener('visibilitychange', onVis); window.removeEventListener('focus', load); };
   }, [user, loc.pathname]);
 
   return (
@@ -221,7 +227,7 @@ function TopBar({ user }) {
         <div className="topbar-title">MedConnect</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {user && !onProfile && (
-            <button onClick={() => setBellOpen(!bellOpen)} aria-label="Notifications"
+            <button onClick={() => { const opening = !bellOpen; setBellOpen(opening); if (opening) loadNotifs.current(); }} aria-label="Notifications"
               style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer', color: '#fff', display: 'grid', placeItems: 'center', width: 32, height: 32, borderRadius: '50%', opacity: totalCount > 0 ? 1 : 0.65 }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -267,7 +273,7 @@ function TopBar({ user }) {
                   New Messages
                 </div>
                 {notifs.unread.map((m) => (
-                  <div key={m.other_id} onClick={() => { setBellOpen(false); nav(`/chat?with=${m.other_id}&name=${encodeURIComponent(m.name || '')}&av=${encodeURIComponent(m.avatar || '')}`); }}
+                  <div key={m.other_id} onClick={() => { setNotifs((n) => ({ ...n, unread: (n.unread || []).filter((x) => x.other_id !== m.other_id) })); setBellOpen(false); nav(`/chat?with=${m.other_id}&name=${encodeURIComponent(m.name || '')}&av=${encodeURIComponent(m.avatar || '')}`); }}
                     style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 18px', cursor: 'pointer', borderTop: '1px solid var(--line)' }}
                     onMouseEnter={(e) => e.currentTarget.style.background = 'var(--paper-2)'}
                     onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
