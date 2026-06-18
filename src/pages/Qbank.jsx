@@ -266,7 +266,7 @@ export default function Qbank() {
               <p className="sub" style={{ fontSize: 12.5, marginBottom: 4 }}>Private by default. Turn a partner on to let them see your chapter accuracy for this bank. Off anytime — stops instantly.</p>
               <p className="sub" style={{ fontSize: 11, color: 'var(--subtle)' }}>🔒 Shows accuracy only — never your actual questions.</p>
             </div>
-            <div style={{ overflowY: 'auto', flex: 1, padding: '4px 18px 0' }}>
+            <div className="qbank-sheet-body" style={{ padding: '4px 18px 0' }}>
               {partnersLoading && <div className="spinner" style={{ margin: '24px auto' }} />}
               {!partnersLoading && partners.length === 0 && <p className="sub" style={{ padding: '10px 0' }}>No connected partners yet.</p>}
               {partners.map((p) => {
@@ -304,7 +304,7 @@ export default function Qbank() {
                 <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 11, height: 11, borderRadius: 3, background: 'var(--gold)', display: 'inline-block' }} />{compareName}</span>
               </div>
             </div>
-            <div style={{ overflowY: 'auto', flex: 1, padding: '6px 18px 0' }}>
+            <div className="qbank-sheet-body" style={{ padding: '6px 18px 0' }}>
               {compareRows.length === 0 && <p className="sub" style={{ padding: '10px 0' }}>No shared progress for this bank yet.</p>}
               {(() => {
                 // union of topics: theirs + mine
