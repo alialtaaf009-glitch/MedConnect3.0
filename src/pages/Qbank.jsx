@@ -253,7 +253,7 @@ export default function Qbank() {
       {/* SHARE MODAL — bottom sheet with bouncy slide + scroll */}
       {shareOpen && (
         <div onClick={() => setShareOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', zIndex: 3000, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-          <div className="sheet-up" onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 480, background: 'var(--paper)', borderRadius: '20px 20px 0 0', maxHeight: '78vh', display: 'flex', flexDirection: 'column', boxShadow: '0 -8px 30px rgba(0,0,0,.2)' }}>
+          <div className="sheet-up qbank-sheet" onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 480, background: 'var(--paper)', borderRadius: '20px 20px 0 0', display: 'flex', flexDirection: 'column', boxShadow: '0 -8px 30px rgba(0,0,0,.2)' }}>
             <div style={{ padding: '16px 18px 10px', flexShrink: 0 }}>
               <div style={{ width: 38, height: 4, borderRadius: 999, background: 'var(--line)', margin: '0 auto 14px' }} />
               <h2 className="serif" style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>Share “{bank}”</h2>
@@ -289,7 +289,7 @@ export default function Qbank() {
       {/* COMPARE MODAL — paired bars (you vs them) */}
       {compareId && (
         <div onClick={() => setCompareId(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', zIndex: 3000, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-          <div className="sheet-up" onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 480, background: 'var(--paper)', borderRadius: '20px 20px 0 0', maxHeight: '78vh', display: 'flex', flexDirection: 'column', boxShadow: '0 -8px 30px rgba(0,0,0,.2)' }}>
+          <div className="sheet-up qbank-sheet" onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 480, background: 'var(--paper)', borderRadius: '20px 20px 0 0', display: 'flex', flexDirection: 'column', boxShadow: '0 -8px 30px rgba(0,0,0,.2)' }}>
             <div style={{ padding: '16px 18px 10px', flexShrink: 0 }}>
               <div style={{ width: 38, height: 4, borderRadius: 999, background: 'var(--line)', margin: '0 auto 14px' }} />
               <h2 className="serif" style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>You vs {compareName}</h2>
@@ -318,7 +318,7 @@ export default function Qbank() {
                           <div style={{ width: `${myAcc ?? 0}%`, height: '100%', background: color, borderRadius: 999, transition: 'width .4s' }} />
                         </div>
                         <span style={{ fontSize: 11.5, fontWeight: 700, width: 60, textAlign: 'right', color: myAcc === null ? 'var(--subtle)' : color }}>{myAcc === null ? '—' : myAcc + '%'}</span>
-                      </div>
+                  </div>
                       {/* their bar */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <div style={{ flex: 1, height: 14, borderRadius: 999, background: 'var(--paper-2)', overflow: 'hidden' }}>
