@@ -13,6 +13,7 @@ export default function Qbank() {
   const [banks, setBanks] = useState([]);             // list of bank names
   const [bank, setBank] = useState('');               // active bank
   const [sharingWith, setSharingWith] = useState([]);
+  const [sharedToMe, setSharedToMe] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [adding, setAdding] = useState(false);
@@ -23,6 +24,17 @@ export default function Qbank() {
   const [partnersLoading, setPartnersLoading] = useState(false);
 
   const [compareId, setCompareId] = useState(null);
+
+  // lock background scroll while a bottom sheet is open
+  useEffect(() => {
+    const anyOpen = shareOpen || compareId;
+    if (anyOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = prev; };
+    }
+  }, [shareOpen, compareId]);
+
   const [compareRows, setCompareRows] = useState([]);
   const [compareName, setCompareName] = useState('');
 
@@ -38,6 +50,7 @@ export default function Qbank() {
       const pr = d.progress || [];
       setRows(pr);
       setSharingWith(d.sharingWith || []);
+      setSharedToMe(d.sharedToMe || []);
       // derive bank list; include any locally-added empty banks
       const found = [...new Set(pr.map((r) => r.bank))];
       setBanks((prev) => {
@@ -235,11 +248,11 @@ export default function Qbank() {
       )}
 
       {/* partners who share WITH me */}
-      <SharedToMe bank={bank} onCompare={openCompare} />
+      <SharedToMe bank={bank} grants={sharedToMe} onCompare={openCompare} />
 
       {/* SHARE MODAL — bottom sheet with bouncy slide + scroll */}
       {shareOpen && (
-        <div onClick={() => setShareOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+        <div onClick={() => setShareOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', zIndex: 3000, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
           <div className="sheet-up" onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 480, background: 'var(--paper)', borderRadius: '20px 20px 0 0', maxHeight: '78vh', display: 'flex', flexDirection: 'column', boxShadow: '0 -8px 30px rgba(0,0,0,.2)' }}>
             <div style={{ padding: '16px 18px 10px', flexShrink: 0 }}>
               <div style={{ width: 38, height: 4, borderRadius: 999, background: 'var(--line)', margin: '0 auto 14px' }} />
@@ -266,7 +279,7 @@ export default function Qbank() {
                 );
               })}
             </div>
-            <div style={{ padding: '12px 18px', flexShrink: 0 }}>
+            <div style={{ padding: '12px 18px calc(env(safe-area-inset-bottom, 0px) + 16px)', flexShrink: 0 }}>
               <button onClick={() => setShareOpen(false)} className="btn ghost" style={{ width: '100%' }}>Done</button>
             </div>
           </div>
@@ -275,7 +288,7 @@ export default function Qbank() {
 
       {/* COMPARE MODAL — paired bars (you vs them) */}
       {compareId && (
-        <div onClick={() => setCompareId(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+        <div onClick={() => setCompareId(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', zIndex: 3000, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
           <div className="sheet-up" onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 480, background: 'var(--paper)', borderRadius: '20px 20px 0 0', maxHeight: '78vh', display: 'flex', flexDirection: 'column', boxShadow: '0 -8px 30px rgba(0,0,0,.2)' }}>
             <div style={{ padding: '16px 18px 10px', flexShrink: 0 }}>
               <div style={{ width: 38, height: 4, borderRadius: 999, background: 'var(--line)', margin: '0 auto 14px' }} />
@@ -318,7 +331,7 @@ export default function Qbank() {
                 });
               })()}
             </div>
-            <div style={{ padding: '12px 18px', flexShrink: 0 }}>
+            <div style={{ padding: '12px 18px calc(env(safe-area-inset-bottom, 0px) + 16px)', flexShrink: 0 }}>
               <button onClick={() => setCompareId(null)} className="btn ghost" style={{ width: '100%' }}>Close</button>
             </div>
           </div>
@@ -328,18 +341,17 @@ export default function Qbank() {
   );
 }
 
-function SharedToMe({ bank, onCompare }) {
+function SharedToMe({ bank, grants, onCompare }) {
   const [list, setList] = useState([]);
   useEffect(() => {
     let active = true;
+    const mine = (grants || []).filter((g) => g.bank === bank);
+    if (!mine.length) { setList([]); return; }
     (async () => {
       try {
-        const d = await api.qbankGet();
-        const grants = (d.sharedToMe || []).filter((g) => g.bank === bank);
-        if (!grants.length) { if (active) setList([]); return; }
         const conn = await api.connections();
         const rows = (conn.connected || conn.connections || []);
-        const named = grants.map((g) => {
+        const named = mine.map((g) => {
           const c = rows.find((r) => r.requester == g.grantor_id || r.recipient == g.grantor_id);
           let name = 'Partner', avatar = '🩺';
           if (c) { const iAmReq = c.requester != g.grantor_id; name = iAmReq ? c.recipient_name : c.requester_name; avatar = iAmReq ? c.recipient_avatar : c.requester_avatar; }
@@ -349,7 +361,7 @@ function SharedToMe({ bank, onCompare }) {
       } catch (e) {}
     })();
     return () => { active = false; };
-  }, [bank]);
+  }, [bank, grants]);
 
   if (list.length === 0) return null;
   return (
