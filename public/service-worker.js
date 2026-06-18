@@ -1,5 +1,5 @@
 // MedConnect service worker — enables PWA install + a basic offline shell.
-const CACHE = 'medconnect-v4';
+const CACHE = 'medconnect-v5';
 const APP_SHELL = ['/', '/index.html'];
 
 self.addEventListener('install', (event) => {
@@ -57,7 +57,17 @@ self.addEventListener('push', (event) => {
     tag: data.tag || undefined,
     renotify: !!data.tag,
   };
-  event.waitUntil(self.registration.showNotification(title, options));
+  event.waitUntil((async () => {
+    await self.registration.showNotification(title, options);
+    // update the home-screen app icon badge
+    try {
+      if (self.navigator && 'setAppBadge' in self.navigator) {
+        const count = typeof data.badgeCount === 'number' ? data.badgeCount : 0;
+        if (count > 0) await self.navigator.setAppBadge(count);
+        else await self.navigator.setAppBadge(); // dot if no count
+      }
+    } catch (e) {}
+  })());
 });
 
 self.addEventListener('notificationclick', (event) => {
