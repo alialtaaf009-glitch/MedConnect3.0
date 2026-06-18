@@ -180,7 +180,7 @@ function TopBar({ user }) {
   const nav = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [bellOpen, setBellOpen] = useState(false);
-  const [notifs, setNotifs] = useState({ requests: [], nudges: [] });
+  const [notifs, setNotifs] = useState({ requests: [], nudges: [], unread: [] });
   const { backHandler } = useBack();
   const roots = ['/home', '/partners', '/osce', '/chat', '/focus'];
   const showBack = !roots.includes(loc.pathname) || !!backHandler;
@@ -188,19 +188,23 @@ function TopBar({ user }) {
   const onProfile = loc.pathname === '/profile';
   const initials = (user?.name || 'Dr A').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('');
   const reqCount = notifs.requests.length;
-  const totalCount = reqCount;
+  const msgCount = (notifs.unread || []).reduce((a, r) => a + (r.unread || 0), 0);
+  const totalCount = reqCount + msgCount;
 
   useEffect(() => {
     if (!user) return;
     const load = () => {
       api.connections()
-        .then((d) => setNotifs({ requests: d.requests || [], nudges: d.nudges || [] }))
+        .then((d) => setNotifs((n) => ({ ...n, requests: d.requests || [], nudges: d.nudges || [] })))
+        .catch(() => {});
+      api.unreadMessages()
+        .then((d) => setNotifs((n) => ({ ...n, unread: d.unread || [] })))
         .catch(() => {});
     };
     load();
     const t = setInterval(load, 30000);
     return () => clearInterval(t);
-  }, [user]);
+  }, [user, loc.pathname]);
 
   return (
     <>
@@ -249,11 +253,32 @@ function TopBar({ user }) {
             </div>
 
             <div style={{ overflowY: 'auto', flex: 1 }}>
-            {notifs.requests.length === 0 && (
+            {notifs.requests.length === 0 && (notifs.unread || []).length === 0 && (
               <div style={{ padding: '44px 18px', textAlign: 'center' }}>
                 <div style={{ fontSize: 32, marginBottom: 10 }}>🔔</div>
                 <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>You're all caught up</p>
-                <p className="sub" style={{ fontSize: 12.5 }}>Connection requests and updates will appear here.</p>
+                <p className="sub" style={{ fontSize: 12.5 }}>New messages and connection requests will appear here.</p>
+              </div>
+            )}
+
+            {(notifs.unread || []).length > 0 && (
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 0.5, textTransform: 'uppercase', color: 'var(--subtle)', padding: '12px 18px 4px' }}>
+                  New Messages
+                </div>
+                {notifs.unread.map((m) => (
+                  <div key={m.other_id} onClick={() => { setBellOpen(false); nav(`/chat?with=${m.other_id}&name=${encodeURIComponent(m.name || '')}&av=${encodeURIComponent(m.avatar || '')}`); }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 18px', cursor: 'pointer', borderTop: '1px solid var(--line)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--paper-2)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', fontSize: 21, flexShrink: 0 }}>{m.avatar || '🩺'}</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: 14 }}>{m.name || 'Someone'}</div>
+                      <div style={{ fontSize: 12, color: 'var(--muted)' }}>{m.unread} new message{m.unread > 1 ? 's' : ''}</div>
+                    </div>
+                    <div style={{ minWidth: 18, height: 18, borderRadius: 999, background: 'var(--rust)', color: '#fff', fontSize: 10, fontWeight: 800, display: 'grid', placeItems: 'center', padding: '0 5px', flexShrink: 0 }}>{m.unread > 9 ? '9+' : m.unread}</div>
+                  </div>
+                ))}
               </div>
             )}
 
