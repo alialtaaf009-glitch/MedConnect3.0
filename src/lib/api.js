@@ -39,6 +39,7 @@ export const api = {
   markReadOne: (other) => req('/messages', { method: 'POST', body: { action: 'mark_read_one', other } }),
   savePushSub: (sub) => req('/me', { method: 'POST', body: { action: 'save_sub', sub } }),
   deletePushSub: (endpoint) => req('/me', { method: 'POST', body: { action: 'delete_sub', endpoint } }),
+  pushDebug: () => req('/me', { method: 'POST', body: { action: 'push_debug' } }),
   // group chats (folded into the messages function via ?scope=groups)
   groups: () => req('/messages?scope=groups'),
   group: (id) => req(`/messages?scope=groups&group=${id}`),
