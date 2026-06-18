@@ -1,5 +1,5 @@
 // MedConnect service worker — enables PWA install + a basic offline shell.
-const CACHE = 'medconnect-v1';
+const CACHE = 'medconnect-v3';
 const APP_SHELL = ['/', '/index.html'];
 
 self.addEventListener('install', (event) => {
@@ -42,4 +42,41 @@ self.addEventListener('fetch', (event) => {
       })
     )
   );
+});
+
+// ---- Push notifications ----
+self.addEventListener('push', (event) => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (e) { data = { title: 'MedConnect', body: event.data ? event.data.text() : '' }; }
+  const title = data.title || 'MedConnect';
+  const options = {
+    body: data.body || '',
+    icon: '/pwa-192.png',
+    badge: '/pwa-192.png',
+    data: { url: data.url || '/home' },
+    tag: data.tag || undefined,
+    renotify: !!data.tag,
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const path = (event.notification.data && event.notification.data.url) || '/home';
+  const fullUrl = new URL(path, self.location.origin).href;
+  event.waitUntil((async () => {
+    const list = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    // If an app window is already open, focus it (and try to navigate, ignoring failures).
+    for (const client of list) {
+      if ('focus' in client) {
+        try { await client.focus(); } catch (e) {}
+        try { if (client.navigate) await client.navigate(fullUrl); } catch (e) {}
+        return;
+      }
+    }
+    // Otherwise open a fresh window.
+    if (self.clients.openWindow) {
+      try { await self.clients.openWindow(fullUrl); } catch (e) {}
+    }
+  })());
 });
