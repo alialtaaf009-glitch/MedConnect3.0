@@ -127,7 +127,14 @@ export default function Qbank() {
   };
 
   const isSharedWith = (pid) => sharingWith.some((g) => g.grantee_id == pid && g.bank === bank);
-  const toggleShare = async (pid, on) => { await api.qbankSetShare(pid, bank, on); load(); };
+  const toggleShare = async (pid, on) => {
+    // optimistic: update local sharingWith immediately so the toggle + count refresh instantly
+    setSharingWith((prev) => {
+      if (on) return [...prev, { grantee_id: pid, bank }];
+      return prev.filter((g) => !(g.grantee_id == pid && g.bank === bank));
+    });
+    try { await api.qbankSetShare(pid, bank, on); } catch (e) {}
+  };
 
   const openCompare = async (pid, name) => {
     setCompareId(pid); setCompareName(name); setCompareRows([]);
