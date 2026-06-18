@@ -37,6 +37,8 @@ export const api = {
   unreadMessages: () => req('/messages?scope=unread'),
   markAllRead: () => req('/messages', { method: 'POST', body: { action: 'mark_all_read' } }),
   markReadOne: (other) => req('/messages', { method: 'POST', body: { action: 'mark_read_one', other } }),
+  savePushSub: (sub) => req('/me', { method: 'POST', body: { action: 'save_sub', sub } }),
+  deletePushSub: (endpoint) => req('/me', { method: 'POST', body: { action: 'delete_sub', endpoint } }),
   // group chats (folded into the messages function via ?scope=groups)
   groups: () => req('/messages?scope=groups'),
   group: (id) => req(`/messages?scope=groups&group=${id}`),
