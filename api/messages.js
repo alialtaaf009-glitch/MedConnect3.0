@@ -99,9 +99,32 @@ export default async function handler(req, res) {
 
     // ===================== DIRECT MESSAGES =====================
     if (req.method === 'GET') {
+      // ---- unread summary for the notification bell: GET /api/messages?scope=unread ----
+      if (req.query.scope === 'unread') {
+        await sql`CREATE TABLE IF NOT EXISTS message_reads (user_id INTEGER NOT NULL, other_id INTEGER NOT NULL, last_read TIMESTAMPTZ DEFAULT now(), PRIMARY KEY (user_id, other_id))`;
+        const rows = await sql`
+          SELECT m.sender AS other_id, u.name, u.avatar,
+                 COUNT(*)::int AS unread,
+                 MAX(m.created_at) AS last_at
+          FROM messages m
+          JOIN users u ON u.id = m.sender
+          LEFT JOIN message_reads r ON r.user_id = ${uid} AND r.other_id = m.sender
+          WHERE m.recipient = ${uid}
+            AND (r.last_read IS NULL OR m.created_at > r.last_read)
+          GROUP BY m.sender, u.name, u.avatar
+          ORDER BY last_at DESC`;
+        const total = rows.reduce((a, r) => a + (r.unread || 0), 0);
+        return res.status(200).json({ unread: rows, total });
+      }
+
       const other = req.query.with ? parseInt(req.query.with, 10) : null;
 
       if (other) {
+        // opening a conversation marks it read (clears unread for this peer)
+        await sql`CREATE TABLE IF NOT EXISTS message_reads (user_id INTEGER NOT NULL, other_id INTEGER NOT NULL, last_read TIMESTAMPTZ DEFAULT now(), PRIMARY KEY (user_id, other_id))`;
+        await sql`
+          INSERT INTO message_reads (user_id, other_id, last_read) VALUES (${uid}, ${other}, now())
+          ON CONFLICT (user_id, other_id) DO UPDATE SET last_read = now()`;
         // full conversation, oldest first
         const msgs = await sql`
           SELECT * FROM messages
@@ -184,4 +207,3 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Messaging failed: ' + e.message });
   }
 }
-
