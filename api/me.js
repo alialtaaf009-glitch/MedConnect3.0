@@ -1,4 +1,5 @@
-import { sql, getUserId, safeUser } from './_shared/util.js';
+import { sql, getUserId, safeUser, readBody } from './_shared/util.js';
+import { ensurePushTable } from './_shared/push.js';
 
 export default async function handler(req, res) {
   const uid = getUserId(req);
@@ -10,6 +11,25 @@ export default async function handler(req, res) {
 
   // POST /api/me  { action: 'mark_study' }  -> deliberate daily study tick
   if (req.method === 'POST') {
+    const body = readBody(req);
+
+    // ---- push notification subscription management ----
+    if (body.action === 'save_sub' && body.sub) {
+      await ensurePushTable();
+      const { endpoint, keys } = body.sub;
+      if (endpoint && keys?.p256dh && keys?.auth) {
+        await sql`
+          INSERT INTO push_subs (user_id, endpoint, p256dh, auth)
+          VALUES (${uid}, ${endpoint}, ${keys.p256dh}, ${keys.auth})
+          ON CONFLICT (user_id, endpoint) DO UPDATE SET p256dh = ${keys.p256dh}, auth = ${keys.auth}`;
+      }
+      return res.status(200).json({ ok: true });
+    }
+    if (body.action === 'delete_sub' && body.endpoint) {
+      await ensurePushTable();
+      await sql`DELETE FROM push_subs WHERE user_id = ${uid} AND endpoint = ${body.endpoint}`;
+      return res.status(200).json({ ok: true });
+    }
     const offsetMin = parseTzOffsetMinutes(u.timezone);
     const todayKey = localDayKey(new Date(), offsetMin);
     const lastKey = u.last_study_day ? localDayKey(new Date(u.last_study_day), offsetMin) : null;
@@ -66,4 +86,3 @@ function parseTzOffsetMinutes(tz) {
   const sign = m[1] === '-' ? -1 : 1;
   return sign * ((parseInt(m[2], 10) || 0) * 60 + (parseInt(m[3] || '0', 10) || 0));
 }
-
