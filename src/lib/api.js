@@ -34,6 +34,7 @@ export const api = {
   qbankDeleteTopic: (bank, topic) => req('/profile', { method: 'POST', body: { action: 'delete_topic', bank, topic } }),
   qbankSetShare: (partnerId, bank, on) => req('/profile', { method: 'POST', body: { action: 'set_share', partnerId, bank, on } }),
   qbankCompare: (partnerId, bank) => req(`/profile?compare=${partnerId}&bank=${encodeURIComponent(bank)}`),
+  unreadMessages: () => req('/messages?scope=unread'),
   // group chats (folded into the messages function via ?scope=groups)
   groups: () => req('/messages?scope=groups'),
   group: (id) => req(`/messages?scope=groups&group=${id}`),
