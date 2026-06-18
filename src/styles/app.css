@@ -378,8 +378,8 @@ button:active { -webkit-tap-highlight-color: transparent; }
   background: rgba(0,0,0,.5);
   padding: 14px;
   /* clear the top bar (~60px) and the bottom system bar */
-  padding-top: calc(env(safe-area-inset-top, 0px) + 78px);
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 28px);
+  padding-top: calc(env(safe-area-inset-top, 0px) + 64px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
 }
 .qbank-sheet {
   width: 100%; max-width: 440px; background: var(--paper);
