@@ -90,7 +90,7 @@ export default function Checklist() {
             placeholder="Add a study task…" className="input"
             style={{ flex: 1, marginBottom: 0, padding: '9px 11px', fontSize: 13 }} />
           <button onClick={add} aria-label="Add task" className="btn-sm"
-            style={{ width: 38, fontSize: 20, padding: 0, borderRadius: 10, flexShrink: 0 }}>+</button>
+            style={{ width: 40, height: 40, fontSize: 22, padding: 0, borderRadius: '50%', flexShrink: 0, display: 'grid', placeItems: 'center', lineHeight: 1 }}>+</button>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, paddingLeft: 2 }}>
           <span style={{ fontSize: 11, color: 'var(--subtle)', fontWeight: 600 }}>Colour:</span>
