@@ -301,6 +301,23 @@ function NotifToggle() {
         </span>
       </div>
       {err && <p className="sub" style={{ color: 'var(--rust)', fontSize: 11.5, padding: '0 14px 8px' }}>{err}</p>}
+      {on && (
+        <div style={{ padding: '0 14px 6px' }}>
+          <button className="link" style={{ fontSize: 12, fontWeight: 700 }} onClick={async () => {
+            try {
+              const r = await api.pushDebug();
+              const d = r.diag || {};
+              alert(
+                'Push diagnostic:\n' +
+                '• Server keys set: ' + (d.vapid_public_set && d.vapid_private_set ? 'YES' : 'NO ❌') + '\n' +
+                '• Subject set: ' + (d.vapid_subject_set ? 'yes' : 'no') + '\n' +
+                '• Your saved devices: ' + (d.my_subscription_count ?? 0) + '\n' +
+                '• Test send: ' + (r.sendResult || '—')
+              );
+            } catch (e) { alert('Debug failed: ' + (e.message || e)); }
+          }}>Send me a test notification</button>
+        </div>
+      )}
     </div>
   );
 }
