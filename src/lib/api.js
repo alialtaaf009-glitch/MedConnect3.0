@@ -29,6 +29,11 @@ export const api = {
   conversation: (withId) => req(`/messages?with=${withId}`),
   sendMessage: (to, body) => req('/messages', { method: 'POST', body: { to, body } }),
   createRoom: (slug) => req('/messages', { method: 'POST', body: { action: 'create_room', slug } }),
+  qbankGet: () => req('/profile?qbank=1'),
+  qbankSave: (bank, topic, done, total, correct) => req('/profile', { method: 'POST', body: { action: 'save_progress', bank, topic, done, total, correct } }),
+  qbankDeleteTopic: (bank, topic) => req('/profile', { method: 'POST', body: { action: 'delete_topic', bank, topic } }),
+  qbankSetShare: (partnerId, bank, on) => req('/profile', { method: 'POST', body: { action: 'set_share', partnerId, bank, on } }),
+  qbankCompare: (partnerId, bank) => req(`/profile?compare=${partnerId}&bank=${encodeURIComponent(bank)}`),
   // group chats (folded into the messages function via ?scope=groups)
   groups: () => req('/messages?scope=groups'),
   group: (id) => req(`/messages?scope=groups&group=${id}`),
