@@ -1,4 +1,5 @@
 import { sql, getUserId, readBody } from './_shared/util.js';
+import { sendPushToUser } from './_shared/push.js';
 
 // GET  /api/messages                  -> list of conversations (people + last message)
 // GET  /api/messages?with=USER_ID     -> full conversation with that user
@@ -214,6 +215,17 @@ export default async function handler(req, res) {
         INSERT INTO messages (sender, recipient, body)
         VALUES (${uid}, ${toId}, ${body.trim()})
         RETURNING *`;
+      // fire a push to the recipient (best-effort, never blocks the response)
+      try {
+        const me = await sql`SELECT name FROM users WHERE id = ${uid}`;
+        const senderName = me[0]?.name || 'Someone';
+        await sendPushToUser(toId, {
+          title: senderName,
+          body: body.trim().slice(0, 120),
+          url: `/chat?with=${uid}`,
+          tag: `msg-${uid}`,
+        });
+      } catch (e) {}
       return res.status(201).json({ message: rows[0] });
     }
 
