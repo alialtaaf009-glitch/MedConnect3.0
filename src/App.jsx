@@ -252,10 +252,12 @@ function TopBar({ user }) {
           {/* scrim */}
           <div onClick={() => setBellOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 150 }} />
           {/* panel */}
-          <div style={{ position: 'fixed', top: 60, right: 12, left: 12, maxWidth: 380, marginLeft: 'auto', maxHeight: '55vh', display: 'flex', flexDirection: 'column', background: 'var(--card)', borderRadius: 18, boxShadow: '0 8px 32px rgba(0,0,0,.22)', zIndex: 151, overflow: 'hidden', animation: 'tabPop .25s ease both' }}>
+          <div style={{ position: 'fixed', top: 58, right: 18, left: 18, maxWidth: 444, margin: '0 auto', maxHeight: '60vh', display: 'flex', flexDirection: 'column', background: 'var(--card)', borderRadius: 18, boxShadow: '0 8px 32px rgba(0,0,0,.22)', zIndex: 151, overflow: 'hidden', animation: 'tabPop .25s ease both' }}>
             <div style={{ padding: '15px 18px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--line)', flexShrink: 0 }}>
               <span style={{ fontWeight: 800, fontSize: 15 }}>Notifications</span>
-              {totalCount > 0 && <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--rust)' }}>{totalCount} new</span>}
+              {totalCount > 0
+                ? <button onClick={async () => { setNotifs((n) => ({ ...n, unread: [] })); try { await api.markAllRead(); } catch (e) {} }} style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--forest)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>Mark all read</button>
+                : null}
             </div>
 
             <div style={{ overflowY: 'auto', flex: 1 }}>
@@ -283,6 +285,9 @@ function TopBar({ user }) {
                       <div style={{ fontSize: 12, color: 'var(--muted)' }}>{m.unread} new message{m.unread > 1 ? 's' : ''}</div>
                     </div>
                     <div style={{ minWidth: 18, height: 18, borderRadius: 999, background: 'var(--rust)', color: '#fff', fontSize: 10, fontWeight: 800, display: 'grid', placeItems: 'center', padding: '0 5px', flexShrink: 0 }}>{m.unread > 9 ? '9+' : m.unread}</div>
+                    <button onClick={(e) => { e.stopPropagation(); setNotifs((n) => ({ ...n, unread: (n.unread || []).filter((x) => x.other_id !== m.other_id) })); api.markReadOne(m.other_id).catch(() => {}); }} aria-label="Dismiss" style={{ background: 'none', border: 'none', color: 'var(--subtle)', cursor: 'pointer', padding: 4, flexShrink: 0, display: 'grid', placeItems: 'center' }}>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                    </button>
                   </div>
                 ))}
               </div>
