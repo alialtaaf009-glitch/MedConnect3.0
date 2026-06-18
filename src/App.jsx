@@ -131,9 +131,6 @@ function Drawer({ open, onClose, user }) {
           <button className="drawer-item" onClick={() => go('/formulas')}>
             <svg viewBox="0 0 24 24"><path d="M4 4h16M4 4v16M9 9l4 4M13 9l-4 4M8 18h8" /></svg>Formulas
           </button>
-          <button className="drawer-item" onClick={() => go('/qbank')}>
-            <svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM4 9h16M9 9v10" /></svg>Qbank tracker
-          </button>
           <div className="drawer-div" />
           <div className="drawer-sect">Grow</div>
           <button className="drawer-item" onClick={inviteFriend}>
