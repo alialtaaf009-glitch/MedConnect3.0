@@ -17,29 +17,29 @@ export default async function handler(req, res) {
     // ---- Qbank tracker: GET /api/profile?qbank=1 ----
     if (req.query.qbank) {
       try {
-        await ensureQbankTables();
-        const mine = await sql`SELECT bank, topic, done, total, correct FROM qbank_progress WHERE user_id = ${uid} ORDER BY topic`;
-        // partners I've granted access to see me, and who grants access to me
-        const grantsOut = await sql`SELECT grantee_id, bank FROM share_grants WHERE grantor_id = ${uid}`;
-        const grantsIn = await sql`SELECT grantor_id, bank FROM share_grants WHERE grantee_id = ${uid}`;
+        // read-only: run all three in parallel, no table creation (writes create tables)
+        const [mine, grantsOut, grantsIn] = await Promise.all([
+          sql`SELECT bank, topic, done, total, correct FROM qbank_progress WHERE user_id = ${uid} ORDER BY topic`,
+          sql`SELECT grantee_id, bank FROM share_grants WHERE grantor_id = ${uid}`,
+          sql`SELECT grantor_id, bank FROM share_grants WHERE grantee_id = ${uid}`,
+        ]);
         return res.status(200).json({ progress: mine, sharingWith: grantsOut, sharedToMe: grantsIn });
       } catch (e) {
-        return res.status(500).json({ error: 'Qbank load failed: ' + (e.message || e) });
+        // tables not created yet (no writes ever) -> just return empty, fast
+        return res.status(200).json({ progress: [], sharingWith: [], sharedToMe: [] });
       }
     }
     // ---- Qbank comparison: GET /api/profile?compare=PARTNER_ID&bank=BANK ----
     if (req.query.compare) {
       try {
-        await ensureQbankTables();
         const partner = parseInt(req.query.compare, 10);
         const bank = req.query.bank || '';
-        // only return partner data if THEY granted ME access for this bank
         const grant = await sql`SELECT 1 FROM share_grants WHERE grantor_id = ${partner} AND grantee_id = ${uid} AND bank = ${bank} LIMIT 1`;
         if (!grant.length) return res.status(403).json({ error: 'Not shared', progress: [] });
         const rows = await sql`SELECT bank, topic, done, total, correct FROM qbank_progress WHERE user_id = ${partner} AND bank = ${bank} ORDER BY topic`;
         return res.status(200).json({ progress: rows });
       } catch (e) {
-        return res.status(500).json({ error: 'Compare failed', progress: [] });
+        return res.status(200).json({ progress: [] });
       }
     }
     const target = parseInt(req.query.user, 10);
