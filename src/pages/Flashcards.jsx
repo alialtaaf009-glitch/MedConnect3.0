@@ -46,11 +46,11 @@ function DeckList({ user, onOpen, onStudy }) {
 
       {creating && (
         <div className="card" style={{ marginBottom: 14 }}>
-          <input className="input" autoFocus placeholder="Deck name (e.g. Cardiology — Arrhythmias)" value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') create(); }} style={{ marginBottom: 8 }} />
-          <input className="input" placeholder="Exam tag (optional, e.g. MRCP)" value={tag} onChange={(e) => setTag(e.target.value)} style={{ marginBottom: 10 }} />
+          <input className="input" autoFocus placeholder="Deck name (e.g. Cardiology — Arrhythmias)" value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') create(); }} style={{ marginBottom: 8, borderRadius: 999 }} />
+          <input className="input" placeholder="Exam tag (optional, e.g. MRCP)" value={tag} onChange={(e) => setTag(e.target.value)} style={{ marginBottom: 10, borderRadius: 999 }} />
           <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={create} className="btn" style={{ flex: 1, background: 'var(--forest)' }}>Create deck</button>
-            <button onClick={() => { setCreating(false); setName(''); }} className="btn ghost" style={{ padding: '11px 16px' }}>Cancel</button>
+            <button onClick={create} className="btn bouncy" style={{ flex: 1, background: 'var(--forest)' }}>Create deck</button>
+            <button onClick={() => { setCreating(false); setName(''); }} className="btn ghost bouncy" style={{ padding: '11px 16px' }}>Cancel</button>
           </div>
         </div>
       )}
@@ -94,9 +94,15 @@ function DeckDetail({ deck, onBack, onStudy }) {
   const [front, setFront] = useState('');
   const [back, setBack] = useState('');
   const [saving, setSaving] = useState(false);
+  const [confirmDel, setConfirmDel] = useState(false);
 
   const load = () => api.deckGet(deck.id).then((d) => setCards(d.cards || [])).catch(() => setCards([]));
   useEffect(() => { load(); }, [deck.id]);
+
+  const removeDeck = async () => {
+    try { await api.deckDelete(deck.id); } catch (e) {}
+    onBack();
+  };
 
   const add = async () => {
     if (!front.trim() || !back.trim() || saving) return;
@@ -112,22 +118,30 @@ function DeckDetail({ deck, onBack, onStudy }) {
 
   return (
     <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
         <button onClick={onBack} style={{ background: 'none', border: 'none', fontSize: 24, color: 'var(--muted)', cursor: 'pointer', lineHeight: 1 }}>‹</button>
         <h1 className="serif" style={{ fontSize: 19, fontWeight: 700, color: 'var(--ink)', flex: 1 }}>{deck.name}</h1>
+        <button onClick={() => setConfirmDel(true)} aria-label="Delete deck" style={{ background: 'none', border: 'none', color: 'var(--subtle)', cursor: 'pointer', padding: 4 }}>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14" /></svg>
+        </button>
       </div>
 
-      {/* deferred actions — shown but disabled, so users know they're coming */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-        <button disabled className="btn ghost" style={{ fontSize: 12.5, padding: '8px', opacity: 0.5, cursor: 'default' }}>🔗 Share — soon</button>
-        <button disabled className="btn ghost" style={{ fontSize: 12.5, padding: '8px', opacity: 0.5, cursor: 'default' }}>⬇ Export — soon</button>
-      </div>
+      {confirmDel && (
+        <div className="card" style={{ marginBottom: 14, borderColor: 'var(--rust)', textAlign: 'center' }}>
+          <p style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>Delete “{deck.name}”?</p>
+          <p className="sub" style={{ fontSize: 12.5, marginBottom: 12 }}>This removes the deck and all its cards. Can't be undone.</p>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={removeDeck} className="btn" style={{ flex: 1, background: 'var(--rust)' }}>Delete</button>
+            <button onClick={() => setConfirmDel(false)} className="btn ghost" style={{ padding: '11px 16px' }}>Cancel</button>
+          </div>
+        </div>
+      )}
 
       <div className="card" style={{ marginBottom: 16 }}>
-        <div className="sub" style={{ textTransform: 'uppercase', fontSize: 10, letterSpacing: 1, marginBottom: 6, fontWeight: 700 }}>New card</div>
-        <textarea className="input" rows={2} placeholder="Front (question)" value={front} onChange={(e) => setFront(e.target.value)} style={{ marginBottom: 8, resize: 'vertical' }} />
-        <textarea className="input" rows={2} placeholder="Back (answer)" value={back} onChange={(e) => setBack(e.target.value)} style={{ marginBottom: 10, resize: 'vertical' }} />
-        <button onClick={add} className="btn" style={{ background: 'var(--forest)', opacity: saving ? 0.6 : 1 }}>+ Add card</button>
+        <div className="sub" style={{ textTransform: 'uppercase', fontSize: 10, letterSpacing: 1, marginBottom: 8, fontWeight: 700 }}>New card</div>
+        <textarea className="input" rows={2} placeholder="Front (question)" value={front} onChange={(e) => setFront(e.target.value)} style={{ marginBottom: 8, resize: 'vertical', borderRadius: 18 }} />
+        <textarea className="input" rows={2} placeholder="Back (answer)" value={back} onChange={(e) => setBack(e.target.value)} style={{ marginBottom: 10, resize: 'vertical', borderRadius: 18 }} />
+        <button onClick={add} className="btn bouncy" style={{ background: 'var(--forest)', opacity: saving ? 0.6 : 1 }}>+ Add card</button>
       </div>
 
       {cards && cards.length > 0 && (
@@ -147,6 +161,10 @@ function DeckDetail({ deck, onBack, onStudy }) {
           <button onClick={() => del(c.id)} style={{ background: 'none', border: 'none', color: 'var(--subtle)', cursor: 'pointer', fontSize: 18, flexShrink: 0 }}>×</button>
         </div>
       ))}
+
+      <p className="sub" style={{ textAlign: 'center', fontSize: 11.5, color: 'var(--subtle)', margin: '20px 0 4px' }}>
+        Sharing & export options coming soon
+      </p>
     </>
   );
 }
@@ -191,14 +209,15 @@ function StudyMode({ deck, onDone }) {
   }
 
   const card = queue[idx];
-  const rate = async (rating) => {
-    try { await api.deckRateCard(card.id, rating); } catch (e) {}
+  const rate = (rating) => {
+    // advance instantly; sync to server in the background (no waiting)
+    api.deckRateCard(card.id, rating).catch(() => {});
     if (idx + 1 >= queue.length) setDone(true);
     else { setIdx(idx + 1); setShowBack(false); }
   };
 
   const RBTN = (label, sub, bg, color, rating) => (
-    <button onClick={() => rate(rating)} style={{ flex: 1, border: 'none', borderRadius: 11, padding: '11px 4px', background: bg, color, fontWeight: 800, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', lineHeight: 1.3 }}>
+    <button onClick={() => rate(rating)} className="bouncy" style={{ flex: 1, border: 'none', borderRadius: 14, padding: '12px 4px', background: bg, color, fontWeight: 800, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', lineHeight: 1.3 }}>
       {label}<br /><span style={{ fontWeight: 500, fontSize: 10, opacity: 0.85 }}>{sub}</span>
     </button>
   );
@@ -246,5 +265,4 @@ function StudyMode({ deck, onDone }) {
       </div>
     </div>
   );
-        }
-
+}
