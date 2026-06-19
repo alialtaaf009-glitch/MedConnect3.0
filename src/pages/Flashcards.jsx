@@ -1,0 +1,250 @@
+import { useState, useEffect } from 'react';
+import { useAuth } from '../context/Auth.jsx';
+import { api } from '../lib/api.js';
+import { examColor } from '../lib/examColors.js';
+
+// Personal flashcard decks — make, study (light spaced repetition), manage.
+// Sharing & export are deferred (see ANKI-TODO-LATER).
+export default function Flashcards() {
+  const { user } = useAuth();
+  const [view, setView] = useState('list'); // 'list' | 'deck' | 'study'
+  const [activeDeck, setActiveDeck] = useState(null);
+
+  return (
+    <div className="screen">
+      {view === 'list' && <DeckList user={user} onOpen={(d) => { setActiveDeck(d); setView('deck'); }} onStudy={(d) => { setActiveDeck(d); setView('study'); }} />}
+      {view === 'deck' && <DeckDetail deck={activeDeck} onBack={() => setView('list')} onStudy={() => setView('study')} />}
+      {view === 'study' && <StudyMode deck={activeDeck} onDone={() => setView('list')} />}
+    </div>
+  );
+}
+
+function DeckList({ user, onOpen, onStudy }) {
+  const [decks, setDecks] = useState(null);
+  const [creating, setCreating] = useState(false);
+  const [name, setName] = useState('');
+  const [tag, setTag] = useState(user?.exam || '');
+
+  const load = () => api.decksGet().then((d) => setDecks(d.decks || [])).catch(() => setDecks([]));
+  useEffect(() => { load(); }, []);
+
+  const create = async () => {
+    if (!name.trim()) return;
+    const d = await api.deckCreate(name.trim(), tag || null);
+    setName(''); setCreating(false);
+    load();
+    if (d.deck) onOpen({ ...d.deck, card_count: 0, due_count: 0 });
+  };
+
+  return (
+    <>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
+        <h1 className="serif" style={{ fontSize: 24, fontWeight: 700, color: 'var(--ink)' }}>Flashcards</h1>
+        <button onClick={() => setCreating(true)} aria-label="New deck" style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--forest)', color: '#fff', border: 'none', fontSize: 24, fontWeight: 300, cursor: 'pointer', display: 'grid', placeItems: 'center', lineHeight: 1 }}>+</button>
+      </div>
+      <p className="sub" style={{ marginBottom: 16 }}>Make decks and study with spaced repetition.</p>
+
+      {creating && (
+        <div className="card" style={{ marginBottom: 14 }}>
+          <input className="input" autoFocus placeholder="Deck name (e.g. Cardiology — Arrhythmias)" value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') create(); }} style={{ marginBottom: 8 }} />
+          <input className="input" placeholder="Exam tag (optional, e.g. MRCP)" value={tag} onChange={(e) => setTag(e.target.value)} style={{ marginBottom: 10 }} />
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={create} className="btn" style={{ flex: 1, background: 'var(--forest)' }}>Create deck</button>
+            <button onClick={() => { setCreating(false); setName(''); }} className="btn ghost" style={{ padding: '11px 16px' }}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {decks === null && <div className="spinner" style={{ margin: '24px auto' }} />}
+      {decks && decks.length === 0 && !creating && (
+        <div style={{ textAlign: 'center', padding: '36px 16px' }}>
+          <div style={{ fontSize: 38, marginBottom: 10 }}>🗂️</div>
+          <p className="sub">No decks yet. Tap + to make your first one.</p>
+        </div>
+      )}
+
+      {decks && decks.map((d) => {
+        const c = examColor(d.exam_tag) || 'var(--forest)';
+        return (
+          <div key={d.id} className="card" style={{ borderLeft: `4px solid ${c}`, marginBottom: 10 }}>
+            <div onClick={() => onOpen(d)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', cursor: 'pointer' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 800, fontSize: 15 }}>{d.name}</div>
+                <div className="sub" style={{ marginTop: 2, fontSize: 12.5 }}>
+                  {d.card_count} card{d.card_count !== 1 ? 's' : ''}
+                  {d.due_count > 0 ? <> · <span style={{ color: 'var(--rust)', fontWeight: 700 }}>{d.due_count} due</span></> : (d.card_count > 0 ? <> · <span style={{ color: 'var(--muted)' }}>all reviewed ✓</span></> : '')}
+                </div>
+              </div>
+              {d.exam_tag && <span style={{ fontSize: 10.5, fontWeight: 700, padding: '2px 9px', borderRadius: 999, background: 'var(--paper-2)', color: 'var(--muted)', flexShrink: 0 }}>{d.exam_tag}</span>}
+            </div>
+            {d.due_count > 0
+              ? <button onClick={() => onStudy(d)} className="btn" style={{ marginTop: 12, background: c }}>Study {d.due_count} due</button>
+              : d.card_count > 0
+                ? <button onClick={() => onStudy(d)} className="btn ghost" style={{ marginTop: 12 }}>Review again</button>
+                : <button onClick={() => onOpen(d)} className="btn ghost" style={{ marginTop: 12 }}>Add cards</button>}
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
+function DeckDetail({ deck, onBack, onStudy }) {
+  const [cards, setCards] = useState(null);
+  const [front, setFront] = useState('');
+  const [back, setBack] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const load = () => api.deckGet(deck.id).then((d) => setCards(d.cards || [])).catch(() => setCards([]));
+  useEffect(() => { load(); }, [deck.id]);
+
+  const add = async () => {
+    if (!front.trim() || !back.trim() || saving) return;
+    setSaving(true);
+    const d = await api.deckAddCard(deck.id, front.trim(), back.trim());
+    if (d.card) setCards((prev) => [...(prev || []), d.card]);
+    setFront(''); setBack(''); setSaving(false);
+  };
+  const del = async (id) => {
+    setCards((prev) => prev.filter((c) => c.id !== id));
+    try { await api.deckDeleteCard(id); } catch (e) {}
+  };
+
+  return (
+    <>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+        <button onClick={onBack} style={{ background: 'none', border: 'none', fontSize: 24, color: 'var(--muted)', cursor: 'pointer', lineHeight: 1 }}>‹</button>
+        <h1 className="serif" style={{ fontSize: 19, fontWeight: 700, color: 'var(--ink)', flex: 1 }}>{deck.name}</h1>
+      </div>
+
+      {/* deferred actions — shown but disabled, so users know they're coming */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        <button disabled className="btn ghost" style={{ fontSize: 12.5, padding: '8px', opacity: 0.5, cursor: 'default' }}>🔗 Share — soon</button>
+        <button disabled className="btn ghost" style={{ fontSize: 12.5, padding: '8px', opacity: 0.5, cursor: 'default' }}>⬇ Export — soon</button>
+      </div>
+
+      <div className="card" style={{ marginBottom: 16 }}>
+        <div className="sub" style={{ textTransform: 'uppercase', fontSize: 10, letterSpacing: 1, marginBottom: 6, fontWeight: 700 }}>New card</div>
+        <textarea className="input" rows={2} placeholder="Front (question)" value={front} onChange={(e) => setFront(e.target.value)} style={{ marginBottom: 8, resize: 'vertical' }} />
+        <textarea className="input" rows={2} placeholder="Back (answer)" value={back} onChange={(e) => setBack(e.target.value)} style={{ marginBottom: 10, resize: 'vertical' }} />
+        <button onClick={add} className="btn" style={{ background: 'var(--forest)', opacity: saving ? 0.6 : 1 }}>+ Add card</button>
+      </div>
+
+      {cards && cards.length > 0 && (
+        <button onClick={onStudy} className="btn" style={{ background: 'var(--forest-2)', marginBottom: 16 }}>Study this deck</button>
+      )}
+
+      <div className="sub" style={{ fontWeight: 800, fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5, margin: '4px 2px 8px' }}>
+        {cards ? `${cards.length} card${cards.length !== 1 ? 's' : ''}` : 'Cards'}
+      </div>
+      {cards === null && <div className="spinner" style={{ margin: '20px auto' }} />}
+      {cards && cards.map((c) => (
+        <div key={c.id} className="card" style={{ padding: '11px 13px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 7, gap: 10 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 700, fontSize: 13.5 }}>{c.front}</div>
+            <div className="sub" style={{ fontSize: 12, marginTop: 1 }}>{c.back}</div>
+          </div>
+          <button onClick={() => del(c.id)} style={{ background: 'none', border: 'none', color: 'var(--subtle)', cursor: 'pointer', fontSize: 18, flexShrink: 0 }}>×</button>
+        </div>
+      ))}
+    </>
+  );
+}
+
+function StudyMode({ deck, onDone }) {
+  const [queue, setQueue] = useState(null);
+  const [idx, setIdx] = useState(0);
+  const [showBack, setShowBack] = useState(false);
+  const [done, setDone] = useState(false);
+  const total = queue ? queue.length : 0;
+
+  useEffect(() => {
+    api.deckGet(deck.id, true).then((d) => {
+      let q = d.cards || [];
+      if (q.length === 0) {
+        // nothing due — review all
+        api.deckGet(deck.id).then((dd) => { setQueue(dd.cards || []); });
+      } else setQueue(q);
+    }).catch(() => setQueue([]));
+  }, [deck.id]);
+
+  if (queue === null) return <div className="spinner" style={{ margin: '40px auto' }} />;
+  if (queue.length === 0) {
+    return (
+      <div style={{ textAlign: 'center', padding: '40px 16px' }}>
+        <div style={{ fontSize: 40, marginBottom: 10 }}>🎉</div>
+        <p style={{ fontWeight: 700, marginBottom: 4 }}>Nothing to study here yet</p>
+        <p className="sub" style={{ marginBottom: 18 }}>Add some cards to this deck first.</p>
+        <button onClick={onDone} className="btn" style={{ maxWidth: 200, margin: '0 auto', background: 'var(--forest)' }}>Back to decks</button>
+      </div>
+    );
+  }
+  if (done) {
+    return (
+      <div style={{ textAlign: 'center', padding: '40px 16px' }}>
+        <div style={{ fontSize: 44, marginBottom: 12 }}>✅</div>
+        <p className="serif" style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Session complete</p>
+        <p className="sub" style={{ marginBottom: 20 }}>You reviewed {total} card{total !== 1 ? 's' : ''}. Nice work.</p>
+        <button onClick={onDone} className="btn" style={{ maxWidth: 220, margin: '0 auto', background: 'var(--forest)' }}>Back to decks</button>
+      </div>
+    );
+  }
+
+  const card = queue[idx];
+  const rate = async (rating) => {
+    try { await api.deckRateCard(card.id, rating); } catch (e) {}
+    if (idx + 1 >= queue.length) setDone(true);
+    else { setIdx(idx + 1); setShowBack(false); }
+  };
+
+  const RBTN = (label, sub, bg, color, rating) => (
+    <button onClick={() => rate(rating)} style={{ flex: 1, border: 'none', borderRadius: 11, padding: '11px 4px', background: bg, color, fontWeight: 800, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', lineHeight: 1.3 }}>
+      {label}<br /><span style={{ fontWeight: 500, fontSize: 10, opacity: 0.85 }}>{sub}</span>
+    </button>
+  );
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '70vh' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+        <button onClick={onDone} style={{ background: 'none', border: 'none', fontSize: 20, color: 'var(--muted)', cursor: 'pointer' }}>✕</button>
+        <div style={{ flex: 1, margin: '0 12px', height: 6, background: 'var(--paper-2)', borderRadius: 999, overflow: 'hidden' }}>
+          <div style={{ width: `${Math.round((idx / total) * 100)}%`, height: '100%', background: 'var(--forest)', transition: 'width .2s' }} />
+        </div>
+        <span className="sub" style={{ fontWeight: 700 }}>{idx + 1} / {total}</span>
+      </div>
+
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <div onClick={() => setShowBack(true)} style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 18, padding: '28px 20px', textAlign: 'center', minHeight: 230, display: 'flex', flexDirection: 'column', justifyContent: 'center', cursor: showBack ? 'default' : 'pointer' }}>
+          <div className="sub" style={{ textTransform: 'uppercase', letterSpacing: 1, fontSize: 10, marginBottom: 14 }}>Question</div>
+          <div className="serif" style={{ fontSize: 19, fontWeight: 700, lineHeight: 1.4 }}>{card.front}</div>
+          {showBack ? (
+            <>
+              <div style={{ borderTop: '1px dashed var(--line)', margin: '20px 0' }} />
+              <div className="sub" style={{ textTransform: 'uppercase', letterSpacing: 1, fontSize: 10, marginBottom: 10 }}>Answer</div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--forest)', whiteSpace: 'pre-wrap' }}>{card.back}</div>
+            </>
+          ) : (
+            <div className="sub" style={{ marginTop: 22, fontSize: 12.5 }}>tap to reveal answer</div>
+          )}
+        </div>
+      </div>
+
+      <div style={{ marginTop: 16, minHeight: 72 }}>
+        {showBack ? (
+          <>
+            <div className="sub" style={{ textAlign: 'center', marginBottom: 8, fontSize: 11.5 }}>How well did you know it?</div>
+            <div style={{ display: 'flex', gap: 7 }}>
+              {RBTN('Again', '<1m', '#e8d3cc', 'var(--rust)', 'again')}
+              {RBTN('Hard', '2d', '#ece4cf', 'var(--gold)', 'hard')}
+              {RBTN('Good', '4d', '#d9e6dd', 'var(--forest)', 'good')}
+              {RBTN('Easy', '9d', 'var(--forest)', '#fff', 'easy')}
+            </div>
+          </>
+        ) : (
+          <button onClick={() => setShowBack(true)} className="btn" style={{ background: 'var(--forest)' }}>Show answer</button>
+        )}
+      </div>
+    </div>
+  );
+        }
+
