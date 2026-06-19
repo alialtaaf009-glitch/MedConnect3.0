@@ -87,18 +87,28 @@ export default function Qbank() {
   const doRename = async () => {
     const name = renameVal.trim();
     if (!name || name === bank) { setRenaming(false); return; }
-    for (const r of bankRows) {
-      await api.qbankSave(name, r.topic, r.done, r.total, r.correct);
-      await api.qbankDeleteTopic(bank, r.topic);
-    }
-    for (const g of sharingWith.filter((g) => g.bank === bank)) {
-      await api.qbankSetShare(g.grantee_id, name, true);
-      await api.qbankSetShare(g.grantee_id, bank, false);
-    }
-    setBanks((prev) => prev.map((b) => (b === bank ? name : b)));
+    const oldBank = bank;
+    const toMigrate = rows.filter((r) => r.bank === oldBank);
+    const sharesToMigrate = sharingWith.filter((g) => g.bank === oldBank);
+    // optimistic: update everything locally right away so it feels instant
+    setRows((prev) => prev.map((r) => (r.bank === oldBank ? { ...r, bank: name } : r)));
+    setBanks((prev) => { const next = prev.map((b) => (b === oldBank ? name : b)); return [...new Set(next)]; });
+    setSharingWith((prev) => prev.map((g) => (g.bank === oldBank ? { ...g, bank: name } : g)));
     setBank(name);
     setRenaming(false);
-    load();
+    // sync to server in the background (re-save under new name, remove old)
+    (async () => {
+      try {
+        for (const r of toMigrate) {
+          await api.qbankSave(name, r.topic, r.done, r.total, r.correct);
+          await api.qbankDeleteTopic(oldBank, r.topic);
+        }
+        for (const g of sharesToMigrate) {
+          await api.qbankSetShare(g.grantee_id, name, true);
+          await api.qbankSetShare(g.grantee_id, oldBank, false);
+        }
+      } catch (e) {}
+    })();
   };
 
   const openShareSection = async () => {
@@ -135,7 +145,7 @@ export default function Qbank() {
 
   return (
     <div className="screen">
-      <h1 className="serif" style={{ fontSize: 24, fontWeight: 700 }}>Qbank Tracker</h1>
+      <h1 className="serif" style={{ fontSize: 24, fontWeight: 700, color: 'var(--ink)' }}>Qbank Tracker</h1>
       <p className="sub" style={{ marginBottom: 16 }}>Track your question-bank progress, solo or shared.</p>
 
       {/* bank selector */}
@@ -312,7 +322,7 @@ function SharedToMe({ bank, grants, compareId, compareName, compareRows, bankRow
               <span className="link" style={{ fontSize: 13, fontWeight: 700 }}>{open ? 'Hide' : 'Compare'} <span style={{ display: 'inline-block', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>▾</span></span>
             </button>
             {open && (
-              <div style={{ padding: '4px 14px 14px' }}>
+            <div style={{ padding: '4px 14px 14px' }}>
                 <div style={{ display: 'flex', gap: 14, margin: '2px 0 10px', fontSize: 11.5, fontWeight: 700 }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 11, height: 11, borderRadius: 3, background: color, display: 'inline-block' }} />You</span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 11, height: 11, borderRadius: 3, background: 'var(--gold)', display: 'inline-block' }} />{compareName}</span>
@@ -345,4 +355,3 @@ function SharedToMe({ bank, grants, compareId, compareName, compareRows, bankRow
     </div>
   );
 }
-           
