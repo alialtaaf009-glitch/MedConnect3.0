@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import StudyTimer from '../components/StudyTimer.jsx';
+import DnaGame from '../components/DnaGame.jsx';
 import { useBack } from '../context/Back.jsx';
 
 
@@ -98,119 +99,8 @@ export default function Focus() {
       </p>
       <StudyTimer />
       <Breathe />
-      <DinoGame />
+      <DnaGame />
     </div>
   );
 }
 
-// 🦖 Mini dino runner — a quick brain-break game (jump the cacti)
-function DinoGame() {
-  const canvasRef = useRef(null);
-  const [running, setRunning] = useState(false);
-  const [score, setScore] = useState(0);
-  const [best, setBest] = useState(() => { try { return parseInt(localStorage.getItem('dino_best') || '0', 10); } catch (e) { return 0; } });
-  const stateRef = useRef(null);
-
-  useEffect(() => {
-    if (!running) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-    const groundY = H - 22;
-
-    const st = {
-      dinoY: groundY, vy: 0, jumping: false,
-      obstacles: [], speed: 3.4, t: 0, score: 0, dead: false, spawn: 70,
-    };
-    stateRef.current = st;
-
-    const jump = () => { if (!st.jumping && !st.dead) { st.vy = -9.2; st.jumping = true; } };
-    const onKey = (e) => { if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); jump(); } };
-    const onTap = () => { if (st.dead) { restart(); } else jump(); };
-    window.addEventListener('keydown', onKey);
-    canvas.addEventListener('pointerdown', onTap);
-
-    const forest = getComputedStyle(document.documentElement).getPropertyValue('--forest').trim() || '#1f4d3f';
-    const rust = getComputedStyle(document.documentElement).getPropertyValue('--rust').trim() || '#a8442a';
-    const line = getComputedStyle(document.documentElement).getPropertyValue('--line').trim() || '#dcd5c2';
-    const ink = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || '#15201c';
-
-    let raf;
-    const loop = () => {
-      st.t++;
-      ctx.clearRect(0, 0, W, H);
-      // ground
-      ctx.strokeStyle = line; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(0, groundY + 2); ctx.lineTo(W, groundY + 2); ctx.stroke();
-
-      // physics
-      st.vy += 0.52; st.dinoY += st.vy;
-      if (st.dinoY >= groundY) { st.dinoY = groundY; st.vy = 0; st.jumping = false; }
-
-      // dino (simple block + head)
-      const dx = 28, dh = 22, dw = 18;
-      ctx.fillStyle = forest;
-      ctx.fillRect(dx, st.dinoY - dh, dw, dh);
-      ctx.fillRect(dx + dw - 4, st.dinoY - dh - 8, 10, 10); // head
-      ctx.fillStyle = '#fff'; ctx.fillRect(dx + dw + 1, st.dinoY - dh - 5, 2, 2); // eye
-
-      // spawn obstacles
-      st.spawn--;
-      if (st.spawn <= 0) {
-        const h = 14 + Math.random() * 16;
-        st.obstacles.push({ x: W + 10, w: 9 + Math.random() * 8, h });
-        st.spawn = 55 + Math.random() * 60;
-      }
-      // move + draw obstacles (cacti)
-      ctx.fillStyle = rust;
-      for (const o of st.obstacles) {
-        o.x -= st.speed;
-        ctx.fillRect(o.x, groundY - o.h, o.w, o.h);
-        // collision
-        if (dx < o.x + o.w && dx + dw > o.x && st.dinoY > groundY - o.h) {
-          st.dead = true;
-        }
-      }
-      st.obstacles = st.obstacles.filter((o) => o.x + o.w > 0);
-
-      // score + difficulty
-      if (!st.dead) {
-        if (st.t % 6 === 0) { st.score++; setScore(st.score); }
-        st.speed += 0.0015;
-      }
-
-      // score text
-      ctx.fillStyle = ink; ctx.font = '700 13px Inter, sans-serif'; ctx.textAlign = 'right';
-      ctx.fillText(String(st.score).padStart(4, '0'), W - 8, 18);
-
-      if (st.dead) {
-        ctx.fillStyle = ink; ctx.font = '800 16px Inter, sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText('Game Over — tap to retry', W / 2, H / 2);
-        const b = Math.max(best, st.score);
-        if (b !== best) { setBest(b); try { localStorage.setItem('dino_best', String(b)); } catch (e) {} }
-        return; // stop loop
-      }
-      raf = requestAnimationFrame(loop);
-    };
-    const restart = () => { cancelAnimationFrame(raf); st.obstacles = []; st.dinoY = groundY; st.vy = 0; st.dead = false; st.score = 0; st.speed = 3.4; st.spawn = 70; setScore(0); loop(); };
-    loop();
-
-    return () => { cancelAnimationFrame(raf); window.removeEventListener('keydown', onKey); canvas.removeEventListener('pointerdown', onTap); };
-  }, [running]);
-
-  return (
-    <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 16, padding: 16, marginTop: 14 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-        <div style={{ fontSize: 15, fontWeight: 700 }}>🦖 Dino dash</div>
-        {best > 0 && <div style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600 }}>Best {best}</div>}
-      </div>
-      <p className="sub" style={{ fontSize: 12.5, marginBottom: 12 }}>A 30-second brain break. Tap or press space to jump the cacti.</p>
-      {!running ? (
-        <button className="btn" style={{ width: '100%', background: 'var(--forest)' }} onClick={() => setRunning(true)}>Play</button>
-      ) : (
-        <canvas ref={canvasRef} width={320} height={120} style={{ width: '100%', height: 'auto', borderRadius: 10, background: 'var(--paper-2)', touchAction: 'manipulation', cursor: 'pointer', display: 'block' }} />
-      )}
-    </div>
-  );
-}
