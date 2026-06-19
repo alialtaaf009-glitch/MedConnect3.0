@@ -266,6 +266,7 @@ function Momentum({ user }) {
   // user-hideable tiles (Profile -> Home screen)
   const hideCd = localStorage.getItem('hide_countdown') === '1';
   const hideSt = localStorage.getItem('hide_streak') === '1';
+
   // exam countdown
   let daysLeft = null;
   if (user?.exam_date) {
@@ -528,12 +529,6 @@ export default function Home() {
 
       <QbankCard nav={nav} />
 
-      <div style={{ padding: '6px 4px 2px', textAlign: 'center' }}>
-        <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: 1.8, color: 'var(--subtle)', textTransform: 'uppercase' }}>
-          For doctors, by doctors
-        </div>
-      </div>
-
       <Momentum user={user} />
 
 
@@ -550,6 +545,13 @@ export default function Home() {
         </span>
       </div>
       {invited && <p className="sub" style={{ fontSize: 12, marginTop: 8, textAlign: 'center', color: 'var(--forest)', fontWeight: 700 }}>Link copied — paste it anywhere! ✓</p>}
+
+      {/* signature footer */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, margin: '28px 0 8px', opacity: 0.55 }}>
+        <span style={{ height: 1, width: 28, background: 'var(--line)' }} />
+        <span style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'var(--muted)', textTransform: 'uppercase' }}>For doctors, by doctors</span>
+        <span style={{ height: 1, width: 28, background: 'var(--line)' }} />
+      </div>
 
       {showMotivation && (
         <div className="fs-open" style={{ position: 'fixed', inset: 0, background: 'var(--paper)', zIndex: 1000, overflowY: 'auto', WebkitOverflowScrolling: 'touch', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 72px)' }}>
@@ -603,4 +605,4 @@ function QbankCard({ nav }) {
       <span style={{ width: 26, height: 26, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', color: 'var(--forest)', fontWeight: 800, flexShrink: 0 }}>›</span>
     </button>
   );
-      }
+}
