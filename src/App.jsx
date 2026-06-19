@@ -415,7 +415,7 @@ export default function App() {
   // hold the splash long enough for the draw animation to finish, even if auth resolves instantly
   const [splashDone, setSplashDone] = useState(false);
   useEffect(() => {
-    const t = setTimeout(() => setSplashDone(true), 1500);
+    const t = setTimeout(() => setSplashDone(true), 800);
     return () => clearTimeout(t);
   }, []);
 
@@ -486,4 +486,4 @@ export default function App() {
       {!immersive && <TabBar />}
     </div>
   );
-      }
+}
