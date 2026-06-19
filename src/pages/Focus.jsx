@@ -67,13 +67,10 @@ function Breathe() {
   }
 
   return (
-    <>
-    <div style={{ borderTop: '1px solid var(--line)', margin: '24px 0 16px' }} />
     <div className="card tint-green" onClick={() => !on && setBig(true)} style={{ textAlign: 'center', cursor: 'pointer' }}>
-      <div style={{ fontSize: 15, fontWeight: 700 }}>Take a break</div>
       <p className="voice sub" style={{ fontSize: 14, marginTop: 2 }}>60 seconds of calm. No side effects.</p>
       <p className="sub" style={{ fontSize: 11, marginTop: 2 }}>
-        Box breathing — in 4, hold 4, out 4, hold 4.
+        Box breathing — in 4, hold 4, out 4, hold 4. Tap for full-screen.
       </p>
       <div style={{ display: 'flex', justifyContent: 'center' }}><Lungs grow={grow} size={120} /></div>
       {on ? (
@@ -86,7 +83,6 @@ function Breathe() {
         <button className="btn" style={{ maxWidth: 200, margin: '0 auto' }} onClick={(e) => { e.stopPropagation(); setOn(true); }}>Start breathing</button>
       )}
     </div>
-    </>
   );
 }
 
@@ -98,9 +94,24 @@ export default function Focus() {
         Coffee in hand? Good. Set a block, tap the box for full-screen, and guard it like an exam hall.
       </p>
       <StudyTimer />
-      <Breathe />
-      <DnaGame />
+      <TakeABreak />
     </div>
+  );
+}
+
+// Unified "Take a break" section with a pill toggle: Breathing | Pill game
+function TakeABreak() {
+  const [tab, setTab] = useState('breathe');
+  return (
+    <>
+      <div style={{ borderTop: '1px solid var(--line)', margin: '24px 0 16px' }} />
+      <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 12 }}>Take a break</div>
+      <div style={{ display: 'flex', background: 'var(--paper-2)', borderRadius: 999, padding: 4, marginBottom: 14 }}>
+        <button onClick={() => setTab('breathe')} style={{ flex: 1, border: 'none', borderRadius: 999, padding: '9px', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', background: tab === 'breathe' ? 'var(--card)' : 'transparent', color: tab === 'breathe' ? 'var(--forest)' : 'var(--muted)', boxShadow: tab === 'breathe' ? '0 1px 4px rgba(0,0,0,.08)' : 'none', transition: 'all .15s' }}>🫁 Breathing</button>
+        <button onClick={() => setTab('game')} style={{ flex: 1, border: 'none', borderRadius: 999, padding: '9px', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', background: tab === 'game' ? 'var(--card)' : 'transparent', color: tab === 'game' ? 'var(--forest)' : 'var(--muted)', boxShadow: tab === 'game' ? '0 1px 4px rgba(0,0,0,.08)' : 'none', transition: 'all .15s' }}>💊 Pill game</button>
+      </div>
+      {tab === 'breathe' ? <Breathe /> : <DnaGame />}
+    </>
   );
 }
 
