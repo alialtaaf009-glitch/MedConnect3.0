@@ -148,6 +148,23 @@ export default async function handler(req, res) {
           const rows = await sql`INSERT INTO cards (deck_id, front, back, interval_days, ease, due_at) VALUES (${did}, ${front}, ${back}, 0, 2.5, now()) RETURNING id, front, back, interval_days, ease, due_at`;
           return res.status(200).json({ card: rows[0] });
         }
+        if (body.action === 'deck_add_bulk') {
+          const did = parseInt(body.deckId, 10);
+          const own = await sql`SELECT id FROM decks WHERE id = ${did} AND owner_id = ${uid}`;
+          if (!own.length) return res.status(404).json({ error: 'Deck not found' });
+          const items = Array.isArray(body.cards) ? body.cards : [];
+          const clean = items
+            .map((c) => ({ front: (c.front || '').trim(), back: (c.back || '').trim() }))
+            .filter((c) => c.front && c.back)
+            .slice(0, 300); // safety cap
+          if (!clean.length) return res.status(400).json({ error: 'No valid cards' });
+          const inserted = [];
+          for (const c of clean) {
+            const r = await sql`INSERT INTO cards (deck_id, front, back, interval_days, ease, due_at) VALUES (${did}, ${c.front}, ${c.back}, 0, 2.5, now()) RETURNING id, front, back, interval_days, ease, due_at`;
+            inserted.push(r[0]);
+          }
+          return res.status(200).json({ cards: inserted, count: inserted.length });
+        }
         if (body.action === 'deck_delete_card') {
           await sql`DELETE FROM cards WHERE id = ${parseInt(body.cardId, 10)} AND deck_id IN (SELECT id FROM decks WHERE owner_id = ${uid})`;
           return res.status(200).json({ ok: true });
@@ -283,4 +300,3 @@ async function ensureQbankTables() {
       PRIMARY KEY (grantor_id, grantee_id, bank)
     )`;
 }
-
