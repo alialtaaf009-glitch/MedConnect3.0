@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useBack } from '../context/Back.jsx';
 
 // 🧬 DNA Pulse — a minimal, retina-sharp flappy break game.
 // Card with a "Play fullscreen" launch; the game runs in a fullscreen overlay.
@@ -19,16 +20,12 @@ export default function DnaGame() {
 
   return (
     <>
-      <div style={{ borderTop: '1px solid var(--line)', margin: '24px 0 16px' }} />
       <div className="card" onClick={() => setOpen(true)} style={{ textAlign: 'center', cursor: 'pointer' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
-          <div style={{ fontSize: 15, fontWeight: 700 }}>🧬 DNA Pulse</div>
-          {best > 0 && <div style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600 }}>Best {best}</div>}
-        </div>
-        <p className="sub" style={{ fontSize: 12.5, marginTop: 2, textAlign: 'left' }}>
-          A quick brain-break. Flap the capsule through the strands.
+        <p className="sub" style={{ fontSize: 12.5, textAlign: 'center' }}>
+          Flap the capsule through the DNA strands.{best > 0 ? ` · Best ${best}` : ''}
         </p>
-        <button className="btn" style={{ maxWidth: 220, margin: '12px auto 0', background: 'var(--forest)' }}
+        <div style={{ fontSize: 40, margin: '6px 0 2px' }}>💊</div>
+        <button className="btn" style={{ maxWidth: 220, margin: '10px auto 0', background: 'var(--forest)' }}
           onClick={(e) => { e.stopPropagation(); setOpen(true); }}>
           ⛶ Play fullscreen
         </button>
@@ -40,6 +37,8 @@ export default function DnaGame() {
 
 function DnaOverlay({ onClose, onBest }) {
   const canvasRef = useRef(null);
+  const { enterImmersive, exitImmersive } = useBack();
+  useEffect(() => { enterImmersive(); return () => exitImmersive(); }, [enterImmersive, exitImmersive]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -69,7 +68,7 @@ function DnaOverlay({ onClose, onBest }) {
       GAP = Math.max(150, H * 0.30);
       PIPE_W = Math.max(46, W * 0.13);
       SPACING = Math.max(220, W * 0.66);
-      SPEED = Math.max(2.4, W * 0.0072);
+      SPEED = Math.max(1.8, W * 0.0055);
       GRAV = H * 0.00085 * 0.9 + 0.18;
       FLAP = -(H * 0.014 * 0.5 + 3.8);
       const bw = Math.max(36, W * 0.1);
@@ -152,11 +151,10 @@ function DnaOverlay({ onClose, onBest }) {
   }, []);
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 1200, background: 'var(--paper)' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 4000, background: 'var(--paper)' }}>
       <button onClick={onClose} aria-label="Close game"
-        style={{ position: 'absolute', top: 'calc(env(safe-area-inset-top, 0px) + 14px)', right: 16, zIndex: 2, background: 'rgba(0,0,0,.28)', color: '#fff', border: 'none', borderRadius: 999, width: 40, height: 40, fontSize: 19, cursor: 'pointer' }}>✕</button>
+        style={{ position: 'absolute', top: 'calc(env(safe-area-inset-top, 0px) + 12px)', right: 14, zIndex: 2, background: 'transparent', color: 'var(--muted)', border: 'none', borderRadius: 999, width: 30, height: 30, fontSize: 16, cursor: 'pointer', opacity: 0.4 }}>✕</button>
       <canvas ref={canvasRef} style={{ display: 'block', width: '100%', height: '100%', touchAction: 'manipulation' }} />
     </div>
   );
-            }
-
+                            }
