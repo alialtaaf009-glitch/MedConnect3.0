@@ -36,6 +36,7 @@ export const api = {
   deckRename: (deckId, name, exam_tag) => req('/profile', { method: 'POST', body: { action: 'deck_rename', deckId, name, exam_tag } }),
   deckDelete: (deckId) => req('/profile', { method: 'POST', body: { action: 'deck_delete', deckId } }),
   deckAddCard: (deckId, front, back) => req('/profile', { method: 'POST', body: { action: 'deck_add_card', deckId, front, back } }),
+  deckAddBulk: (deckId, cards) => req('/profile', { method: 'POST', body: { action: 'deck_add_bulk', deckId, cards } }),
   deckDeleteCard: (cardId) => req('/profile', { method: 'POST', body: { action: 'deck_delete_card', cardId } }),
   deckRateCard: (cardId, rating) => req('/profile', { method: 'POST', body: { action: 'deck_rate_card', cardId, rating } }),
   qbankSave: (bank, topic, done, total, correct) => req('/profile', { method: 'POST', body: { action: 'save_progress', bank, topic, done, total, correct } }),
