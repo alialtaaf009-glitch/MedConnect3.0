@@ -20,6 +20,7 @@ import About from './pages/About.jsx';
 import LabValues from './pages/LabValues.jsx';
 import Formulas from './pages/Formulas.jsx';
 import Qbank from './pages/Qbank.jsx';
+import Flashcards from './pages/Flashcards.jsx';
 import Pro from './pages/Pro.jsx';
 import Checklist from './components/Checklist.jsx';
 import AddPartner from './pages/AddPartner.jsx';
@@ -131,6 +132,9 @@ function Drawer({ open, onClose, user }) {
           <button className="drawer-item" onClick={() => go('/formulas')}>
             <svg viewBox="0 0 24 24"><path d="M4 4h16M4 4v16M9 9l4 4M13 9l-4 4M8 18h8" /></svg>Formulas
           </button>
+          <button className="drawer-item" onClick={() => go('/flashcards')}>
+            <svg viewBox="0 0 24 24"><rect x="3" y="5" width="14" height="11" rx="2" /><path d="M7 9h6M7 12h4" /><path d="M7 5l4-2 10 4-2 9-4-1.5" /></svg>Flashcards
+          </button>
           <div className="drawer-div" />
           <div className="drawer-sect">Grow</div>
           <button className="drawer-item" onClick={inviteFriend}>
@@ -241,8 +245,8 @@ function TopBar({ user }) {
               </svg>
               {totalCount > 0 && (
                 <span style={{ position: 'absolute', top: 2, right: 2, width: 14, height: 14, borderRadius: '50%', background: 'var(--rust)', color: '#fff', fontSize: 9, fontWeight: 800, display: 'grid', placeItems: 'center', border: '1.5px solid var(--forest)' }}>
-                  {totalCount > 9 ? '9+' : totalCount}
-                                  </span>
+                                    {totalCount > 9 ? '9+' : totalCount}
+                </span>
               )}
             </button>
           )}
@@ -477,6 +481,7 @@ export default function App() {
         <Route path="/labs" element={<LabValues />} />
         <Route path="/formulas" element={<Formulas />} />
         <Route path="/qbank" element={<Qbank />} />
+        <Route path="/flashcards" element={<Flashcards />} />
         <Route path="/pro" element={<Pro />} />
         <Route path="/connections" element={<Navigate to="/partners?tab=mine" replace />} />
         <Route path="/profile" element={<Profile />} />
@@ -486,4 +491,5 @@ export default function App() {
       {!immersive && <TabBar />}
     </div>
   );
-}
+      }
+
