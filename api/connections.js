@@ -21,12 +21,18 @@ export default async function handler(req, res) {
       let nudges = [];
       if (connected.length) {
         const otherIds = connected.map((c) => (c.requester === uid ? c.recipient : c.requester));
-        // which of these partners have we exchanged ANY message with?
+        // which of these partners have we exchanged ANY message with, OR ever opened a chat with?
         const chatted = await sql`
           SELECT DISTINCT CASE WHEN sender = ${uid} THEN recipient ELSE sender END AS other
           FROM messages
           WHERE sender = ${uid} OR recipient = ${uid}`;
         const chattedSet = new Set(chatted.map((r) => Number(r.other)));
+        // also treat anyone we've opened a conversation with (message_reads) as "already greeted"
+        // so clearing a chat doesn't make them pop up as a fresh match again
+        try {
+          const opened = await sql`SELECT other_id FROM message_reads WHERE user_id = ${uid}`;
+          for (const r of opened) chattedSet.add(Number(r.other_id));
+        } catch (e) {}
         nudges = connected
           .filter((c) => {
             const otherId = c.requester === uid ? c.recipient : c.requester;
