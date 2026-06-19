@@ -95,6 +95,10 @@ function DeckDetail({ deck, onBack, onStudy }) {
   const [back, setBack] = useState('');
   const [saving, setSaving] = useState(false);
   const [confirmDel, setConfirmDel] = useState(false);
+  const [reverse, setReverse] = useState(false);
+  const [mode, setMode] = useState('single'); // 'single' | 'bulk'
+  const [bulkText, setBulkText] = useState('');
+  const [bulkMsg, setBulkMsg] = useState('');
 
   const load = () => api.deckGet(deck.id).then((d) => setCards(d.cards || [])).catch(() => setCards([]));
   useEffect(() => { load(); }, [deck.id]);
@@ -107,9 +111,45 @@ function DeckDetail({ deck, onBack, onStudy }) {
   const add = async () => {
     if (!front.trim() || !back.trim() || saving) return;
     setSaving(true);
-    const d = await api.deckAddCard(deck.id, front.trim(), back.trim());
-    if (d.card) setCards((prev) => [...(prev || []), d.card]);
+    const f = front.trim(), b = back.trim();
+    if (reverse) {
+      const d = await api.deckAddBulk(deck.id, [{ front: f, back: b }, { front: b, back: f }]);
+      if (d.cards) setCards((prev) => [...(prev || []), ...d.cards]);
+    } else {
+      const d = await api.deckAddCard(deck.id, f, b);
+      if (d.card) setCards((prev) => [...(prev || []), d.card]);
+    }
     setFront(''); setBack(''); setSaving(false);
+  };
+
+  // parse pasted text: each line "front | back" or "front , back" or tab-separated
+  const parseBulk = (text) => {
+    const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
+    const out = [];
+    for (const line of lines) {
+      let parts;
+      if (line.includes('\t')) parts = line.split('\t');
+      else if (line.includes('|')) parts = line.split('|');
+      else if (line.includes(';')) parts = line.split(';');
+      else if (line.includes(',')) { const i = line.indexOf(','); parts = [line.slice(0, i), line.slice(i + 1)]; }
+      else continue;
+      const f = (parts[0] || '').trim(), b = (parts.slice(1).join(' ') || '').trim();
+      if (f && b) out.push({ front: f, back: b });
+    }
+    return out;
+  };
+
+  const importBulk = async () => {
+    if (saving) return;
+    const parsed = parseBulk(bulkText);
+    if (!parsed.length) { setBulkMsg('No valid lines found. Use "question | answer" per line.'); return; }
+    setSaving(true); setBulkMsg('');
+    let toAdd = parsed;
+    if (reverse) toAdd = parsed.flatMap((c) => [c, { front: c.back, back: c.front }]);
+    const d = await api.deckAddBulk(deck.id, toAdd);
+    if (d.cards) setCards((prev) => [...(prev || []), ...d.cards]);
+    setBulkText(''); setBulkMsg(`Added ${d.count || 0} card${(d.count || 0) !== 1 ? 's' : ''} ✓`);
+    setSaving(false);
   };
   const del = async (id) => {
     setCards((prev) => prev.filter((c) => c.id !== id));
@@ -138,10 +178,34 @@ function DeckDetail({ deck, onBack, onStudy }) {
       )}
 
       <div className="card" style={{ marginBottom: 16 }}>
-        <div className="sub" style={{ textTransform: 'uppercase', fontSize: 10, letterSpacing: 1, marginBottom: 8, fontWeight: 700 }}>New card</div>
-        <textarea className="input" rows={2} placeholder="Front (question)" value={front} onChange={(e) => setFront(e.target.value)} style={{ marginBottom: 8, resize: 'vertical', borderRadius: 18 }} />
-        <textarea className="input" rows={2} placeholder="Back (answer)" value={back} onChange={(e) => setBack(e.target.value)} style={{ marginBottom: 10, resize: 'vertical', borderRadius: 18 }} />
-        <button onClick={add} className="btn bouncy" style={{ background: 'var(--forest)', opacity: saving ? 0.6 : 1 }}>+ Add card</button>
+        {/* single / bulk toggle */}
+        <div style={{ display: 'flex', background: 'var(--paper-2)', borderRadius: 999, padding: 3, marginBottom: 12 }}>
+          <button onClick={() => { setMode('single'); setBulkMsg(''); }} className="bouncy" style={{ flex: 1, border: 'none', borderRadius: 999, padding: '7px', fontWeight: 700, fontSize: 12.5, fontFamily: 'inherit', cursor: 'pointer', background: mode === 'single' ? 'var(--card)' : 'transparent', color: mode === 'single' ? 'var(--forest)' : 'var(--muted)', boxShadow: mode === 'single' ? '0 1px 4px rgba(0,0,0,.08)' : 'none' }}>One card</button>
+          <button onClick={() => { setMode('bulk'); setBulkMsg(''); }} className="bouncy" style={{ flex: 1, border: 'none', borderRadius: 999, padding: '7px', fontWeight: 700, fontSize: 12.5, fontFamily: 'inherit', cursor: 'pointer', background: mode === 'bulk' ? 'var(--card)' : 'transparent', color: mode === 'bulk' ? 'var(--forest)' : 'var(--muted)', boxShadow: mode === 'bulk' ? '0 1px 4px rgba(0,0,0,.08)' : 'none' }}>Paste list</button>
+        </div>
+
+        {mode === 'single' ? (
+          <>
+            <textarea className="input" rows={2} placeholder="Front (question)" value={front} onChange={(e) => setFront(e.target.value)} style={{ marginBottom: 8, resize: 'vertical', borderRadius: 18 }} />
+            <textarea className="input" rows={2} placeholder="Back (answer)" value={back} onChange={(e) => setBack(e.target.value)} style={{ marginBottom: 10, resize: 'vertical', borderRadius: 18 }} />
+            <button onClick={add} className="btn bouncy" style={{ background: 'var(--forest)', opacity: saving ? 0.6 : 1 }}>+ Add card{reverse ? 's (2)' : ''}</button>
+          </>
+        ) : (
+          <>
+            <p className="sub" style={{ fontSize: 12, marginBottom: 8 }}>One card per line. Separate front &amp; back with <b>|</b> (or a comma).</p>
+            <textarea className="input" rows={6} placeholder={'Most common cause of AF? | Hypertension\nECG hallmark of WPW? | Delta wave + short PR'} value={bulkText} onChange={(e) => setBulkText(e.target.value)} style={{ marginBottom: 10, resize: 'vertical', borderRadius: 18, fontSize: 13 }} />
+            <button onClick={importBulk} className="btn bouncy" style={{ background: 'var(--forest)', opacity: saving ? 0.6 : 1 }}>{saving ? 'Importing…' : 'Import cards'}</button>
+            {bulkMsg && <p className="sub" style={{ textAlign: 'center', marginTop: 8, fontSize: 12, color: bulkMsg.includes('✓') ? 'var(--forest)' : 'var(--rust)', fontWeight: 600 }}>{bulkMsg}</p>}
+          </>
+        )}
+
+        {/* reverse toggle — applies to both modes */}
+        <label style={{ display: 'flex', alignItems: 'center', gap: 9, marginTop: 12, cursor: 'pointer', userSelect: 'none' }} onClick={() => setReverse(!reverse)}>
+          <span style={{ width: 38, height: 22, borderRadius: 999, background: reverse ? 'var(--forest)' : 'var(--line)', position: 'relative', flexShrink: 0, transition: 'background .2s' }}>
+            <span style={{ position: 'absolute', top: 2.5, left: reverse ? 18 : 3, width: 17, height: 17, borderRadius: '50%', background: '#fff', transition: 'left .2s' }} />
+          </span>
+          <span style={{ fontSize: 12.5, fontWeight: 600 }}>Also make reverse cards <span className="sub" style={{ fontWeight: 400 }}>(answer → question too)</span></span>
+        </label>
       </div>
 
       {cards && cards.length > 0 && (
@@ -265,4 +329,4 @@ function StudyMode({ deck, onDone }) {
       </div>
     </div>
   );
-}
+    }
