@@ -42,6 +42,37 @@ export default async function handler(req, res) {
         return res.status(200).json({ progress: [] });
       }
     }
+    // ---- Flashcard decks: GET /api/profile?decks=1 (list) ----
+    if (req.query.decks) {
+      try {
+        const decks = await sql`
+          SELECT d.id, d.name, d.exam_tag,
+                 COUNT(c.id)::int AS card_count,
+                 COUNT(c.id) FILTER (WHERE c.due_at <= now())::int AS due_count
+          FROM decks d
+          LEFT JOIN cards c ON c.deck_id = d.id
+          WHERE d.owner_id = ${uid}
+          GROUP BY d.id, d.name, d.exam_tag
+          ORDER BY d.created_at DESC`;
+        return res.status(200).json({ decks });
+      } catch (e) {
+        return res.status(200).json({ decks: [] });
+      }
+    }
+    // ---- cards in a deck: GET /api/profile?deck=ID  (&due=1 for review queue only) ----
+    if (req.query.deck) {
+      try {
+        const deckId = parseInt(req.query.deck, 10);
+        const own = await sql`SELECT id, name, exam_tag FROM decks WHERE id = ${deckId} AND owner_id = ${uid}`;
+        if (!own.length) return res.status(404).json({ error: 'Deck not found' });
+        const cards = req.query.due
+          ? await sql`SELECT id, front, back, interval_days, ease, due_at FROM cards WHERE deck_id = ${deckId} AND due_at <= now() ORDER BY due_at ASC LIMIT 60`
+          : await sql`SELECT id, front, back, interval_days, ease, due_at FROM cards WHERE deck_id = ${deckId} ORDER BY created_at ASC`;
+        return res.status(200).json({ deck: own[0], cards });
+      } catch (e) {
+        return res.status(200).json({ deck: null, cards: [] });
+      }
+    }
     const target = parseInt(req.query.user, 10);
     if (!target) return res.status(400).json({ error: 'user id required' });
     try {
@@ -86,6 +117,62 @@ export default async function handler(req, res) {
           await sql`DELETE FROM share_grants WHERE grantor_id = ${uid} AND grantee_id = ${grantee} AND bank = ${body.bank}`;
         }
         return res.status(200).json({ ok: true });
+      }
+
+      // ---- Flashcard deck actions ----
+      if (body.action && body.action.startsWith('deck_')) {
+        await ensureDeckTables();
+
+        if (body.action === 'deck_create') {
+          const name = (body.name || '').trim();
+          if (!name) return res.status(400).json({ error: 'name required' });
+          const rows = await sql`INSERT INTO decks (owner_id, name, exam_tag) VALUES (${uid}, ${name}, ${body.exam_tag || null}) RETURNING id, name, exam_tag`;
+          return res.status(200).json({ deck: rows[0] });
+        }
+        if (body.action === 'deck_rename') {
+          await sql`UPDATE decks SET name = ${body.name}, exam_tag = ${body.exam_tag || null} WHERE id = ${parseInt(body.deckId, 10)} AND owner_id = ${uid}`;
+          return res.status(200).json({ ok: true });
+        }
+        if (body.action === 'deck_delete') {
+          const did = parseInt(body.deckId, 10);
+          await sql`DELETE FROM cards WHERE deck_id = ${did}`;
+          await sql`DELETE FROM decks WHERE id = ${did} AND owner_id = ${uid}`;
+          return res.status(200).json({ ok: true });
+        }
+        if (body.action === 'deck_add_card') {
+          const did = parseInt(body.deckId, 10);
+          const own = await sql`SELECT id FROM decks WHERE id = ${did} AND owner_id = ${uid}`;
+          if (!own.length) return res.status(404).json({ error: 'Deck not found' });
+          const front = (body.front || '').trim(), back = (body.back || '').trim();
+          if (!front || !back) return res.status(400).json({ error: 'front and back required' });
+          const rows = await sql`INSERT INTO cards (deck_id, front, back, interval_days, ease, due_at) VALUES (${did}, ${front}, ${back}, 0, 2.5, now()) RETURNING id, front, back, interval_days, ease, due_at`;
+          return res.status(200).json({ card: rows[0] });
+        }
+        if (body.action === 'deck_delete_card') {
+          await sql`DELETE FROM cards WHERE id = ${parseInt(body.cardId, 10)} AND deck_id IN (SELECT id FROM decks WHERE owner_id = ${uid})`;
+          return res.status(200).json({ ok: true });
+        }
+        // spaced-repetition rating: again / hard / good / easy
+        if (body.action === 'deck_rate_card') {
+          const cardId = parseInt(body.cardId, 10);
+          const rating = body.rating; // 'again'|'hard'|'good'|'easy'
+          const card = await sql`SELECT c.interval_days, c.ease FROM cards c JOIN decks d ON d.id = c.deck_id WHERE c.id = ${cardId} AND d.owner_id = ${uid}`;
+          if (!card.length) return res.status(404).json({ error: 'Card not found' });
+          let { interval_days, ease } = card[0];
+          interval_days = Number(interval_days) || 0; ease = Number(ease) || 2.5;
+          let nextDays;
+          if (rating === 'again') { ease = Math.max(1.3, ease - 0.2); nextDays = 0; }
+          else if (rating === 'hard') { ease = Math.max(1.3, ease - 0.15); nextDays = Math.max(1, Math.round((interval_days || 1) * 1.2)); }
+          else if (rating === 'easy') { ease = ease + 0.15; nextDays = Math.max(3, Math.round((interval_days || 1) * ease * 1.3)); }
+          else { nextDays = interval_days === 0 ? 1 : Math.max(1, Math.round((interval_days || 1) * ease)); } // good
+          // 'again' = due in ~1 min; others = due in nextDays
+          if (rating === 'again') {
+            await sql`UPDATE cards SET ease = ${ease}, interval_days = 0, due_at = now() + interval '1 minute' WHERE id = ${cardId}`;
+          } else {
+            await sql`UPDATE cards SET ease = ${ease}, interval_days = ${nextDays}, due_at = now() + (${nextDays} * interval '1 day') WHERE id = ${cardId}`;
+          }
+          return res.status(200).json({ ok: true, nextDays });
+        }
       }
 
       return res.status(400).json({ error: 'Unknown action' });
@@ -154,6 +241,28 @@ export default async function handler(req, res) {
 }
 
 // Self-creating tables (no manual migration needed), matching the existing pattern.
+async function ensureDeckTables() {
+  await sql`
+    CREATE TABLE IF NOT EXISTS decks (
+      id SERIAL PRIMARY KEY,
+      owner_id INTEGER NOT NULL,
+      name TEXT NOT NULL,
+      exam_tag TEXT,
+      created_at TIMESTAMPTZ DEFAULT now()
+    )`;
+  await sql`
+    CREATE TABLE IF NOT EXISTS cards (
+      id SERIAL PRIMARY KEY,
+      deck_id INTEGER NOT NULL,
+      front TEXT NOT NULL,
+      back TEXT NOT NULL,
+      interval_days INTEGER DEFAULT 0,
+      ease REAL DEFAULT 2.5,
+      due_at TIMESTAMPTZ DEFAULT now(),
+      created_at TIMESTAMPTZ DEFAULT now()
+    )`;
+}
+
 async function ensureQbankTables() {
   await sql`
     CREATE TABLE IF NOT EXISTS qbank_progress (
@@ -174,3 +283,4 @@ async function ensureQbankTables() {
       PRIMARY KEY (grantor_id, grantee_id, bank)
     )`;
 }
+
