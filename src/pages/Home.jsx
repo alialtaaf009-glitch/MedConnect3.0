@@ -286,6 +286,28 @@ function Momentum({ user }) {
   const todayKey = 'studied_' + new Date().toISOString().slice(0, 10);
   const [studiedToday, setStudiedToday] = useState(user?.studied_today || localStorage.getItem(todayKey) === '1');
   const [marking, setMarking] = useState(false);
+  // per-day study log (local) → powers the streak dots. { 'YYYY-MM-DD': 1 }
+  const logStudyDay = () => {
+    try {
+      const log = JSON.parse(localStorage.getItem('study_days') || '{}');
+      log[new Date().toISOString().slice(0, 10)] = 1;
+      localStorage.setItem('study_days', JSON.stringify(log));
+    } catch (e) {}
+  };
+  const last7 = (() => {
+    let log = {};
+    try { log = JSON.parse(localStorage.getItem('study_days') || '{}'); } catch (e) {}
+    // ensure today reflects studiedToday even before a fresh log write
+    if (studiedToday) log[new Date().toISOString().slice(0, 10)] = 1;
+    const out = []; const d = new Date(); d.setDate(d.getDate() - 6);
+    const L = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    for (let i = 0; i < 7; i++) {
+      const k = d.toISOString().slice(0, 10);
+      out.push({ on: !!log[k], letter: L[d.getDay()], isToday: k === new Date().toISOString().slice(0, 10) });
+      d.setDate(d.getDate() + 1);
+    }
+    return out;
+  })();
   const burstConfetti = () => {
     const colors = ['#a8442a', '#1f4d3f', '#b98a2e', '#2c6a55'];
     for (let i = 0; i < 18; i++) {
@@ -305,8 +327,9 @@ function Momentum({ user }) {
     setMarking(true);
     try {
       const d = await api.markStudy();
-          if (d.user) {
+      if (d.user) {
         setStreak(d.user.current_streak || 0); setStudiedToday(true); localStorage.setItem(todayKey, '1');
+        logStudyDay();
         burstConfetti();
         if (navigator.vibrate) { try { navigator.vibrate(20); } catch (e) {} }
       }
@@ -336,27 +359,49 @@ function Momentum({ user }) {
     <>
       {(!hideCd && daysLeft !== null) || !hideSt ? (
       <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
-        {!hideCd && daysLeft !== null && (
-          <div className="card stat-press" onClick={() => setCdOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '13px 12px', border: 'none', borderRadius: 16, margin: 0, cursor: 'pointer', position: 'relative', overflow: 'hidden', color: '#fff', background: 'linear-gradient(145deg, #1f4d3f 0%, #2c6a55 100%)', boxShadow: '0 4px 12px rgba(31,77,63,.22)' }}>
-            <span style={{ position: 'absolute', right: -6, bottom: -18, fontSize: 88, opacity: 0.12, lineHeight: 1, pointerEvents: 'none' }}>⏳</span>
+        {!hideCd && daysLeft !== null && (() => {
+          const finalStretch = daysLeft > 0 && daysLeft <= 10;
+          // ring progress: assume a 180-day prep window; fraction elapsed
+          const WINDOW = 180;
+          const frac = daysLeft > 0 ? Math.max(0, Math.min(1, (WINDOW - daysLeft) / WINDOW)) : 1;
+          const R = 36, C = 2 * Math.PI * R;
+          const ringColor = finalStretch ? '#f3c969' : '#fff';
+          return (
+          <div className="card stat-press" onClick={() => setCdOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '14px 12px', border: 'none', borderRadius: 16, margin: 0, cursor: 'pointer', position: 'relative', overflow: 'hidden', color: '#fff', background: 'linear-gradient(145deg, #1f4d3f 0%, #2c6a55 100%)', boxShadow: '0 4px 12px rgba(31,77,63,.22)' }}>
+            <span style={{ position: 'absolute', right: -6, bottom: -18, fontSize: 84, opacity: 0.12, lineHeight: 1, pointerEvents: 'none' }}>⏳</span>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'rgba(255,255,255,.82)', textTransform: 'uppercase', position: 'relative' }}>Countdown</div>
-            <div className="display-num" style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: daysLeft > 99 ? 32 : 36, fontWeight: 900, color: '#fff', lineHeight: 1.05, position: 'relative' }}>
-              {daysLeft > 0 ? daysLeft : daysLeft === 0 ? 'Today' : '—'}
+            <div style={{ position: 'relative', width: 84, height: 84, margin: '6px auto 2px' }}>
+              <svg width="84" height="84" viewBox="0 0 84 84" style={{ transform: 'rotate(-90deg)' }}>
+                <circle cx="42" cy="42" r={R} fill="none" stroke="rgba(255,255,255,.25)" strokeWidth="7" />
+                <circle cx="42" cy="42" r={R} fill="none" stroke={ringColor} strokeWidth="7" strokeLinecap="round" strokeDasharray={C} strokeDashoffset={C * (1 - frac)} style={{ transition: 'stroke-dashoffset .6s ease' }} />
+              </svg>
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="display-num" style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: daysLeft > 99 ? 26 : 30, fontWeight: 900, color: finalStretch ? '#f3c969' : '#fff', lineHeight: 1 }}>
+                  {daysLeft > 0 ? daysLeft : daysLeft === 0 ? 'Today' : '—'}
+                </div>
+                <div style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: 0.8, textTransform: 'uppercase', opacity: 0.82, marginTop: 1 }}>{daysLeft > 0 ? 'days' : daysLeft === 0 ? '' : 'passed'}</div>
+              </div>
             </div>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,.82)', marginTop: 1, position: 'relative' }}>{daysLeft > 0 ? 'days to exam' : daysLeft === 0 ? 'exam day!' : 'passed'}</div>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,.82)', position: 'relative' }}>{finalStretch ? 'final stretch 💪' : daysLeft > 0 ? 'to exam' : daysLeft === 0 ? 'exam day!' : ''}</div>
           </div>
-        )}
+          );
+        })()}
         {!hideSt && (
-        <div className="card stat-press" onClick={() => setStOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '13px 12px', border: 'none', borderRadius: 16, margin: 0, cursor: 'pointer', position: 'relative', overflow: 'hidden', color: '#fff', background: 'linear-gradient(145deg, #a8442a 0%, #c25a3d 100%)', boxShadow: '0 4px 12px rgba(168,68,42,.22)' }}>
+        <div className="card stat-press" onClick={() => setStOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '14px 12px', border: 'none', borderRadius: 16, margin: 0, cursor: 'pointer', position: 'relative', overflow: 'hidden', color: '#fff', background: 'linear-gradient(145deg, #a8442a 0%, #c25a3d 100%)', boxShadow: '0 4px 12px rgba(168,68,42,.22)' }}>
           <span style={{ position: 'absolute', right: -6, bottom: -16, fontSize: 84, opacity: 0.14, lineHeight: 1, pointerEvents: 'none' }}>🔥</span>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'rgba(255,255,255,.82)', textTransform: 'uppercase', position: 'relative' }}>Study Streak</div>
-          <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 36, fontWeight: 900, color: '#fff', lineHeight: 1.05, position: 'relative' }}>
+          <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 36, fontWeight: 900, color: '#fff', lineHeight: 1.05, position: 'relative', marginTop: 2 }}>
             {streak}
           </div>
+          <div style={{ display: 'flex', gap: 5, justifyContent: 'center', marginTop: 8, position: 'relative' }}>
+            {last7.map((d, i) => (
+              <div key={i} title={d.letter} style={{ width: 12, height: 12, borderRadius: 4, background: '#fff', opacity: d.on ? 1 : 0.28, boxShadow: d.isToday ? '0 0 0 2px rgba(255,255,255,.45)' : 'none' }} />
+            ))}
+          </div>
           {studiedToday ? (
-            <div style={{ marginTop: 4, position: 'relative' }}><span style={{ fontSize: 10, fontWeight: 800, padding: '3px 10px', borderRadius: 999, background: 'rgba(255,255,255,.22)', color: '#fff' }}>✓ done today</span></div>
+            <div style={{ marginTop: 8, position: 'relative' }}><span style={{ fontSize: 10, fontWeight: 800, padding: '3px 10px', borderRadius: 999, background: 'rgba(255,255,255,.22)', color: '#fff' }}>✓ done today</span></div>
           ) : (
-            <button onClick={(e) => { e.stopPropagation(); markStudy(); }} disabled={marking} style={{ marginTop: 4, fontSize: 11, fontWeight: 700, color: 'var(--rust)', background: '#fff', border: 'none', borderRadius: 999, padding: '5px 12px', cursor: 'pointer', position: 'relative' }}>
+            <button onClick={(e) => { e.stopPropagation(); markStudy(); }} disabled={marking} style={{ marginTop: 8, fontSize: 11, fontWeight: 700, color: 'var(--rust)', background: '#fff', border: 'none', borderRadius: 999, padding: '5px 12px', cursor: 'pointer', position: 'relative' }}>
               {marking ? '…' : 'Mark today ✓'}
             </button>
           )}
@@ -446,7 +491,6 @@ function Momentum({ user }) {
     </>
   );
 }
-
 export default function Home() {
   const { user } = useAuth();
   const nav = useNavigate();
@@ -611,4 +655,4 @@ function QbankCard({ nav }) {
       <span style={{ width: 26, height: 26, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', color: 'var(--forest)', fontWeight: 800, flexShrink: 0 }}>›</span>
     </button>
   );
-}
+      }
