@@ -225,7 +225,7 @@ function TopBar({ user }) {
   return (
     <>
       <div className="topbar">
-        <div style={{ width: 36, flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+        <div style={{ width: 76, flexShrink: 0, display: 'flex', alignItems: 'center' }}>
           {showBack
             ? <button className="topbar-back" onClick={goBack} aria-label="Back">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
@@ -235,14 +235,16 @@ function TopBar({ user }) {
               </button>}
         </div>
         <div className="topbar-title">MedConnect</div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ width: 76, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8 }}>
           {user && !onProfile && (
             <button onClick={() => { const opening = !bellOpen; setBellOpen(opening); if (opening) loadNotifs.current(); }} aria-label="Notifications"
               style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer', color: '#fff', display: 'grid', placeItems: 'center', width: 32, height: 32, borderRadius: '50%', opacity: totalCount > 0 ? 1 : 0.65 }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                 <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                              </svg>
+              </svg>
               {totalCount > 0 && (
                 <span style={{ position: 'absolute', top: 2, right: 2, width: 14, height: 14, borderRadius: '50%', background: 'var(--rust)', color: '#fff', fontSize: 9, fontWeight: 800, display: 'grid', placeItems: 'center', border: '1.5px solid var(--forest)' }}>
                   {totalCount > 9 ? '9+' : totalCount}
@@ -250,9 +252,7 @@ function TopBar({ user }) {
               )}
             </button>
           )}
-          {onProfile
-            ? <span style={{ width: 36 }} />
-            : <button className="topbar-avatar" onClick={() => nav('/profile')} aria-label="Profile">{user?.avatar || initials}</button>}
+          {!onProfile && <button className="topbar-avatar" onClick={() => nav('/profile')} aria-label="Profile">{user?.avatar || initials}</button>}
         </div>
       </div>
 
@@ -476,6 +476,7 @@ export default function App() {
         <Route path="/formulas" element={<Formulas />} />
         <Route path="/qbank" element={<Qbank />} />
         <Route path="/flashcards" element={<Flashcards />} />
+        <Route path="/resources" element={<Resources />} />
         <Route path="/pro" element={<Pro />} />
         <Route path="/connections" element={<Navigate to="/partners?tab=mine" replace />} />
         <Route path="/profile" element={<Profile />} />
@@ -486,3 +487,4 @@ export default function App() {
     </div>
   );
         }
+        
