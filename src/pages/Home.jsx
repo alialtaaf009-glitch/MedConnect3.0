@@ -112,13 +112,19 @@ function DotRing({ color, size = 30 }) {
 // "Explore study partners" browser: by-country / by-exam trees with partner counts
 function ExploreBrowse() {
   const nav = useNavigate();
-  const [openCountry, setOpenCountry] = useState('');
-  const [openExam, setOpenExam] = useState('');
-  const [browseMode, setBrowseMode] = useState('country'); // 'country' | 'exam'
+  const ls = (k, d) => { try { return localStorage.getItem(k) ?? d; } catch (e) { return d; } };
+  const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+  const [openCountry, setOpenCountryRaw] = useState(() => ls('explore_open_country', ''));
+  const setOpenCountry = (v) => { setOpenCountryRaw(v); lsSet('explore_open_country', v); };
+  const [openExam, setOpenExamRaw] = useState(() => ls('explore_open_exam', ''));
+  const setOpenExam = (v) => { setOpenExamRaw(v); lsSet('explore_open_exam', v); };
+  const [browseMode, setBrowseModeRaw] = useState(() => ls('explore_mode', 'country'));
+  const setBrowseMode = (v) => { setBrowseModeRaw(v); lsSet('explore_mode', v); };
   // starred countries/exams float to the top; a toggle lets you show only your pinned set
   const [pinC, setPinC] = useState(() => { try { return JSON.parse(localStorage.getItem('pin_countries') || '[]'); } catch (e) { return []; } });
   const [pinE, setPinE] = useState(() => { try { return JSON.parse(localStorage.getItem('pin_exams') || '[]'); } catch (e) { return []; } });
-  const [pinnedOnly, setPinnedOnly] = useState(false);
+  const [pinnedOnly, setPinnedOnlyRaw] = useState(() => ls('explore_pinned_only', '0') === '1');
+  const setPinnedOnly = (v) => { const next = typeof v === 'function' ? v(pinnedOnly) : v; setPinnedOnlyRaw(next); lsSet('explore_pinned_only', next ? '1' : '0'); };
   const togglePinC = (name) => setPinC((p) => { const n = p.includes(name) ? p.filter((x) => x !== name) : [...p, name]; localStorage.setItem('pin_countries', JSON.stringify(n)); return n; });
   const togglePinE = (key) => setPinE((p) => { const n = p.includes(key) ? p.filter((x) => x !== key) : [...p, key]; localStorage.setItem('pin_exams', JSON.stringify(n)); return n; });
 
@@ -299,10 +305,10 @@ function Momentum({ user }) {
     setMarking(true);
     try {
       const d = await api.markStudy();
-      if (d.user) {
+          if (d.user) {
         setStreak(d.user.current_streak || 0); setStudiedToday(true); localStorage.setItem(todayKey, '1');
         burstConfetti();
-                if (navigator.vibrate) { try { navigator.vibrate(20); } catch (e) {} }
+        if (navigator.vibrate) { try { navigator.vibrate(20); } catch (e) {} }
       }
     } catch (e) {} finally { setMarking(false); }
   };
