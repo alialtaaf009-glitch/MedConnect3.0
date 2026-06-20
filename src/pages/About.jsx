@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import aliAvatar from '../assets/ali-avatar.png';
 
 export default function About() {
   const nav = useNavigate();
@@ -40,12 +41,11 @@ export default function About() {
       </h2>
 
       <div className="card" style={{ textAlign: 'center', padding: '24px 18px' }}>
-        {/* Avatar — add your photo here later:
-            <img src="/your-photo.jpg" alt="Dr. Ali Altaf"
-                 style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        */}
+        {/* Avatar */}
         <div style={{ position: 'relative', display: 'inline-flex', justifyContent: 'center', marginBottom: 14 }}>
-          <div style={{ width: 104, height: 104, borderRadius: '50%', background: 'var(--paper-2, #e6ecdd)', display: 'grid', placeItems: 'center', overflow: 'hidden' }} />
+          <div style={{ width: 104, height: 104, borderRadius: '50%', background: 'var(--paper-2, #e6ecdd)', display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
+            <img src={aliAvatar} alt="Dr. Ali Altaf" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
           <span style={{ position: 'absolute', top: -2, right: -6, fontSize: 18 }}>✨</span>
         </div>
 
@@ -62,7 +62,7 @@ export default function About() {
         <div style={{ width: 56, height: 1, background: 'var(--line)', margin: '18px auto' }} />
 
         <p style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: 15.5, lineHeight: 1.7, color: 'var(--ink)', maxWidth: 360, margin: '0 auto' }}>
-          MedConnect was born from my own experience preparing for licensing exams. From endless nights of studying to building this app — it&apos;s my way of paying it forward. <span style={{ color: 'var(--rust, #c0533f)' }}>♥</span>
+          MedConnect was born from my own experience preparing for licensing exams. From endless nights of studying to building this app &mdash; it&apos;s my way of paying it forward. <span style={{ color: 'var(--rust, #c0533f)' }}>&#9829;</span>
         </p>
 
         {/* Stat boxes */}
