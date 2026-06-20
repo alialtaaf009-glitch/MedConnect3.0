@@ -21,6 +21,7 @@ import LabValues from './pages/LabValues.jsx';
 import Formulas from './pages/Formulas.jsx';
 import Qbank from './pages/Qbank.jsx';
 import Flashcards from './pages/Flashcards.jsx';
+import Resources from './pages/Resources.jsx';
 import Pro from './pages/Pro.jsx';
 import Checklist from './components/Checklist.jsx';
 import AddPartner from './pages/AddPartner.jsx';
@@ -135,6 +136,9 @@ function Drawer({ open, onClose, user }) {
           <button className="drawer-item" onClick={() => go('/flashcards')}>
             <svg viewBox="0 0 24 24"><rect x="3" y="5" width="14" height="11" rx="2" /><path d="M7 9h6M7 12h4" /><path d="M7 5l4-2 10 4-2 9-4-1.5" /></svg>Flashcards
           </button>
+          <button className="drawer-item" onClick={() => go('/resources')}>
+            <svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2V5z" /><path d="M8 7h7M8 11h7M8 15h4" /></svg>Resources
+          </button>
           <div className="drawer-div" />
           <div className="drawer-sect">Grow</div>
           <button className="drawer-item" onClick={inviteFriend}>
@@ -241,8 +245,6 @@ function TopBar({ user }) {
               style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer', color: '#fff', display: 'grid', placeItems: 'center', width: 32, height: 32, borderRadius: '50%', opacity: totalCount > 0 ? 1 : 0.65 }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                 <path d="M13.73 21a2 2 0 0 1-3.46 0" />
               </svg>
               {totalCount > 0 && (
@@ -327,7 +329,7 @@ function TopBar({ user }) {
                   );
                 })}
               </div>
-            )}
+          )}
             </div>
 
             {notifs.requests.length > 0 && (
@@ -344,7 +346,6 @@ function TopBar({ user }) {
     </>
   );
 }
-
 function TabBar() {
   const timer = useTimer();
   const timerRunning = !!timer?.running;
@@ -486,5 +487,4 @@ export default function App() {
       {!immersive && <TabBar />}
     </div>
   );
-        }
-        
+}
