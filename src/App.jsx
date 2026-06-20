@@ -245,7 +245,7 @@ function TopBar({ user }) {
               </svg>
               {totalCount > 0 && (
                 <span style={{ position: 'absolute', top: 2, right: 2, width: 14, height: 14, borderRadius: '50%', background: 'var(--rust)', color: '#fff', fontSize: 9, fontWeight: 800, display: 'grid', placeItems: 'center', border: '1.5px solid var(--forest)' }}>
-                                    {totalCount > 9 ? '9+' : totalCount}
+                  {totalCount > 9 ? '9+' : totalCount}
                 </span>
               )}
             </button>
@@ -425,14 +425,13 @@ export default function App() {
 
   if (loading || !splashDone) return (
     <div className="app">
-      <div className="center splash" style={{ flexDirection: 'column', gap: 16 }}>
-        <svg className="splash-draw" width="92" height="92" viewBox="0 0 64 64" aria-label="MedConnect">
-          <line x1="32" y1="8" x2="32" y2="58" />
-          <path className="snake" d="M32 16 q10 6 0 12 q-10 6 0 12 q10 6 0 10" />
-          <path className="wings" d="M32 14 q-10 -2 -16 4" />
-          <path className="wings" d="M32 14 q10 -2 16 4" />
-          <circle cx="32" cy="9" r="3" />
-        </svg>
+      <div className="center splash" style={{ flexDirection: 'column', gap: 14 }}>
+        <div className="splash-mark" aria-label="MedConnect">
+          <svg width="72" height="72" viewBox="0 0 72 72">
+            <circle cx="36" cy="36" r="32" fill="none" stroke="currentColor" strokeWidth="2.5" />
+            <text x="36" y="48" textAnchor="middle" fontFamily="'Fraunces', Georgia, serif" fontSize="38" fontWeight="900" fill="currentColor">M</text>
+          </svg>
+        </div>
         <div className="splash-brand">MedConnect</div>
         <div className="splash-tag"><span>Connect.</span> <span>Study.</span> <span>Succeed.</span></div>
       </div>
@@ -491,5 +490,4 @@ export default function App() {
       {!immersive && <TabBar />}
     </div>
   );
-      }
-
+}
