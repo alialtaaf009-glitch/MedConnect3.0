@@ -251,21 +251,11 @@ button:active { -webkit-tap-highlight-color: transparent; }
 .avatar-idle { animation: avatarIdle 9s ease-in-out infinite; transform-origin: center 70%; }
 @media (prefers-reduced-motion: reduce) { .avatar-idle { animation: none; } }
 
-/* app open splash — wordmark + tagline */
-.splash-mark { color: var(--forest); opacity: 0; transform: scale(0.85); animation: splashMark .55s cubic-bezier(0.34, 1.56, 0.64, 1) .05s forwards; }
-@keyframes splashMark { to { opacity: 1; transform: scale(1); } }
-.splash-brand { font-family: 'Fraunces', Georgia, serif; font-size: 30px; font-weight: 900; letter-spacing: -0.5px; color: var(--forest); opacity: 0; animation: splashFade .4s ease .35s forwards; }
+/* app open splash — logo + wordmark + tagline */
+.splash-logo { width: 84px; height: 84px; }
+.splash-brand { font-family: 'Fraunces', Georgia, serif; font-size: 30px; font-weight: 900; letter-spacing: -0.5px; color: var(--forest); margin-top: 4px; }
 .splash-tag { font-size: 12.5px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--rust); }
-.splash-tag span { opacity: 0; display: inline-block; animation: splashWord .5s ease forwards; }
-.splash-tag span:nth-child(1) { animation-delay: 0.55s; }
-.splash-tag span:nth-child(2) { animation-delay: 0.75s; }
-.splash-tag span:nth-child(3) { animation-delay: 0.95s; }
-@keyframes splashFade { to { opacity: 1; } }
-@keyframes splashWord { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-@media (prefers-reduced-motion: reduce) {
-  .splash-mark { animation: none; opacity: 1; transform: none; }
-  .splash-brand, .splash-tag span { animation: none; opacity: 1; }
-}
+.splash-tag span { display: inline-block; }
 
 /* gentle self-twinkle on favourited stars */
 @keyframes twinkle {
