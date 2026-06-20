@@ -302,7 +302,7 @@ function Momentum({ user }) {
       if (d.user) {
         setStreak(d.user.current_streak || 0); setStudiedToday(true); localStorage.setItem(todayKey, '1');
         burstConfetti();
-        if (navigator.vibrate) { try { navigator.vibrate(20); } catch (e) {} }
+                if (navigator.vibrate) { try { navigator.vibrate(20); } catch (e) {} }
       }
     } catch (e) {} finally { setMarking(false); }
   };
@@ -597,7 +597,7 @@ function QbankCard({ nav }) {
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--forest)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5h16v14H4zM4 9h16M9 9v10" /></svg>
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontWeight: 800, fontSize: 14.5 }}>Qbank Tracker</div>
+        <div style={{ fontWeight: 800, fontSize: 14.5, color: 'var(--ink)' }}>Qbank Tracker</div>
         {stats.loading
           ? <div style={{ height: 11, width: 130, borderRadius: 6, background: 'var(--paper-2)', marginTop: 4 }} />
           : <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 1 }}>{subtitle}</div>}
