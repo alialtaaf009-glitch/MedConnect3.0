@@ -1,6 +1,24 @@
 // API client — talks to Netlify Functions at /api/* (same origin, no IP needed).
 function token() { return localStorage.getItem('token'); }
 
+// Tiny in-flight + short-TTL cache, used only for read-heavy endpoints that
+// multiple components fetch on mount (e.g. connections). Dedupes simultaneous
+// calls and serves cached data for `ttlMs` ms. Writes call invalidate() to clear.
+const _cache = new Map(); // key -> { promise, t, data }
+function cached(key, ttlMs, fetcher) {
+  const now = Date.now();
+  const hit = _cache.get(key);
+  if (hit) {
+    if (hit.promise) return hit.promise; // dedupe in-flight
+    if (now - hit.t < ttlMs) return Promise.resolve(hit.data);
+  }
+  const p = fetcher().then((data) => { _cache.set(key, { t: Date.now(), data }); return data; })
+    .catch((e) => { _cache.delete(key); throw e; });
+  _cache.set(key, { promise: p, t: now });
+  return p;
+}
+function invalidate(prefix) { for (const k of _cache.keys()) if (k.startsWith(prefix)) _cache.delete(k); }
+
 async function req(path, { method = 'GET', body } = {}) {
   const headers = { 'Content-Type': 'application/json' };
   const t = token();
@@ -18,13 +36,15 @@ export const api = {
   login: (email, password) => req('/login', { method: 'POST', body: { email, password } }),
   me: () => req('/me'),
   markStudy: () => req('/me', { method: 'POST', body: { action: 'mark_study' } }),
-  updateProfile: (p) => req('/profile', { method: 'PUT', body: p }),
+  updateProfile: (p) => { invalidate('connections'); return req('/profile', { method: 'PUT', body: p }); },
   publicProfile: (id) => req(`/profile?user=${id}`),
   deleteAccount: () => req('/profile', { method: 'DELETE' }),
   matches: () => req('/matches'),
-  connections: () => req('/connections'),
-  sendRequest: (recipientId) => req('/connections', { method: 'POST', body: { recipientId } }),
-  respond: (id, action) => req(`/connections?id=${id}`, { method: 'PATCH', body: { action } }),
+  // connections is fetched by App's bell, the Partners-nav-dot, and Home.
+  // 20s cache dedupes parallel mounts; writes (accept/decline/request) invalidate it.
+  connections: () => cached('connections', 20000, () => req('/connections')),
+  sendRequest: (recipientId) => { invalidate('connections'); return req('/connections', { method: 'POST', body: { recipientId } }); },
+  respond: (id, action) => { invalidate('connections'); return req(`/connections?id=${id}`, { method: 'PATCH', body: { action } }); },
   conversations: () => req('/messages'),
   conversation: (withId) => req(`/messages?with=${withId}`),
   sendMessage: (to, body) => req('/messages', { method: 'POST', body: { to, body } }),
@@ -57,7 +77,7 @@ export const api = {
   addGroupMember: (groupId, userId) => req('/messages?scope=groups', { method: 'POST', body: { action: 'add_member', groupId, userId } }),
   leaveGroup: (groupId) => req('/messages?scope=groups', { method: 'POST', body: { action: 'leave', groupId } }),
   deleteGroup: (groupId) => req('/messages?scope=groups', { method: 'POST', body: { action: 'delete', groupId } }),
-  deleteChat: (targetId) => req('/moderation', { method: 'POST', body: { action: 'delete_chat', targetId } }),
+  deleteChat: (targetId) => { invalidate('connections'); return req('/moderation', { method: 'POST', body: { action: 'delete_chat', targetId } }); },
   blockUser: (targetId) => req('/moderation', { method: 'POST', body: { action: 'block', targetId } }),
   unfriendUser: (targetId) => req('/moderation', { method: 'POST', body: { action: 'unfriend', targetId } }),
   reportUser: (targetId, reason) => req('/moderation', { method: 'POST', body: { action: 'report', targetId, reason } }),
