@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import StudyTimer from '../components/StudyTimer.jsx';
-import DnaGame from '../components/DnaGame.jsx';
+import TileGame from '../components/TileGame.jsx';
 import { useBack } from '../context/Back.jsx';
 
 
@@ -99,7 +99,7 @@ export default function Focus() {
   );
 }
 
-// Unified "Take a break" section with a pill toggle: Breathing | Pill game
+// Unified "Take a break" section with a pill toggle: Breathing | Memory
 function TakeABreak() {
   const [tab, setTab] = useState('breathe');
   return (
@@ -108,9 +108,9 @@ function TakeABreak() {
       <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 12 }}>Take a break</div>
       <div style={{ display: 'flex', background: 'var(--paper-2)', borderRadius: 999, padding: 4, marginBottom: 14 }}>
         <button onClick={() => setTab('breathe')} style={{ flex: 1, border: 'none', borderRadius: 999, padding: '9px', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', background: tab === 'breathe' ? 'var(--card)' : 'transparent', color: tab === 'breathe' ? 'var(--forest)' : 'var(--muted)', boxShadow: tab === 'breathe' ? '0 1px 4px rgba(0,0,0,.08)' : 'none', transition: 'all .15s' }}>🫁 Breathing</button>
-        <button onClick={() => setTab('game')} style={{ flex: 1, border: 'none', borderRadius: 999, padding: '9px', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', background: tab === 'game' ? 'var(--card)' : 'transparent', color: tab === 'game' ? 'var(--forest)' : 'var(--muted)', boxShadow: tab === 'game' ? '0 1px 4px rgba(0,0,0,.08)' : 'none', transition: 'all .15s' }}>💊 Pill game</button>
+        <button onClick={() => setTab('game')} style={{ flex: 1, border: 'none', borderRadius: 999, padding: '9px', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', background: tab === 'game' ? 'var(--card)' : 'transparent', color: tab === 'game' ? 'var(--forest)' : 'var(--muted)', boxShadow: tab === 'game' ? '0 1px 4px rgba(0,0,0,.08)' : 'none', transition: 'all .15s' }}>🫀 Memory</button>
       </div>
-      {tab === 'breathe' ? <Breathe /> : <DnaGame />}
+      {tab === 'breathe' ? <Breathe /> : <TileGame />}
     </>
   );
 }
