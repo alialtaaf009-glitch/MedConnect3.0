@@ -11,6 +11,7 @@ const AVATARS = ['🩺','💉','🧬','🦴','🫀','🧠','👨‍⚕️','👩
   '🐱','🦊','🦉','🐼','🐨','🦁','🐸','🦋','🐧','🐢','🦄','🐙',
   '🌟','🔥','🌙','🍀','⚡','🎯','📚','☕'];
 const COUNTRIES = ['Pakistan','United Kingdom','United States','Saudi Arabia / Gulf','Australia','India','Other'];
+const EXAMS = ['MRCP — Part 1','MRCP — Part 2 (Written)','MRCP — PACES','MRCS — Part A','MRCS — Part B (OSCE)','PLAB 1 / UKMLA AKT','PLAB 2 / UKMLA CPSA','USMLE — Step 1','USMLE — Step 2 CK','FCPS — Part 1','FCPS — Part 2','AMC — Part 1','SMLE','Other'];
 const TIMEZONES = ['GMT-8 (US Pacific)','GMT-5 (US Eastern)','GMT+0 (UK)','GMT+1 (Europe)','GMT+3 (Gulf / Saudi)','GMT+5 (Pakistan)','GMT+5:30 (India)','GMT+8 (Singapore/China)','GMT+10 (Australia East)'];
 const QBANKS = ['PassMedicine','Pastest','BMJ OnExamination','Plabable','UWorld','AMBOSS','MRCPUK Question Bank','Marrow','PrepLadder','DAMS','Cerebellum','eGurukul','Other'];
 const STUDY_WHEN = ['🌄 Early bird', '☀️ Daytime', '🌆 Evening', '🦉 Night owl'];
@@ -86,6 +87,7 @@ export default function Profile() {
   const [studyStyles, setStudyStyles] = useState(user?.study_styles || '');
   const [attempt, setAttempt] = useState(user?.attempt || '');
   const [examDate, setExamDate] = useState(user?.exam_date ? user.exam_date.slice(0, 10) : '');
+  const [exam, setExam] = useState(user?.exam || EXAMS[0]);
   const [regCouncil, setRegCouncil] = useState(user?.reg_council || '');
   const [regNumber, setRegNumber] = useState(user?.reg_number || '');
   const [medicalSchool, setMedicalSchool] = useState(user?.medical_school || '');
@@ -100,7 +102,7 @@ export default function Profile() {
     }
     setBusy(true);
     try {
-      const { user: updated } = await api.updateProfile({ name, avatar, country, timezone, questionBank, studyTime, examDate, attempt, regCouncil, regNumber, medicalSchool, bio, focus, gender, studyStyles });
+      const { user: updated } = await api.updateProfile({ name, avatar, country, timezone, questionBank, studyTime, examDate, attempt, regCouncil, regNumber, medicalSchool, bio, focus, gender, studyStyles, exam });
       setUser(updated);
       setEditing(false);
     } catch (e) {
@@ -137,6 +139,11 @@ export default function Profile() {
 
         <label className="label">Short bio <span style={{ textTransform:'none', letterSpacing:0, fontWeight:400 }}>(optional — what you're looking for)</span></label>
         <textarea className="input" rows={3} style={{ resize:'vertical', fontFamily:'inherit' }} placeholder="e.g. MRCP Part 1 in May, looking for an evening study partner to do PassMedicine questions together." value={bio} onChange={(e) => setBio(e.target.value)} maxLength={300} />
+
+        <label className="label">Exam</label>
+        <select className="input" value={exam} onChange={(e) => setExam(e.target.value)}>
+          {EXAMS.map((x) => <option key={x} value={x}>{x}</option>)}
+        </select>
 
         <label className="label">Exam date <span style={{ textTransform: 'none', letterSpacing: 0, fontWeight: 400 }}>(for your countdown)</span></label>
         <input className="input" type="date" value={examDate} onChange={(e) => setExamDate(e.target.value)} />
