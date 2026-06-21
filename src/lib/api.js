@@ -63,7 +63,7 @@ export const api = {
   qbankSave: (bank, topic, done, total, correct) => { invalidate('qbank'); return req('/profile', { method: 'POST', body: { action: 'save_progress', bank, topic, done, total, correct } }); },
   qbankDeleteTopic: (bank, topic) => { invalidate('qbank'); return req('/profile', { method: 'POST', body: { action: 'delete_topic', bank, topic } }); },
   qbankSetShare: (partnerId, bank, on) => { invalidate('qbank'); return req('/profile', { method: 'POST', body: { action: 'set_share', partnerId, bank, on } }); },
-  qbankCompare: (partnerId, bank) => req(`/profile?compare=${partnerId}&bank=${encodeURIComponent(bank)}`),
+  qbankCompare: (partnerId, bank) => cached(`compare:${partnerId}:${bank}`, 30000, () => req(`/profile?compare=${partnerId}&bank=${encodeURIComponent(bank)}`)),
   unreadMessages: () => req('/messages?scope=unread'),
   markAllRead: () => req('/messages', { method: 'POST', body: { action: 'mark_all_read' } }),
   markReadOne: (other) => req('/messages', { method: 'POST', body: { action: 'mark_read_one', other } }),
