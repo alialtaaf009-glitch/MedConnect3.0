@@ -218,7 +218,7 @@ export default function Qbank() {
               <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 0', borderTop: '1px solid var(--line)' }}>
                 <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', fontSize: 18, flexShrink: 0 }}>{p.avatar || '🩺'}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, fontSize: 14 }}>{p.name}</div>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--ink)' }}>{p.name}</div>
                   <div style={{ fontSize: 11.5, color: on ? '#2c6a55' : 'var(--subtle)' }}>{on ? 'You share with them' : 'Not sharing'}</div>
                 </div>
                 <button onClick={() => toggleShare(p.id, !on)} style={{ width: 46, height: 27, borderRadius: 999, border: 'none', cursor: 'pointer', position: 'relative', background: on ? color : 'var(--line)', transition: 'background .2s', flexShrink: 0 }}>
@@ -318,11 +318,11 @@ function SharedToMe({ bank, grants, compareId, compareName, compareRows, bankRow
           <div key={p.id} style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 14, marginBottom: 8, overflow: 'hidden' }}>
             <button onClick={() => onToggle(p.id, p.name)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '11px 13px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
               <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', fontSize: 18 }}>{p.avatar || '🩺'}</div>
-              <span style={{ flex: 1, textAlign: 'left', fontWeight: 700, fontSize: 14 }}>{p.name}</span>
+              <span style={{ flex: 1, textAlign: 'left', fontWeight: 700, fontSize: 14, color: 'var(--ink)' }}>{p.name}</span>
               <span className="link" style={{ fontSize: 13, fontWeight: 700 }}>{open ? 'Hide' : 'Compare'} <span style={{ display: 'inline-block', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>▾</span></span>
             </button>
             {open && (
-              <div style={{ padding: '4px 14px 14px' }}>
+            <div style={{ padding: '4px 14px 14px' }}>
                 <div style={{ display: 'flex', gap: 14, margin: '2px 0 10px', fontSize: 11.5, fontWeight: 700 }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 11, height: 11, borderRadius: 3, background: color, display: 'inline-block' }} />You</span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 11, height: 11, borderRadius: 3, background: 'var(--gold)', display: 'inline-block' }} />{compareName}</span>
@@ -355,3 +355,4 @@ function SharedToMe({ bank, grants, compareId, compareName, compareRows, bankRow
     </div>
   );
 }
+      
