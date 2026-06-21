@@ -110,9 +110,9 @@ function ConversationList({ nav, me }) {
             const init = (c.name || 'Dr').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('');
             const unread = c.last_sender == c.other_id && new Date(c.last_at).getTime() > Number(localStorage.getItem('chat_read_' + c.other_id) || 0);
             return (
-              <div key={c.other_id} style={{ position: 'relative', marginBottom: 10 }}>
+              <div key={c.other_id} style={{ position: 'relative', borderBottom: '1px solid var(--line)' }}>
                 <button onClick={() => delChat(c)} aria-label="Delete chat" style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: 74, background: 'var(--rust)', color: '#fff', border: 'none', borderRadius: 20, display: 'grid', placeItems: 'center', cursor: 'pointer' }}><IcoTrash /></button>
-              <div className="row" style={{ cursor: 'pointer', marginBottom: 0, position: 'relative', zIndex: 1, transform: swipeId === c.other_id ? 'translateX(-82px)' : 'translateX(0)', transition: 'transform .22s ease' }}
+              <div className="row" style={{ cursor: 'pointer', marginBottom: 0, padding: '9px 4px', position: 'relative', zIndex: 1, transform: swipeId === c.other_id ? 'translateX(-82px)' : 'translateX(0)', transition: 'transform .22s ease' }}
                 onTouchStart={(e) => pressStart(c, e.touches[0].clientX)} onTouchEnd={() => pressEnd(c)} onTouchMove={(e) => pressMove(e.touches[0].clientX)}
                 onMouseDown={(e) => pressStart(c, e.clientX)} onMouseUp={() => pressEnd(c)} onMouseLeave={() => pressEnd(null)}
                 onContextMenu={(e) => e.preventDefault()}
@@ -143,7 +143,7 @@ function ConversationList({ nav, me }) {
             </p>
           )}
           {groups.map((g) => (
-            <div key={g.id} className="row" style={{ cursor: 'pointer' }} onClick={() => nav(`/chat?group=${g.id}`)}>
+            <div key={g.id} className="row" style={{ cursor: 'pointer', marginBottom: 0, padding: '9px 4px', borderBottom: '1px solid var(--line)' }} onClick={() => nav(`/chat?group=${g.id}`)}>
               <div style={{ width: 42, height: 42, borderRadius: 12, background: 'var(--forest)', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 18, flexShrink: 0 }}>👥</div>
               <div className="grow">
                 <div className="name">{g.name}</div>
