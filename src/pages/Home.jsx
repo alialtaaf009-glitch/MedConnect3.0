@@ -337,7 +337,7 @@ function Momentum({ user }) {
   };
 
   // pop-outs
-  const [cdOpen, setCdOpen] = useState(false);
+const [cdOpen, setCdOpen] = useState(false);
   const [stOpen, setStOpen] = useState(false);
   const [nowTs, setNowTs] = useState(Date.now());
   useEffect(() => {
@@ -490,7 +490,7 @@ function Momentum({ user }) {
       })()}
     </>
   );
-  
+}
 export default function Home() {
   const { user } = useAuth();
   const nav = useNavigate();
@@ -655,6 +655,4 @@ function QbankCard({ nav }) {
       <span style={{ width: 26, height: 26, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', color: 'var(--forest)', fontWeight: 800, flexShrink: 0 }}>›</span>
     </button>
   );
-      }
-        
-                                                                                                                                                                      }
+}
