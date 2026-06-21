@@ -67,22 +67,22 @@ function DeckList({ user, onOpen, onStudy }) {
       {decks && decks.map((d) => {
         const c = examColor(d.exam_tag) || 'var(--forest)';
         return (
-          <div key={d.id} className="card" style={{ borderLeft: `4px solid ${c}`, marginBottom: 10 }}>
-            <div onClick={() => onOpen(d)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', cursor: 'pointer' }}>
+          <div key={d.id} className="card" style={{ marginBottom: 10, borderRadius: 18 }}>
+            <div onClick={() => onOpen(d)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', cursor: 'pointer', gap: 10 }}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 800, fontSize: 15 }}>{d.name}</div>
+                <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--ink)' }}>{d.name}</div>
                 <div className="sub" style={{ marginTop: 2, fontSize: 12.5 }}>
                   {d.card_count} card{d.card_count !== 1 ? 's' : ''}
                   {d.due_count > 0 ? <> · <span style={{ color: 'var(--rust)', fontWeight: 700 }}>{d.due_count} due</span></> : (d.card_count > 0 ? <> · <span style={{ color: 'var(--muted)' }}>all reviewed ✓</span></> : '')}
                 </div>
               </div>
-              {d.exam_tag && <span style={{ fontSize: 10.5, fontWeight: 700, padding: '2px 9px', borderRadius: 999, background: 'var(--paper-2)', color: 'var(--muted)', flexShrink: 0 }}>{d.exam_tag}</span>}
+              {d.exam_tag && <span style={{ fontSize: 10.5, fontWeight: 700, padding: '3px 11px', borderRadius: 999, background: `${c}1a`, color: c, flexShrink: 0 }}>{d.exam_tag}</span>}
             </div>
             {d.due_count > 0
-              ? <button onClick={() => onStudy(d)} className="btn" style={{ marginTop: 12, background: c }}>Study {d.due_count} due</button>
+              ? <button onClick={() => onStudy(d)} className="btn bouncy" style={{ marginTop: 12, background: 'var(--forest)', borderRadius: 999 }}>Study {d.due_count} due</button>
               : d.card_count > 0
-                ? <button onClick={() => onStudy(d)} className="btn ghost" style={{ marginTop: 12 }}>Review again</button>
-                : <button onClick={() => onOpen(d)} className="btn ghost" style={{ marginTop: 12 }}>Add cards</button>}
+                ? <button onClick={() => onStudy(d)} className="btn ghost bouncy" style={{ marginTop: 12, borderRadius: 999 }}>Review again</button>
+                : <button onClick={() => onOpen(d)} className="btn ghost bouncy" style={{ marginTop: 12, borderRadius: 999 }}>Add cards</button>}
           </div>
         );
       })}
