@@ -13,10 +13,19 @@ export default function SignIn() {
   const [err, setErr] = useState('');
 
   const submit = async () => {
-    setBusy(true); setErr('');
+    setErr('');
+    // client-side validation for clearer, faster feedback
+    const cleanEmail = email.trim().toLowerCase();
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!EMAIL_RE.test(cleanEmail)) { setErr('Please enter a valid email address'); return; }
+    if (mode === 'register') {
+      if (!name.trim()) { setErr('Please enter your name'); return; }
+      if (password.length < 8) { setErr('Password must be at least 8 characters'); return; }
+    }
+    setBusy(true);
     try {
-      if (mode === 'register') await register(name, email, password);
-      else await login(email, password);
+      if (mode === 'register') await register(name.trim(), cleanEmail, password);
+      else await login(cleanEmail, password);
     } catch (e) { setErr(e.message); } finally { setBusy(false); }
   };
 
