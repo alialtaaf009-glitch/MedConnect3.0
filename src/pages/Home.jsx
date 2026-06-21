@@ -272,6 +272,8 @@ function QuickRow({ user, nav }) {
   // user-hideable tiles (Profile -> Home screen)
   const hideCd = localStorage.getItem('hide_countdown') === '1';
   const hideSt = localStorage.getItem('hide_streak') === '1';
+  const hideQb = localStorage.getItem('hide_qbank') === '1';
+  const hideFc = localStorage.getItem('hide_flashcards') === '1';
 
   // exam countdown
   let daysLeft = null;
@@ -382,7 +384,7 @@ function QuickRow({ user, nav }) {
   }, []);
 
   // shared circle wrapper
-const Circle = ({ tint, color, glow, onClick, badge, selected, children, label }) => (
+  const Circle = ({ tint, color, glow, onClick, badge, selected, children, label }) => (
     <div onClick={onClick} className="qi-press" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }}>
       <div className="qi-shape" style={{ position: 'relative', width: 64, height: 64, borderRadius: '50%', background: tint, color, display: 'grid', placeItems: 'center', boxShadow: glow || '0 6px 14px rgba(31,77,63,.12)', transition: 'transform .18s cubic-bezier(.34,1.7,.5,1), box-shadow .25s' }}>
         {badge != null && (
@@ -409,14 +411,18 @@ const Circle = ({ tint, color, glow, onClick, badge, selected, children, label }
       {/* paddingTop gives the fire breathing room from the motivation box */}
       <div style={{ display: 'flex', gap: 10, margin: '2px 0 4px', paddingTop: 8 }}>
         {/* Qbank — navigates */}
+        {!hideQb && (
         <Circle tint="#dff0e4" color="#147a52" glow="0 6px 14px rgba(20,122,82,.18)" label="Qbank" selected={false} onClick={() => nav('/qbank')}>
           <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><rect x="7" y="12" width="3" height="6" /><rect x="12" y="8" width="3" height="10" /><rect x="17" y="14" width="3" height="4" /></svg>
         </Circle>
+        )}
 
         {/* Flashcards — navigates */}
+        {!hideFc && (
         <Circle tint="#fbeccb" color="#c08a1e" glow="0 6px 14px rgba(192,138,30,.20)" label="Flashcards" selected={false} badge={due ? due : null} onClick={() => nav('/flashcards')}>
           <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="6" width="13" height="12" rx="2" /><path d="M7 10h5M7 13.5h3" /><path d="M20 8.5v8a2 2 0 0 1-2 2H8.5" /></svg>
         </Circle>
+        )}
 
         {/* Countdown — opens inline detail */}
         {!hideCd && daysLeft !== null && (
@@ -693,4 +699,3 @@ function QbankCard({ nav }) {
     </button>
   );
 }
-    
