@@ -216,7 +216,7 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'country' && (
-      <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
         {orderedCountries.map(([flag, country, exams], idx) => (
         <div key={country} style={{ borderTop: idx === 0 ? 'none' : '1px solid var(--line)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '11px 18px', cursor: 'pointer' }}
@@ -382,7 +382,7 @@ function QuickRow({ user, nav }) {
   }, []);
 
   // shared circle wrapper
-  const Circle = ({ tint, color, glow, onClick, badge, selected, children, label }) => (
+const Circle = ({ tint, color, glow, onClick, badge, selected, children, label }) => (
     <div onClick={onClick} className="qi-press" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }}>
       <div className="qi-shape" style={{ position: 'relative', width: 64, height: 64, borderRadius: '50%', background: tint, color, display: 'grid', placeItems: 'center', boxShadow: glow || '0 6px 14px rgba(31,77,63,.12)', transition: 'transform .18s cubic-bezier(.34,1.7,.5,1), box-shadow .25s' }}>
         {badge != null && (
@@ -447,7 +447,7 @@ function QuickRow({ user, nav }) {
 
 
       {cdOpen && user?.exam_date && (() => {
-      const examTs = new Date(user.exam_date).getTime();
+        const examTs = new Date(user.exam_date).getTime();
         const diff = Math.max(0, examTs - nowTs);
         const totSec = Math.floor(diff / 1000);
         const totDays = Math.floor(totSec / 86400);
@@ -570,7 +570,7 @@ export default function Home() {
 
   return (
     <div className="screen">
-      <div onClick={() => setShowMotivation(true)} style={{ cursor: 'pointer', marginTop: 0, padding: '15px 18px', borderRadius: 18, background: 'linear-gradient(135deg, var(--forest) 0%, var(--forest-2) 100%)', color: '#fff', position: 'relative', overflow: 'hidden', boxShadow: '0 6px 20px rgba(31,77,63,.28)' }}>
+      <div onClick={() => setShowMotivation(true)} style={{ cursor: 'pointer', marginTop: 0, padding: '15px 18px', borderRadius: 18, background: 'linear-gradient(135deg, #1f4d3f 0%, #2c6a55 100%)', color: '#fff', position: 'relative', overflow: 'hidden', boxShadow: '0 6px 20px rgba(31,77,63,.28)' }}>
         <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--gold)', marginBottom: 8, position: 'relative' }}>
           Hi Dr. {(user?.name || '').replace(/^Dr\.?\s+/i, '').split(' ')[0] || 'Doctor'} — a thought for today
         </div>
@@ -598,7 +598,7 @@ export default function Home() {
           </div>
         );
         return (
-          <div style={{ marginTop: 12, borderRadius: 16, overflow: 'hidden', background: 'linear-gradient(135deg, var(--forest) 0%, var(--forest-2) 100%)', color: '#fff', boxShadow: '0 4px 14px rgba(31,77,63,.25)' }}>
+          <div style={{ marginTop: 12, borderRadius: 16, overflow: 'hidden', background: 'linear-gradient(135deg, #1f4d3f 0%, #2c6a55 100%)', color: '#fff', boxShadow: '0 4px 14px rgba(31,77,63,.25)' }}>
             <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--gold)', padding: '11px 14px 0' }}>
               🎉 {liveNudges.length === 1 ? 'New study partner' : `${liveNudges.length} new study partners`}
             </div>
@@ -693,3 +693,4 @@ function QbankCard({ nav }) {
     </button>
   );
 }
+    
