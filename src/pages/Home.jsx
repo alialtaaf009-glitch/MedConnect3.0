@@ -180,7 +180,7 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'exam' && (
-        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+      <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
           {orderedExams.map(({ flag, country, exam, parts }, idx) => {
               const key = 'exam|' + country + '|' + exam;
               const ecx = examColor(exam);
@@ -267,8 +267,8 @@ function ExploreBrowse() {
   );
 }
 
-// Countdown + Study Streak tiles, each with a tap-to-expand pop-out.
-function Momentum({ user }) {
+// Quick row: Qbank · Flashcards · Countdown · Streak (circles). Stats open inline; tools navigate.
+function QuickRow({ user, nav }) {
   // user-hideable tiles (Profile -> Home screen)
   const hideCd = localStorage.getItem('hide_countdown') === '1';
   const hideSt = localStorage.getItem('hide_streak') === '1';
@@ -355,60 +355,132 @@ function Momentum({ user }) {
     return 'Update your exam date in Profile.';
   };
 
+  // ---- Qbank summary (folded in from QbankCard) ----
+  const [qStats, setQStats] = useState({ loading: true });
+  useEffect(() => {
+    let active = true;
+    api.qbankGet().then((d) => {
+      if (!active) return;
+      const rows = d.progress || [];
+      if (!rows.length) { setQStats({ empty: true }); return; }
+      const t = rows.reduce((a, r) => ({ done: a.done + (r.done || 0), correct: a.correct + (r.correct || 0) }), { done: 0, correct: 0 });
+      const acc = t.done ? Math.round((t.correct / t.done) * 100) : 0;
+      setQStats({ done: t.done, acc });
+    }).catch(() => { if (active) setQStats({ empty: true }); });
+    return () => { active = false; };
+  }, []);
+  const qSub = qStats.loading ? 'Loading…' : qStats.empty ? 'Start tracking your progress' : `${qStats.done} done · ${qStats.acc}% accuracy`;
+
+  // ---- Flashcards due (best-effort; no badge if endpoint absent) ----
+  const [due, setDue] = useState(null);
+  useEffect(() => {
+    let active = true;
+    if (typeof api.flashcardsDue === 'function') {
+      api.flashcardsDue().then((d) => { if (active) setDue(d?.due ?? d?.count ?? 0); }).catch(() => { if (active) setDue(0); });
+    } else { setDue(0); }
+    return () => { active = false; };
+  }, []);
+
+  // inline detail panel (Countdown / Streak open here; Qbank / Flashcards navigate)
+  const [openK, setOpenK] = useState(null);
+  const toggle = (k) => setOpenK((p) => (p === k ? null : k));
+
+  // shared circle wrapper
+  const Circle = ({ tint, color, glow, onClick, badge, selected, children, label }) => (
+    <div onClick={onClick} className="qi-press" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }}>
+      <div style={{ position: 'relative', width: 64, height: 64, borderRadius: '50%', background: tint, color, display: 'grid', placeItems: 'center', boxShadow: selected ? `0 0 0 3px var(--paper), 0 0 0 5px ${color}` : (glow || '0 6px 14px rgba(31,77,63,.12)'), transform: selected ? 'scale(1.06)' : 'scale(1)', transition: 'transform .35s cubic-bezier(.34,1.7,.5,1), box-shadow .25s' }}>
+        {badge != null && (
+          <span style={{ position: 'absolute', top: -2, right: -2, minWidth: 18, height: 18, padding: '0 4px', borderRadius: 999, background: 'var(--rust)', color: '#fff', fontSize: 9, fontWeight: 800, display: 'grid', placeItems: 'center', border: '2px solid var(--paper)', zIndex: 3, animation: 'qBadge .5s cubic-bezier(.34,1.7,.5,1) both' }}>{badge}</span>
+        )}
+        {children}
+      </div>
+      <div style={{ fontSize: 11, fontWeight: 700, color: openK && selected ? 'var(--ink)' : 'var(--muted)', textAlign: 'center', lineHeight: 1.15 }}>{label}</div>
+    </div>
+    );
+
+  const finalStretch = daysLeft != null && daysLeft > 0 && daysLeft <= 10;
+  const WINDOW = 180;
+  const frac = daysLeft == null ? 0 : (daysLeft > 0 ? Math.max(0, Math.min(1, (WINDOW - daysLeft) / WINDOW)) : 1);
+  const R2 = 27, C2 = 2 * Math.PI * R2;
+
   return (
     <>
-      {(!hideCd && daysLeft !== null) || !hideSt ? (
-      <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
-        {!hideCd && daysLeft !== null && (() => {
-          const finalStretch = daysLeft > 0 && daysLeft <= 10;
-          // ring progress: assume a 180-day prep window; fraction elapsed
-          const WINDOW = 180;
-          const frac = daysLeft > 0 ? Math.max(0, Math.min(1, (WINDOW - daysLeft) / WINDOW)) : 1;
-          const R = 36, C = 2 * Math.PI * R;
-          const ringColor = finalStretch ? '#f3c969' : '#fff';
-          return (
-          <div className="card stat-press" onClick={() => setCdOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '14px 12px', border: 'none', borderRadius: 16, margin: 0, cursor: 'pointer', position: 'relative', overflow: 'hidden', color: '#fff', background: 'linear-gradient(145deg, #1f4d3f 0%, #2c6a55 100%)', boxShadow: '0 4px 12px rgba(31,77,63,.22)' }}>
-            <span style={{ position: 'absolute', right: -6, bottom: -18, fontSize: 84, opacity: 0.12, lineHeight: 1, pointerEvents: 'none' }}>⏳</span>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'rgba(255,255,255,.82)', textTransform: 'uppercase', position: 'relative' }}>Countdown</div>
-            <div style={{ position: 'relative', width: 84, height: 84, margin: '6px auto 2px' }}>
-              <svg width="84" height="84" viewBox="0 0 84 84" style={{ transform: 'rotate(-90deg)' }}>
-                <circle cx="42" cy="42" r={R} fill="none" stroke="rgba(255,255,255,.25)" strokeWidth="7" />
-                <circle cx="42" cy="42" r={R} fill="none" stroke={ringColor} strokeWidth="7" strokeLinecap="round" strokeDasharray={C} strokeDashoffset={C * (1 - frac)} style={{ transition: 'stroke-dashoffset .6s ease' }} />
-              </svg>
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <div className="display-num" style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: daysLeft > 99 ? 26 : 30, fontWeight: 900, color: finalStretch ? '#f3c969' : '#fff', lineHeight: 1 }}>
-                  {daysLeft > 0 ? daysLeft : daysLeft === 0 ? 'Today' : '—'}
-                </div>
-                <div style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: 0.8, textTransform: 'uppercase', opacity: 0.82, marginTop: 1 }}>{daysLeft > 0 ? 'days' : daysLeft === 0 ? '' : 'passed'}</div>
-              </div>
+      <style>{`
+        @keyframes qBadge{0%{transform:scale(0)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
+        @keyframes firePop{0%{transform:scale(.6)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
+        .qi-press:active > div:first-child{transform:scale(.9)!important}
+        .qrow-detail{overflow:hidden;transition:max-height .42s cubic-bezier(.34,1.45,.5,1),opacity .3s,margin .42s;}
+      `}</style>
+
+      {/* paddingTop gives the fire breathing room from the motivation box */}
+      <div style={{ display: 'flex', gap: 10, margin: '2px 0 4px', paddingTop: 8 }}>
+        {/* Qbank — navigates */}
+        <Circle tint="#dff0e4" color="#147a52" glow="0 6px 14px rgba(20,122,82,.18)" label="Qbank" selected={false} onClick={() => nav('/qbank')}>
+          <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><rect x="7" y="12" width="3" height="6" /><rect x="12" y="8" width="3" height="10" /><rect x="17" y="14" width="3" height="4" /></svg>
+        </Circle>
+
+        {/* Flashcards — navigates */}
+        <Circle tint="#fbeccb" color="#c08a1e" glow="0 6px 14px rgba(192,138,30,.20)" label="Flashcards" selected={false} badge={due ? due : null} onClick={() => nav('/flashcards')}>
+          <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="6" width="13" height="12" rx="2" /><path d="M7 10h5M7 13.5h3" /><path d="M20 8.5v8a2 2 0 0 1-2 2H8.5" /></svg>
+        </Circle>
+
+        {/* Countdown — opens inline detail */}
+        {!hideCd && daysLeft !== null && (
+          <Circle tint="transparent" color="#1f9bb8" glow="none" label="Countdown" selected={openK === 'count'} onClick={() => toggle('count')}>
+            <svg width="64" height="64" viewBox="0 0 64 64" style={{ position: 'absolute', inset: 0, transform: 'rotate(-90deg)' }}>
+              <circle cx="32" cy="32" r={R2} fill="#dceff3" />
+              <circle cx="32" cy="32" r={R2} fill="none" stroke="#c2e2e9" strokeWidth="5" />
+              <circle cx="32" cy="32" r={R2} fill="none" stroke={finalStretch ? '#d98a1e' : '#1f9bb8'} strokeWidth="5" strokeLinecap="round" strokeDasharray={C2} strokeDashoffset={C2 * (1 - frac)} style={{ transition: 'stroke-dashoffset .6s ease' }} />
+            </svg>
+            <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <b style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: daysLeft > 99 ? 16 : 19, color: finalStretch ? '#c0533f' : '#15795a', lineHeight: 1 }}>{daysLeft > 0 ? daysLeft : daysLeft === 0 ? '0' : '—'}</b>
+              <span style={{ fontSize: 7.5, fontWeight: 800, letterSpacing: 1, color: '#5a8a7a', marginTop: 1 }}>{daysLeft >= 0 ? 'DAYS' : 'PASSED'}</span>
             </div>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,.82)', position: 'relative' }}>{finalStretch ? 'final stretch 💪' : daysLeft > 0 ? 'to exam' : daysLeft === 0 ? 'exam day!' : ''}</div>
-          </div>
-          );
-        })()}
+          </Circle>
+        )}
+
+        {/* Streak — fire is the mark-today tap; circle body opens detail */}
         {!hideSt && (
-        <div className="card stat-press" onClick={() => setStOpen(true)} style={{ flex: 1, textAlign: 'center', padding: '14px 12px', border: 'none', borderRadius: 16, margin: 0, cursor: 'pointer', position: 'relative', overflow: 'hidden', color: '#fff', background: 'linear-gradient(145deg, #a8442a 0%, #c25a3d 100%)', boxShadow: '0 4px 12px rgba(168,68,42,.22)' }}>
-          <span style={{ position: 'absolute', right: -6, bottom: -16, fontSize: 84, opacity: 0.14, lineHeight: 1, pointerEvents: 'none' }}>🔥</span>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'rgba(255,255,255,.82)', textTransform: 'uppercase', position: 'relative' }}>Study Streak</div>
-          <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 36, fontWeight: 900, color: '#fff', lineHeight: 1.05, position: 'relative', marginTop: 2 }}>
-            {streak}
-          </div>
-          <div style={{ display: 'flex', gap: 5, justifyContent: 'center', marginTop: 8, position: 'relative' }}>
-            {last7.map((d, i) => (
-              <div key={i} title={d.letter} style={{ width: 12, height: 12, borderRadius: 4, background: '#fff', opacity: d.on ? 1 : 0.28, boxShadow: d.isToday ? '0 0 0 2px rgba(255,255,255,.45)' : 'none' }} />
-            ))}
-          </div>
-          {studiedToday ? (
-            <div style={{ marginTop: 8, position: 'relative' }}><span style={{ fontSize: 10, fontWeight: 800, padding: '3px 10px', borderRadius: 999, background: 'rgba(255,255,255,.22)', color: '#fff' }}>✓ done today</span></div>
-          ) : (
-            <button onClick={(e) => { e.stopPropagation(); markStudy(); }} disabled={marking} style={{ marginTop: 8, fontSize: 11, fontWeight: 700, color: 'var(--rust)', background: '#fff', border: 'none', borderRadius: 999, padding: '5px 12px', cursor: 'pointer', position: 'relative' }}>
-              {marking ? '…' : 'Mark today ✓'}
-            </button>
-          )}
-        </div>
+          <Circle tint="#fde0d8" color="#d24a30" glow="0 6px 14px rgba(210,74,48,.22)" label="Streak" selected={openK === 'streak'} onClick={() => toggle('streak')}>
+            <span
+              onClick={(e) => { e.stopPropagation(); if (!studiedToday) markStudy(); }}
+              style={{ position: 'absolute', top: -9, right: -9, fontSize: 22, zIndex: 4, cursor: 'pointer', transition: 'transform .3s cubic-bezier(.34,1.8,.5,1)', filter: studiedToday ? 'drop-shadow(0 2px 5px rgba(210,74,48,.4))' : 'grayscale(.7) opacity(.55) drop-shadow(0 2px 3px rgba(0,0,0,.12))', animation: studiedToday ? 'firePop .5s cubic-bezier(.34,1.8,.5,1)' : 'none' }}
+            >🔥</span>
+            <span style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 24, color: '#d24a30', lineHeight: 1 }}>{streak}</span>
+          </Circle>
         )}
       </div>
-      ) : null}
+
+      {/* inline detail panel for Countdown / Streak */}
+      <div className="qrow-detail" style={{ maxHeight: openK ? 160 : 0, opacity: openK ? 1 : 0, marginBottom: openK ? 10 : 0 }}>
+        <div className="card" style={{ margin: 0, padding: 14 }}>
+          {openK === 'count' && (
+            <>
+              <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 15.5, color: 'var(--ink)' }}>Exam Countdown</div>
+              <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 7 }}>
+                <b style={{ color: 'var(--forest-2)', fontWeight: 800 }}>{daysLeft}</b> day{daysLeft === 1 ? '' : 's'} to {user?.exam || 'your exam'}{user?.exam_date ? ` · ${new Date(user.exam_date).toDateString()}` : ''}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 11 }}>
+                <button className="btn ghost" style={{ width: 'auto', padding: '7px 14px', fontSize: 12 }} onClick={() => setCdOpen(true)}>Full view ›</button>
+              </div>
+            </>
+          )}
+          {openK === 'streak' && (
+            <>
+              <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 15.5, color: 'var(--ink)' }}>Study Streak</div>
+              <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 7 }}>
+                <b style={{ color: 'var(--rust)', fontWeight: 800 }}>{streak}</b>-day streak · best {Math.max(user?.longest_streak || 0, streak)}
+              </div>
+              <div style={{ fontSize: 12.5, marginTop: 5, color: '#b06b3a', fontWeight: 600 }}>
+                {studiedToday ? '✓ Logged today — see you tomorrow' : '💡 Tap the 🔥 to log today and keep your streak alive'}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 11 }}>
+                <button className="btn ghost" style={{ width: 'auto', padding: '7px 14px', fontSize: 12 }} onClick={() => setStOpen(true)}>Full view ›</button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
 
       {cdOpen && user?.exam_date && (() => {
         const examTs = new Date(user.exam_date).getTime();
@@ -577,9 +649,7 @@ export default function Home() {
         );
       })()}
 
-      <QbankCard nav={nav} />
-
-      <Momentum user={user} />
+      <QuickRow user={user} nav={nav} />
 
 
       <h2 className="serif" style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 21, fontWeight: 900, letterSpacing: '-0.3px', color: 'var(--forest)', margin: '10px 0 12px' }}>Explore Study Partners</h2>
