@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/Auth.jsx';
 import { api } from '../lib/api.js';
 import { examColor } from '../lib/examColors.js';
@@ -90,6 +91,7 @@ function DeckList({ user, onOpen, onStudy }) {
 }
 
 function DeckDetail({ deck, onBack, onStudy }) {
+  const nav = useNavigate();
   const [cards, setCards] = useState(null);
   const [front, setFront] = useState('');
   const [back, setBack] = useState('');
@@ -226,9 +228,10 @@ function DeckDetail({ deck, onBack, onStudy }) {
         </div>
       ))}
 
-      <p className="sub" style={{ textAlign: 'center', fontSize: 11.5, color: 'var(--subtle)', margin: '20px 0 4px' }}>
-        Sharing & export options coming soon
-      </p>
+      <div onClick={() => nav('/pro')} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, marginTop: 18, cursor: 'pointer', color: 'var(--subtle)' }}>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5" /><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" /></svg>
+        <span style={{ fontSize: 11.5, fontWeight: 600 }}>Export &amp; deck sharing — <span style={{ color: 'var(--gold)', fontWeight: 800 }}>Pro</span></span>
+      </div>
     </>
   );
 }
@@ -329,4 +332,4 @@ function StudyMode({ deck, onDone }) {
       </div>
     </div>
   );
-    }
+}
