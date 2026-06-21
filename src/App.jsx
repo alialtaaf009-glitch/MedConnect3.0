@@ -22,7 +22,6 @@ import Formulas from './pages/Formulas.jsx';
 import Qbank from './pages/Qbank.jsx';
 import Flashcards from './pages/Flashcards.jsx';
 import Resources from './pages/Resources.jsx';
-import RestReset from './pages/RestReset.jsx';
 import Pro from './pages/Pro.jsx';
 import Checklist from './components/Checklist.jsx';
 import AddPartner from './pages/AddPartner.jsx';
@@ -134,14 +133,8 @@ function Drawer({ open, onClose, user }) {
           <button className="drawer-item" onClick={() => go('/formulas')}>
             <svg viewBox="0 0 24 24"><path d="M4 4h16M4 4v16M9 9l4 4M13 9l-4 4M8 18h8" /></svg>Formulas
           </button>
-          <button className="drawer-item" onClick={() => go('/flashcards')}>
-            <svg viewBox="0 0 24 24"><rect x="3" y="5" width="14" height="11" rx="2" /><path d="M7 9h6M7 12h4" /><path d="M7 5l4-2 10 4-2 9-4-1.5" /></svg>Flashcards
-          </button>
           <button className="drawer-item" onClick={() => go('/resources')}>
             <svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2V5z" /><path d="M8 7h7M8 11h7M8 15h4" /></svg>Resources
-          </button>
-          <button className="drawer-item" onClick={() => go('/rest')}>
-            <svg viewBox="0 0 24 24"><path d="M20 14a8 8 0 1 1-9.5-9.5 6 6 0 0 0 9.5 9.5z" /></svg>Rest &amp; reset
           </button>
           <div className="drawer-div" />
           <div className="drawer-sect">Grow</div>
@@ -318,7 +311,7 @@ function TopBar({ user }) {
                   const name = c.requester_name || 'Someone';
                   const exam = c.requester_exam || '';
                   const av = c.requester_avatar || '🩺';
-                return (
+                  return (
                     <div key={c.id} onClick={() => { setBellOpen(false); nav('/partners?tab=requests'); }}
                       style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 18px', cursor: 'pointer', borderTop: '1px solid var(--line)' }}
                       onMouseEnter={(e) => e.currentTarget.style.background = 'var(--paper-2)'}
@@ -482,7 +475,6 @@ export default function App() {
         <Route path="/qbank" element={<Qbank />} />
         <Route path="/flashcards" element={<Flashcards />} />
         <Route path="/resources" element={<Resources />} />
-        <Route path="/rest" element={<RestReset />} />
         <Route path="/pro" element={<Pro />} />
         <Route path="/connections" element={<Navigate to="/partners?tab=mine" replace />} />
         <Route path="/profile" element={<Profile />} />
