@@ -18,6 +18,7 @@ export function AuthProvider({ children }) {
   const value = {
     user, loading, setUser,
     login: async (e, p) => { const d = await api.login(e, p); persist(d.token, d.user); },
+    googleLogin: async (cred) => { const d = await api.googleLogin(cred); persist(d.token, d.user); return d; },
     register: async (n, e, p) => { const d = await api.register(n, e, p); persist(d.token, d.user); },
     logout: () => { localStorage.removeItem('token'); setUser(null); },
   };
