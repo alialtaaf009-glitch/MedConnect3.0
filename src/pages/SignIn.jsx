@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/Auth.jsx';
 
+const GOOGLE_CLIENT_ID = '402347146267-47oui3qdf8sir6do5115ejdi5gdgok6r.apps.googleusercontent.com';
+
 export default function SignIn() {
-  const { login, register } = useAuth();
+  const { login, register, googleLogin } = useAuth();
   const nav = useNavigate();
   const [mode, setMode] = useState('login');
   const [name, setName] = useState('');
@@ -11,6 +13,34 @@ export default function SignIn() {
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
+  const googleBtnRef = useRef(null);
+
+  // initialise Google Sign-In button once the GSI script has loaded
+  useEffect(() => {
+    let tries = 0;
+    const init = () => {
+      if (window.google?.accounts?.id && googleBtnRef.current) {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: async (resp) => {
+            setErr(''); setBusy(true);
+            try { await googleLogin(resp.credential); }
+            catch (e) { setErr(e.message || 'Google sign-in failed'); }
+            finally { setBusy(false); }
+          },
+        });
+        window.google.accounts.id.renderButton(googleBtnRef.current, {
+          theme: 'outline', size: 'large', width: 280, text: 'continue_with', shape: 'pill',
+        });
+        return true;
+      }
+      return false;
+    };
+    if (!init()) {
+      const t = setInterval(() => { tries++; if (init() || tries > 40) clearInterval(t); }, 100);
+      return () => clearInterval(t);
+    }
+  }, [googleLogin]);
 
   const submit = async () => {
     setErr('');
@@ -57,6 +87,16 @@ export default function SignIn() {
       <button className="btn" onClick={submit} disabled={busy}>
         {busy ? 'Please wait…' : mode === 'register' ? 'Create account' : 'Sign in'}
       </button>
+
+      {/* divider */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '18px 0' }}>
+        <div style={{ flex: 1, height: 1, background: 'var(--line)' }} />
+        <span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600 }}>or</span>
+        <div style={{ flex: 1, height: 1, background: 'var(--line)' }} />
+      </div>
+      {/* Google Sign-In button (rendered by Google's script) */}
+      <div ref={googleBtnRef} style={{ display: 'flex', justifyContent: 'center', minHeight: 44 }} />
+
       <button className="link" style={{ marginTop: 16 }} onClick={() => setMode(mode === 'login' ? 'register' : 'login')}>
         {mode === 'login' ? 'New here? Create an account' : 'Have an account? Sign in'}
       </button>
