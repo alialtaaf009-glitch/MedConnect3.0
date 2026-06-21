@@ -322,7 +322,7 @@ function SharedToMe({ bank, grants, compareId, compareName, compareRows, bankRow
               <span className="link" style={{ fontSize: 13, fontWeight: 700 }}>{open ? 'Hide' : 'Compare'} <span style={{ display: 'inline-block', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>▾</span></span>
             </button>
             {open && (
-            <div style={{ padding: '4px 14px 14px' }}>
+              <div style={{ padding: '4px 14px 14px' }}>
                 <div style={{ display: 'flex', gap: 14, margin: '2px 0 10px', fontSize: 11.5, fontWeight: 700 }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 11, height: 11, borderRadius: 3, background: color, display: 'inline-block' }} />You</span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 11, height: 11, borderRadius: 3, background: 'var(--gold)', display: 'inline-block' }} />{compareName}</span>
@@ -355,4 +355,3 @@ function SharedToMe({ bank, grants, compareId, compareName, compareRows, bankRow
     </div>
   );
 }
-      
