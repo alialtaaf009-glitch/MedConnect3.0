@@ -57,7 +57,7 @@ export default function Qbank() {
   }), { done: 0, total: 0, correct: 0 });
   const pctDone = totals.total ? Math.round((totals.done / totals.total) * 100) : 0;
   const pctAcc = totals.done ? Math.round((totals.correct / totals.done) * 100) : 0;
-  const accColor = (p) => p >= 70 ? '#2c7a4b' : p >= 50 ? '#b98a2e' : '#a8442a';
+  const accColor = (p) => p >= 70 ? '#2c6a55' : p >= 50 ? '#b98a2e' : '#a8442a';
 
   const saveTopic = async () => {
     if (!draft.topic.trim()) return;
@@ -219,7 +219,7 @@ export default function Qbank() {
                 <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', fontSize: 18, flexShrink: 0 }}>{p.avatar || '🩺'}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontWeight: 700, fontSize: 14 }}>{p.name}</div>
-                  <div style={{ fontSize: 11.5, color: on ? '#2c7a4b' : 'var(--subtle)' }}>{on ? 'You share with them' : 'Not sharing'}</div>
+                  <div style={{ fontSize: 11.5, color: on ? '#2c6a55' : 'var(--subtle)' }}>{on ? 'You share with them' : 'Not sharing'}</div>
                 </div>
                 <button onClick={() => toggleShare(p.id, !on)} style={{ width: 46, height: 27, borderRadius: 999, border: 'none', cursor: 'pointer', position: 'relative', background: on ? color : 'var(--line)', transition: 'background .2s', flexShrink: 0 }}>
                   <span style={{ position: 'absolute', top: 3, left: on ? 22 : 3, width: 21, height: 21, borderRadius: '50%', background: '#fff', transition: 'left .2s' }} />
@@ -322,7 +322,7 @@ function SharedToMe({ bank, grants, compareId, compareName, compareRows, bankRow
               <span className="link" style={{ fontSize: 13, fontWeight: 700 }}>{open ? 'Hide' : 'Compare'} <span style={{ display: 'inline-block', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>▾</span></span>
             </button>
             {open && (
-            <div style={{ padding: '4px 14px 14px' }}>
+              <div style={{ padding: '4px 14px 14px' }}>
                 <div style={{ display: 'flex', gap: 14, margin: '2px 0 10px', fontSize: 11.5, fontWeight: 700 }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 11, height: 11, borderRadius: 3, background: color, display: 'inline-block' }} />You</span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 11, height: 11, borderRadius: 3, background: 'var(--gold)', display: 'inline-block' }} />{compareName}</span>
