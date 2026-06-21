@@ -28,6 +28,49 @@ body {
 ::selection { background: var(--forest); color: #fff; }
 
 .app { max-width: 480px; margin: 0 auto; min-height: 100vh; padding-bottom: 78px; position: relative; }
+
+/* ---- Desktop framing: present the phone-width app as a polished centered panel ---- */
+@media (min-width: 700px) {
+  body {
+    background:
+      radial-gradient(circle at 20% 20%, rgba(31,77,63,.10), transparent 45%),
+      radial-gradient(circle at 80% 75%, rgba(184,138,46,.10), transparent 45%),
+      linear-gradient(160deg, #e9ece6 0%, #dfe4dc 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+  [data-theme="dark"] body {
+    background:
+      radial-gradient(circle at 20% 20%, rgba(62,167,132,.10), transparent 45%),
+      radial-gradient(circle at 80% 75%, rgba(184,138,46,.10), transparent 45%),
+      linear-gradient(160deg, #0e1512 0%, #14110c 100%);
+  }
+  .app {
+    max-width: 440px;
+    margin: 28px auto;
+    min-height: calc(100vh - 56px);
+    background: var(--paper);
+    border-radius: 28px;
+    box-shadow: 0 24px 70px rgba(20,30,24,.22), 0 2px 10px rgba(20,30,24,.10);
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  /* anchor the bottom nav to the app panel, not the whole window */
+  .tabbar {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    max-width: 440px !important;
+    width: 440px !important;
+    bottom: 28px !important;
+    border-radius: 0 0 28px 28px;
+  }
+  /* keep notification panel / sheets aligned to the panel width */
+  .topbar { border-radius: 28px 28px 0 0; }
+}
+@media (min-width: 700px) {
+  /* a little breathing room so content never hides behind the floating nav */
+  .app { padding-bottom: 84px; }
+}
 .screen { padding: 14px 18px 20px; animation: fadeUp .28s ease both; }
 @keyframes fadeUp { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {
