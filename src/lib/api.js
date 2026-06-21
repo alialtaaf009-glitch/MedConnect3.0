@@ -34,6 +34,7 @@ async function req(path, { method = 'GET', body } = {}) {
 export const api = {
   register: (name, email, password) => req('/register', { method: 'POST', body: { name, email, password } }),
   login: (email, password) => req('/login', { method: 'POST', body: { email, password } }),
+  googleLogin: (googleCredential) => req('/login', { method: 'POST', body: { googleCredential } }),
   me: () => req('/me'),
   markStudy: () => req('/me', { method: 'POST', body: { action: 'mark_study' } }),
   updateProfile: (p) => { invalidate('connections'); return req('/profile', { method: 'PUT', body: p }); },
