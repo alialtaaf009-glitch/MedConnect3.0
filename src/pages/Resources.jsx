@@ -4,7 +4,7 @@
 const RESOURCES = [
   { section: 'Clinical references',
     items: [
-      { name: 'BNF',            icon: '💊', url: 'https://bnf.nice.org.uk/',          desc: 'British National Formulary — drug doses, interactions, prescribing.' },
+      { name: 'Drugs.com',      icon: '💊', url: 'https://www.drugs.com/',          desc: 'Drug doses, interactions & prescribing info — free and global.' },
       { name: 'NICE Guidelines', icon: '📋', url: 'https://www.nice.org.uk/guidance', desc: 'UK clinical guidelines and pathways for almost every condition.' },
       { name: 'MDCalc',          icon: '🩺', url: 'https://www.mdcalc.com/',           desc: 'Medical calculators — CHA₂DS₂-VASc, Wells, GCS, eGFR, hundreds more.' },
     ] },
@@ -55,4 +55,3 @@ export default function Resources() {
     </div>
   );
 }
-
