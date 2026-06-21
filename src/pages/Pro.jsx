@@ -1,5 +1,3 @@
-import { useAuth } from '../context/Auth.jsx';
-
 const LockIcon = ({ size = 13 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
     <rect x="4.5" y="10.5" width="15" height="10" rx="2.5" />
@@ -11,11 +9,11 @@ const FEATURES = [
   ['🌈', 'More colours & themes', 'Exclusive wallpaper backgrounds and fonts for your quotes.'],
   ['🩺', 'Full OSCE station bank', 'Every station for your exam, with marking schemes and timed mocks.'],
   ['🌿', 'More Take a Break exercises', 'New guided breathing patterns and quick reset routines.'],
+  ['⬇', 'Export your flashcards', 'Download any deck as CSV — import straight into Anki, Excel, or Sheets.'],
 ];
 
 export default function Pro() {
-  const { user } = useAuth();
-  const isPro = user?.pro_active;
+  const isPro = false; // payments not live yet — everyone sees the upgrade view
 
   const notify = () => {
     const subject = encodeURIComponent('Notify me about MedConnect Pro');
@@ -55,4 +53,3 @@ export default function Pro() {
     </div>
   );
 }
-
