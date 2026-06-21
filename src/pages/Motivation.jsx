@@ -8,20 +8,18 @@ export default function Motivation({ onBack }) {
   const today = quoteOfTheDay();
   const [favIds, setFavIds] = useState([]);
   const [tab, setTab] = useState('today');
-  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     api.getFavourites().then((d) => setFavIds(d.ids || [])).catch(() => {});
   }, []);
 
-  const toggle = async (id) => {
-    if (busy) return;
-    setBusy(true);
+  const toggle = (id) => {
     const isFav = favIds.includes(id);
-    try {
-      const d = await api.toggleFavourite(id, isFav ? 'remove' : 'add');
-      setFavIds(d.ids || []);
-    } catch (e) {} finally { setBusy(false); }
+    // optimistic: flip the star instantly, sync in the background
+    setFavIds((prev) => isFav ? prev.filter((x) => x !== id) : [...prev, id]);
+    api.toggleFavourite(id, isFav ? 'remove' : 'add')
+      .then((d) => { if (d && d.ids) setFavIds(d.ids); })
+      .catch(() => { /* revert on failure */ setFavIds((prev) => isFav ? [...prev, id] : prev.filter((x) => x !== id)); });
   };
 
   const Star = ({ id }) => {
@@ -144,3 +142,4 @@ export default function Motivation({ onBack }) {
     </div>
   );
 }
+
