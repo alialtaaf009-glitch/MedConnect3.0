@@ -577,9 +577,7 @@ export default function Home() {
         );
       })()}
 
-      <QbankCard nav={nav} />
-
-      <Momentum user={user} />
+      <QuickRow nav={nav} user={user} />
 
 
       <h2 className="serif" style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 21, fontWeight: 900, letterSpacing: '-0.3px', color: 'var(--forest)', margin: '10px 0 12px' }}>Explore Study Partners</h2>
@@ -611,6 +609,232 @@ export default function Home() {
         </div>
       )}
     </div>
+  );
+}
+
+// Compact circular quick-row: Qbank · Flashcards · Countdown · Streak.
+// Tools (Qbank, Flashcards) navigate. Stats (Countdown, Streak) open the existing pop-outs.
+function QuickRow({ nav, user }) {
+  // hide toggles (Profile -> Home screen) still respected
+  const hideCd = localStorage.getItem('hide_countdown') === '1';
+  const hideSt = localStorage.getItem('hide_streak') === '1';
+
+  // ---- Qbank summary (same source as old QbankCard) ----
+  const [qbank, setQbank] = useState({ loading: true });
+  useEffect(() => {
+    let active = true;
+    api.qbankGet().then((d) => {
+      if (!active) return;
+      const rows = d.progress || [];
+      if (!rows.length) { setQbank({ empty: true }); return; }
+      const t = rows.reduce((a, r) => ({ done: a.done + (r.done || 0), correct: a.correct + (r.correct || 0) }), { done: 0, correct: 0 });
+      const acc = t.done ? Math.round((t.correct / t.done) * 100) : 0;
+      setQbank({ done: t.done, acc });
+    }).catch(() => { if (active) setQbank({ empty: true }); });
+    return () => { active = false; };
+  }, []);
+
+  // ---- Flashcards due (best-effort; falls back to 0 if endpoint absent) ----
+  const [due, setDue] = useState(null);
+  useEffect(() => {
+    let active = true;
+    if (typeof api.flashcardsDue === 'function') {
+      api.flashcardsDue().then((d) => { if (active) setDue(d?.due ?? d?.count ?? 0); }).catch(() => { if (active) setDue(0); });
+    } else { setDue(0); }
+    return () => { active = false; };
+  }, []);
+
+  // ---- Countdown ----
+  let daysLeft = null;
+  if (user?.exam_date) {
+    const t = new Date(user.exam_date).getTime();
+    if (!isNaN(t)) daysLeft = Math.ceil((t - Date.now()) / 86400000);
+  }
+  const WINDOW = 180;
+  const frac = daysLeft == null ? 0 : (daysLeft > 0 ? Math.max(0, Math.min(1, (WINDOW - daysLeft) / WINDOW)) : 1);
+  const finalStretch = daysLeft != null && daysLeft > 0 && daysLeft <= 10;
+
+  // ---- Streak (same logic as old Momentum) ----
+  const [streak, setStreak] = useState(user?.current_streak || 0);
+  const todayKey = 'studied_' + new Date().toISOString().slice(0, 10);
+  const [studiedToday, setStudiedToday] = useState(user?.studied_today || localStorage.getItem(todayKey) === '1');
+  const [marking, setMarking] = useState(false);
+  const logStudyDay = () => {
+    try {
+      const log = JSON.parse(localStorage.getItem('study_days') || '{}');
+      log[new Date().toISOString().slice(0, 10)] = 1;
+      localStorage.setItem('study_days', JSON.stringify(log));
+    } catch (e) {}
+  };
+  const last7 = (() => {
+    let log = {};
+    try { log = JSON.parse(localStorage.getItem('study_days') || '{}'); } catch (e) {}
+    if (studiedToday) log[new Date().toISOString().slice(0, 10)] = 1;
+    const out = []; const d = new Date(); d.setDate(d.getDate() - 6);
+    const L = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    for (let i = 0; i < 7; i++) {
+      const k = d.toISOString().slice(0, 10);
+      out.push({ on: !!log[k], letter: L[d.getDay()], isToday: k === new Date().toISOString().slice(0, 10) });
+      d.setDate(d.getDate() + 1);
+    }
+    return out;
+  })();
+  const burstConfetti = () => {
+    const colors = ['#a8442a', '#1f4d3f', '#b98a2e', '#2c6a55'];
+    for (let i = 0; i < 18; i++) {
+      const p = document.createElement('div');
+      p.className = 'confetti-piece';
+      p.style.background = colors[i % colors.length];
+      p.style.setProperty('--dx', (Math.random() * 240 - 120) + 'px');
+      p.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg');
+      p.style.left = (45 + Math.random() * 10) + '%';
+      p.style.animationDelay = (Math.random() * 0.15) + 's';
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 1300);
+    }
+  };
+  const markStudy = async () => {
+    if (marking || studiedToday) return;
+    setMarking(true);
+    try {
+      const d = await api.markStudy();
+      if (d.user) {
+        setStreak(d.user.current_streak || 0); setStudiedToday(true); localStorage.setItem(todayKey, '1');
+        logStudyDay();
+        burstConfetti();
+        if (navigator.vibrate) { try { navigator.vibrate(20); } catch (e) {} }
+      }
+    } catch (e) {} finally { setMarking(false); }
+  };
+
+  // ---- pop-outs (reused from old Momentum) ----
+  const [cdOpen, setCdOpen] = useState(false);
+  const [stOpen, setStOpen] = useState(false);
+  const [nowTs, setNowTs] = useState(Date.now());
+  useEffect(() => {
+    if (!cdOpen) return;
+    const t = setInterval(() => setNowTs(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [cdOpen]);
+  const coachLine = (d) => {
+    if (d > 60) return 'Plenty of runway.';
+    if (d > 14) return 'Sharpening phase.';
+    if (d > 2) return 'Lock in.';
+    if (d >= 0) return 'Trust your prep. Rest well.';
+    return 'Update your exam date in Profile.';
+  };
+
+  // ---- circle primitive ----
+  const R = 27, C = 2 * Math.PI * R;
+  const Circle = ({ tint, color, onClick, badge, children, label }) => (
+    <div onClick={onClick} className="stat-press" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7, cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }}>
+      <div style={{ position: 'relative', width: 64, height: 64, borderRadius: '50%', background: tint, display: 'grid', placeItems: 'center', boxShadow: '0 4px 12px rgba(31,77,63,.08)', color }}>
+        {badge != null && (
+          <span style={{ position: 'absolute', top: -2, right: -2, minWidth: 18, height: 18, padding: '0 4px', borderRadius: 999, background: 'var(--rust)', color: '#fff', fontSize: 9, fontWeight: 800, display: 'grid', placeItems: 'center', border: '2px solid var(--paper)', zIndex: 2 }}>{badge}</span>
+        )}
+        {children}
+      </div>
+      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textAlign: 'center', lineHeight: 1.15 }}>{label}</div>
+    </div>
+  );
+
+  return (
+    <>
+      <div style={{ display: 'flex', gap: 8, margin: '4px 0 10px' }}>
+        {/* Qbank */}
+        <Circle tint="#e3efe6" color="var(--forest)" label="Qbank" onClick={() => nav('/qbank')}>
+          <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><rect x="7" y="12" width="3" height="6" /><rect x="12" y="8" width="3" height="10" /><rect x="17" y="14" width="3" height="4" /></svg>
+        </Circle>
+
+        {/* Flashcards */}
+        <Circle tint="#f6edd6" color="#9a7a1e" label="Flashcards" onClick={() => nav('/flashcards')} badge={due ? due : null}>
+          <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="6" width="13" height="12" rx="2" /><path d="M7 10h5M7 13.5h3" /><path d="M20 8.5v8a2 2 0 0 1-2 2H8.5" /></svg>
+        </Circle>
+
+        {/* Countdown ring */}
+        {!hideCd && daysLeft !== null && (
+          <Circle tint="transparent" color="var(--forest)" label="Countdown" onClick={() => setCdOpen(true)}>
+            <svg width="64" height="64" viewBox="0 0 64 64" style={{ position: 'absolute', inset: 0, transform: 'rotate(-90deg)' }}>
+              <circle cx="32" cy="32" r={R} fill="#e6eef0" />
+              <circle cx="32" cy="32" r={R} fill="none" stroke="#d3e2e8" strokeWidth="5" />
+              <circle cx="32" cy="32" r={R} fill="none" stroke={finalStretch ? '#d98a1e' : '#2f7d56'} strokeWidth="5" strokeLinecap="round" strokeDasharray={C} strokeDashoffset={C * (1 - frac)} style={{ transition: 'stroke-dashoffset .6s ease' }} />
+            </svg>
+            <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <b style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: daysLeft > 99 ? 16 : 19, color: finalStretch ? '#c0533f' : 'var(--forest)', lineHeight: 1 }}>{daysLeft > 0 ? daysLeft : daysLeft === 0 ? '0' : '—'}</b>
+              <span style={{ fontSize: 7.5, fontWeight: 800, letterSpacing: 1, color: 'var(--muted)', marginTop: 1 }}>{daysLeft >= 0 ? 'DAYS' : 'PASSED'}</span>
+            </div>
+          </Circle>
+        )}
+
+        {/* Streak: number inside + fire corner */}
+        {!hideSt && (
+          <Circle tint="#f7e3de" color="var(--rust)" label="Streak" onClick={() => setStOpen(true)}>
+            <span style={{ position: 'absolute', top: -6, right: -6, fontSize: 20, filter: 'drop-shadow(0 2px 3px rgba(0,0,0,.15))', zIndex: 2 }}>🔥</span>
+            <span style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 24, color: 'var(--rust)', lineHeight: 1 }}>{streak}</span>
+          </Circle>
+        )}
+      </div>
+
+      {/* ===== Countdown pop-out (reused) ===== */}
+      {cdOpen && user?.exam_date && (() => {
+        const examTs = new Date(user.exam_date).getTime();
+        const totSec = Math.floor(Math.max(0, examTs - nowTs) / 1000);
+        const totDays = Math.floor(totSec / 86400);
+        const weeks = Math.floor(totDays / 7);
+        const days = totDays % 7;
+        const hh = String(Math.floor((totSec % 86400) / 3600)).padStart(2, '0');
+        const mm2 = String(Math.floor((totSec % 3600) / 60)).padStart(2, '0');
+        const ss = String(totSec % 60).padStart(2, '0');
+        const dLeft = Math.ceil((examTs - nowTs) / 86400000);
+        return (
+          <div onClick={() => setCdOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'grid', placeItems: 'center', zIndex: 100, padding: 24 }}>
+            <div onClick={(e) => e.stopPropagation()} className="card" style={{ maxWidth: 340, width: '100%', textAlign: 'center', animation: 'popIn .3s cubic-bezier(0.34, 1.56, 0.64, 1) both', margin: 0 }}>
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--rust)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto 6px', display: 'block' }}><path d="M6 2h12M6 22h12M6 2c0 4 3 6 6 10 3-4 6-6 6-10M6 22c0-4 3-6 6-10" /></svg>
+              <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--rust)', textTransform: 'uppercase' }}>{user?.exam || 'Your exam'}</div>
+              <div className="sub" style={{ fontSize: 12, marginTop: 2 }}>{new Date(user.exam_date).toDateString()}</div>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 10, margin: '16px 0 4px' }}>
+                <div style={{ flex: 1, maxWidth: 90 }}><div className="display-num" style={{ fontSize: 34, fontWeight: 700, color: 'var(--forest)', lineHeight: 1 }}>{weeks}</div><div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>weeks</div></div>
+                <div style={{ flex: 1, maxWidth: 90 }}><div className="display-num" style={{ fontSize: 34, fontWeight: 700, color: 'var(--forest)', lineHeight: 1 }}>{days}</div><div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>days</div></div>
+              </div>
+              <div className="display-num" style={{ fontSize: 30, fontWeight: 700, color: 'var(--rust)', letterSpacing: 2, fontVariantNumeric: 'tabular-nums', margin: '6px 0 2px' }}>{hh}:{mm2}:{ss}</div>
+              <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>hours · minutes · seconds</div>
+              <div style={{ display: 'inline-block', fontSize: 12, fontWeight: 700, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 999, padding: '5px 14px', margin: '14px 0 2px' }}>{coachLine(dLeft)}</div>
+              <button className="btn ghost" style={{ marginTop: 12 }} onClick={() => setCdOpen(false)}>Back to it</button>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ===== Streak pop-out (reused) ===== */}
+      {stOpen && (() => {
+        const best = Math.max(user?.longest_streak || 0, streak);
+        const line = !studiedToday
+          ? 'One tap keeps the flame alive.'
+          : streak >= best && streak > 1
+            ? "You're at your peak. Don't look down."
+            : streak === 0
+              ? 'Every legendary streak starts at day one.'
+              : "Today's locked in. See you tomorrow, doctor.";
+        return (
+          <div onClick={() => setStOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'grid', placeItems: 'center', zIndex: 100, padding: 24 }}>
+            <div onClick={(e) => e.stopPropagation()} className="card" style={{ maxWidth: 340, width: '100%', textAlign: 'center', animation: 'popIn .3s cubic-bezier(0.34, 1.56, 0.64, 1) both', margin: 0 }}>
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--rust)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto 6px', display: 'block' }}><path d="M12 2c1 4-2 5-2 8a4 4 0 0 0 8 0c0-1-.5-2-1-3 .5 3-2 3-2 1 0-2-1-4-3-6z" /><path d="M8.5 12c-.8 1-1.5 2.2-1.5 3.8a5 5 0 0 0 10 0c0-1.2-.4-2.3-1-3.2" /></svg>
+              <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--rust)', textTransform: 'uppercase' }}>Study Streak</div>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 10, margin: '16px 0 4px' }}>
+                <div style={{ flex: 1, maxWidth: 90 }}><div className="display-num" style={{ fontSize: 34, fontWeight: 700, color: 'var(--rust)', lineHeight: 1 }}>{streak}</div><div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>day{streak === 1 ? '' : 's'} in a row</div></div>
+                <div style={{ flex: 1, maxWidth: 90 }}><div className="display-num" style={{ fontSize: 34, fontWeight: 700, color: 'var(--forest)', lineHeight: 1 }}>{best}</div><div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>personal best</div></div>
+              </div>
+              <div style={{ display: 'flex', gap: 5, justifyContent: 'center', marginTop: 4 }}>
+                {last7.map((d, i) => (<div key={i} title={d.letter} style={{ width: 12, height: 12, borderRadius: 4, background: 'var(--rust)', opacity: d.on ? 1 : 0.22, boxShadow: d.isToday ? '0 0 0 2px rgba(192,83,63,.35)' : 'none' }} />))}
+              </div>
+              <div style={{ display: 'inline-block', fontSize: 12, fontWeight: 700, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 999, padding: '5px 14px', margin: '14px 0 2px' }}>{line}</div>
+              {!studiedToday && (<button className="btn btn-cta" style={{ marginTop: 12 }} disabled={marking} onClick={markStudy}>{marking ? '…' : 'Mark today ✓'}</button>)}
+              <button className="btn ghost" style={{ marginTop: 8 }} onClick={() => setStOpen(false)}>Keep going</button>
+            </div>
+          </div>
+        );
+      })()}
+    </>
   );
 }
 
