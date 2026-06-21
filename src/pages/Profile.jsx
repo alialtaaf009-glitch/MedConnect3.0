@@ -230,8 +230,8 @@ export default function Profile() {
       )}
 
       <div className="label" style={{ marginTop: 18 }}>Home screen</div>
-      {[['hide_countdown', 'Show exam countdown'], ['hide_streak', 'Show study streak']].map(([key, label]) => (
-        <div key={key} className="row" style={{ padding: '12px 14px', cursor: 'pointer' }}
+      {[['hide_qbank', 'Show Qbank tracker'], ['hide_flashcards', 'Show flashcards'], ['hide_countdown', 'Show exam countdown'], ['hide_streak', 'Show study streak']].map(([key, label]) => (
+        <div key={key} className="row" style={{ padding: '12px 14px', marginBottom: 8, cursor: 'pointer' }}
           onClick={() => { localStorage.setItem(key, localStorage.getItem(key) === '1' ? '' : '1'); setTilePrefs((p) => p + 1); }}>
           <span style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>{label}</span>
           <span style={{ width: 40, height: 23, borderRadius: 999, background: localStorage.getItem(key) === '1' ? 'var(--line)' : 'var(--forest)', position: 'relative', transition: 'background .2s ease', flexShrink: 0 }}>
@@ -292,7 +292,7 @@ function NotifToggle() {
 
   if (!supported) {
     return (
-      <div className="row" style={{ padding: '12px 14px', opacity: 0.7 }}>
+      <div className="row" style={{ padding: '12px 14px', marginBottom: 8, opacity: 0.7 }}>
         <span style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>Push notifications
           <span style={{ display: 'block', fontSize: 11.5, fontWeight: 400, color: 'var(--subtle)' }}>Not supported on this device/browser. On iPhone, install the app to your Home Screen first.</span>
         </span>
@@ -302,7 +302,7 @@ function NotifToggle() {
 
   return (
     <div>
-      <div className="row" style={{ padding: '12px 14px', cursor: 'pointer' }} onClick={flip}>
+      <div className="row" style={{ padding: '12px 14px', marginBottom: 8, cursor: 'pointer' }} onClick={flip}>
         <span style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>Push notifications
           <span style={{ display: 'block', fontSize: 11.5, fontWeight: 400, color: 'var(--subtle)' }}>Get alerted about new messages & requests</span>
         </span>
@@ -329,14 +329,12 @@ function NotifToggle() {
               alert(
                 'Did you see a "local test" notification just now?\n\n' +
                 'If YES → your device works; the server push is being sent too.\n' +
-                'If NO → notifications are blocked in your phone settings.\n\n' +
-                'Server diagnostic:\n' +
-                '• Keys set: ' + (d.vapid_public_set && d.vapid_private_set ? 'YES' : 'NO') + '\n' +
-                '• Saved devices: ' + (d.my_subscription_count ?? 0) + '\n' +
-                '• Server send: ' + (r.sendResult || '—')
+                'If NO → notifications are blocked in your phone'
               );
-            } catch (e) { alert('Debug failed: ' + (e.message || e)); }
-          }}>Send me a test notification</button>
+            } catch (e) {
+              alert('Server push test failed: ' + (e.message || e));
+            }
+          }}>Send a test notification</button>
         </div>
       )}
     </div>
