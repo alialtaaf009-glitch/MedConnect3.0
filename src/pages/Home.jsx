@@ -381,22 +381,18 @@ function QuickRow({ user, nav }) {
     return () => { active = false; };
   }, []);
 
-  // inline detail panel (Countdown / Streak open here; Qbank / Flashcards navigate)
-  const [openK, setOpenK] = useState(null);
-  const toggle = (k) => setOpenK((p) => (p === k ? null : k));
-
   // shared circle wrapper
   const Circle = ({ tint, color, glow, onClick, badge, selected, children, label }) => (
     <div onClick={onClick} className="qi-press" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }}>
-      <div style={{ position: 'relative', width: 64, height: 64, borderRadius: '50%', background: tint, color, display: 'grid', placeItems: 'center', boxShadow: selected ? `0 0 0 3px var(--paper), 0 0 0 5px ${color}` : (glow || '0 6px 14px rgba(31,77,63,.12)'), transform: selected ? 'scale(1.06)' : 'scale(1)', transition: 'transform .35s cubic-bezier(.34,1.7,.5,1), box-shadow .25s' }}>
+      <div className="qi-shape" style={{ position: 'relative', width: 64, height: 64, borderRadius: '50%', background: tint, color, display: 'grid', placeItems: 'center', boxShadow: glow || '0 6px 14px rgba(31,77,63,.12)', transition: 'transform .18s cubic-bezier(.34,1.7,.5,1), box-shadow .25s' }}>
         {badge != null && (
           <span style={{ position: 'absolute', top: -2, right: -2, minWidth: 18, height: 18, padding: '0 4px', borderRadius: 999, background: 'var(--rust)', color: '#fff', fontSize: 9, fontWeight: 800, display: 'grid', placeItems: 'center', border: '2px solid var(--paper)', zIndex: 3, animation: 'qBadge .5s cubic-bezier(.34,1.7,.5,1) both' }}>{badge}</span>
         )}
         {children}
       </div>
-      <div style={{ fontSize: 11, fontWeight: 700, color: openK && selected ? 'var(--ink)' : 'var(--muted)', textAlign: 'center', lineHeight: 1.15 }}>{label}</div>
+      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textAlign: 'center', lineHeight: 1.15 }}>{label}</div>
     </div>
-    );
+  );
 
   const finalStretch = daysLeft != null && daysLeft > 0 && daysLeft <= 10;
   const WINDOW = 180;
@@ -407,9 +403,7 @@ function QuickRow({ user, nav }) {
     <>
       <style>{`
         @keyframes qBadge{0%{transform:scale(0)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
-        @keyframes firePop{0%{transform:scale(.6)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
-        .qi-press:active > div:first-child{transform:scale(.9)!important}
-        .qrow-detail{overflow:hidden;transition:max-height .42s cubic-bezier(.34,1.45,.5,1),opacity .3s,margin .42s;}
+        .qi-press:active .qi-shape{transform:scale(.88)}
       `}</style>
 
       {/* paddingTop gives the fire breathing room from the motivation box */}
@@ -426,7 +420,7 @@ function QuickRow({ user, nav }) {
 
         {/* Countdown — opens inline detail */}
         {!hideCd && daysLeft !== null && (
-          <Circle tint="transparent" color="#1f9bb8" glow="none" label="Countdown" selected={openK === 'count'} onClick={() => toggle('count')}>
+          <Circle tint="transparent" color="#1f9bb8" glow="none" label="Countdown" onClick={() => setCdOpen(true)}>
             <svg width="64" height="64" viewBox="0 0 64 64" style={{ position: 'absolute', inset: 0, transform: 'rotate(-90deg)' }}>
               <circle cx="32" cy="32" r={R2} fill="#dceff3" />
               <circle cx="32" cy="32" r={R2} fill="none" stroke="#c2e2e9" strokeWidth="5" />
@@ -441,46 +435,16 @@ function QuickRow({ user, nav }) {
 
         {/* Streak — fire is the mark-today tap; circle body opens detail */}
         {!hideSt && (
-          <Circle tint="#fde0d8" color="#d24a30" glow="0 6px 14px rgba(210,74,48,.22)" label="Streak" selected={openK === 'streak'} onClick={() => toggle('streak')}>
+          <Circle tint="#fde0d8" color="#d24a30" glow="0 6px 14px rgba(210,74,48,.22)" label="Streak" onClick={() => setStOpen(true)}>
             <span
               onClick={(e) => { e.stopPropagation(); if (!studiedToday) markStudy(); }}
-              style={{ position: 'absolute', top: -9, right: -9, fontSize: 22, zIndex: 4, cursor: 'pointer', transition: 'transform .3s cubic-bezier(.34,1.8,.5,1)', filter: studiedToday ? 'drop-shadow(0 2px 5px rgba(210,74,48,.4))' : 'grayscale(.7) opacity(.55) drop-shadow(0 2px 3px rgba(0,0,0,.12))', animation: studiedToday ? 'firePop .5s cubic-bezier(.34,1.8,.5,1)' : 'none' }}
+              style={{ position: 'absolute', top: -6, right: -6, fontSize: 17, zIndex: 4, cursor: 'pointer', filter: studiedToday ? 'drop-shadow(0 1px 3px rgba(210,74,48,.4))' : 'grayscale(.7) opacity(.55) drop-shadow(0 1px 2px rgba(0,0,0,.12))' }}
             >🔥</span>
             <span style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 24, color: '#d24a30', lineHeight: 1 }}>{streak}</span>
           </Circle>
         )}
       </div>
 
-      {/* inline detail panel for Countdown / Streak */}
-      <div className="qrow-detail" style={{ maxHeight: openK ? 160 : 0, opacity: openK ? 1 : 0, marginBottom: openK ? 10 : 0 }}>
-        <div className="card" style={{ margin: 0, padding: 14 }}>
-          {openK === 'count' && (
-            <>
-              <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 15.5, color: 'var(--ink)' }}>Exam Countdown</div>
-              <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 7 }}>
-                <b style={{ color: 'var(--forest-2)', fontWeight: 800 }}>{daysLeft}</b> day{daysLeft === 1 ? '' : 's'} to {user?.exam || 'your exam'}{user?.exam_date ? ` · ${new Date(user.exam_date).toDateString()}` : ''}
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 11 }}>
-                <button className="btn ghost" style={{ width: 'auto', padding: '7px 14px', fontSize: 12 }} onClick={() => setCdOpen(true)}>Full view ›</button>
-              </div>
-            </>
-          )}
-          {openK === 'streak' && (
-            <>
-              <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 15.5, color: 'var(--ink)' }}>Study Streak</div>
-              <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 7 }}>
-                <b style={{ color: 'var(--rust)', fontWeight: 800 }}>{streak}</b>-day streak · best {Math.max(user?.longest_streak || 0, streak)}
-              </div>
-              <div style={{ fontSize: 12.5, marginTop: 5, color: '#b06b3a', fontWeight: 600 }}>
-                {studiedToday ? '✓ Logged today — see you tomorrow' : '💡 Tap the 🔥 to log today and keep your streak alive'}
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 11 }}>
-                <button className="btn ghost" style={{ width: 'auto', padding: '7px 14px', fontSize: 12 }} onClick={() => setStOpen(true)}>Full view ›</button>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
 
       {cdOpen && user?.exam_date && (() => {
         const examTs = new Date(user.exam_date).getTime();
@@ -523,7 +487,7 @@ function QuickRow({ user, nav }) {
       })()}
 
       {stOpen && (() => {
-        const best = Math.max(user?.longest_streak || 0, streak);
+          const best = Math.max(user?.longest_streak || 0, streak);
         const line = !studiedToday
           ? 'One tap keeps the flame alive.'
           : streak >= best && streak > 1
