@@ -180,7 +180,7 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'exam' && (
-      <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
           {orderedExams.map(({ flag, country, exam, parts }, idx) => {
               const key = 'exam|' + country + '|' + exam;
               const ecx = examColor(exam);
@@ -339,7 +339,7 @@ function QuickRow({ user, nav, onGreen }) {
   };
 
   // pop-outs
-const [cdOpen, setCdOpen] = useState(false);
+  const [cdOpen, setCdOpen] = useState(false);
   const [stOpen, setStOpen] = useState(false);
   const [nowTs, setNowTs] = useState(Date.now());
   useEffect(() => {
@@ -493,7 +493,7 @@ const [cdOpen, setCdOpen] = useState(false);
       })()}
 
       {stOpen && (() => {
-      const best = Math.max(user?.longest_streak || 0, streak);
+        const best = Math.max(user?.longest_streak || 0, streak);
         const line = !studiedToday
           ? 'One tap keeps the flame alive.'
           : streak >= best && streak > 1
@@ -577,7 +577,7 @@ export default function Home() {
   return (
     <div className="screen" style={{ padding: 0 }}>
       {/* ===== GREEN BAND: greeting + motivation quote + nudges + quick circles ===== */}
-      <div className="mc-home-band" style={{ padding: '14px 18px 38px', color: '#fff', borderRadius: '0 0 34px 34px' }}>
+      <div className="mc-home-band" style={{ padding: '14px 18px 40px', color: '#fff' }}>
         <div onClick={() => setShowMotivation(true)} style={{ cursor: 'pointer', position: 'relative' }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--gold)', marginBottom: 8 }}>
             Hi Dr. {(user?.name || '').replace(/^Dr\.?\s+/i, '').split(' ')[0] || 'Doctor'} — a thought for today
@@ -593,7 +593,7 @@ export default function Home() {
 
         {liveNudges.length > 0 && (() => {
           const first = liveNudges[0];
-          const rest = liveNudges.slice(1);
+      const rest = liveNudges.slice(1);
           const Row = ({ n, divided }) => (
             <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '12px 14px', borderTop: divided ? '1px solid rgba(255,255,255,.15)' : 'none' }}>
               <div onClick={() => nav(`/chat?with=${n.id}&name=${encodeURIComponent(n.name)}&av=${encodeURIComponent(n.avatar || '')}`)} style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,.18)', display: 'grid', placeItems: 'center', fontSize: 20, flexShrink: 0, cursor: 'pointer' }}>{n.avatar || '👋'}</div>
@@ -632,7 +632,7 @@ export default function Home() {
       </div>
 
       {/* ===== CURVED LIGHT SHEET: Explore + invite + footer ===== */}
-      <div style={{ background: 'var(--paper)', borderRadius: '34px 34px 0 0', marginTop: -34, position: 'relative', zIndex: 1, padding: '24px 18px 20px' }}>
+      <div style={{ background: 'var(--paper)', borderRadius: '28px 28px 0 0', marginTop: -28, position: 'relative', zIndex: 1, padding: '24px 18px 20px' }}>
         <h2 className="serif" style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 21, fontWeight: 900, letterSpacing: '-0.3px', color: 'var(--forest)', margin: '0 0 12px' }}>Explore Study Partners</h2>
 
         <ExploreBrowse />
