@@ -457,7 +457,7 @@ function QuickRow({ user, nav, onGreen }) {
       <div style={{ display: 'flex', gap: 10, margin: '2px 0 4px', paddingTop: 8 }}>
         {/* Qbank — navigates */}
         {!hideQb && (
-        <Circle tint="#dff0e4" color="#147a52" glow="0 6px 14px rgba(20,122,82,.18)" label="Qbank" selected={false} onClick={(e) => launchBloom(e, '#147a8a', 'qbank')}>
+      <Circle tint="#dff0e4" color="#147a52" glow="0 6px 14px rgba(20,122,82,.18)" label="Qbank" selected={false} onClick={(e) => launchBloom(e, '#147a8a', 'qbank')}>
           <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><rect x="7" y="12" width="3" height="6" /><rect x="12" y="8" width="3" height="10" /><rect x="17" y="14" width="3" height="4" /></svg>
         </Circle>
         )}
@@ -538,7 +538,7 @@ function QuickRow({ user, nav, onGreen }) {
       })()}
 
       {stOpen && (() => {
-        const best = Math.max(user?.longest_streak || 0, streak);
+      const best = Math.max(user?.longest_streak || 0, streak);
         const line = !studiedToday
           ? 'One tap keeps the flame alive.'
           : streak >= best && streak > 1
@@ -644,7 +644,7 @@ function QuickRow({ user, nav, onGreen }) {
               {/* light sheet */}
               <div style={{ flex: 1, background: 'var(--paper)', borderRadius: '24px 24px 0 0', marginTop: -16, overflowY: 'auto', WebkitOverflowScrolling: 'touch', opacity: bloomGrown ? 1 : 0, transition: 'opacity .3s ease .18s' }}>
                 {bloom.key === 'countdown' && (
-            <div style={{ textAlign: 'center', padding: '26px 22px' }}>
+                  <div style={{ textAlign: 'center', padding: '26px 22px' }}>
                     <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 14 }}>{examTs ? new Date(user.exam_date).toDateString() : 'Add your exam date in Profile.'}</div>
                     <div style={{ display: 'inline-block', fontSize: 13, fontWeight: 700, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 999, padding: '7px 16px' }}>{coachLine(dLeft ?? 999)}</div>
                     <button className="btn ghost" style={{ marginTop: 20, maxWidth: 220, margin: '20px auto 0' }} onClick={closeBloom}>Back to it</button>
@@ -731,7 +731,8 @@ function QuickRow({ user, nav, onGreen }) {
       })()}
     </>
   );
-  export default function Home() {
+}
+export default function Home() {
   const { user } = useAuth();
   const nav = useNavigate();
   const initials = (user?.name || 'Dr A').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map(x => x[0]?.toUpperCase()).join('');
