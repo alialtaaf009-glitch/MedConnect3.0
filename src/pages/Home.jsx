@@ -483,7 +483,7 @@ const coachLine = (d) => {
               </div>
               <div className="display-num" style={{ fontSize: 30, fontWeight: 700, color: 'var(--rust)', letterSpacing: 2, fontVariantNumeric: 'tabular-nums', margin: '6px 0 2px' }}>
                 {hh}:{mm2}:{ss}
-                </div>
+              </div>
               <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>hours · minutes · seconds</div>
               <div style={{ display: 'inline-block', fontSize: 12, fontWeight: 700, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 999, padding: '5px 14px', margin: '14px 0 2px' }}>{coachLine(dLeft)}</div>
               <button className="btn ghost" style={{ marginTop: 12 }} onClick={() => setCdOpen(false)}>Back to it</button>
@@ -632,7 +632,7 @@ export default function Home() {
       </div>
 
       {/* ===== CURVED LIGHT SHEET: Explore + invite + footer ===== */}
-      <div style={{ background: 'var(--paper)', borderRadius: '34px 34px 0 0', marginTop: -24, position: 'relative', zIndex: 1, padding: '24px 18px 20px', boxShadow: '0 -10px 24px rgba(22,41,31,.12)' }}>
+      <div style={{ background: 'var(--paper)', borderRadius: '34px 34px 0 0', marginTop: -24, position: 'relative', zIndex: 1, padding: '24px 18px 20px' }}>
         <h2 className="serif" style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 21, fontWeight: 900, letterSpacing: '-0.3px', color: 'var(--forest)', margin: '0 0 12px' }}>Explore Study Partners</h2>
 
         <ExploreBrowse />
