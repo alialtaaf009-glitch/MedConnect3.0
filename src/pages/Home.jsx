@@ -216,7 +216,7 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'country' && (
-        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+      <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
         {orderedCountries.map(([flag, country, exams], idx) => (
         <div key={country} style={{ borderTop: idx === 0 ? 'none' : '1px solid var(--line)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '11px 18px', cursor: 'pointer' }}
@@ -268,7 +268,7 @@ function ExploreBrowse() {
 }
 
 // Quick row: Qbank · Flashcards · Countdown · Streak (circles). Stats open inline; tools navigate.
-function QuickRow({ user, nav }) {
+function QuickRow({ user, nav, onGreen }) {
   // user-hideable tiles (Profile -> Home screen)
   const hideCd = localStorage.getItem('hide_countdown') === '1';
   const hideSt = localStorage.getItem('hide_streak') === '1';
@@ -388,11 +388,11 @@ function QuickRow({ user, nav }) {
     <div onClick={onClick} className="qi-press" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }}>
       <div className="qi-shape" style={{ position: 'relative', width: 64, height: 64, borderRadius: '50%', background: tint, color, display: 'grid', placeItems: 'center', boxShadow: glow || '0 6px 14px rgba(31,77,63,.12)', transition: 'transform .18s cubic-bezier(.34,1.7,.5,1), box-shadow .25s' }}>
         {badge != null && (
-          <span style={{ position: 'absolute', top: -2, right: -2, minWidth: 18, height: 18, padding: '0 4px', borderRadius: 999, background: 'var(--rust)', color: '#fff', fontSize: 9, fontWeight: 800, display: 'grid', placeItems: 'center', border: '2px solid var(--paper)', zIndex: 3, animation: 'qBadge .5s cubic-bezier(.34,1.7,.5,1) both' }}>{badge}</span>
+          <span style={{ position: 'absolute', top: -2, right: -2, minWidth: 18, height: 18, padding: '0 4px', borderRadius: 999, background: 'var(--rust)', color: '#fff', fontSize: 9, fontWeight: 800, display: 'grid', placeItems: 'center', border: `2px solid ${onGreen ? '#1c4337' : 'var(--paper)'}`, zIndex: 3, animation: 'qBadge .5s cubic-bezier(.34,1.7,.5,1) both' }}>{badge}</span>
         )}
         {children}
       </div>
-      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textAlign: 'center', lineHeight: 1.15 }}>{label}</div>
+      <div style={{ fontSize: 11, fontWeight: 700, color: onGreen ? 'rgba(255,255,255,.85)' : 'var(--muted)', textAlign: 'center', lineHeight: 1.15 }}>{label}</div>
     </div>
   );
 
@@ -426,7 +426,7 @@ function QuickRow({ user, nav }) {
 
         {/* Countdown — opens inline detail */}
         {!hideCd && daysLeft !== null && (
-          <Circle tint="transparent" color="#1f9bb8" glow="none" label="Countdown" onClick={() => setCdOpen(true)}>
+      <Circle tint="transparent" color="#1f9bb8" glow="none" label="Countdown" onClick={() => setCdOpen(true)}>
             <svg width="64" height="64" viewBox="0 0 64 64" style={{ position: 'absolute', inset: 0, transform: 'rotate(-90deg)' }}>
               <circle cx="32" cy="32" r={R2} fill="#dceff3" />
               <circle cx="32" cy="32" r={R2} fill="none" stroke="#c2e2e9" strokeWidth="5" />
@@ -575,75 +575,84 @@ export default function Home() {
   };
 
   return (
-    <div className="screen">
-      <div onClick={() => setShowMotivation(true)} style={{ cursor: 'pointer', marginTop: 0, padding: '15px 18px', borderRadius: 18, background: 'linear-gradient(135deg, #1f4d3f 0%, #2c6a55 100%)', color: '#fff', position: 'relative', overflow: 'hidden', boxShadow: '0 6px 20px rgba(31,77,63,.28)' }}>
-        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--gold)', marginBottom: 8, position: 'relative' }}>
-          Hi Dr. {(user?.name || '').replace(/^Dr\.?\s+/i, '').split(' ')[0] || 'Doctor'} — a thought for today
-        </div>
-        <div style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: 17, fontWeight: 500, lineHeight: 1.4, position: 'relative', paddingRight: 28 }}>
-          <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: 26, fontWeight: 700, color: 'var(--gold)', verticalAlign: '-9px', lineHeight: 0, marginRight: 1 }}>“</span>{quote.text}<span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: 26, fontWeight: 700, color: 'var(--gold)', verticalAlign: '-9px', lineHeight: 0, marginLeft: 1 }}>”</span>
-        </div>
-        {quote.author && <div style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: 13, fontStyle: 'italic', color: 'var(--gold)', marginTop: 6, paddingRight: 28 }}>— {quote.author}</div>}
-        <div style={{ position: 'absolute', top: '50%', right: 14, transform: 'translateY(-50%)', width: 26, height: 26, borderRadius: '50%', background: 'rgba(255,255,255,0.14)', display: 'grid', placeItems: 'center', fontSize: 15, opacity: 0.9 }}>›</div>
-      </div>
-
-      {liveNudges.length > 0 && (() => {
-        const first = liveNudges[0];
-        const rest = liveNudges.slice(1);
-        const Row = ({ n, divided }) => (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '12px 14px', borderTop: divided ? '1px solid rgba(255,255,255,.15)' : 'none' }}>
-            <div onClick={() => nav(`/chat?with=${n.id}&name=${encodeURIComponent(n.name)}&av=${encodeURIComponent(n.avatar || '')}`)} style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,.18)', display: 'grid', placeItems: 'center', fontSize: 20, flexShrink: 0, cursor: 'pointer' }}>{n.avatar || '👋'}</div>
-            <div style={{ flex: 1, minWidth: 0, lineHeight: 1.3, cursor: 'pointer' }} onClick={() => nav(`/chat?with=${n.id}&name=${encodeURIComponent(n.name)}&av=${encodeURIComponent(n.avatar || '')}`)}>
-              <div style={{ fontWeight: 700, fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{n.name}</div>
-              {n.exam && <div style={{ fontSize: 11.5, opacity: 0.82 }}>{n.exam}</div>}
-            </div>
-            <button onClick={() => nav(`/chat?with=${n.id}&name=${encodeURIComponent(n.name)}&av=${encodeURIComponent(n.avatar || '')}`)} style={{ background: '#fff', color: 'var(--forest)', border: 'none', borderRadius: 999, padding: '7px 14px', fontSize: 12, fontWeight: 800, cursor: 'pointer', flexShrink: 0, fontFamily: 'inherit' }}>Say hi</button>
-            <button onClick={() => dismissNudge(n.id)} aria-label="Dismiss" style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.55)', cursor: 'pointer', padding: 4, flexShrink: 0, display: 'grid', placeItems: 'center' }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
-            </button>
+    <div className="screen" style={{ padding: 0 }}>
+      {/* ===== GREEN BAND: greeting + motivation quote + nudges + quick circles ===== */}
+      <div style={{ background: 'linear-gradient(165deg, #1f4d3f 0%, #163a2f 100%)', padding: '14px 18px 30px', color: '#fff' }}>
+        <div onClick={() => setShowMotivation(true)} style={{ cursor: 'pointer', position: 'relative' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--gold)', marginBottom: 8 }}>
+            Hi Dr. {(user?.name || '').replace(/^Dr\.?\s+/i, '').split(' ')[0] || 'Doctor'} — a thought for today
           </div>
-        );
-        return (
-          <div style={{ marginTop: 12, borderRadius: 16, overflow: 'hidden', background: 'linear-gradient(135deg, #1f4d3f 0%, #2c6a55 100%)', color: '#fff', boxShadow: '0 4px 14px rgba(31,77,63,.25)' }}>
-            <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--gold)', padding: '11px 14px 0' }}>
-              🎉 {liveNudges.length === 1 ? 'New study partner' : `${liveNudges.length} new study partners`}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ flex: 1, fontFamily: "'Newsreader', Georgia, serif", fontSize: 18, fontWeight: 500, lineHeight: 1.42 }}>
+              <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: 25, fontWeight: 700, color: 'var(--gold)', verticalAlign: '-9px', lineHeight: 0, marginRight: 1 }}>“</span>{quote.text}<span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: 25, fontWeight: 700, color: 'var(--gold)', verticalAlign: '-9px', lineHeight: 0, marginLeft: 1 }}>”</span>
+              {quote.author && <span style={{ display: 'block', fontFamily: "'Newsreader', Georgia, serif", fontSize: 13, fontStyle: 'italic', color: 'var(--gold)', marginTop: 6 }}>— {quote.author}</span>}
             </div>
-            <Row n={first} />
-            {rest.length > 0 && nudgesOpen && rest.map((n) => <Row key={n.id} n={n} divided />)}
-            {rest.length > 0 && (
-              <button onClick={() => setNudgesOpen(!nudgesOpen)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '10px', borderTop: '1px solid rgba(255,255,255,.15)', background: 'rgba(255,255,255,.08)', border: 'none', color: '#fff', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
-                {nudgesOpen ? 'Show less' : `Show ${rest.length} more`}
-                <span style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(255,255,255,.2)', display: 'grid', placeItems: 'center', transition: 'transform .25s ease', transform: nudgesOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
-                </span>
+            <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,0.14)', display: 'grid', placeItems: 'center', fontSize: 16, flexShrink: 0 }}>›</div>
+          </div>
+        </div>
+
+        {liveNudges.length > 0 && (() => {
+          const first = liveNudges[0];
+          const rest = liveNudges.slice(1);
+          const Row = ({ n, divided }) => (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '12px 14px', borderTop: divided ? '1px solid rgba(255,255,255,.15)' : 'none' }}>
+              <div onClick={() => nav(`/chat?with=${n.id}&name=${encodeURIComponent(n.name)}&av=${encodeURIComponent(n.avatar || '')}`)} style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,.18)', display: 'grid', placeItems: 'center', fontSize: 20, flexShrink: 0, cursor: 'pointer' }}>{n.avatar || '👋'}</div>
+              <div style={{ flex: 1, minWidth: 0, lineHeight: 1.3, cursor: 'pointer' }} onClick={() => nav(`/chat?with=${n.id}&name=${encodeURIComponent(n.name)}&av=${encodeURIComponent(n.avatar || '')}`)}>
+                <div style={{ fontWeight: 700, fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{n.name}</div>
+                {n.exam && <div style={{ fontSize: 11.5, opacity: 0.82 }}>{n.exam}</div>}
+              </div>
+              <button onClick={() => nav(`/chat?with=${n.id}&name=${encodeURIComponent(n.name)}&av=${encodeURIComponent(n.avatar || '')}`)} style={{ background: '#fff', color: 'var(--forest)', border: 'none', borderRadius: 999, padding: '7px 14px', fontSize: 12, fontWeight: 800, cursor: 'pointer', flexShrink: 0, fontFamily: 'inherit' }}>Say hi</button>
+              <button onClick={() => dismissNudge(n.id)} aria-label="Dismiss" style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.55)', cursor: 'pointer', padding: 4, flexShrink: 0, display: 'grid', placeItems: 'center' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
               </button>
-            )}
-          </div>
-        );
-      })()}
+            </div>
+          );
+          return (
+            <div style={{ marginTop: 14, borderRadius: 16, overflow: 'hidden', background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.12)', color: '#fff' }}>
+              <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--gold)', padding: '11px 14px 0' }}>
+                🎉 {liveNudges.length === 1 ? 'New study partner' : `${liveNudges.length} new study partners`}
+              </div>
+              <Row n={first} />
+              {rest.length > 0 && nudgesOpen && rest.map((n) => <Row key={n.id} n={n} divided />)}
+              {rest.length > 0 && (
+                <button onClick={() => setNudgesOpen(!nudgesOpen)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '10px', borderTop: '1px solid rgba(255,255,255,.15)', background: 'rgba(255,255,255,.08)', border: 'none', color: '#fff', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+                  {nudgesOpen ? 'Show less' : `Show ${rest.length} more`}
+                  <span style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(255,255,255,.2)', display: 'grid', placeItems: 'center', transition: 'transform .25s ease', transform: nudgesOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+                  </span>
+                </button>
+              )}
+            </div>
+          );
+        })()}
 
-      <QuickRow user={user} nav={nav} />
-
-
-      <h2 className="serif" style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 21, fontWeight: 900, letterSpacing: '-0.3px', color: 'var(--forest)', margin: '10px 0 12px' }}>Explore Study Partners</h2>
-
-      <ExploreBrowse />
-
-      {/* invite a colleague — slim rust pill, native share sheet (Android & iOS), clipboard fallback */}
-      <div onClick={inviteFriend} style={{ display: 'flex', alignItems: 'center', gap: 12, borderRadius: 999, padding: '12px 16px', marginTop: 20, cursor: 'pointer', background: 'linear-gradient(135deg, #1f4d3f 0%, #2c6a55 100%)', color: '#fff', boxShadow: '0 4px 14px rgba(31,77,63,.25)' }}>
-        <span style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,.2)', display: 'grid', placeItems: 'center', fontSize: 19, flexShrink: 0 }}>👋</span>
-        <span style={{ flex: 1, fontSize: 13.5, fontWeight: 700, lineHeight: 1.3 }}>Study better, together — invite a colleague</span>
-        <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,.22)', display: 'grid', placeItems: 'center', flexShrink: 0, color: '#fff' }}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
-        </span>
+        <div style={{ marginTop: 18 }}>
+          <QuickRow user={user} nav={nav} onGreen />
+        </div>
       </div>
-      {invited && <p className="sub" style={{ fontSize: 12, marginTop: 8, textAlign: 'center', color: 'var(--forest)', fontWeight: 700 }}>Link copied — paste it anywhere! ✓</p>}
 
-      {/* signature footer */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, margin: '28px 0 8px', opacity: 0.55 }}>
-        <span style={{ height: 1, width: 28, background: 'var(--line)' }} />
-        <span style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'var(--muted)', textTransform: 'uppercase' }}>For doctors, by doctors</span>
-        <span style={{ height: 1, width: 28, background: 'var(--line)' }} />
+      {/* ===== CURVED LIGHT SHEET: Explore + invite + footer ===== */}
+      <div style={{ background: 'var(--paper)', borderRadius: '28px 28px 0 0', marginTop: -16, position: 'relative', zIndex: 1, padding: '22px 18px 20px' }}>
+        <h2 className="serif" style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 21, fontWeight: 900, letterSpacing: '-0.3px', color: 'var(--forest)', margin: '0 0 12px' }}>Explore Study Partners</h2>
+
+        <ExploreBrowse />
+
+        {/* invite a colleague — slim rust pill, native share sheet (Android & iOS), clipboard fallback */}
+        <div onClick={inviteFriend} style={{ display: 'flex', alignItems: 'center', gap: 12, borderRadius: 999, padding: '12px 16px', marginTop: 20, cursor: 'pointer', background: 'linear-gradient(135deg, #1f4d3f 0%, #2c6a55 100%)', color: '#fff', boxShadow: '0 4px 14px rgba(31,77,63,.25)' }}>
+          <span style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,.2)', display: 'grid', placeItems: 'center', fontSize: 19, flexShrink: 0 }}>👋</span>
+          <span style={{ flex: 1, fontSize: 13.5, fontWeight: 700, lineHeight: 1.3 }}>Study better, together — invite a colleague</span>
+          <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,.22)', display: 'grid', placeItems: 'center', flexShrink: 0, color: '#fff' }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+          </span>
+        </div>
+        {invited && <p className="sub" style={{ fontSize: 12, marginTop: 8, textAlign: 'center', color: 'var(--forest)', fontWeight: 700 }}>Link copied — paste it anywhere! ✓</p>}
+
+        {/* signature footer */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, margin: '28px 0 8px', opacity: 0.55 }}>
+          <span style={{ height: 1, width: 28, background: 'var(--line)' }} />
+          <span style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'var(--muted)', textTransform: 'uppercase' }}>For doctors, by doctors</span>
+          <span style={{ height: 1, width: 28, background: 'var(--line)' }} />
+        </div>
       </div>
 
       {showMotivation && (
