@@ -148,7 +148,7 @@ h1, h2, h3, .h1, .name, .brand-name, .stat-num { font-family: 'Inter', system-ui
 /* bottom nav */
 .tabbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px;
   background: var(--forest); border-top: 1px solid var(--forest); display: flex; padding: 10px 0 16px; }
-[data-theme="dark"] .tabbar { background: var(--paper); border-top-color: var(--line); }
+[data-theme="dark"] .tabbar { background: #1a3a30; border-top-color: #1a3a30; }
 .tabbar a { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #9fc2b5; font-size: 10px;
   font-family: 'Inter', sans-serif; font-weight: 600; transition: color .18s ease; }
 .tabbar a.active { color: #ffffff; }
