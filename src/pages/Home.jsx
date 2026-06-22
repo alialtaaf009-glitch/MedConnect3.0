@@ -183,7 +183,7 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'exam' && (
-        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+      <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
           {orderedExams.map(({ flag, country, exam, parts }, idx) => {
               const key = 'exam|' + country + '|' + exam;
               const ecx = examColor(exam);
@@ -474,7 +474,7 @@ function QuickRow({ user, nav, onGreen }) {
 
 
       {cdOpen && user?.exam_date && (() => {
-        const examTs = new Date(user.exam_date).getTime();
+      const examTs = new Date(user.exam_date).getTime();
         const diff = Math.max(0, examTs - nowTs);
         const totSec = Math.floor(diff / 1000);
         const totDays = Math.floor(totSec / 86400);
@@ -559,13 +559,10 @@ function QuickRow({ user, nav, onGreen }) {
         const dLeft = examTs ? Math.ceil((examTs - Date.now()) / 86400000) : null;
         const best = Math.max(user?.longest_streak || 0, streak);
         const isPage = bloom.key === 'qbank' || bloom.key === 'flashcards';
-        // clip-path circle reveal grows from the tapped circle — cheap & smooth
+        const title = bloom.key === 'qbank' ? 'Qbank Tracker' : bloom.key === 'flashcards' ? 'Flashcards' : bloom.key === 'countdown' ? 'Countdown' : 'Study Streak';
         const ox = bloom.origin.x, oy = bloom.origin.y;
         const maxR = Math.ceil(Math.hypot(Math.max(ox, window.innerWidth - ox), Math.max(oy, window.innerHeight - oy)) * 1.05);
-        const clip = bloomGrown
-          ? `circle(${maxR}px at ${ox}px ${oy}px)`
-          : `circle(34px at ${ox}px ${oy}px)`;
-        const topPct = isPage ? '0 0 24%' : '0 0 42%';
+        const clip = bloomGrown ? `circle(${maxR}px at ${ox}px ${oy}px)` : `circle(34px at ${ox}px ${oy}px)`;
         return (
           <div style={{ position: 'fixed', inset: 0, zIndex: 1200, overflow: 'hidden', pointerEvents: bloomGrown ? 'auto' : 'none' }}>
             <div style={{
@@ -574,18 +571,19 @@ function QuickRow({ user, nav, onGreen }) {
               transition: 'clip-path .42s cubic-bezier(0.22,1,0.36,1), -webkit-clip-path .42s cubic-bezier(0.22,1,0.36,1)',
               display: 'flex', flexDirection: 'column',
             }}>
-              {/* top coloured area (extends up under the status bar) */}
-              <div style={{ flex: topPct, display: 'flex', flexDirection: 'column', color: '#fff', padding: 'calc(env(safe-area-inset-top,0px) + 14px) 20px 0' }}>
-                {/* back button row */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', opacity: bloomGrown ? 1 : 0, transition: 'opacity .25s ease .12s' }}>
-                  <button onClick={closeBloom} aria-label="Back" style={{ background: 'rgba(255,255,255,.18)', border: 'none', width: 34, height: 34, borderRadius: '50%', display: 'grid', placeItems: 'center', cursor: 'pointer', color: '#fff' }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-                  </button>
-                  {isPage && <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 17, fontWeight: 900 }}>{bloom.key === 'qbank' ? 'Qbank Tracker' : 'Flashcards'}</div>}
-                  <span style={{ width: 34 }} />
-                </div>
-                {/* centred hero content for countdown/streak */}
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', opacity: bloomGrown ? 1 : 0, transition: 'opacity .3s ease .16s' }}>
+              {/* sticky coloured top bar — same colour, blends with the status strip above */}
+              <div style={{ flexShrink: 0, background: bloom.color, color: '#fff', padding: 'calc(env(safe-area-inset-top,0px) + 12px) 14px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', opacity: bloomGrown ? 1 : 0, transition: 'opacity .25s ease .12s', zIndex: 5 }}>
+                <button onClick={closeBloom} aria-label="Back" style={{ background: 'rgba(255,255,255,.18)', border: 'none', width: 34, height: 34, borderRadius: '50%', display: 'grid', placeItems: 'center', cursor: 'pointer', color: '#fff', flexShrink: 0 }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+                </button>
+                <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 16, fontWeight: 900 }}>{title}</div>
+                <span style={{ width: 34, flexShrink: 0 }} />
+              </div>
+
+              {/* single scroll container: coloured hero, then the light sheet rises over it */}
+              <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch', opacity: bloomGrown ? 1 : 0, transition: 'opacity .3s ease .16s' }}>
+                {/* coloured hero */}
+                <div style={{ background: bloom.color, color: '#fff', textAlign: 'center', padding: isPage ? '4px 20px 24px' : '20px 24px 40px' }}>
                   {bloom.key === 'countdown' && (
                     <>
                       <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.5, textTransform: 'uppercase', opacity: 0.85 }}>{user?.exam || 'Your exam'}</div>
@@ -600,40 +598,43 @@ function QuickRow({ user, nav, onGreen }) {
                       <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', opacity: 0.85 }}>day{streak === 1 ? '' : 's'} in a row 🔥</div>
                     </>
                   )}
+                  {bloom.key === 'qbank' && <div style={{ fontSize: 30 }}>📊</div>}
+                  {bloom.key === 'flashcards' && <div style={{ fontSize: 30 }}>🗂️</div>}
                 </div>
-              </div>
-              {/* bottom light sheet */}
-              <div style={{ flex: 1, background: 'var(--paper)', borderRadius: '28px 28px 0 0', overflowY: 'auto', WebkitOverflowScrolling: 'touch', opacity: bloomGrown ? 1 : 0, transition: 'opacity .3s ease .18s' }}>
-                {bloom.key === 'countdown' && (
-                  <div style={{ textAlign: 'center', padding: '22px' }}>
-                    <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 14 }}>{examTs ? new Date(user.exam_date).toDateString() : 'Add your exam date in Profile.'}</div>
-                    <div style={{ display: 'inline-block', fontSize: 13, fontWeight: 700, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 999, padding: '7px 16px' }}>{coachLine(dLeft ?? 999)}</div>
-                    <button className="btn ghost" style={{ marginTop: 20, maxWidth: 220, margin: '20px auto 0' }} onClick={closeBloom}>Back to it</button>
-                  </div>
-                )}
-                {bloom.key === 'streak' && (
-                  <div style={{ textAlign: 'center', padding: '22px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 14 }}>
-                      <div style={{ flex: 1, maxWidth: 120 }}>
-                        <div className="display-num" style={{ fontSize: 32, fontWeight: 700, color: 'var(--rust)', lineHeight: 1 }}>{streak}</div>
-                        <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>current</div>
-                      </div>
-                      <div style={{ flex: 1, maxWidth: 120 }}>
-                        <div className="display-num" style={{ fontSize: 32, fontWeight: 700, color: 'var(--forest)', lineHeight: 1 }}>{best}</div>
-                        <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>personal best</div>
-                      </div>
+
+                {/* light sheet — rises over the colour as you scroll */}
+                <div style={{ background: 'var(--paper)', borderRadius: '24px 24px 0 0', minHeight: '70vh', marginTop: -16 }}>
+                  {bloom.key === 'countdown' && (
+                    <div style={{ textAlign: 'center', padding: '24px 22px' }}>
+                      <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 14 }}>{examTs ? new Date(user.exam_date).toDateString() : 'Add your exam date in Profile.'}</div>
+                      <div style={{ display: 'inline-block', fontSize: 13, fontWeight: 700, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 999, padding: '7px 16px' }}>{coachLine(dLeft ?? 999)}</div>
+                      <button className="btn ghost" style={{ marginTop: 20, maxWidth: 220, margin: '20px auto 0' }} onClick={closeBloom}>Back to it</button>
                     </div>
-                    <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 16 }}>
-                      {studiedToday ? '🔥 Today is logged — see you tomorrow' : '🔥 Tap below to log today'}
+                  )}
+                  {bloom.key === 'streak' && (
+                    <div style={{ textAlign: 'center', padding: '24px 22px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 14 }}>
+                        <div style={{ flex: 1, maxWidth: 120 }}>
+                          <div className="display-num" style={{ fontSize: 32, fontWeight: 700, color: 'var(--rust)', lineHeight: 1 }}>{streak}</div>
+                          <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>current</div>
+                        </div>
+                        <div style={{ flex: 1, maxWidth: 120 }}>
+                          <div className="display-num" style={{ fontSize: 32, fontWeight: 700, color: 'var(--forest)', lineHeight: 1 }}>{best}</div>
+                          <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>personal best</div>
+                        </div>
+                      </div>
+                      <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 16 }}>
+                        {studiedToday ? '🔥 Today is logged — see you tomorrow' : '🔥 Tap below to log today'}
+                      </div>
+                      {!studiedToday && (
+                        <button className="btn btn-cta" style={{ maxWidth: 220, margin: '0 auto' }} disabled={marking} onClick={markStudy}>{marking ? '…' : 'Mark today ✓'}</button>
+                      )}
+                      <button className="btn ghost" style={{ marginTop: 10, maxWidth: 220, margin: '10px auto 0' }} onClick={closeBloom}>Keep going</button>
                     </div>
-                    {!studiedToday && (
-                      <button className="btn btn-cta" style={{ maxWidth: 220, margin: '0 auto' }} disabled={marking} onClick={markStudy}>{marking ? '…' : 'Mark today ✓'}</button>
-                    )}
-                    <button className="btn ghost" style={{ marginTop: 10, maxWidth: 220, margin: '10px auto 0' }} onClick={closeBloom}>Keep going</button>
-                  </div>
-                )}
-                {bloom.key === 'qbank' && <Qbank inBloom />}
-                {bloom.key === 'flashcards' && <Flashcards inBloom />}
+                  )}
+                  {bloom.key === 'qbank' && <Qbank inBloom />}
+                  {bloom.key === 'flashcards' && <Flashcards inBloom />}
+                </div>
               </div>
             </div>
           </div>
@@ -814,3 +815,4 @@ function QbankCard({ nav }) {
     </button>
   );
 }
+                                                         }
