@@ -218,7 +218,7 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'country' && (
-      <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
         {orderedCountries.map(([flag, country, exams], idx) => (
         <div key={country} style={{ borderTop: idx === 0 ? 'none' : '1px solid var(--line)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '11px 18px', cursor: 'pointer' }}
@@ -438,7 +438,7 @@ function QuickRow({ user, nav, onGreen }) {
     setBloomGrown(false);
     if (setBar) setBar(null); // restore system bars to theme colour
     if (exitImmersive) exitImmersive(); // bring the top bar + nav back
-    setTimeout(() => setBloom(null), 340);
+    setTimeout(() => setBloom(null), 480);
   };
   // safety: whenever there's no open bloom, ensure the system bar + immersive are reset
   useEffect(() => {
@@ -450,14 +450,19 @@ function QuickRow({ user, nav, onGreen }) {
     <>
       <style>{`
         @keyframes qBadge{0%{transform:scale(0)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
-        .qi-press:active .qi-shape{transform:scale(.88)}
+        .qi-press{transition:transform .4s cubic-bezier(0.16,1,0.3,1)}
+        .qi-press:active .qi-shape{transform:scale(.9)}
+        .qi-press:active{transform:scale(.97)}
+        @media (prefers-reduced-motion: reduce){
+          .qi-press:active .qi-shape{transform:scale(.94)}
+        }
       `}</style>
 
       {/* paddingTop gives the fire breathing room from the motivation box */}
       <div style={{ display: 'flex', gap: 10, margin: '2px 0 4px', paddingTop: 8 }}>
         {/* Qbank — navigates */}
         {!hideQb && (
-      <Circle tint="#dff0e4" color="#147a52" glow="0 6px 14px rgba(20,122,82,.18)" label="Qbank" selected={false} onClick={(e) => launchBloom(e, '#147a8a', 'qbank')}>
+        <Circle tint="#dff0e4" color="#147a52" glow="0 6px 14px rgba(20,122,82,.18)" label="Qbank" selected={false} onClick={(e) => launchBloom(e, '#147a8a', 'qbank')}>
           <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><rect x="7" y="12" width="3" height="6" /><rect x="12" y="8" width="3" height="10" /><rect x="17" y="14" width="3" height="4" /></svg>
         </Circle>
         )}
@@ -538,7 +543,7 @@ function QuickRow({ user, nav, onGreen }) {
       })()}
 
       {stOpen && (() => {
-      const best = Math.max(user?.longest_streak || 0, streak);
+        const best = Math.max(user?.longest_streak || 0, streak);
         const line = !studiedToday
           ? 'One tap keeps the flame alive.'
           : streak >= best && streak > 1
@@ -591,7 +596,8 @@ function QuickRow({ user, nav, onGreen }) {
             <div style={{
               position: 'absolute', inset: 0, background: bloom.color,
               clipPath: clip, WebkitClipPath: clip,
-              transition: 'clip-path .42s cubic-bezier(0.22,1,0.36,1), -webkit-clip-path .42s cubic-bezier(0.22,1,0.36,1)',
+              willChange: 'clip-path',
+              transition: 'clip-path .55s cubic-bezier(0.16, 1, 0.3, 1), -webkit-clip-path .55s cubic-bezier(0.16, 1, 0.3, 1)',
               display: 'flex', flexDirection: 'column',
             }}>
               {/* coloured top bar — covers the real top bar, blends with status strip above */}
@@ -604,7 +610,7 @@ function QuickRow({ user, nav, onGreen }) {
               </div>
 
               {/* coloured hero */}
-              <div style={{ flexShrink: 0, background: bloom.color, color: '#fff', textAlign: 'center', padding: '14px 24px 36px', opacity: bloomGrown ? 1 : 0, transition: 'opacity .3s ease .16s' }}>
+              <div style={{ flexShrink: 0, background: bloom.color, color: '#fff', textAlign: 'center', padding: '14px 24px 36px', opacity: bloomGrown ? 1 : 0, transform: bloomGrown ? 'translateY(0)' : 'translateY(8px)', transition: 'opacity .4s ease .22s, transform .5s cubic-bezier(0.16,1,0.3,1) .22s' }}>
                 {bloom.key === 'countdown' && (
                   <>
                     <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.5, textTransform: 'uppercase', opacity: 0.85 }}>{user?.exam || 'Your exam'}</div>
@@ -642,7 +648,7 @@ function QuickRow({ user, nav, onGreen }) {
               </div>
 
               {/* light sheet */}
-              <div style={{ flex: 1, background: 'var(--paper)', borderRadius: '24px 24px 0 0', marginTop: -16, overflowY: 'auto', WebkitOverflowScrolling: 'touch', opacity: bloomGrown ? 1 : 0, transition: 'opacity .3s ease .18s' }}>
+              <div style={{ flex: 1, background: 'var(--paper)', borderRadius: '24px 24px 0 0', marginTop: -16, overflowY: 'auto', WebkitOverflowScrolling: 'touch', opacity: bloomGrown ? 1 : 0, transform: bloomGrown ? 'translateY(0)' : 'translateY(14px)', transition: 'opacity .42s ease .26s, transform .55s cubic-bezier(0.16,1,0.3,1) .26s' }}>
                 {bloom.key === 'countdown' && (
                   <div style={{ textAlign: 'center', padding: '26px 22px' }}>
                     <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 14 }}>{examTs ? new Date(user.exam_date).toDateString() : 'Add your exam date in Profile.'}</div>
@@ -880,7 +886,7 @@ function QbankCard({ nav }) {
   }, []);
 
   const subtitle = stats.empty
-    ? 'Start tracking your question progress'
+  ? 'Start tracking your question progress'
     : `${stats.done} done · ${stats.acc}% accuracy${stats.banks > 1 ? ` · ${stats.banks} banks` : ''}`;
 
   return (
