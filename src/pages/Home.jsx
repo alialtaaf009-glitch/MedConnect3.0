@@ -270,6 +270,7 @@ function ExploreBrowse() {
 
 // Quick row: Qbank · Flashcards · Countdown · Streak (circles). Stats open inline; tools navigate.
 function QuickRow({ user, nav, onGreen }) {
+  const { enterImmersive, exitImmersive } = useBack();
   // user-hideable tiles (Profile -> Home screen)
   const hideCd = localStorage.getItem('hide_countdown') === '1';
   const hideSt = localStorage.getItem('hide_streak') === '1';
@@ -429,23 +430,25 @@ function QuickRow({ user, nav, onGreen }) {
     setBloom({ color, origin: { x, y }, key });
     setBloomGrown(false);
     if (setBar) setBar(color); // colour the system bars to match
+    if (enterImmersive) enterImmersive(); // hide the app's top bar + nav
     requestAnimationFrame(() => requestAnimationFrame(() => setBloomGrown(true)));
   };
   const closeBloom = () => {
     setBloomGrown(false);
     if (setBar) setBar(null); // restore system bars to theme colour
+    if (exitImmersive) exitImmersive(); // bring the top bar + nav back
     setTimeout(() => setBloom(null), 340);
   };
-  // safety: whenever there's no open bloom, ensure the system bar is reset
+  // safety: whenever there's no open bloom, ensure the system bar + immersive are reset
   useEffect(() => {
-    if (!bloom && setBar) setBar(null);
-    return () => { if (setBar) setBar(null); };
-  }, [bloom, setBar]);
+    if (!bloom) { if (setBar) setBar(null); if (exitImmersive) exitImmersive(); }
+    return () => { if (setBar) setBar(null); if (exitImmersive) exitImmersive(); };
+  }, [bloom, setBar, exitImmersive]);
 
   return (
     <>
       <style>{`
-      @keyframes qBadge{0%{transform:scale(0)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
+        @keyframes qBadge{0%{transform:scale(0)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
         .qi-press:active .qi-shape{transform:scale(.88)}
       `}</style>
 
@@ -494,7 +497,7 @@ function QuickRow({ user, nav, onGreen }) {
 
 
       {cdOpen && user?.exam_date && (() => {
-        const examTs = new Date(user.exam_date).getTime();
+      const examTs = new Date(user.exam_date).getTime();
         const diff = Math.max(0, examTs - nowTs);
         const totSec = Math.floor(diff / 1000);
         const totDays = Math.floor(totSec / 86400);
@@ -591,9 +594,9 @@ function QuickRow({ user, nav, onGreen }) {
               display: 'flex', flexDirection: 'column',
             }}>
               {/* coloured top bar — covers the real top bar, blends with status strip above */}
-              <div style={{ flexShrink: 0, background: bloom.color, color: '#fff', padding: 'calc(env(safe-area-inset-top,0px) + 12px) 14px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', opacity: bloomGrown ? 1 : 0, transition: 'opacity .25s ease .12s' }}>
-                <button onClick={closeBloom} aria-label="Back" style={{ background: 'rgba(255,255,255,.18)', border: 'none', width: 34, height: 34, borderRadius: '50%', display: 'grid', placeItems: 'center', cursor: 'pointer', color: '#fff', flexShrink: 0 }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+              <div style={{ flexShrink: 0, background: bloom.color, color: '#fff', padding: 'calc(env(safe-area-inset-top,0px) + 16px) 16px 14px', minHeight: 'calc(env(safe-area-inset-top,0px) + 60px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <button onClick={closeBloom} aria-label="Back" style={{ background: 'rgba(255,255,255,.22)', border: 'none', width: 38, height: 38, borderRadius: '50%', display: 'grid', placeItems: 'center', cursor: 'pointer', color: '#fff', flexShrink: 0, padding: 0 }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
                 </button>
                 <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 16, fontWeight: 900 }}>{title}</div>
                 <span style={{ width: 34, flexShrink: 0 }} />
