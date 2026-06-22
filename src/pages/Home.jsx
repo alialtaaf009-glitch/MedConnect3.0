@@ -360,29 +360,46 @@ function QuickRow({ user, nav, onGreen }) {
 
   // ---- Qbank summary (folded in from QbankCard) ----
   const [qStats, setQStats] = useState({ loading: true });
+  const [qTopics, setQTopics] = useState([]); // top topics for the bloom pill-list
   useEffect(() => {
     let active = true;
     api.qbankGet().then((d) => {
       if (!active) return;
       const rows = d.progress || [];
-      if (!rows.length) { setQStats({ empty: true }); return; }
+      if (!rows.length) { setQStats({ empty: true }); setQTopics([]); return; }
       const t = rows.reduce((a, r) => ({ done: a.done + (r.done || 0), correct: a.correct + (r.correct || 0) }), { done: 0, correct: 0 });
       const acc = t.done ? Math.round((t.correct / t.done) * 100) : 0;
-      setQStats({ done: t.done, acc });
-    }).catch(() => { if (active) setQStats({ empty: true }); });
+      const banks = [...new Set(rows.map((r) => r.bank))].length;
+      setQStats({ done: t.done, acc, banks });
+      // top topics by accuracy (done > 0), up to 5
+      const tops = rows.filter((r) => (r.done || 0) > 0)
+        .map((r) => ({ topic: r.topic, pct: Math.round(((r.correct || 0) / (r.done || 1)) * 100) }))
+        .sort((a, b) => b.pct - a.pct).slice(0, 5);
+      setQTopics(tops);
+    }).catch(() => { if (active) { setQStats({ empty: true }); setQTopics([]); } });
     return () => { active = false; };
   }, []);
   const qSub = qStats.loading ? 'Loading…' : qStats.empty ? 'Start tracking your progress' : `${qStats.done} done · ${qStats.acc}% accuracy`;
 
-  // ---- Flashcards due (best-effort; no badge if endpoint absent) ----
+  // ---- Flashcards: decks + due totals for the bloom summary ----
   const [due, setDue] = useState(null);
+  const [decks, setDecks] = useState(null); // null = loading, [] = none
   useEffect(() => {
     let active = true;
-    if (typeof api.flashcardsDue === 'function') {
-      api.flashcardsDue().then((d) => { if (active) setDue(d?.due ?? d?.count ?? 0); }).catch(() => { if (active) setDue(0); });
-    } else { setDue(0); }
+    api.decksGet().then((d) => {
+      if (!active) return;
+      const list = d.decks || [];
+      setDecks(list);
+      const totalDue = list.reduce((a, x) => a + (x.due_count || 0), 0);
+      setDue(totalDue);
+    }).catch(() => { if (active) { setDecks([]); setDue(0); } });
     return () => { active = false; };
   }, []);
+  const deckStats = decks ? {
+    decks: decks.length,
+    cards: decks.reduce((a, x) => a + (x.card_count || 0), 0),
+    due: decks.reduce((a, x) => a + (x.due_count || 0), 0),
+  } : null;
 
   // shared circle wrapper
   const Circle = ({ tint, color, glow, onClick, badge, selected, children, label }) => (
@@ -428,7 +445,7 @@ function QuickRow({ user, nav, onGreen }) {
   return (
     <>
       <style>{`
-        @keyframes qBadge{0%{transform:scale(0)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
+      @keyframes qBadge{0%{transform:scale(0)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
         .qi-press:active .qi-shape{transform:scale(.88)}
       `}</style>
 
@@ -436,14 +453,14 @@ function QuickRow({ user, nav, onGreen }) {
       <div style={{ display: 'flex', gap: 10, margin: '2px 0 4px', paddingTop: 8 }}>
         {/* Qbank — navigates */}
         {!hideQb && (
-        <Circle tint="#dff0e4" color="#147a52" glow="0 6px 14px rgba(20,122,82,.18)" label="Qbank" selected={false} onClick={() => nav('/qbank')}>
+        <Circle tint="#dff0e4" color="#147a52" glow="0 6px 14px rgba(20,122,82,.18)" label="Qbank" selected={false} onClick={(e) => launchBloom(e, '#147a8a', 'qbank')}>
           <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><rect x="7" y="12" width="3" height="6" /><rect x="12" y="8" width="3" height="10" /><rect x="17" y="14" width="3" height="4" /></svg>
         </Circle>
         )}
 
         {/* Flashcards — navigates */}
         {!hideFc && (
-        <Circle tint="#fbeccb" color="#c08a1e" glow="0 6px 14px rgba(192,138,30,.20)" label="Flashcards" selected={false} badge={due ? due : null} onClick={() => nav('/flashcards')}>
+        <Circle tint="#fbeccb" color="#c08a1e" glow="0 6px 14px rgba(192,138,30,.20)" label="Flashcards" selected={false} badge={due ? due : null} onClick={(e) => launchBloom(e, '#c08a1e', 'flashcards')}>
           <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="6" width="13" height="12" rx="2" /><path d="M7 10h5M7 13.5h3" /><path d="M20 8.5v8a2 2 0 0 1-2 2H8.5" /></svg>
         </Circle>
         )}
@@ -561,7 +578,7 @@ function QuickRow({ user, nav, onGreen }) {
         const examTs = user?.exam_date ? new Date(user.exam_date).getTime() : null;
         const dLeft = examTs ? Math.ceil((examTs - Date.now()) / 86400000) : null;
         const best = Math.max(user?.longest_streak || 0, streak);
-        const title = bloom.key === 'countdown' ? 'Countdown' : 'Study Streak';
+        const title = bloom.key === 'countdown' ? 'Countdown' : bloom.key === 'streak' ? 'Study Streak' : bloom.key === 'qbank' ? 'Qbank Tracker' : 'Flashcards';
         const ox = bloom.origin.x, oy = bloom.origin.y;
         const maxR = Math.ceil(Math.hypot(Math.max(ox, window.innerWidth - ox), Math.max(oy, window.innerHeight - oy)) * 1.05);
         const clip = bloomGrown ? `circle(${maxR}px at ${ox}px ${oy}px)` : `circle(34px at ${ox}px ${oy}px)`;
@@ -598,6 +615,26 @@ function QuickRow({ user, nav, onGreen }) {
                     <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', opacity: 0.85 }}>day{streak === 1 ? '' : 's'} in a row 🔥</div>
                   </>
                 )}
+                {bloom.key === 'qbank' && (
+                  <>
+                    <div style={{ fontSize: 30, marginBottom: 4 }}>📊</div>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 26 }}>
+                      <div><div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 30, fontWeight: 900, lineHeight: 1 }}>{qStats.empty || qStats.loading ? 0 : qStats.done}</div><div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.85, marginTop: 3 }}>done</div></div>
+                      <div><div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 30, fontWeight: 900, lineHeight: 1 }}>{qStats.empty || qStats.loading ? 0 : qStats.acc}%</div><div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.85, marginTop: 3 }}>accuracy</div></div>
+                      <div><div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 30, fontWeight: 900, lineHeight: 1 }}>{qStats.banks || 0}</div><div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.85, marginTop: 3 }}>banks</div></div>
+                    </div>
+                  </>
+                )}
+                {bloom.key === 'flashcards' && (
+                  <>
+                    <div style={{ fontSize: 30, marginBottom: 4 }}>🗂️</div>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 26 }}>
+                      <div><div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 30, fontWeight: 900, lineHeight: 1 }}>{deckStats?.decks ?? 0}</div><div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.85, marginTop: 3 }}>decks</div></div>
+                      <div><div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 30, fontWeight: 900, lineHeight: 1 }}>{deckStats?.cards ?? 0}</div><div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.85, marginTop: 3 }}>cards</div></div>
+                      <div><div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 30, fontWeight: 900, lineHeight: 1 }}>{deckStats?.due ?? 0}</div><div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.85, marginTop: 3 }}>due</div></div>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* light sheet */}
@@ -628,6 +665,59 @@ function QuickRow({ user, nav, onGreen }) {
                       <button className="btn btn-cta" style={{ maxWidth: 220, margin: '0 auto' }} disabled={marking} onClick={markStudy}>{marking ? '…' : 'Mark today ✓'}</button>
                     )}
                     <button className="btn ghost" style={{ marginTop: 10, maxWidth: 220, margin: '10px auto 0' }} onClick={closeBloom}>Keep going</button>
+                  </div>
+                )}
+                {bloom.key === 'qbank' && (
+                  <div style={{ padding: '20px 16px' }}>
+                    {qStats.empty ? (
+                      <div style={{ textAlign: 'center', padding: '24px 16px' }}>
+                        <div style={{ fontSize: 38, marginBottom: 10 }}>📊</div>
+                        <p style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 18 }}>No progress tracked yet. Open the tracker to add your first topic.</p>
+                      </div>
+                    ) : (
+                      <>
+                        <h3 style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--muted)', marginBottom: 10 }}>Top topics</h3>
+                        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 18, overflow: 'hidden', marginBottom: 16 }}>
+                          {qTopics.map((t, i) => {
+                            const col = t.pct >= 70 ? '#2c6a55' : t.pct >= 50 ? '#b98a2e' : '#c0392b';
+                            return (
+                              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 15px', borderTop: i === 0 ? 'none' : '1px solid var(--line)' }}>
+                                <span style={{ flex: 1, fontSize: 13.5, fontWeight: 700, color: 'var(--ink)' }}>{t.topic}</span>
+                                <span style={{ width: 54, height: 6, background: 'var(--paper-2)', borderRadius: 99, overflow: 'hidden' }}><span style={{ display: 'block', height: '100%', borderRadius: 99, width: `${t.pct}%`, background: col }} /></span>
+                                <span style={{ fontSize: 12.5, fontWeight: 800, color: col, minWidth: 34, textAlign: 'right' }}>{t.pct}%</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
+                    <button onClick={() => { closeBloom(); setTimeout(() => nav('/qbank'), 300); }} style={{ width: '100%', border: 'none', borderRadius: 999, padding: '14px', fontSize: 14, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', color: '#fff', background: '#147a8a' }}>Open full tracker →</button>
+                  </div>
+                )}
+                {bloom.key === 'flashcards' && (
+                  <div style={{ padding: '20px 16px' }}>
+                    {decks && decks.length === 0 ? (
+                      <div style={{ textAlign: 'center', padding: '24px 16px' }}>
+                        <div style={{ fontSize: 38, marginBottom: 10 }}>🗂️</div>
+                        <p style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 18 }}>No decks yet. Make your first one to study with spaced repetition.</p>
+                        <button onClick={() => { closeBloom(); setTimeout(() => nav('/flashcards'), 300); }} style={{ width: '100%', border: 'none', borderRadius: 999, padding: '14px', fontSize: 14, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', color: '#fff', background: '#c08a1e' }}>+ Create your first deck</button>
+                      </div>
+                    ) : (
+                      <>
+                        <h3 style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--muted)', marginBottom: 10 }}>Your decks</h3>
+                        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 18, overflow: 'hidden', marginBottom: 16 }}>
+                          {(decks || []).slice(0, 6).map((d, i) => (
+                            <div key={d.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '13px 15px', borderTop: i === 0 ? 'none' : '1px solid var(--line)' }}>
+                              <span style={{ flex: 1, fontSize: 13.5, fontWeight: 700, color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.name}</span>
+                              {d.due_count > 0
+                                ? <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--rust)', background: '#fbe4df', padding: '2px 9px', borderRadius: 99, flexShrink: 0 }}>{d.due_count} due</span>
+                                : <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 600, flexShrink: 0 }}>{d.card_count > 0 ? 'reviewed ✓' : 'empty'}</span>}
+                            </div>
+                          ))}
+                        </div>
+                        <button onClick={() => { closeBloom(); setTimeout(() => nav('/flashcards'), 300); }} style={{ width: '100%', border: 'none', borderRadius: 999, padding: '14px', fontSize: 14, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', color: '#fff', background: '#c08a1e' }}>Open all decks →</button>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
