@@ -218,7 +218,7 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'country' && (
-      <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
         {orderedCountries.map(([flag, country, exams], idx) => (
         <div key={country} style={{ borderTop: idx === 0 ? 'none' : '1px solid var(--line)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '11px 18px', cursor: 'pointer' }}
@@ -375,7 +375,7 @@ function QuickRow({ user, nav, onGreen }) {
       const banks = [...new Set(rows.map((r) => r.bank))].length;
       setQStats({ done: t.done, total: t.total, acc, banks });
       const tops = rows.filter((r) => (r.done || 0) > 0)
-        .map((r) => ({ topic: r.topic, pct: Math.round(((r.correct || 0) / (r.done || 1)) * 100) }))
+        .map((r) => ({ topic: r.topic, pct: Math.round(((r.correct || 0) / (r.done || 1)) * 100), done: r.done || 0, total: r.total || 0, correct: r.correct || 0 }))
         .sort((a, b) => b.pct - a.pct).slice(0, 5);
       setQTopics(tops);
     }).catch(() => { setQStats({ empty: true }); setQTopics([]); });
@@ -424,6 +424,16 @@ function QuickRow({ user, nav, onGreen }) {
       loadDecks();
     } catch (e) {} finally { setSavingDeck(false); }
   };
+  // expand-a-deck + delete (inline in the Flashcards bloom)
+  const [expandedDeck, setExpandedDeck] = useState(null); // deck id
+  const [confirmDelDeck, setConfirmDelDeck] = useState(null); // deck id
+  const [deletingDeck, setDeletingDeck] = useState(false);
+  const removeDeck = async (id) => {
+    if (deletingDeck) return;
+    setDeletingDeck(true);
+    try { await api.deckDelete(id); setConfirmDelDeck(null); setExpandedDeck(null); loadDecks(); }
+    catch (e) {} finally { setDeletingDeck(false); }
+  };
   const deckStats = decks ? {
     decks: decks.length,
     cards: decks.reduce((a, x) => a + (x.card_count || 0), 0),
@@ -450,6 +460,8 @@ function QuickRow({ user, nav, onGreen }) {
 
   // ---- circle bloom: grows from the tapped circle into a full-screen, half-and-half coloured panel ----
   const { setBar } = useTheme();
+  const MORALE = ['Small steps every day add up to big results.', 'Consistency beats intensity.', 'You are closer than you were yesterday.', 'Trust the process — keep showing up.', 'Progress, not perfection.', 'Every question makes you sharper.', 'Discipline today, freedom tomorrow.'];
+  const [moraleLine] = useState(() => MORALE[Math.floor(Math.random() * MORALE.length)]);
   const [bloom, setBloom] = useState(null); // { color, origin:{x,y}, key, navTo } | null
   const [bloomGrown, setBloomGrown] = useState(false);
   const launchBloom = (e, color, key) => {
@@ -465,7 +477,7 @@ function QuickRow({ user, nav, onGreen }) {
     setBloomGrown(false);
     if (setBar) setBar(null); // restore system bars to theme colour
     if (exitImmersive) exitImmersive(); // bring the top bar + nav back
-    setTimeout(() => setBloom(null), 480);
+    setTimeout(() => setBloom(null), 380);
   };
   // safety: whenever there's no open bloom, ensure the system bar + immersive are reset
   useEffect(() => {
@@ -503,7 +515,7 @@ function QuickRow({ user, nav, onGreen }) {
 
         {/* Countdown — opens inline detail */}
         {!hideCd && daysLeft !== null && (
-          <Circle tint="transparent" color="#1f9bb8" glow="none" label="Countdown" onClick={(e) => launchBloom(e, '#147a8a', 'countdown')}>
+          <Circle tint="transparent" color="#1f9bb8" glow="none" label="Countdown" onClick={(e) => launchBloom(e, '#4a5bb8', 'countdown')}>
             <svg width="64" height="64" viewBox="0 0 64 64" style={{ position: 'absolute', inset: 0, transform: 'rotate(-90deg)' }}>
               <circle cx="32" cy="32" r={R2} fill="#dceff3" />
               <circle cx="32" cy="32" r={R2} fill="none" stroke="#c2e2e9" strokeWidth="5" />
@@ -615,16 +627,14 @@ function QuickRow({ user, nav, onGreen }) {
         const dLeft = examTs ? Math.ceil((examTs - Date.now()) / 86400000) : null;
         const best = Math.max(user?.longest_streak || 0, streak);
         const title = bloom.key === 'countdown' ? 'Countdown' : bloom.key === 'streak' ? 'Study Streak' : bloom.key === 'qbank' ? 'Qbank Tracker' : 'Flashcards';
-        const ox = bloom.origin.x, oy = bloom.origin.y;
-        const maxR = Math.ceil(Math.hypot(Math.max(ox, window.innerWidth - ox), Math.max(oy, window.innerHeight - oy)) * 1.05);
-        const clip = bloomGrown ? `circle(${maxR}px at ${ox}px ${oy}px)` : `circle(34px at ${ox}px ${oy}px)`;
         return createPortal((
-          <div style={{ position: 'fixed', inset: 0, zIndex: 5000, overflow: 'hidden', pointerEvents: bloomGrown ? 'auto' : 'none' }}>
+          <div style={{ position: 'fixed', inset: 0, zIndex: 5000, overflow: 'hidden', pointerEvents: bloomGrown ? 'auto' : 'none', opacity: bloomGrown ? 1 : 0, transition: 'opacity .32s ease' }}>
             <div style={{
               position: 'absolute', inset: 0, background: bloom.color,
-              clipPath: clip, WebkitClipPath: clip,
-              willChange: 'clip-path',
-              transition: 'clip-path .55s cubic-bezier(0.16, 1, 0.3, 1), -webkit-clip-path .55s cubic-bezier(0.16, 1, 0.3, 1)',
+              transformOrigin: 'center',
+              transform: bloomGrown ? 'scale(1)' : 'scale(0.96)',
+              willChange: 'transform, opacity',
+              transition: 'transform .42s cubic-bezier(0.16, 1, 0.3, 1)',
               display: 'flex', flexDirection: 'column',
             }}>
               {/* coloured top bar — covers the real top bar, blends with status strip above */}
@@ -637,7 +647,7 @@ function QuickRow({ user, nav, onGreen }) {
               </div>
 
               {/* coloured hero */}
-              <div style={{ flexShrink: 0, background: bloom.color, color: '#fff', textAlign: 'center', padding: '14px 24px 36px', opacity: bloomGrown ? 1 : 0, transform: bloomGrown ? 'translateY(0)' : 'translateY(8px)', transition: 'opacity .4s ease .22s, transform .5s cubic-bezier(0.16,1,0.3,1) .22s' }}>
+              <div style={{ flexShrink: 0, background: bloom.color, color: '#fff', textAlign: 'center', padding: '14px 24px 36px', opacity: bloomGrown ? 1 : 0, transition: 'opacity .3s ease .08s' }}>
                 {bloom.key === 'countdown' && (
                   <>
                     <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.5, textTransform: 'uppercase', opacity: 0.85 }}>{user?.exam || 'Your exam'}</div>
@@ -674,11 +684,12 @@ function QuickRow({ user, nav, onGreen }) {
               </div>
 
               {/* light sheet */}
-              <div style={{ flex: 1, background: 'var(--paper)', borderRadius: '24px 24px 0 0', marginTop: -16, overflowY: 'auto', WebkitOverflowScrolling: 'touch', opacity: bloomGrown ? 1 : 0, transform: bloomGrown ? 'translateY(0)' : 'translateY(14px)', transition: 'opacity .42s ease .26s, transform .55s cubic-bezier(0.16,1,0.3,1) .26s' }}>
+              <div style={{ flex: 1, background: 'var(--paper)', borderRadius: '24px 24px 0 0', marginTop: -16, overflowY: 'auto', WebkitOverflowScrolling: 'touch', opacity: bloomGrown ? 1 : 0, transition: 'opacity .3s ease .1s' }}>
                 {bloom.key === 'countdown' && (
                   <div style={{ textAlign: 'center', padding: '26px 22px' }}>
                     <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 14 }}>{examTs ? new Date(user.exam_date).toDateString() : 'Add your exam date in Profile.'}</div>
                     <div style={{ display: 'inline-block', fontSize: 13, fontWeight: 700, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 999, padding: '7px 16px' }}>{coachLine(dLeft ?? 999)}</div>
+                    <p style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 15, lineHeight: 1.5, color: 'var(--ink)', fontStyle: 'italic', margin: '18px auto 0', maxWidth: 260 }}>"{moraleLine}"</p>
                     <button className="btn ghost" style={{ marginTop: 20, maxWidth: 220, margin: '20px auto 0' }} onClick={closeBloom}>Back to it</button>
                   </div>
                 )}
@@ -701,6 +712,7 @@ function QuickRow({ user, nav, onGreen }) {
                       <button className="btn btn-cta" style={{ maxWidth: 220, margin: '0 auto' }} disabled={marking} onClick={markStudy}>{marking ? '…' : 'Mark today ✓'}</button>
                     )}
                     <button className="btn ghost" style={{ marginTop: 10, maxWidth: 220, margin: '10px auto 0' }} onClick={closeBloom}>Keep going</button>
+                    <p style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 15, lineHeight: 1.5, color: 'var(--ink)', fontStyle: 'italic', margin: '18px auto 0', maxWidth: 260 }}>"{moraleLine}"</p>
                   </div>
                 )}
                 {bloom.key === 'qbank' && (
@@ -717,10 +729,13 @@ function QuickRow({ user, nav, onGreen }) {
                           {qTopics.map((t, i) => {
                             const col = t.pct >= 70 ? '#2c6a55' : t.pct >= 50 ? '#b98a2e' : '#c0392b';
                             return (
-                              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 15px', borderTop: i === 0 ? 'none' : '1px solid var(--line)' }}>
-                                <span style={{ flex: 1, fontSize: 13.5, fontWeight: 700, color: 'var(--ink)' }}>{t.topic}</span>
-                                <span style={{ width: 54, height: 6, background: 'var(--paper-2)', borderRadius: 99, overflow: 'hidden' }}><span style={{ display: 'block', height: '100%', borderRadius: 99, width: `${t.pct}%`, background: col }} /></span>
-                                <span style={{ fontSize: 12.5, fontWeight: 800, color: col, minWidth: 34, textAlign: 'right' }}>{t.pct}%</span>
+                              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '13px 15px', borderTop: i === 0 ? 'none' : '1px solid var(--line)' }}>
+                                <span style={{ flex: 1, fontSize: 13.5, fontWeight: 700, color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.topic}</span>
+                                <span style={{ width: 44, height: 6, background: 'var(--paper-2)', borderRadius: 99, overflow: 'hidden', flexShrink: 0 }}><span style={{ display: 'block', height: '100%', borderRadius: 99, width: `${t.pct}%`, background: col }} /></span>
+                                <span style={{ fontSize: 12.5, fontWeight: 800, color: col, minWidth: 32, textAlign: 'right' }}>{t.pct}%</span>
+                                <button onClick={() => { setTDraft({ topic: t.topic, done: String(t.done), total: String(t.total), correct: String(t.correct) }); setAddingTopic(true); }} aria-label="Edit topic" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--muted)', flexShrink: 0, display: 'grid', placeItems: 'center' }}>
+                                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z" /></svg>
+                                </button>
                               </div>
                             );
                           })}
@@ -731,13 +746,13 @@ function QuickRow({ user, nav, onGreen }) {
                       <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 18, padding: 14 }}>
                         <input value={tDraft.topic} onChange={(e) => setTDraft({ ...tDraft, topic: e.target.value })} placeholder="Topic name" autoFocus
                           style={{ width: '100%', padding: '11px 14px', borderRadius: 999, border: '1.5px solid var(--line)', fontSize: 14, fontFamily: 'inherit', background: 'var(--paper)', color: 'var(--ink)', marginBottom: 9 }} />
-                        <div style={{ display: 'flex', gap: 8, marginBottom: 9 }}>
+                        <div style={{ display: 'flex', gap: 7, marginBottom: 9 }}>
                           <input value={tDraft.done} onChange={(e) => setTDraft({ ...tDraft, done: e.target.value })} placeholder="Done" inputMode="numeric"
-                            style={{ flex: 1, padding: '11px 12px', borderRadius: 999, border: '1.5px solid var(--line)', fontSize: 14, fontFamily: 'inherit', background: 'var(--paper)', color: 'var(--ink)', textAlign: 'center' }} />
+                            style={{ width: '33%', minWidth: 0, padding: '11px 6px', borderRadius: 999, border: '1.5px solid var(--line)', fontSize: 13, fontFamily: 'inherit', background: 'var(--paper)', color: 'var(--ink)', textAlign: 'center' }} />
                           <input value={tDraft.total} onChange={(e) => setTDraft({ ...tDraft, total: e.target.value })} placeholder="Total" inputMode="numeric"
-                            style={{ flex: 1, padding: '11px 12px', borderRadius: 999, border: '1.5px solid var(--line)', fontSize: 14, fontFamily: 'inherit', background: 'var(--paper)', color: 'var(--ink)', textAlign: 'center' }} />
+                            style={{ width: '33%', minWidth: 0, padding: '11px 6px', borderRadius: 999, border: '1.5px solid var(--line)', fontSize: 13, fontFamily: 'inherit', background: 'var(--paper)', color: 'var(--ink)', textAlign: 'center' }} />
                           <input value={tDraft.correct} onChange={(e) => setTDraft({ ...tDraft, correct: e.target.value })} placeholder="Correct" inputMode="numeric"
-                            style={{ flex: 1, padding: '11px 12px', borderRadius: 999, border: '1.5px solid var(--line)', fontSize: 14, fontFamily: 'inherit', background: 'var(--paper)', color: 'var(--ink)', textAlign: 'center' }} />
+                            style={{ width: '34%', minWidth: 0, padding: '11px 6px', borderRadius: 999, border: '1.5px solid var(--line)', fontSize: 13, fontFamily: 'inherit', background: 'var(--paper)', color: 'var(--ink)', textAlign: 'center' }} />
                         </div>
                         <div style={{ display: 'flex', gap: 8 }}>
                           <button onClick={() => { setAddingTopic(false); setTDraft({ topic: '', done: '', total: '', correct: '' }); }} style={{ flex: 1, border: '1.5px solid var(--line)', background: 'var(--card)', color: 'var(--muted)', borderRadius: 999, padding: '11px', fontSize: 13, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>Cancel</button>
@@ -745,7 +760,7 @@ function QuickRow({ user, nav, onGreen }) {
                         </div>
                       </div>
                     ) : (
-                      <button onClick={() => setAddingTopic(true)} style={{ width: '100%', border: 'none', borderRadius: 999, padding: '14px', fontSize: 14, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', color: '#fff', background: '#147a8a' }}>+ Add topic</button>
+                    <button onClick={() => setAddingTopic(true)} style={{ width: '100%', border: 'none', borderRadius: 999, padding: '14px', fontSize: 14, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', color: '#fff', background: '#147a8a' }}>+ Add topic</button>
                     )}
                   </div>
                 )}
@@ -775,14 +790,39 @@ function QuickRow({ user, nav, onGreen }) {
                           </div>
                         ) : (
                           <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 18, overflow: 'hidden' }}>
-                            {(decks || []).slice(0, 8).map((d, i) => (
-                              <div key={d.id} onClick={() => { closeBloom(); setTimeout(() => nav('/flashcards'), 300); }} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '13px 15px', borderTop: i === 0 ? 'none' : '1px solid var(--line)', cursor: 'pointer' }}>
-                                <span style={{ flex: 1, fontSize: 13.5, fontWeight: 700, color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.name}</span>
-                                {d.due_count > 0
-                                  ? <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--rust)', background: '#fbe4df', padding: '2px 9px', borderRadius: 99, flexShrink: 0 }}>{d.due_count} due</span>
-                                  : <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 600, flexShrink: 0 }}>{d.card_count > 0 ? 'reviewed ✓' : 'empty'}</span>}
+                            {(decks || []).slice(0, 12).map((d, i) => {
+                              const open = expandedDeck === d.id;
+                              return (
+                              <div key={d.id} style={{ borderTop: i === 0 ? 'none' : '1px solid var(--line)' }}>
+                                <div onClick={() => { setConfirmDelDeck(null); setExpandedDeck(open ? null : d.id); }} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '13px 15px', cursor: 'pointer' }}>
+                                  <span style={{ flex: 1, fontSize: 13.5, fontWeight: 700, color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.name}</span>
+                                  {d.due_count > 0
+                                    ? <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--rust)', background: '#fbe4df', padding: '2px 9px', borderRadius: 99, flexShrink: 0 }}>{d.due_count} due</span>
+                                    : <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 600, flexShrink: 0 }}>{d.card_count > 0 ? 'reviewed ✓' : 'empty'}</span>}
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform .2s ease' }}><path d="M6 9l6 6 6-6" /></svg>
+                                </div>
+                                {open && (
+                                  <div style={{ padding: '0 15px 14px' }}>
+                                    <div style={{ fontSize: 11.5, color: 'var(--muted)', marginBottom: 10 }}>{d.card_count || 0} card{d.card_count === 1 ? '' : 's'}{d.exam_tag ? ` · ${d.exam_tag}` : ''}</div>
+                                    {confirmDelDeck === d.id ? (
+                                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                        <span style={{ flex: 1, fontSize: 12, color: 'var(--rust)', fontWeight: 600 }}>Delete this deck?</span>
+                                        <button onClick={() => setConfirmDelDeck(null)} style={{ border: '1.5px solid var(--line)', background: 'var(--card)', color: 'var(--muted)', borderRadius: 999, padding: '7px 14px', fontSize: 12, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>No</button>
+                                        <button onClick={() => removeDeck(d.id)} disabled={deletingDeck} style={{ border: 'none', background: 'var(--rust)', color: '#fff', borderRadius: 999, padding: '7px 14px', fontSize: 12, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer' }}>{deletingDeck ? '…' : 'Delete'}</button>
+                                      </div>
+                                    ) : (
+                                      <div style={{ display: 'flex', gap: 8 }}>
+                                        <button onClick={() => { closeBloom(); setTimeout(() => nav('/flashcards'), 300); }} style={{ flex: 1, border: 'none', background: '#c08a1e', color: '#fff', borderRadius: 999, padding: '10px', fontSize: 13, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer' }}>{d.due_count > 0 ? `Review ${d.due_count} due` : 'Study deck'}</button>
+                                        <button onClick={() => setConfirmDelDeck(d.id)} aria-label="Delete deck" style={{ flexShrink: 0, width: 40, border: '1.5px solid var(--line)', background: 'var(--card)', color: 'var(--rust)', borderRadius: 999, display: 'grid', placeItems: 'center', cursor: 'pointer' }}>
+                                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg>
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
                               </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         )}
                       </>
