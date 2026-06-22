@@ -6,21 +6,21 @@ import { examColor } from '../lib/examColors.js';
 
 // Personal flashcard decks — make, study (light spaced repetition), manage.
 // Sharing & export are deferred (see ANKI-TODO-LATER).
-export default function Flashcards({ inBloom = false }) {
+export default function Flashcards() {
   const { user } = useAuth();
   const [view, setView] = useState('list'); // 'list' | 'deck' | 'study'
   const [activeDeck, setActiveDeck] = useState(null);
 
   return (
-    <div className="screen" style={inBloom ? { padding: '18px 16px 30px', animation: 'none' } : undefined}>
-      {view === 'list' && <DeckList user={user} inBloom={inBloom} onOpen={(d) => { setActiveDeck(d); setView('deck'); }} onStudy={(d) => { setActiveDeck(d); setView('study'); }} />}
+    <div className="screen">
+      {view === 'list' && <DeckList user={user} onOpen={(d) => { setActiveDeck(d); setView('deck'); }} onStudy={(d) => { setActiveDeck(d); setView('study'); }} />}
       {view === 'deck' && <DeckDetail deck={activeDeck} onBack={() => setView('list')} onStudy={() => setView('study')} />}
       {view === 'study' && <StudyMode deck={activeDeck} onDone={() => setView('list')} />}
     </div>
   );
 }
 
-function DeckList({ user, onOpen, onStudy, inBloom }) {
+function DeckList({ user, onOpen, onStudy }) {
   const [decks, setDecks] = useState(null);
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState('');
@@ -40,8 +40,7 @@ function DeckList({ user, onOpen, onStudy, inBloom }) {
   return (
     <>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
-        {!inBloom && <h1 className="serif" style={{ fontSize: 24, fontWeight: 700, color: 'var(--ink)' }}>Flashcards</h1>}
-        {inBloom && <span />}
+        <h1 className="serif" style={{ fontSize: 24, fontWeight: 700, color: 'var(--ink)' }}>Flashcards</h1>
         <button onClick={() => setCreating(true)} aria-label="New deck" style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--forest)', color: '#fff', border: 'none', fontSize: 24, fontWeight: 300, cursor: 'pointer', display: 'grid', placeItems: 'center', lineHeight: 1 }}>+</button>
       </div>
       <p className="sub" style={{ marginBottom: 16 }}>Make decks and study with spaced repetition.</p>
