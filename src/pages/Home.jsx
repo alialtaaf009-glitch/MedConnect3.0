@@ -5,8 +5,6 @@ import { useBack } from '../context/Back.jsx';
 import { useTheme } from '../context/Theme.jsx';
 import { quoteOfTheDay } from '../lib/quotes';
 import Motivation from './Motivation.jsx';
-import Qbank from './Qbank.jsx';
-import Flashcards from './Flashcards.jsx';
 import { api } from '../lib/api';
 
 // country -> exams -> parts (three levels, like the prototype)
@@ -421,6 +419,11 @@ function QuickRow({ user, nav, onGreen }) {
     if (setBar) setBar(null); // restore system bars to theme colour
     setTimeout(() => setBloom(null), 340);
   };
+  // safety: whenever there's no open bloom, ensure the system bar is reset
+  useEffect(() => {
+    if (!bloom && setBar) setBar(null);
+    return () => { if (setBar) setBar(null); };
+  }, [bloom, setBar]);
 
   return (
     <>
@@ -433,14 +436,14 @@ function QuickRow({ user, nav, onGreen }) {
       <div style={{ display: 'flex', gap: 10, margin: '2px 0 4px', paddingTop: 8 }}>
         {/* Qbank — navigates */}
         {!hideQb && (
-        <Circle tint="#dff0e4" color="#147a52" glow="0 6px 14px rgba(20,122,82,.18)" label="Qbank" selected={false} onClick={(e) => launchBloom(e, '#147a52', 'qbank')}>
+        <Circle tint="#dff0e4" color="#147a52" glow="0 6px 14px rgba(20,122,82,.18)" label="Qbank" selected={false} onClick={() => nav('/qbank')}>
           <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><rect x="7" y="12" width="3" height="6" /><rect x="12" y="8" width="3" height="10" /><rect x="17" y="14" width="3" height="4" /></svg>
         </Circle>
         )}
 
         {/* Flashcards — navigates */}
         {!hideFc && (
-        <Circle tint="#fbeccb" color="#c08a1e" glow="0 6px 14px rgba(192,138,30,.20)" label="Flashcards" selected={false} badge={due ? due : null} onClick={(e) => launchBloom(e, '#c08a1e', 'flashcards')}>
+        <Circle tint="#fbeccb" color="#c08a1e" glow="0 6px 14px rgba(192,138,30,.20)" label="Flashcards" selected={false} badge={due ? due : null} onClick={() => nav('/flashcards')}>
           <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="6" width="13" height="12" rx="2" /><path d="M7 10h5M7 13.5h3" /><path d="M20 8.5v8a2 2 0 0 1-2 2H8.5" /></svg>
         </Circle>
         )}
@@ -514,7 +517,7 @@ function QuickRow({ user, nav, onGreen }) {
       })()}
 
       {stOpen && (() => {
-      const best = Math.max(user?.longest_streak || 0, streak);
+        const best = Math.max(user?.longest_streak || 0, streak);
         const line = !studiedToday
           ? 'One tap keeps the flame alive.'
           : streak >= best && streak > 1
@@ -558,21 +561,20 @@ function QuickRow({ user, nav, onGreen }) {
         const examTs = user?.exam_date ? new Date(user.exam_date).getTime() : null;
         const dLeft = examTs ? Math.ceil((examTs - Date.now()) / 86400000) : null;
         const best = Math.max(user?.longest_streak || 0, streak);
-        const isPage = bloom.key === 'qbank' || bloom.key === 'flashcards';
-        const title = bloom.key === 'qbank' ? 'Qbank Tracker' : bloom.key === 'flashcards' ? 'Flashcards' : bloom.key === 'countdown' ? 'Countdown' : 'Study Streak';
+        const title = bloom.key === 'countdown' ? 'Countdown' : 'Study Streak';
         const ox = bloom.origin.x, oy = bloom.origin.y;
         const maxR = Math.ceil(Math.hypot(Math.max(ox, window.innerWidth - ox), Math.max(oy, window.innerHeight - oy)) * 1.05);
         const clip = bloomGrown ? `circle(${maxR}px at ${ox}px ${oy}px)` : `circle(34px at ${ox}px ${oy}px)`;
         return (
-          <div style={{ position: 'fixed', inset: 0, zIndex: 1200, overflow: 'hidden', pointerEvents: bloomGrown ? 'auto' : 'none' }}>
+          <div style={{ position: 'fixed', inset: 0, zIndex: 5000, overflow: 'hidden', pointerEvents: bloomGrown ? 'auto' : 'none' }}>
             <div style={{
               position: 'absolute', inset: 0, background: bloom.color,
               clipPath: clip, WebkitClipPath: clip,
               transition: 'clip-path .42s cubic-bezier(0.22,1,0.36,1), -webkit-clip-path .42s cubic-bezier(0.22,1,0.36,1)',
               display: 'flex', flexDirection: 'column',
             }}>
-              {/* sticky coloured top bar — same colour, blends with the status strip above */}
-              <div style={{ flexShrink: 0, background: bloom.color, color: '#fff', padding: 'calc(env(safe-area-inset-top,0px) + 12px) 14px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', opacity: bloomGrown ? 1 : 0, transition: 'opacity .25s ease .12s', zIndex: 5 }}>
+              {/* coloured top bar — covers the real top bar, blends with status strip above */}
+              <div style={{ flexShrink: 0, background: bloom.color, color: '#fff', padding: 'calc(env(safe-area-inset-top,0px) + 12px) 14px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', opacity: bloomGrown ? 1 : 0, transition: 'opacity .25s ease .12s' }}>
                 <button onClick={closeBloom} aria-label="Back" style={{ background: 'rgba(255,255,255,.18)', border: 'none', width: 34, height: 34, borderRadius: '50%', display: 'grid', placeItems: 'center', cursor: 'pointer', color: '#fff', flexShrink: 0 }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
                 </button>
@@ -580,61 +582,54 @@ function QuickRow({ user, nav, onGreen }) {
                 <span style={{ width: 34, flexShrink: 0 }} />
               </div>
 
-              {/* single scroll container: coloured hero, then the light sheet rises over it */}
-              <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch', opacity: bloomGrown ? 1 : 0, transition: 'opacity .3s ease .16s' }}>
-                {/* coloured hero */}
-                <div style={{ background: bloom.color, color: '#fff', textAlign: 'center', padding: isPage ? '4px 20px 24px' : '20px 24px 40px' }}>
-                  {bloom.key === 'countdown' && (
-                    <>
-                      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.5, textTransform: 'uppercase', opacity: 0.85 }}>{user?.exam || 'Your exam'}</div>
-                      <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 64, fontWeight: 900, lineHeight: 1, margin: '6px 0' }}>{dLeft != null ? (dLeft > 0 ? dLeft : 0) : '—'}</div>
-                      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', opacity: 0.85 }}>{dLeft > 0 ? 'days to go' : dLeft === 0 ? 'exam day!' : 'set your date'}</div>
-                    </>
-                  )}
-                  {bloom.key === 'streak' && (
-                    <>
-                      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.5, textTransform: 'uppercase', opacity: 0.85 }}>Study streak</div>
-                      <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 64, fontWeight: 900, lineHeight: 1, margin: '6px 0' }}>{streak}</div>
-                      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', opacity: 0.85 }}>day{streak === 1 ? '' : 's'} in a row 🔥</div>
-                    </>
-                  )}
-                  {bloom.key === 'qbank' && <div style={{ fontSize: 30 }}>📊</div>}
-                  {bloom.key === 'flashcards' && <div style={{ fontSize: 30 }}>🗂️</div>}
-                </div>
+              {/* coloured hero */}
+              <div style={{ flexShrink: 0, background: bloom.color, color: '#fff', textAlign: 'center', padding: '14px 24px 36px', opacity: bloomGrown ? 1 : 0, transition: 'opacity .3s ease .16s' }}>
+                {bloom.key === 'countdown' && (
+                  <>
+                    <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.5, textTransform: 'uppercase', opacity: 0.85 }}>{user?.exam || 'Your exam'}</div>
+                    <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 66, fontWeight: 900, lineHeight: 1, margin: '6px 0' }}>{dLeft != null ? (dLeft > 0 ? dLeft : 0) : '—'}</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', opacity: 0.85 }}>{dLeft > 0 ? 'days to go' : dLeft === 0 ? 'exam day!' : 'set your date'}</div>
+                  </>
+                )}
+                {bloom.key === 'streak' && (
+                  <>
+                    <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.5, textTransform: 'uppercase', opacity: 0.85 }}>Study streak</div>
+                    <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 66, fontWeight: 900, lineHeight: 1, margin: '6px 0' }}>{streak}</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', opacity: 0.85 }}>day{streak === 1 ? '' : 's'} in a row 🔥</div>
+                  </>
+                )}
+              </div>
 
-                {/* light sheet — rises over the colour as you scroll */}
-                <div style={{ background: 'var(--paper)', borderRadius: '24px 24px 0 0', minHeight: '70vh', marginTop: -16 }}>
-                  {bloom.key === 'countdown' && (
-                    <div style={{ textAlign: 'center', padding: '24px 22px' }}>
-                      <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 14 }}>{examTs ? new Date(user.exam_date).toDateString() : 'Add your exam date in Profile.'}</div>
-                      <div style={{ display: 'inline-block', fontSize: 13, fontWeight: 700, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 999, padding: '7px 16px' }}>{coachLine(dLeft ?? 999)}</div>
-                      <button className="btn ghost" style={{ marginTop: 20, maxWidth: 220, margin: '20px auto 0' }} onClick={closeBloom}>Back to it</button>
-                    </div>
-                  )}
-                  {bloom.key === 'streak' && (
-                    <div style={{ textAlign: 'center', padding: '24px 22px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 14 }}>
-                        <div style={{ flex: 1, maxWidth: 120 }}>
-                          <div className="display-num" style={{ fontSize: 32, fontWeight: 700, color: 'var(--rust)', lineHeight: 1 }}>{streak}</div>
-                          <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>current</div>
-                        </div>
-                        <div style={{ flex: 1, maxWidth: 120 }}>
-                          <div className="display-num" style={{ fontSize: 32, fontWeight: 700, color: 'var(--forest)', lineHeight: 1 }}>{best}</div>
-                          <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>personal best</div>
-                        </div>
+              {/* light sheet */}
+              <div style={{ flex: 1, background: 'var(--paper)', borderRadius: '24px 24px 0 0', marginTop: -16, overflowY: 'auto', WebkitOverflowScrolling: 'touch', opacity: bloomGrown ? 1 : 0, transition: 'opacity .3s ease .18s' }}>
+                {bloom.key === 'countdown' && (
+                  <div style={{ textAlign: 'center', padding: '26px 22px' }}>
+                    <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 14 }}>{examTs ? new Date(user.exam_date).toDateString() : 'Add your exam date in Profile.'}</div>
+                    <div style={{ display: 'inline-block', fontSize: 13, fontWeight: 700, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 999, padding: '7px 16px' }}>{coachLine(dLeft ?? 999)}</div>
+                    <button className="btn ghost" style={{ marginTop: 20, maxWidth: 220, margin: '20px auto 0' }} onClick={closeBloom}>Back to it</button>
+                  </div>
+                )}
+                {bloom.key === 'streak' && (
+                  <div style={{ textAlign: 'center', padding: '26px 22px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 14 }}>
+                      <div style={{ flex: 1, maxWidth: 120 }}>
+                        <div className="display-num" style={{ fontSize: 32, fontWeight: 700, color: 'var(--rust)', lineHeight: 1 }}>{streak}</div>
+                        <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>current</div>
                       </div>
-                      <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 16 }}>
-                        {studiedToday ? '🔥 Today is logged — see you tomorrow' : '🔥 Tap below to log today'}
+                      <div style={{ flex: 1, maxWidth: 120 }}>
+                        <div className="display-num" style={{ fontSize: 32, fontWeight: 700, color: 'var(--forest)', lineHeight: 1 }}>{best}</div>
+                        <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>personal best</div>
                       </div>
-                      {!studiedToday && (
-                        <button className="btn btn-cta" style={{ maxWidth: 220, margin: '0 auto' }} disabled={marking} onClick={markStudy}>{marking ? '…' : 'Mark today ✓'}</button>
-                      )}
-                      <button className="btn ghost" style={{ marginTop: 10, maxWidth: 220, margin: '10px auto 0' }} onClick={closeBloom}>Keep going</button>
                     </div>
-                  )}
-                  {bloom.key === 'qbank' && <Qbank inBloom />}
-                  {bloom.key === 'flashcards' && <Flashcards inBloom />}
-                </div>
+                    <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 16 }}>
+                      {studiedToday ? '🔥 Today is logged — see you tomorrow' : '🔥 Tap below to log today'}
+                    </div>
+                    {!studiedToday && (
+                      <button className="btn btn-cta" style={{ maxWidth: 220, margin: '0 auto' }} disabled={marking} onClick={markStudy}>{marking ? '…' : 'Mark today ✓'}</button>
+                    )}
+                    <button className="btn ghost" style={{ marginTop: 10, maxWidth: 220, margin: '10px auto 0' }} onClick={closeBloom}>Keep going</button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
