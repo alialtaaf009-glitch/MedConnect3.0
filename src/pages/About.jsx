@@ -37,8 +37,7 @@ export default function About() {
       <h2 style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: 15, fontWeight: 800, color: 'var(--forest)', marginBottom: 10, textAlign: 'center' }}>About the developer</h2>
       <div className="card" style={{ textAlign: 'center', padding: '18px 16px' }}>
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
-          <img src="/ali-avatar.png" alt="Dr. Ali Altaf"
-            style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', boxShadow: '0 4px 12px rgba(31,77,63,.22)', border: '2px solid var(--card)' }} />
+          <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: 32, boxShadow: '0 4px 12px rgba(31,77,63,.18)' }}>👨‍⚕️</div>
         </div>
         <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: 15, fontWeight: 800, color: 'var(--ink)' }}>Dr. Ali Altaf</div>
         <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 600, marginTop: 2, letterSpacing: 0.3 }}>MBBS &middot; Founder &amp; Developer</div>
@@ -52,3 +51,4 @@ export default function About() {
     </div>
   );
 }
+
