@@ -37,18 +37,24 @@ export default function About() {
       <h2 style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: 15, fontWeight: 800, color: 'var(--forest)', marginBottom: 10, textAlign: 'center' }}>About the developer</h2>
       <div className="card" style={{ textAlign: 'center', padding: '18px 16px' }}>
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
-          <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: 32, boxShadow: '0 4px 12px rgba(31,77,63,.18)' }}>👨‍⚕️</div>
+          <div style={{ position: 'relative', width: 64, height: 64 }}>
+            <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: 32, boxShadow: '0 4px 12px rgba(31,77,63,.18)' }}>👨‍⚕️</div>
+            <span style={{ position: 'absolute', top: -4, right: -6, fontSize: 20 }}>✨</span>
+          </div>
         </div>
         <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: 15, fontWeight: 800, color: 'var(--ink)' }}>Dr. Ali Altaf</div>
         <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 600, marginTop: 2, letterSpacing: 0.3 }}>MBBS &middot; Founder &amp; Developer</div>
+        <div style={{ fontSize: 11.5, color: 'var(--rust)', fontWeight: 700, marginTop: 6, letterSpacing: 0.5 }}>Doctor. Dreamer. Builder.</div>
         <p style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--ink)', marginTop: 12 }}>
           Built by a doctor who understands the challenges of exam preparation. MedConnect was created to make studying less isolated and more collaborative.
         </p>
         <p style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 12, fontStyle: 'italic' }}>
           Made with care in Lahore, Pakistan. 🌿
         </p>
+        <div style={{ marginTop: 14, padding: '11px 14px', borderRadius: 14, background: 'var(--paper-2)', fontSize: 11.5, color: 'var(--muted)', lineHeight: 1.55 }}>
+          ☕ Built over many late nights, countless cups of coffee, and a deep belief that no one should have to study alone.
+        </div>
       </div>
     </div>
   );
 }
-
