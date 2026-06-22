@@ -230,17 +230,27 @@ export default function Profile() {
       )}
 
       <div className="label" style={{ marginTop: 18 }}>Home screen</div>
-      {[['hide_qbank', 'Show Qbank tracker'], ['hide_flashcards', 'Show flashcards'], ['hide_countdown', 'Show exam countdown'], ['hide_streak', 'Show study streak']].map(([key, label]) => (
-        <div key={key} className="row" style={{ padding: '12px 14px', marginBottom: 8, cursor: 'pointer' }}
-          onClick={() => { localStorage.setItem(key, localStorage.getItem(key) === '1' ? '' : '1'); setTilePrefs((p) => p + 1); }}>
-          <span style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>{label}</span>
-          <span style={{ width: 40, height: 23, borderRadius: 999, background: localStorage.getItem(key) === '1' ? 'var(--line)' : 'var(--forest)', position: 'relative', transition: 'background .2s ease', flexShrink: 0 }}>
-            <span style={{ position: 'absolute', top: 2.5, left: localStorage.getItem(key) === '1' ? 3 : 19, width: 18, height: 18, borderRadius: '50%', background: '#fff', transition: 'left .2s ease' }} />
-          </span>
-        </div>
-      ))}
-      <NotifToggle />
-      <button className="btn ghost" style={{ marginTop:10, color:'var(--rust)', borderColor:'var(--rust)' }} onClick={logout}>Log out</button>
+      <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 18, overflow: 'hidden', boxShadow: '0 4px 14px rgba(31,77,63,.04)' }}>
+        {[['hide_qbank', 'Show Qbank tracker'], ['hide_flashcards', 'Show flashcards'], ['hide_countdown', 'Show exam countdown'], ['hide_streak', 'Show study streak']].map(([key, label], i) => {
+          const off = localStorage.getItem(key) === '1';
+          return (
+            <div key={key} style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', cursor: 'pointer', borderTop: i === 0 ? 'none' : '1px solid var(--line)' }}
+              onClick={() => { localStorage.setItem(key, off ? '' : '1'); setTilePrefs((p) => p + 1); }}>
+              <span style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>{label}</span>
+              <span style={{ width: 42, height: 24, borderRadius: 999, background: off ? 'var(--line)' : 'var(--forest)', position: 'relative', transition: 'background .2s ease', flexShrink: 0 }}>
+                <span style={{ position: 'absolute', top: 2.5, left: off ? 3 : 20.5, width: 19, height: 19, borderRadius: '50%', background: '#fff', transition: 'left .2s ease', boxShadow: '0 1px 3px rgba(0,0,0,.2)' }} />
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="label" style={{ marginTop: 18 }}>Notifications</div>
+      <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 18, overflow: 'hidden', boxShadow: '0 4px 14px rgba(31,77,63,.04)' }}>
+        <NotifToggle />
+      </div>
+
+      <button className="btn ghost" style={{ marginTop:16, color:'var(--rust)', borderColor:'var(--rust)' }} onClick={logout}>Log out</button>
 
       <div style={{ textAlign:'center', marginTop:18 }}>
         <button className="link" onClick={() => nav('/legal')}>Privacy & Terms</button>
@@ -292,7 +302,7 @@ function NotifToggle() {
 
   if (!supported) {
     return (
-      <div className="row" style={{ padding: '12px 14px', marginBottom: 8, opacity: 0.7 }}>
+      <div style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', opacity: 0.7 }}>
         <span style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>Push notifications
           <span style={{ display: 'block', fontSize: 11.5, fontWeight: 400, color: 'var(--subtle)' }}>Not supported on this device/browser. On iPhone, install the app to your Home Screen first.</span>
         </span>
@@ -301,18 +311,18 @@ function NotifToggle() {
   }
 
   return (
-    <div>
-      <div className="row" style={{ padding: '12px 14px', marginBottom: 8, cursor: 'pointer' }} onClick={flip}>
+    <>
+      <div style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', cursor: 'pointer' }} onClick={flip}>
         <span style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>Push notifications
           <span style={{ display: 'block', fontSize: 11.5, fontWeight: 400, color: 'var(--subtle)' }}>Get alerted about new messages & requests</span>
         </span>
-        <span style={{ width: 40, height: 23, borderRadius: 999, background: on ? 'var(--forest)' : 'var(--line)', position: 'relative', transition: 'background .2s ease', flexShrink: 0, opacity: busy ? 0.6 : 1 }}>
-          <span style={{ position: 'absolute', top: 2.5, left: on ? 19 : 3, width: 18, height: 18, borderRadius: '50%', background: '#fff', transition: 'left .2s ease' }} />
+        <span style={{ width: 42, height: 24, borderRadius: 999, background: on ? 'var(--forest)' : 'var(--line)', position: 'relative', transition: 'background .2s ease', flexShrink: 0, opacity: busy ? 0.6 : 1 }}>
+          <span style={{ position: 'absolute', top: 2.5, left: on ? 20.5 : 3, width: 19, height: 19, borderRadius: '50%', background: '#fff', transition: 'left .2s ease', boxShadow: '0 1px 3px rgba(0,0,0,.2)' }} />
         </span>
       </div>
-      {err && <p className="sub" style={{ color: 'var(--rust)', fontSize: 11.5, padding: '0 14px 8px' }}>{err}</p>}
+      {err && <p className="sub" style={{ color: 'var(--rust)', fontSize: 11.5, padding: '0 16px 10px' }}>{err}</p>}
       {on && (
-        <div style={{ padding: '0 14px 6px' }}>
+        <div style={{ padding: '0 16px 12px', borderTop: '1px solid var(--line)', paddingTop: 12 }}>
           <button className="link" style={{ fontSize: 12, fontWeight: 700 }} onClick={async () => {
             // First: test if THIS device can show a notification at all (via the service worker)
             try {
@@ -337,6 +347,6 @@ function NotifToggle() {
           }}>Send a test notification</button>
         </div>
       )}
-    </div>
+    </>
   );
 }
