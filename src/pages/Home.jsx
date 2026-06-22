@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/Auth.jsx';
 import { useBack } from '../context/Back.jsx';
@@ -217,7 +218,7 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'country' && (
-        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+      <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
         {orderedCountries.map(([flag, country, exams], idx) => (
         <div key={country} style={{ borderTop: idx === 0 ? 'none' : '1px solid var(--line)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '11px 18px', cursor: 'pointer' }}
@@ -497,7 +498,7 @@ function QuickRow({ user, nav, onGreen }) {
 
 
       {cdOpen && user?.exam_date && (() => {
-      const examTs = new Date(user.exam_date).getTime();
+        const examTs = new Date(user.exam_date).getTime();
         const diff = Math.max(0, examTs - nowTs);
         const totSec = Math.floor(diff / 1000);
         const totDays = Math.floor(totSec / 86400);
@@ -585,7 +586,7 @@ function QuickRow({ user, nav, onGreen }) {
         const ox = bloom.origin.x, oy = bloom.origin.y;
         const maxR = Math.ceil(Math.hypot(Math.max(ox, window.innerWidth - ox), Math.max(oy, window.innerHeight - oy)) * 1.05);
         const clip = bloomGrown ? `circle(${maxR}px at ${ox}px ${oy}px)` : `circle(34px at ${ox}px ${oy}px)`;
-        return (
+        return createPortal((
           <div style={{ position: 'fixed', inset: 0, zIndex: 5000, overflow: 'hidden', pointerEvents: bloomGrown ? 'auto' : 'none' }}>
             <div style={{
               position: 'absolute', inset: 0, background: bloom.color,
@@ -643,7 +644,7 @@ function QuickRow({ user, nav, onGreen }) {
               {/* light sheet */}
               <div style={{ flex: 1, background: 'var(--paper)', borderRadius: '24px 24px 0 0', marginTop: -16, overflowY: 'auto', WebkitOverflowScrolling: 'touch', opacity: bloomGrown ? 1 : 0, transition: 'opacity .3s ease .18s' }}>
                 {bloom.key === 'countdown' && (
-                  <div style={{ textAlign: 'center', padding: '26px 22px' }}>
+            <div style={{ textAlign: 'center', padding: '26px 22px' }}>
                     <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 14 }}>{examTs ? new Date(user.exam_date).toDateString() : 'Add your exam date in Profile.'}</div>
                     <div style={{ display: 'inline-block', fontSize: 13, fontWeight: 700, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 999, padding: '7px 16px' }}>{coachLine(dLeft ?? 999)}</div>
                     <button className="btn ghost" style={{ marginTop: 20, maxWidth: 220, margin: '20px auto 0' }} onClick={closeBloom}>Back to it</button>
@@ -726,12 +727,11 @@ function QuickRow({ user, nav, onGreen }) {
               </div>
             </div>
           </div>
-        );
+        ), document.body);
       })()}
     </>
   );
-}
-export default function Home() {
+  export default function Home() {
   const { user } = useAuth();
   const nav = useNavigate();
   const initials = (user?.name || 'Dr A').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map(x => x[0]?.toUpperCase()).join('');
