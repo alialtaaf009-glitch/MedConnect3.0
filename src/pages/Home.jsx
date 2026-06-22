@@ -180,7 +180,7 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'exam' && (
-        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+      <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
           {orderedExams.map(({ flag, country, exam, parts }, idx) => {
               const key = 'exam|' + country + '|' + exam;
               const ecx = examColor(exam);
@@ -216,7 +216,7 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'country' && (
-      <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
         {orderedCountries.map(([flag, country, exams], idx) => (
         <div key={country} style={{ borderTop: idx === 0 ? 'none' : '1px solid var(--line)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '11px 18px', cursor: 'pointer' }}
@@ -349,7 +349,7 @@ function QuickRow({ user, nav, onGreen }) {
   }, [cdOpen]);
 
   // adaptive coach line — urgency without panic
-  const coachLine = (d) => {
+const coachLine = (d) => {
     if (d > 60) return 'Plenty of runway.';
     if (d > 14) return 'Sharpening phase.';
     if (d > 2)  return 'Lock in.';
@@ -426,7 +426,7 @@ function QuickRow({ user, nav, onGreen }) {
 
         {/* Countdown — opens inline detail */}
         {!hideCd && daysLeft !== null && (
-      <Circle tint="transparent" color="#1f9bb8" glow="none" label="Countdown" onClick={() => setCdOpen(true)}>
+          <Circle tint="transparent" color="#1f9bb8" glow="none" label="Countdown" onClick={() => setCdOpen(true)}>
             <svg width="64" height="64" viewBox="0 0 64 64" style={{ position: 'absolute', inset: 0, transform: 'rotate(-90deg)' }}>
               <circle cx="32" cy="32" r={R2} fill="#dceff3" />
               <circle cx="32" cy="32" r={R2} fill="none" stroke="#c2e2e9" strokeWidth="5" />
@@ -483,7 +483,7 @@ function QuickRow({ user, nav, onGreen }) {
               </div>
               <div className="display-num" style={{ fontSize: 30, fontWeight: 700, color: 'var(--rust)', letterSpacing: 2, fontVariantNumeric: 'tabular-nums', margin: '6px 0 2px' }}>
                 {hh}:{mm2}:{ss}
-              </div>
+                </div>
               <div className="sub" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>hours · minutes · seconds</div>
               <div style={{ display: 'inline-block', fontSize: 12, fontWeight: 700, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 999, padding: '5px 14px', margin: '14px 0 2px' }}>{coachLine(dLeft)}</div>
               <button className="btn ghost" style={{ marginTop: 12 }} onClick={() => setCdOpen(false)}>Back to it</button>
@@ -577,7 +577,7 @@ export default function Home() {
   return (
     <div className="screen" style={{ padding: 0 }}>
       {/* ===== GREEN BAND: greeting + motivation quote + nudges + quick circles ===== */}
-      <div style={{ background: 'linear-gradient(165deg, #1f4d3f 0%, #163a2f 100%)', padding: '14px 18px 30px', color: '#fff' }}>
+      <div style={{ background: 'linear-gradient(180deg, #1f4d3f 0%, #1f4d3f 55%, #1a4236 100%)', padding: '14px 18px 34px', color: '#fff' }}>
         <div onClick={() => setShowMotivation(true)} style={{ cursor: 'pointer', position: 'relative' }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--gold)', marginBottom: 8 }}>
             Hi Dr. {(user?.name || '').replace(/^Dr\.?\s+/i, '').split(' ')[0] || 'Doctor'} — a thought for today
@@ -632,7 +632,7 @@ export default function Home() {
       </div>
 
       {/* ===== CURVED LIGHT SHEET: Explore + invite + footer ===== */}
-      <div style={{ background: 'var(--paper)', borderRadius: '28px 28px 0 0', marginTop: -16, position: 'relative', zIndex: 1, padding: '22px 18px 20px' }}>
+      <div style={{ background: 'var(--paper)', borderRadius: '34px 34px 0 0', marginTop: -24, position: 'relative', zIndex: 1, padding: '24px 18px 20px', boxShadow: '0 -10px 24px rgba(22,41,31,.12)' }}>
         <h2 className="serif" style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 21, fontWeight: 900, letterSpacing: '-0.3px', color: 'var(--forest)', margin: '0 0 12px' }}>Explore Study Partners</h2>
 
         <ExploreBrowse />
