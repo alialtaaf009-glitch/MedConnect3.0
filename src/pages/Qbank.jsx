@@ -5,7 +5,7 @@ import { examColor } from '../lib/examColors.js';
 
 // Qbank progress tracker — solo by default, optional per-partner sharing.
 // All sharing/compare is INLINE (no modals) so nothing can clip off-screen.
-export default function Qbank({ inBloom = false }) {
+export default function Qbank() {
   const { user } = useAuth();
   const color = examColor(user?.exam) || '#1f4d3f';
 
@@ -144,9 +144,9 @@ export default function Qbank({ inBloom = false }) {
   const shareCount = sharingWith.filter((g) => g.bank === bank).length;
 
   return (
-    <div className="screen" style={inBloom ? { padding: '18px 16px 30px', animation: 'none' } : undefined}>
-      {!inBloom && <h1 className="serif" style={{ fontSize: 24, fontWeight: 700, color: 'var(--ink)' }}>Qbank Tracker</h1>}
-      {!inBloom && <p className="sub" style={{ marginBottom: 16 }}>Track your question-bank progress, solo or shared.</p>}
+    <div className="screen">
+      <h1 className="serif" style={{ fontSize: 24, fontWeight: 700, color: 'var(--ink)' }}>Qbank Tracker</h1>
+      <p className="sub" style={{ marginBottom: 16 }}>Track your question-bank progress, solo or shared.</p>
 
       {/* bank selector */}
       <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 14, paddingBottom: 4, alignItems: 'center' }}>
