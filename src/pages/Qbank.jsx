@@ -160,7 +160,7 @@ export default function Qbank({ inBloom = false }) {
       </div>
 
       {newBankOpen && (
-      <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
           <input className="input" autoFocus placeholder="Qbank name (e.g. PassMedicine, Pastest, UWorld)" value={newBankVal} onChange={(e) => setNewBankVal(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') addBank(); }} style={{ marginBottom: 0, flex: 1, fontSize: 13 }} />
           <button onClick={addBank} className="btn-sm">Add</button>
         </div>
