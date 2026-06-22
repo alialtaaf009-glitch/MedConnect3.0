@@ -183,7 +183,7 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'exam' && (
-      <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
           {orderedExams.map(({ flag, country, exam, parts }, idx) => {
               const key = 'exam|' + country + '|' + exam;
               const ecx = examColor(exam);
@@ -474,7 +474,7 @@ function QuickRow({ user, nav, onGreen }) {
 
 
       {cdOpen && user?.exam_date && (() => {
-      const examTs = new Date(user.exam_date).getTime();
+        const examTs = new Date(user.exam_date).getTime();
         const diff = Math.max(0, examTs - nowTs);
         const totSec = Math.floor(diff / 1000);
         const totDays = Math.floor(totSec / 86400);
@@ -514,7 +514,7 @@ function QuickRow({ user, nav, onGreen }) {
       })()}
 
       {stOpen && (() => {
-        const best = Math.max(user?.longest_streak || 0, streak);
+      const best = Math.max(user?.longest_streak || 0, streak);
         const line = !studiedToday
           ? 'One tap keeps the flame alive.'
           : streak >= best && streak > 1
@@ -815,4 +815,3 @@ function QbankCard({ nav }) {
     </button>
   );
 }
-                                                         }
