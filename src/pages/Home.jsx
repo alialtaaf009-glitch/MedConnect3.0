@@ -2,8 +2,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/Auth.jsx';
 import { useBack } from '../context/Back.jsx';
+import { useTheme } from '../context/Theme.jsx';
 import { quoteOfTheDay } from '../lib/quotes';
 import Motivation from './Motivation.jsx';
+import Qbank from './Qbank.jsx';
+import Flashcards from './Flashcards.jsx';
 import { api } from '../lib/api';
 
 // country -> exams -> parts (three levels, like the prototype)
@@ -402,19 +405,21 @@ function QuickRow({ user, nav, onGreen }) {
   const R2 = 27, C2 = 2 * Math.PI * R2;
 
   // ---- circle bloom: grows from the tapped circle into a full-screen, half-and-half coloured panel ----
+  const { setBar } = useTheme();
   const [bloom, setBloom] = useState(null); // { color, origin:{x,y}, key, navTo } | null
   const [bloomGrown, setBloomGrown] = useState(false);
-  const launchBloom = (e, color, key, navTo) => {
+  const launchBloom = (e, color, key) => {
     let x = window.innerWidth / 2, y = window.innerHeight / 2;
     try { const r = e.currentTarget.getBoundingClientRect(); x = r.left + r.width / 2; y = r.top + r.height / 2; } catch (_) {}
-    setBloom({ color, origin: { x, y }, key, navTo });
+    setBloom({ color, origin: { x, y }, key });
     setBloomGrown(false);
+    if (setBar) setBar(color); // colour the system bars to match
     requestAnimationFrame(() => requestAnimationFrame(() => setBloomGrown(true)));
   };
-  const closeBloom = () => { setBloomGrown(false); setTimeout(() => setBloom(null), 360); };
-  const bloomThenNav = (e, color, key, to) => {
-    launchBloom(e, color, key, to);
-    setTimeout(() => nav(to), 430);
+  const closeBloom = () => {
+    setBloomGrown(false);
+    if (setBar) setBar(null); // restore system bars to theme colour
+    setTimeout(() => setBloom(null), 340);
   };
 
   return (
@@ -428,14 +433,14 @@ function QuickRow({ user, nav, onGreen }) {
       <div style={{ display: 'flex', gap: 10, margin: '2px 0 4px', paddingTop: 8 }}>
         {/* Qbank — navigates */}
         {!hideQb && (
-        <Circle tint="#dff0e4" color="#147a52" glow="0 6px 14px rgba(20,122,82,.18)" label="Qbank" selected={false} onClick={(e) => bloomThenNav(e, '#147a52', 'qbank', '/qbank')}>
+        <Circle tint="#dff0e4" color="#147a52" glow="0 6px 14px rgba(20,122,82,.18)" label="Qbank" selected={false} onClick={(e) => launchBloom(e, '#147a52', 'qbank')}>
           <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><rect x="7" y="12" width="3" height="6" /><rect x="12" y="8" width="3" height="10" /><rect x="17" y="14" width="3" height="4" /></svg>
         </Circle>
         )}
 
         {/* Flashcards — navigates */}
         {!hideFc && (
-        <Circle tint="#fbeccb" color="#c08a1e" glow="0 6px 14px rgba(192,138,30,.20)" label="Flashcards" selected={false} badge={due ? due : null} onClick={(e) => bloomThenNav(e, '#c08a1e', 'flashcards', '/flashcards')}>
+        <Circle tint="#fbeccb" color="#c08a1e" glow="0 6px 14px rgba(192,138,30,.20)" label="Flashcards" selected={false} badge={due ? due : null} onClick={(e) => launchBloom(e, '#c08a1e', 'flashcards')}>
           <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="6" width="13" height="12" rx="2" /><path d="M7 10h5M7 13.5h3" /><path d="M20 8.5v8a2 2 0 0 1-2 2H8.5" /></svg>
         </Circle>
         )}
@@ -550,57 +555,64 @@ function QuickRow({ user, nav, onGreen }) {
         );
       })()}
       {bloom && (() => {
-        const big = Math.ceil(Math.hypot(window.innerWidth, window.innerHeight) * 2.2);
         const examTs = user?.exam_date ? new Date(user.exam_date).getTime() : null;
         const dLeft = examTs ? Math.ceil((examTs - Date.now()) / 86400000) : null;
         const best = Math.max(user?.longest_streak || 0, streak);
+        const isPage = bloom.key === 'qbank' || bloom.key === 'flashcards';
+        // clip-path circle reveal grows from the tapped circle — cheap & smooth
+        const ox = bloom.origin.x, oy = bloom.origin.y;
+        const maxR = Math.ceil(Math.hypot(Math.max(ox, window.innerWidth - ox), Math.max(oy, window.innerHeight - oy)) * 1.05);
+        const clip = bloomGrown
+          ? `circle(${maxR}px at ${ox}px ${oy}px)`
+          : `circle(34px at ${ox}px ${oy}px)`;
+        const topPct = isPage ? '0 0 24%' : '0 0 42%';
         return (
           <div style={{ position: 'fixed', inset: 0, zIndex: 1200, overflow: 'hidden', pointerEvents: bloomGrown ? 'auto' : 'none' }}>
-            {/* growing colour disc */}
             <div style={{
-              position: 'absolute', left: bloom.origin.x, top: bloom.origin.y,
-              width: big, height: big, marginLeft: -big / 2, marginTop: -big / 2,
-              borderRadius: '50%', background: bloom.color,
-              transform: bloomGrown ? 'scale(1)' : 'scale(0.018)',
-              transition: 'transform .5s cubic-bezier(0.22,1,0.36,1)',
-            }} />
-            {/* content fades in after the disc fills */}
-            <div style={{
-              position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
-              opacity: bloomGrown ? 1 : 0, transition: 'opacity .3s ease .18s',
-              paddingTop: 'calc(env(safe-area-inset-top,0px) + 20px)',
+              position: 'absolute', inset: 0, background: bloom.color,
+              clipPath: clip, WebkitClipPath: clip,
+              transition: 'clip-path .42s cubic-bezier(0.22,1,0.36,1), -webkit-clip-path .42s cubic-bezier(0.22,1,0.36,1)',
+              display: 'flex', flexDirection: 'column',
             }}>
-              {/* top coloured half */}
-              <div style={{ flex: '0 0 42%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#fff', textAlign: 'center', padding: '0 24px' }}>
-                {bloom.key === 'countdown' && (
-                  <>
-                    <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.5, textTransform: 'uppercase', opacity: 0.85 }}>{user?.exam || 'Your exam'}</div>
-                    <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 64, fontWeight: 900, lineHeight: 1, margin: '6px 0' }}>{dLeft != null ? (dLeft > 0 ? dLeft : 0) : '—'}</div>
-                    <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', opacity: 0.85 }}>{dLeft > 0 ? 'days to go' : dLeft === 0 ? 'exam day!' : 'set your date'}</div>
-                  </>
-                )}
-                {bloom.key === 'streak' && (
-            <>
-                    <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.5, textTransform: 'uppercase', opacity: 0.85 }}>Study streak</div>
-                    <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 64, fontWeight: 900, lineHeight: 1, margin: '6px 0' }}>{streak}</div>
-                    <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', opacity: 0.85 }}>day{streak === 1 ? '' : 's'} in a row 🔥</div>
-                  </>
-                )}
-                {(bloom.key === 'qbank' || bloom.key === 'flashcards') && (
-                  <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 30, fontWeight: 900 }}>{bloom.key === 'qbank' ? 'Qbank' : 'Flashcards'}</div>
-                )}
+              {/* top coloured area (extends up under the status bar) */}
+              <div style={{ flex: topPct, display: 'flex', flexDirection: 'column', color: '#fff', padding: 'calc(env(safe-area-inset-top,0px) + 14px) 20px 0' }}>
+                {/* back button row */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', opacity: bloomGrown ? 1 : 0, transition: 'opacity .25s ease .12s' }}>
+                  <button onClick={closeBloom} aria-label="Back" style={{ background: 'rgba(255,255,255,.18)', border: 'none', width: 34, height: 34, borderRadius: '50%', display: 'grid', placeItems: 'center', cursor: 'pointer', color: '#fff' }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+                  </button>
+                  {isPage && <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 17, fontWeight: 900 }}>{bloom.key === 'qbank' ? 'Qbank Tracker' : 'Flashcards'}</div>}
+                  <span style={{ width: 34 }} />
+                </div>
+                {/* centred hero content for countdown/streak */}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', opacity: bloomGrown ? 1 : 0, transition: 'opacity .3s ease .16s' }}>
+                  {bloom.key === 'countdown' && (
+                    <>
+                      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.5, textTransform: 'uppercase', opacity: 0.85 }}>{user?.exam || 'Your exam'}</div>
+                      <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 64, fontWeight: 900, lineHeight: 1, margin: '6px 0' }}>{dLeft != null ? (dLeft > 0 ? dLeft : 0) : '—'}</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', opacity: 0.85 }}>{dLeft > 0 ? 'days to go' : dLeft === 0 ? 'exam day!' : 'set your date'}</div>
+                    </>
+                  )}
+                  {bloom.key === 'streak' && (
+                    <>
+                      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.5, textTransform: 'uppercase', opacity: 0.85 }}>Study streak</div>
+                      <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 64, fontWeight: 900, lineHeight: 1, margin: '6px 0' }}>{streak}</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', opacity: 0.85 }}>day{streak === 1 ? '' : 's'} in a row 🔥</div>
+                    </>
+                  )}
+                </div>
               </div>
               {/* bottom light sheet */}
-              <div style={{ flex: 1, background: 'var(--paper)', borderRadius: '28px 28px 0 0', padding: '22px 22px calc(env(safe-area-inset-bottom,0px) + 20px)', overflowY: 'auto' }}>
+              <div style={{ flex: 1, background: 'var(--paper)', borderRadius: '28px 28px 0 0', overflowY: 'auto', WebkitOverflowScrolling: 'touch', opacity: bloomGrown ? 1 : 0, transition: 'opacity .3s ease .18s' }}>
                 {bloom.key === 'countdown' && (
-                  <div style={{ textAlign: 'center' }}>
+                  <div style={{ textAlign: 'center', padding: '22px' }}>
                     <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 14 }}>{examTs ? new Date(user.exam_date).toDateString() : 'Add your exam date in Profile.'}</div>
                     <div style={{ display: 'inline-block', fontSize: 13, fontWeight: 700, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 999, padding: '7px 16px' }}>{coachLine(dLeft ?? 999)}</div>
                     <button className="btn ghost" style={{ marginTop: 20, maxWidth: 220, margin: '20px auto 0' }} onClick={closeBloom}>Back to it</button>
                   </div>
                 )}
                 {bloom.key === 'streak' && (
-                  <div style={{ textAlign: 'center' }}>
+                  <div style={{ textAlign: 'center', padding: '22px' }}>
                     <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 14 }}>
                       <div style={{ flex: 1, maxWidth: 120 }}>
                         <div className="display-num" style={{ fontSize: 32, fontWeight: 700, color: 'var(--rust)', lineHeight: 1 }}>{streak}</div>
@@ -620,9 +632,8 @@ function QuickRow({ user, nav, onGreen }) {
                     <button className="btn ghost" style={{ marginTop: 10, maxWidth: 220, margin: '10px auto 0' }} onClick={closeBloom}>Keep going</button>
                   </div>
                 )}
-                {(bloom.key === 'qbank' || bloom.key === 'flashcards') && (
-                  <div style={{ textAlign: 'center', color: 'var(--muted)', fontSize: 13, paddingTop: 10 }}>Opening…</div>
-                )}
+                {bloom.key === 'qbank' && <Qbank inBloom />}
+                {bloom.key === 'flashcards' && <Flashcards inBloom />}
               </div>
             </div>
           </div>
