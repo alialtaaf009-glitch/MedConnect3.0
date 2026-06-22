@@ -454,3 +454,9 @@ button:active { -webkit-tap-highlight-color: transparent; }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 .tab-pop { animation: tabPop .34s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.mc-home-band {
+  background: #1f4d3f;
+}
+[data-theme="dark"] .mc-home-band {
+  background: #14241c;
+}
