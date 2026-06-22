@@ -460,3 +460,12 @@ button:active { -webkit-tap-highlight-color: transparent; }
 [data-theme="dark"] .mc-home-band {
   background: #14241c;
 }
+/* ===== Add to app.css (bottom of file is fine) ===== */
+
+/* Home green band — matches the .topbar exactly in BOTH themes */
+.mc-home-band {
+  background: #1f4d3f;               /* same as .topbar (light)  */
+}
+[data-theme="dark"] .mc-home-band {
+  background: #14241c;               /* same as .topbar (dark)   */
+}
