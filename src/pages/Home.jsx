@@ -218,7 +218,7 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'country' && (
-        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+      <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
         {orderedCountries.map(([flag, country, exams], idx) => (
         <div key={country} style={{ borderTop: idx === 0 ? 'none' : '1px solid var(--line)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '11px 18px', cursor: 'pointer' }}
@@ -363,40 +363,67 @@ function QuickRow({ user, nav, onGreen }) {
   // ---- Qbank summary (folded in from QbankCard) ----
   const [qStats, setQStats] = useState({ loading: true });
   const [qTopics, setQTopics] = useState([]); // top topics for the bloom pill-list
-  useEffect(() => {
-    let active = true;
+  const [qBank, setQBank] = useState(''); // active bank name (for saving topics)
+  const loadQbank = () => {
     api.qbankGet().then((d) => {
-      if (!active) return;
       const rows = d.progress || [];
+      const bankName = rows[0]?.bank || user?.question_bank || 'PassMedicine';
+      setQBank(bankName);
       if (!rows.length) { setQStats({ empty: true }); setQTopics([]); return; }
-      const t = rows.reduce((a, r) => ({ done: a.done + (r.done || 0), correct: a.correct + (r.correct || 0) }), { done: 0, correct: 0 });
+      const t = rows.reduce((a, r) => ({ done: a.done + (r.done || 0), total: a.total + (r.total || 0), correct: a.correct + (r.correct || 0) }), { done: 0, total: 0, correct: 0 });
       const acc = t.done ? Math.round((t.correct / t.done) * 100) : 0;
       const banks = [...new Set(rows.map((r) => r.bank))].length;
-      setQStats({ done: t.done, acc, banks });
-      // top topics by accuracy (done > 0), up to 5
+      setQStats({ done: t.done, total: t.total, acc, banks });
       const tops = rows.filter((r) => (r.done || 0) > 0)
         .map((r) => ({ topic: r.topic, pct: Math.round(((r.correct || 0) / (r.done || 1)) * 100) }))
         .sort((a, b) => b.pct - a.pct).slice(0, 5);
       setQTopics(tops);
-    }).catch(() => { if (active) { setQStats({ empty: true }); setQTopics([]); } });
-    return () => { active = false; };
-  }, []);
+    }).catch(() => { setQStats({ empty: true }); setQTopics([]); });
+  };
+  useEffect(() => { loadQbank(); }, []);
   const qSub = qStats.loading ? 'Loading…' : qStats.empty ? 'Start tracking your progress' : `${qStats.done} done · ${qStats.acc}% accuracy`;
+
+  // inline add-topic form (in the Qbank bloom)
+  const [addingTopic, setAddingTopic] = useState(false);
+  const [tDraft, setTDraft] = useState({ topic: '', done: '', total: '', correct: '' });
+  const [savingTopic, setSavingTopic] = useState(false);
+  const saveTopic = async () => {
+    if (!tDraft.topic.trim() || savingTopic) return;
+    setSavingTopic(true);
+    try {
+      await api.qbankSave(qBank, tDraft.topic.trim(), Number(tDraft.done) || 0, Number(tDraft.total) || 0, Number(tDraft.correct) || 0);
+      setTDraft({ topic: '', done: '', total: '', correct: '' });
+      setAddingTopic(false);
+      loadQbank();
+    } catch (e) {} finally { setSavingTopic(false); }
+  };
 
   // ---- Flashcards: decks + due totals for the bloom summary ----
   const [due, setDue] = useState(null);
   const [decks, setDecks] = useState(null); // null = loading, [] = none
-  useEffect(() => {
-    let active = true;
+  const loadDecks = () => {
     api.decksGet().then((d) => {
-      if (!active) return;
       const list = d.decks || [];
       setDecks(list);
-      const totalDue = list.reduce((a, x) => a + (x.due_count || 0), 0);
-      setDue(totalDue);
-    }).catch(() => { if (active) { setDecks([]); setDue(0); } });
-    return () => { active = false; };
-  }, []);
+      setDue(list.reduce((a, x) => a + (x.due_count || 0), 0));
+    }).catch(() => { setDecks([]); setDue(0); });
+  };
+  useEffect(() => { loadDecks(); }, []);
+
+  // inline create-deck form (in the Flashcards bloom)
+  const [addingDeck, setAddingDeck] = useState(false);
+  const [dName, setDName] = useState('');
+  const [dTag, setDTag] = useState('');
+  const [savingDeck, setSavingDeck] = useState(false);
+  const saveDeck = async () => {
+    if (!dName.trim() || savingDeck) return;
+    setSavingDeck(true);
+    try {
+      await api.deckCreate(dName.trim(), dTag.trim() || null);
+      setDName(''); setDTag(''); setAddingDeck(false);
+      loadDecks();
+    } catch (e) {} finally { setSavingDeck(false); }
+  };
   const deckStats = decks ? {
     decks: decks.length,
     cards: decks.reduce((a, x) => a + (x.card_count || 0), 0),
@@ -629,9 +656,8 @@ function QuickRow({ user, nav, onGreen }) {
                   <>
                     <div style={{ fontSize: 30, marginBottom: 4 }}>📊</div>
                     <div style={{ display: 'flex', justifyContent: 'center', gap: 26 }}>
-                      <div><div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 30, fontWeight: 900, lineHeight: 1 }}>{qStats.empty || qStats.loading ? 0 : qStats.done}</div><div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.85, marginTop: 3 }}>done</div></div>
+                      <div><div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 26, fontWeight: 900, lineHeight: 1 }}>{qStats.empty || qStats.loading ? 0 : qStats.done}{qStats.total ? <span style={{ opacity: 0.6, fontSize: 18 }}>/{qStats.total}</span> : ''}</div><div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.85, marginTop: 3 }}>done</div></div>
                       <div><div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 30, fontWeight: 900, lineHeight: 1 }}>{qStats.empty || qStats.loading ? 0 : qStats.acc}%</div><div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.85, marginTop: 3 }}>accuracy</div></div>
-                      <div><div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 30, fontWeight: 900, lineHeight: 1 }}>{qStats.banks || 0}</div><div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.85, marginTop: 3 }}>banks</div></div>
                     </div>
                   </>
                 )}
@@ -701,31 +727,64 @@ function QuickRow({ user, nav, onGreen }) {
                         </div>
                       </>
                     )}
-                    <button onClick={() => { closeBloom(); setTimeout(() => nav('/qbank'), 300); }} style={{ width: '100%', border: 'none', borderRadius: 999, padding: '14px', fontSize: 14, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', color: '#fff', background: '#147a8a' }}>Open full tracker →</button>
+                    {addingTopic ? (
+                      <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 18, padding: 14 }}>
+                        <input value={tDraft.topic} onChange={(e) => setTDraft({ ...tDraft, topic: e.target.value })} placeholder="Topic name" autoFocus
+                          style={{ width: '100%', padding: '11px 14px', borderRadius: 999, border: '1.5px solid var(--line)', fontSize: 14, fontFamily: 'inherit', background: 'var(--paper)', color: 'var(--ink)', marginBottom: 9 }} />
+                        <div style={{ display: 'flex', gap: 8, marginBottom: 9 }}>
+                          <input value={tDraft.done} onChange={(e) => setTDraft({ ...tDraft, done: e.target.value })} placeholder="Done" inputMode="numeric"
+                            style={{ flex: 1, padding: '11px 12px', borderRadius: 999, border: '1.5px solid var(--line)', fontSize: 14, fontFamily: 'inherit', background: 'var(--paper)', color: 'var(--ink)', textAlign: 'center' }} />
+                          <input value={tDraft.total} onChange={(e) => setTDraft({ ...tDraft, total: e.target.value })} placeholder="Total" inputMode="numeric"
+                            style={{ flex: 1, padding: '11px 12px', borderRadius: 999, border: '1.5px solid var(--line)', fontSize: 14, fontFamily: 'inherit', background: 'var(--paper)', color: 'var(--ink)', textAlign: 'center' }} />
+                          <input value={tDraft.correct} onChange={(e) => setTDraft({ ...tDraft, correct: e.target.value })} placeholder="Correct" inputMode="numeric"
+                            style={{ flex: 1, padding: '11px 12px', borderRadius: 999, border: '1.5px solid var(--line)', fontSize: 14, fontFamily: 'inherit', background: 'var(--paper)', color: 'var(--ink)', textAlign: 'center' }} />
+                        </div>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <button onClick={() => { setAddingTopic(false); setTDraft({ topic: '', done: '', total: '', correct: '' }); }} style={{ flex: 1, border: '1.5px solid var(--line)', background: 'var(--card)', color: 'var(--muted)', borderRadius: 999, padding: '11px', fontSize: 13, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>Cancel</button>
+                          <button onClick={saveTopic} disabled={savingTopic || !tDraft.topic.trim()} style={{ flex: 1, border: 'none', background: '#147a8a', color: '#fff', borderRadius: 999, padding: '11px', fontSize: 13, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', opacity: tDraft.topic.trim() ? 1 : 0.5 }}>{savingTopic ? 'Saving…' : 'Save topic'}</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button onClick={() => setAddingTopic(true)} style={{ width: '100%', border: 'none', borderRadius: 999, padding: '14px', fontSize: 14, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', color: '#fff', background: '#147a8a' }}>+ Add topic</button>
+                    )}
                   </div>
                 )}
                 {bloom.key === 'flashcards' && (
                   <div style={{ padding: '20px 16px' }}>
-                    {decks && decks.length === 0 ? (
-                      <div style={{ textAlign: 'center', padding: '24px 16px' }}>
-                        <div style={{ fontSize: 38, marginBottom: 10 }}>🗂️</div>
-                        <p style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 18 }}>No decks yet. Make your first one to study with spaced repetition.</p>
-                        <button onClick={() => { closeBloom(); setTimeout(() => nav('/flashcards'), 300); }} style={{ width: '100%', border: 'none', borderRadius: 999, padding: '14px', fontSize: 14, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', color: '#fff', background: '#c08a1e' }}>+ Create your first deck</button>
+                    {addingDeck ? (
+                      <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 18, padding: 14, marginBottom: 16 }}>
+                        <input value={dName} onChange={(e) => setDName(e.target.value)} placeholder="Deck name" autoFocus
+                          style={{ width: '100%', padding: '11px 14px', borderRadius: 999, border: '1.5px solid var(--line)', fontSize: 14, fontFamily: 'inherit', background: 'var(--paper)', color: 'var(--ink)', marginBottom: 9 }} />
+                        <input value={dTag} onChange={(e) => setDTag(e.target.value)} placeholder="Exam tag (optional)"
+                          style={{ width: '100%', padding: '11px 14px', borderRadius: 999, border: '1.5px solid var(--line)', fontSize: 14, fontFamily: 'inherit', background: 'var(--paper)', color: 'var(--ink)', marginBottom: 9 }} />
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <button onClick={() => { setAddingDeck(false); setDName(''); setDTag(''); }} style={{ flex: 1, border: '1.5px solid var(--line)', background: 'var(--card)', color: 'var(--muted)', borderRadius: 999, padding: '11px', fontSize: 13, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>Cancel</button>
+                          <button onClick={saveDeck} disabled={savingDeck || !dName.trim()} style={{ flex: 1, border: 'none', background: '#c08a1e', color: '#fff', borderRadius: 999, padding: '11px', fontSize: 13, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', opacity: dName.trim() ? 1 : 0.5 }}>{savingDeck ? 'Creating…' : 'Create deck'}</button>
+                        </div>
                       </div>
                     ) : (
                       <>
-                        <h3 style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--muted)', marginBottom: 10 }}>Your decks</h3>
-                        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 18, overflow: 'hidden', marginBottom: 16 }}>
-                          {(decks || []).slice(0, 6).map((d, i) => (
-                            <div key={d.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '13px 15px', borderTop: i === 0 ? 'none' : '1px solid var(--line)' }}>
-                              <span style={{ flex: 1, fontSize: 13.5, fontWeight: 700, color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.name}</span>
-                              {d.due_count > 0
-                                ? <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--rust)', background: '#fbe4df', padding: '2px 9px', borderRadius: 99, flexShrink: 0 }}>{d.due_count} due</span>
-                                : <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 600, flexShrink: 0 }}>{d.card_count > 0 ? 'reviewed ✓' : 'empty'}</span>}
-                            </div>
-                          ))}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                          <h3 style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--muted)' }}>Your decks</h3>
+                          <button onClick={() => setAddingDeck(true)} aria-label="New deck" style={{ width: 36, height: 36, borderRadius: '50%', background: '#c08a1e', color: '#fff', border: 'none', fontSize: 22, display: 'grid', placeItems: 'center', cursor: 'pointer', lineHeight: 1 }}>+</button>
                         </div>
-                        <button onClick={() => { closeBloom(); setTimeout(() => nav('/flashcards'), 300); }} style={{ width: '100%', border: 'none', borderRadius: 999, padding: '14px', fontSize: 14, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', color: '#fff', background: '#c08a1e' }}>Open all decks →</button>
+                        {decks && decks.length === 0 ? (
+                          <div style={{ textAlign: 'center', padding: '24px 16px' }}>
+                            <div style={{ fontSize: 38, marginBottom: 10 }}>🗂️</div>
+                            <p style={{ fontSize: 13.5, color: 'var(--muted)' }}>No decks yet. Tap + to make your first one.</p>
+                          </div>
+                        ) : (
+                          <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 18, overflow: 'hidden' }}>
+                            {(decks || []).slice(0, 8).map((d, i) => (
+                              <div key={d.id} onClick={() => { closeBloom(); setTimeout(() => nav('/flashcards'), 300); }} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '13px 15px', borderTop: i === 0 ? 'none' : '1px solid var(--line)', cursor: 'pointer' }}>
+                                <span style={{ flex: 1, fontSize: 13.5, fontWeight: 700, color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.name}</span>
+                                {d.due_count > 0
+                                  ? <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--rust)', background: '#fbe4df', padding: '2px 9px', borderRadius: 99, flexShrink: 0 }}>{d.due_count} due</span>
+                                  : <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 600, flexShrink: 0 }}>{d.card_count > 0 ? 'reviewed ✓' : 'empty'}</span>}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </>
                     )}
                   </div>
@@ -886,7 +945,7 @@ function QbankCard({ nav }) {
   }, []);
 
   const subtitle = stats.empty
-  ? 'Start tracking your question progress'
+    ? 'Start tracking your question progress'
     : `${stats.done} done · ${stats.acc}% accuracy${stats.banks > 1 ? ` · ${stats.banks} banks` : ''}`;
 
   return (
