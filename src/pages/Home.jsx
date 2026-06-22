@@ -339,7 +339,7 @@ function QuickRow({ user, nav, onGreen }) {
   };
 
   // pop-outs
-  const [cdOpen, setCdOpen] = useState(false);
+const [cdOpen, setCdOpen] = useState(false);
   const [stOpen, setStOpen] = useState(false);
   const [nowTs, setNowTs] = useState(Date.now());
   useEffect(() => {
@@ -349,7 +349,7 @@ function QuickRow({ user, nav, onGreen }) {
   }, [cdOpen]);
 
   // adaptive coach line — urgency without panic
-const coachLine = (d) => {
+  const coachLine = (d) => {
     if (d > 60) return 'Plenty of runway.';
     if (d > 14) return 'Sharpening phase.';
     if (d > 2)  return 'Lock in.';
@@ -493,7 +493,7 @@ const coachLine = (d) => {
       })()}
 
       {stOpen && (() => {
-        const best = Math.max(user?.longest_streak || 0, streak);
+      const best = Math.max(user?.longest_streak || 0, streak);
         const line = !studiedToday
           ? 'One tap keeps the flame alive.'
           : streak >= best && streak > 1
@@ -577,7 +577,7 @@ export default function Home() {
   return (
     <div className="screen" style={{ padding: 0 }}>
       {/* ===== GREEN BAND: greeting + motivation quote + nudges + quick circles ===== */}
-      <div style={{ background: 'linear-gradient(180deg, #1f4d3f 0%, #1f4d3f 55%, #1a4236 100%)', padding: '14px 18px 34px', color: '#fff' }}>
+      <div className="mc-home-band" style={{ padding: '14px 18px 38px', color: '#fff', borderRadius: '0 0 34px 34px' }}>
         <div onClick={() => setShowMotivation(true)} style={{ cursor: 'pointer', position: 'relative' }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--gold)', marginBottom: 8 }}>
             Hi Dr. {(user?.name || '').replace(/^Dr\.?\s+/i, '').split(' ')[0] || 'Doctor'} — a thought for today
@@ -632,7 +632,7 @@ export default function Home() {
       </div>
 
       {/* ===== CURVED LIGHT SHEET: Explore + invite + footer ===== */}
-      <div style={{ background: 'var(--paper)', borderRadius: '34px 34px 0 0', marginTop: -24, position: 'relative', zIndex: 1, padding: '24px 18px 20px' }}>
+      <div style={{ background: 'var(--paper)', borderRadius: '34px 34px 0 0', marginTop: -34, position: 'relative', zIndex: 1, padding: '24px 18px 20px' }}>
         <h2 className="serif" style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 21, fontWeight: 900, letterSpacing: '-0.3px', color: 'var(--forest)', margin: '0 0 12px' }}>Explore Study Partners</h2>
 
         <ExploreBrowse />
