@@ -72,6 +72,7 @@ export default function Profile() {
   const { user, logout, setUser } = useAuth();
   const { mode, toggle } = useTheme();
   const [, setTilePrefs] = useState(0); // re-render when tile prefs change
+  const [homeOpen, setHomeOpen] = useState(false); // collapsible home-screen settings
   const [shareOpen, setShareOpen] = useState(false);
   const shareLink = `https://med-connect3-0.vercel.app/add/${user?.id}`;
   const shareProfile = async () => {
@@ -146,6 +147,7 @@ export default function Profile() {
         <select className="input" value={exam} onChange={(e) => setExam(e.target.value)}>
           {EXAMS.map((x) => <option key={x} value={x}>{x}</option>)}
         </select>
+
         <label className="label">Exam date <span style={{ textTransform: 'none', letterSpacing: 0, fontWeight: 400 }}>(for your countdown)</span></label>
         <input className="input" type="date" value={examDate} onChange={(e) => setExamDate(e.target.value)} />
 
@@ -252,10 +254,14 @@ export default function Profile() {
 
       <div className="label" style={{ marginTop: 18 }}>Home screen</div>
       <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 18, overflow: 'hidden', boxShadow: '0 4px 14px rgba(31,77,63,.04)' }}>
-        {[['hide_qbank', 'Show Qbank tracker'], ['hide_flashcards', 'Show flashcards'], ['hide_countdown', 'Show exam countdown'], ['hide_streak', 'Show study streak']].map(([key, label], i) => {
+        <div onClick={() => setHomeOpen((o) => !o)} style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', cursor: 'pointer' }}>
+          <span style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>Which tiles to show</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ transform: homeOpen ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform .2s ease' }}><path d="M6 9l6 6 6-6" /></svg>
+        </div>
+        {homeOpen && [['hide_qbank', 'Show Qbank tracker'], ['hide_flashcards', 'Show flashcards'], ['hide_countdown', 'Show exam countdown'], ['hide_streak', 'Show study streak']].map(([key, label]) => {
           const off = localStorage.getItem(key) === '1';
           return (
-            <div key={key} style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', cursor: 'pointer', borderTop: i === 0 ? 'none' : '1px solid var(--line)' }}
+            <div key={key} style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', cursor: 'pointer', borderTop: '1px solid var(--line)' }}
               onClick={() => { localStorage.setItem(key, off ? '' : '1'); setTilePrefs((p) => p + 1); }}>
               <span style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>{label}</span>
               <span style={{ width: 42, height: 24, borderRadius: 999, background: off ? 'var(--line)' : 'var(--forest)', position: 'relative', transition: 'background .2s ease', flexShrink: 0 }}>
@@ -288,7 +294,7 @@ export default function Profile() {
       </div>
 
       {!confirmDel ? (
-      <button className="link" style={{ display:'block', margin:'14px auto 0', color:'var(--subtle)', fontSize:13 }} onClick={() => setConfirmDel(true)}>Delete my account</button>
+        <button className="link" style={{ display:'block', margin:'14px auto 0', color:'var(--subtle)', fontSize:13 }} onClick={() => setConfirmDel(true)}>Delete my account</button>
       ) : (
         <div className="card" style={{ marginTop:14, borderColor:'var(--rust)' }}>
           <p style={{ fontSize:14, marginBottom:10 }}>Permanently delete your account and all your data? This can't be undone.</p>
