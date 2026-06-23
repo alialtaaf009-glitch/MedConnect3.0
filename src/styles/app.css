@@ -8,6 +8,7 @@
   --bg:var(--paper); --bg2:var(--paper-2); --panel:var(--card); --panel2:var(--paper-2);
   --teal:var(--forest); --teal-dim:var(--forest-2); --amber:var(--gold);
   --rose:var(--rust); --green:#1aa860; --violet:var(--rust); --faint:var(--subtle);
+  --section-hero:#1f4d3f;
 }
 [data-theme="dark"] {
   --ink:#ece7d8; --paper:#14110c; --paper-2:#1d1913; --card:#1b1710;
@@ -16,6 +17,7 @@
   --bg:var(--paper); --bg2:var(--paper-2); --panel:var(--card); --panel2:var(--paper-2);
   --teal:var(--forest); --teal-dim:var(--forest-2); --amber:var(--gold);
   --rose:var(--rust); --green:#2ecc71; --violet:var(--rust); --faint:var(--subtle);
+  --section-hero:#14241c;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -24,10 +26,11 @@ body {
   font-family: 'Inter', system-ui, sans-serif;
   background: var(--paper); color: var(--ink);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 ::selection { background: var(--forest); color: #fff; }
 
-.app { max-width: 480px; margin: 0 auto; min-height: 100vh; padding-bottom: 78px; position: relative; }
+.app { max-width: 480px; width: 100%; margin: 0 auto; min-height: 100vh; padding-bottom: 78px; position: relative; }
 
 /* ---- Desktop framing: present the phone-width app as a polished centered panel ---- */
 @media (min-width: 700px) {
@@ -128,11 +131,12 @@ h1, h2, h3, .h1, .name, .brand-name, .stat-num { font-family: 'Inter', system-ui
 .label { display: block; font-family: 'Inter', system-ui, sans-serif; font-size: 13px; color: var(--forest); font-weight: 700;
   text-transform: uppercase; letter-spacing: .5px; margin: 18px 0 9px; }
 .chips { display: flex; flex-wrap: wrap; gap: 9px; }
-.chip { border: 1px solid var(--line); background: transparent; color: var(--muted);
-  border-radius: 10px; padding: 8px 14px; font-size: 13.5px; cursor: pointer; font-family: 'Inter', sans-serif;
-  transition: background .18s ease, border-color .18s ease, color .18s ease, transform .22s cubic-bezier(0.34, 1.56, 0.64, 1); }
-.chip:active { transform: scale(0.9); }
-.chip.on { background: var(--forest); border-color: var(--forest); color: var(--paper); }
+.chip { border: 1.5px solid var(--line); background: transparent; color: var(--muted); font-weight: 600;
+  border-radius: 999px; padding: 8px 15px; font-size: 13.5px; cursor: pointer; font-family: 'Inter', sans-serif;
+  line-height: 1.2; box-sizing: border-box;
+  transition: background .2s ease, border-color .2s ease, color .2s ease, transform .15s cubic-bezier(0.22, 1, 0.3, 1); }
+.chip:active { transform: scale(0.94); }
+.chip.on { background: var(--forest); border-color: var(--forest); color: var(--paper); font-weight: 600; }
 
 .pill { font-size: 12px; padding: 4px 10px; border-radius: 20px; font-family: 'Inter', system-ui, sans-serif; font-weight: 700; }
 .pill.pending { background: var(--paper-2); color: var(--gold); }
@@ -148,7 +152,7 @@ h1, h2, h3, .h1, .name, .brand-name, .stat-num { font-family: 'Inter', system-ui
 /* bottom nav */
 .tabbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px;
   background: var(--forest); border-top: 1px solid var(--forest); display: flex; padding: 10px 0 16px; }
-[data-theme="dark"] .tabbar { background: #1a3a30; border-top-color: #1a3a30; }
+[data-theme="dark"] .tabbar { background: #14241c; border-top-color: #14241c; }
 .tabbar a { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #9fc2b5; font-size: 10px;
   font-family: 'Inter', sans-serif; font-weight: 600; transition: color .18s ease; }
 .tabbar a.active { color: #ffffff; }
@@ -313,9 +317,14 @@ button:active { -webkit-tap-highlight-color: transparent; }
 
 /* top app bar — green, bookends the nav */
 .topbar { position: sticky; top: 0; z-index: 60; display: flex; align-items: center; gap: 12px;
-  padding: calc(env(safe-area-inset-top, 0px) + 12px) 16px 12px; background: var(--forest);
-  border-bottom: 1px solid var(--forest); min-height: calc(env(safe-area-inset-top, 0px) + 60px); }
-[data-theme="dark"] .topbar { background: #1a3a30; border-bottom-color: #1a3a30; }
+  padding: calc(env(safe-area-inset-top, 0px) + 12px) 16px 12px; background: var(--topbar-bg, var(--forest));
+  border-bottom: 1px solid var(--topbar-bg, var(--forest)); min-height: calc(env(safe-area-inset-top, 0px) + 60px); }
+[data-theme="dark"] .topbar { background: var(--topbar-bg, #14241c); border-bottom-color: var(--topbar-bg, #14241c); }
+/* nav-section coloured hero — matches the top bar in both light & dark so they blend */
+.section-hero { background: #1f4d3f; color: #fff; }
+[data-theme="dark"] .section-hero { background: #14241c; }
+:root { --section-hero: #1f4d3f; }
+[data-theme="dark"] { --section-hero: #14241c; }
 .topbar-title { flex: 1; text-align: center; font-family: 'Fraunces', Georgia, serif; font-size: 20px; font-weight: 900; letter-spacing: -0.4px; color: #fff; }
 .topbar-back { background: none; border: none; color: #fff; cursor: pointer; display: grid; place-items: center; padding: 0; width: 24px; height: 24px;
   transition: transform .2s cubic-bezier(0.34, 1.56, 0.64, 1); }
@@ -324,6 +333,7 @@ button:active { -webkit-tap-highlight-color: transparent; }
   color: #fff; font-weight: 700; font-size: 16px; cursor: pointer; display: grid; place-items: center; flex-shrink: 0;
   font-family: 'Inter', sans-serif; transition: transform .2s cubic-bezier(0.34, 1.56, 0.64, 1); }
 .topbar-avatar:active { transform: scale(0.9); }
+
 /* hamburger in top bar */
 .topbar-burger { background: none; border: none; cursor: pointer; padding: 0; width: 24px; height: 24px; display: flex; flex-direction: column; justify-content: center; gap: 4px; }
 .topbar-burger span { height: 2.2px; width: 22px; background: #fff; border-radius: 2px; display: block; transition: transform .2s ease; }
@@ -454,5 +464,3 @@ button:active { -webkit-tap-highlight-color: transparent; }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 .tab-pop { animation: tabPop .34s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
-.mc-home-band { background: #1f4d3f; }
-[data-theme="dark"] .mc-home-band { background: #1a3a30; }
