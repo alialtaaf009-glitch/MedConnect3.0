@@ -91,8 +91,12 @@ function ConversationList({ nav, me }) {
   if (status === 'loading') return <div className="center" style={{minHeight:200}}><div className="spinner" /></div>;
 
   return (
-    <div className="screen">
-      <h1 className="h1" style={{ marginBottom: 12 }}>Messages</h1>
+    <div className="screen" style={{ padding: 0 }}>
+      <div style={{ background: '#1f4d3f', color: '#fff', padding: '18px 20px 28px' }}>
+        <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 26, fontWeight: 900, lineHeight: 1 }}>Messages</h1>
+        <p style={{ fontSize: 12.5, opacity: 0.85, marginTop: 5 }}>Your study conversations and groups.</p>
+      </div>
+      <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -18, position: 'relative', padding: '18px 16px', minHeight: '64vh' }}>
       <div className="tabs" style={{ marginBottom: 14 }}>
         <button className={`tab ${tab === 'direct' ? 'on' : ''}`} onClick={() => setTab('direct')}>Direct</button>
         <button className={`tab ${tab === 'groups' ? 'on' : ''}`} onClick={() => setTab('groups')}>Groups</button>
@@ -163,6 +167,7 @@ function ConversationList({ nav, me }) {
           )}
         </>
       )}
+      </div>
 
       {creating && (
         <div onClick={() => setCreating(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'grid', placeItems: 'center', zIndex: 100, padding: 24 }}>
