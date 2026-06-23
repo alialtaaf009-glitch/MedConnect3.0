@@ -528,7 +528,21 @@ function QuickRow({ user, nav, onGreen }) {
           <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="6" width="13" height="12" rx="2" /><path d="M7 10h5M7 13.5h3" /><path d="M20 8.5v8a2 2 0 0 1-2 2H8.5" /></svg>
         </Circle>
       )}
-
+        {/* Countdown — opens bloom; always shows when toggle is on */}
+        {!hideCd && (
+          <Circle tint="transparent" color="#1f9bb8" glow="none" label="Countdown" onClick={(e) => launchBloom(e, '#4a5bb8', 'countdown')}>
+            <svg width="64" height="64" viewBox="0 0 64 64" style={{ position: 'absolute', inset: 0, transform: 'rotate(-90deg)' }}>
+              <circle cx="32" cy="32" r={R2} fill="#dceff3" />
+              <circle cx="32" cy="32" r={R2} fill="none" stroke="#c2e2e9" strokeWidth="5" />
+              <circle cx="32" cy="32" r={R2} fill="none" stroke={finalStretch ? '#d98a1e' : '#1f9bb8'} strokeWidth="5" strokeLinecap="round" strokeDasharray={C2} strokeDashoffset={C2 * (1 - (daysLeft === null ? 0 : frac))} style={{ transition: 'stroke-dashoffset .6s ease' }} />
+            </svg>
+            <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <b style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: daysLeft !== null && daysLeft > 99 ? 16 : 19, color: finalStretch ? '#c0533f' : '#15795a', lineHeight: 1 }}>{daysLeft === null ? '\u2013' : daysLeft > 0 ? daysLeft : daysLeft === 0 ? '0' : '\u2013'}</b>
+              <span style={{ fontSize: 7.5, fontWeight: 800, letterSpacing: 1, color: '#5a8a7a', marginTop: 1 }}>{daysLeft === null ? 'SET' : daysLeft >= 0 ? 'DAYS' : 'PASSED'}</span>
+            </div>
+          </Circle>
+        )}
+        
         {/* Streak — fire is the mark-today tap; circle body opens detail */}
         {!hideSt && (
           <Circle tint="#fde0d8" color="#d24a30" glow="0 6px 14px rgba(210,74,48,.22)" label="Streak" onClick={(e) => launchBloom(e, '#d24a30', 'streak')}>
