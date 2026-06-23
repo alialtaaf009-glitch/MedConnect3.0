@@ -184,6 +184,9 @@ function Drawer({ open, onClose, user }) {
 function TopBar({ user }) {
   const loc = useLocation();
   const nav = useNavigate();
+  // each main section gets its own colour so the top bar blends with the page's hero
+  // sections now use a green hero matching the default top bar — no per-section bar colour
+  const barColor = null;
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [bellOpen, setBellOpen] = useState(false);
   const [notifs, setNotifs] = useState({ requests: [], nudges: [], unread: [] });
@@ -229,7 +232,7 @@ function TopBar({ user }) {
 
   return (
     <>
-      <div className="topbar">
+      <div className="topbar" style={barColor ? { background: barColor, color: '#fff', borderBottomColor: barColor } : undefined}>
         <div style={{ width: 76, flexShrink: 0, display: 'flex', alignItems: 'center' }}>
           {showBack
             ? <button className="topbar-back" onClick={goBack} aria-label="Back">
@@ -239,7 +242,7 @@ function TopBar({ user }) {
                 <span /><span /><span />
               </button>}
         </div>
-        <div className="topbar-title">MedConnect</div>
+        <div className="topbar-title" style={barColor ? { color: '#fff' } : undefined}>MedConnect</div>
         <div style={{ width: 76, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8 }}>
           {user && !onProfile && (
             <button onClick={() => { const opening = !bellOpen; setBellOpen(opening); if (opening) loadNotifs.current(); }} aria-label="Notifications"
@@ -283,7 +286,7 @@ function TopBar({ user }) {
             )}
 
             {(notifs.unread || []).length > 0 && (
-              <div>
+          <div>
                 <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 0.5, textTransform: 'uppercase', color: 'var(--subtle)', padding: '12px 18px 4px' }}>
                   New Messages
                 </div>
@@ -490,4 +493,3 @@ export default function App() {
     </div>
   );
 }
-
