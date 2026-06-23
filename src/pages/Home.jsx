@@ -197,7 +197,7 @@ function ExploreBrowse() {
                         {examCount(exam)}
                       </span>
                     )}
-                    <span className={`star-btn ${pinE.includes(key) ? 'on twinkle' : ''}`} onClick={(e) => { e.stopPropagation(); togglePinE(key); }} style={{ padding: '0 5px', display: 'inline-flex' }}><StarIcon filled={pinE.includes(key)} /></span>
+                    <span className={`star-btn ${pinE.includes(key) ? 'on twinkle' : ''}`} onClick={(e) => { e.stopPropagation(); togglePinE(key); }} style={{ width: 28, display: 'inline-flex', justifyContent: 'center', flexShrink: 0 }}><StarIcon filled={pinE.includes(key)} /></span>
                     <span className={`chev-round ${openExam === key ? 'open' : ''}`} style={{ width: 24, height: 24 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg></span>
                   </div>
                   {openExam === key && parts.map((part) => {
@@ -218,14 +218,14 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'country' && (
-        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+      <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
         {orderedCountries.map(([flag, country, exams], idx) => (
         <div key={country} style={{ borderTop: idx === 0 ? 'none' : '1px solid var(--line)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '11px 18px', cursor: 'pointer' }}
             onClick={() => setOpenCountry(openCountry === country ? '' : country)}>
             <Flag country={country} emoji={flag} ring={flagColor(country)} />
             <span style={{ flex: 1, fontWeight: 600 }}>{country}</span>
-            <span className={`star-btn ${pinC.includes(country) ? 'on twinkle' : ''}`} onClick={(e) => { e.stopPropagation(); togglePinC(country); }} style={{ padding: '0 5px', display: 'inline-flex' }}><StarIcon filled={pinC.includes(country)} /></span>
+            <span className={`star-btn ${pinC.includes(country) ? 'on twinkle' : ''}`} onClick={(e) => { e.stopPropagation(); togglePinC(country); }} style={{ width: 28, display: 'inline-flex', justifyContent: 'center', flexShrink: 0 }}><StarIcon filled={pinC.includes(country)} /></span>
             <span className={`chev-round ${openCountry === country ? 'open' : ''}`}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
             </span>
@@ -470,9 +470,11 @@ function QuickRow({ user, nav, onGreen }) {
   const moraleFor = (key) => (MORALE[key] || MORALE.streak)[moralePick % (MORALE[key] || MORALE.streak).length];
   const [bloom, setBloom] = useState(null); // { color, origin:{x,y}, key, navTo } | null
   const [bloomGrown, setBloomGrown] = useState(false);
+  const [bloomClosing, setBloomClosing] = useState(false);
   const launchBloom = (e, color, key) => {
     let x = window.innerWidth / 2, y = window.innerHeight / 2;
     try { const r = e.currentTarget.getBoundingClientRect(); x = r.left + r.width / 2; y = r.top + r.height / 2; } catch (_) {}
+    setBloomClosing(false);
     setBloom({ color, origin: { x, y }, key });
     setBloomGrown(false);
     if (setBar) setBar(color); // colour the status strip to match
@@ -483,10 +485,12 @@ function QuickRow({ user, nav, onGreen }) {
     }));
   };
   const closeBloom = () => {
+    setBloomClosing(true);
     setBloomGrown(false); // slide the panel down
     // keep the bar coloured + immersive WHILE it slides, then restore everything together
     setTimeout(() => {
       setBloom(null);
+      setBloomClosing(false);
       if (setBar) setBar(null);
       if (exitImmersive) exitImmersive();
     }, 460);
@@ -500,7 +504,7 @@ function QuickRow({ user, nav, onGreen }) {
   return (
     <>
       <style>{`
-        @keyframes qBadge{0%{transform:scale(0)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
+      @keyframes qBadge{0%{transform:scale(0)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
         .qi-press{transition:transform .4s cubic-bezier(0.16,1,0.3,1)}
         .qi-press:active .qi-shape{transform:scale(.9)}
         .qi-press:active{transform:scale(.97)}
@@ -646,7 +650,7 @@ function QuickRow({ user, nav, onGreen }) {
               position: 'absolute', inset: 0, background: bloom.color,
               transform: bloomGrown ? 'translateY(0)' : 'translateY(100%)',
               willChange: 'transform',
-              animation: bloomGrown ? 'bloomSlideUp .46s cubic-bezier(0.16,1,0.3,1) both' : 'bloomSlideDown .42s cubic-bezier(0.4,0,0.2,1) both',
+              animation: bloomGrown ? 'bloomSlideUp .46s cubic-bezier(0.16,1,0.3,1) both' : (bloomClosing ? 'bloomSlideDown .42s cubic-bezier(0.4,0,0.2,1) both' : 'none'),
               display: 'flex', flexDirection: 'column',
             }}>
               {/* coloured top bar — covers the real top bar, blends with status strip above */}
@@ -728,7 +732,7 @@ function QuickRow({ user, nav, onGreen }) {
                   </div>
                 )}
                 {bloom.key === 'qbank' && (
-                  <div style={{ padding: '20px 16px' }}>
+             padding: '20px 16px' }}>
                     {qStats.empty ? (
                       <div style={{ textAlign: 'center', padding: '24px 16px' }}>
                         <div style={{ fontSize: 38, marginBottom: 10 }}>📊</div>
@@ -881,7 +885,7 @@ export default function Home() {
       url: 'https://med-connect3-0.vercel.app',
     };
     try {
-      if (navigator.share) { await navigator.share(data); return; }
+       (navigator.share) { await navigator.share(data); return; }
     } catch (e) { if (e?.name === 'AbortError') return; }
     try {
       await navigator.clipboard.writeText(`${data.text} ${data.url}`);
