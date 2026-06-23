@@ -4,18 +4,6 @@ import { api } from '../lib/api';
 import { examColor } from '../lib/examColors';
 import { useAuth } from '../context/Auth.jsx';
 import { useTheme } from '../context/Theme.jsx';
-
-function useSectionColor(color) {
-  const { setBar } = useTheme();
-  useEffect(() => {
-    document.documentElement.style.setProperty('--topbar-bg', color);
-    if (setBar) setBar(color);
-    return () => {
-      document.documentElement.style.removeProperty('--topbar-bg');
-      if (setBar) setBar(null);
-    };
-  }, [color, setBar]);
-}
 import { isOnline } from '../lib/presence';
 
 // sets the top bar + status strip to a section colour while mounted
@@ -57,7 +45,6 @@ function EmptyState({ title, sub }) {
 export default function Partners() {
   useSectionColor('#4a5bb8');
   const { user } = useAuth();
-  useSectionColor('#4a5bb8');
   const nav = useNavigate();
   const [params] = useSearchParams();
   const filterExam = params.get('exam');
@@ -303,4 +290,4 @@ export default function Partners() {
       )}
     </div>
   );
-  }
+}
