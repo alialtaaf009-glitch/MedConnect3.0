@@ -101,6 +101,7 @@ export default function Profile() {
   const [rightNow, setRightNow] = useState(() => unpackBio(user?.bio).r);
   const [busy, setBusy] = useState(false);
   const [confirmDel, setConfirmDel] = useState(false);
+  const [confirmLogout, setConfirmLogout] = useState(false);
 
   const save = async () => {
     setBusy(true);
@@ -141,35 +142,42 @@ export default function Profile() {
         <label className="label">Display name</label>
         <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
 
-        <MultiChips label="Prefers" hint="How do you like to study with a partner?" options={PREFERS} value={prefers} onChange={setPrefers} />
-        <MultiChips label="Right now" hint="Where are you in your prep?" options={RIGHT_NOW} value={rightNow} onChange={setRightNow} />
-
         <label className="label">Exam</label>
         <select className="input" value={exam} onChange={(e) => setExam(e.target.value)}>
           {EXAMS.map((x) => <option key={x} value={x}>{x}</option>)}
         </select>
-
         <label className="label">Exam date <span style={{ textTransform: 'none', letterSpacing: 0, fontWeight: 400 }}>(for your countdown)</span></label>
         <input className="input" type="date" value={examDate} onChange={(e) => setExamDate(e.target.value)} />
 
         <Chips label="Country" options={COUNTRIES} value={country} onChange={setCountry} />
-        <label className="label">Timezone  (optional)</label>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '26px 0 4px' }}>
+          <span style={{ flex: 1, height: 1, background: 'var(--line)' }} />
+          <span style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--muted)' }}>Optional details</span>
+          <span style={{ flex: 1, height: 1, background: 'var(--line)' }} />
+        </div>
+        <p className="sub" style={{ fontSize: 12, marginBottom: 14, textAlign: 'center' }}>These help match you with better study partners.</p>
+
+        <MultiChips label="Prefers" hint="How do you like to study with a partner?" options={PREFERS} value={prefers} onChange={setPrefers} />
+        <MultiChips label="Right now" hint="Where are you in your prep?" options={RIGHT_NOW} value={rightNow} onChange={setRightNow} />
+
+        <label className="label">Timezone</label>
         <select className="input" value={timezone} onChange={(e) => setTimezone(e.target.value)}>
           <option value="">Select timezone</option>
           {TIMEZONES.map((tz) => <option key={tz} value={tz}>{tz}</option>)}
         </select>
-        <Chips label="Question bank" options={QBANKS} value={questionBank} onChange={setQuestionBank} optional />
-        <Chips label="When do you study?" options={STUDY_WHEN} value={studyTime} onChange={setStudyTime} optional />
-        <Chips label="Current focus" options={FOCUS} value={focus} onChange={setFocus} optional />
-        <Chips label="Gender" options={GENDER} value={gender} onChange={setGender} optional />
-        <MultiChips label="Study style & environment" hint="How do you study best? Pick any that fit — helps match you with compatible partners." options={STUDY_STYLES} value={studyStyles} onChange={setStudyStyles} />
+        <Chips label="Question bank" options={QBANKS} value={questionBank} onChange={setQuestionBank} />
+        <Chips label="When do you study?" options={STUDY_WHEN} value={studyTime} onChange={setStudyTime} />
+        <Chips label="Current focus" options={FOCUS} value={focus} onChange={setFocus} />
+        <Chips label="Gender" options={GENDER} value={gender} onChange={setGender} />
+        <MultiChips label="Study style & environment" hint="How do you study best? Pick any that fit." options={STUDY_STYLES} value={studyStyles} onChange={setStudyStyles} />
 
-        <label className="label">Medical school <span style={{ textTransform: 'none', letterSpacing: 0, fontWeight: 400 }}>(optional)</span></label>
+        <label className="label">Medical school</label>
         <input className="input" placeholder="e.g. King Edward Medical University" value={medicalSchool} onChange={(e) => setMedicalSchool(e.target.value)} />
 
         <label className="label">Medical registration <span style={{ textTransform: 'none', letterSpacing: 0, fontWeight: 400 }}>(self-reported)</span></label>
         <select className="select" value={regCouncil} onChange={(e) => setRegCouncil(e.target.value)}>
-          <option value="">Select council (optional)</option>
+          <option value="">Select council</option>
           <option value="PMDC">PMDC (Pakistan)</option>
           <option value="GMC">GMC (UK)</option>
           <option value="IMC">IMC (Ireland)</option>
@@ -263,7 +271,15 @@ export default function Profile() {
         <NotifToggle />
       </div>
 
-      <button className="btn ghost" style={{ marginTop:16, color:'var(--rust)', borderColor:'var(--rust)' }} onClick={logout}>Log out</button>
+      {!confirmLogout ? (
+        <button className="btn ghost" style={{ marginTop:16, color:'var(--rust)', borderColor:'var(--rust)' }} onClick={() => setConfirmLogout(true)}>Log out</button>
+      ) : (
+        <div className="card" style={{ marginTop:16 }}>
+          <p style={{ fontSize:14, marginBottom:10 }}>Log out of your account?</p>
+          <button className="btn" style={{ background:'var(--rust)' }} onClick={logout}>Yes, log out</button>
+          <button className="btn ghost" style={{ marginTop:8 }} onClick={() => setConfirmLogout(false)}>Cancel</button>
+        </div>
+      )}
 
       <div style={{ textAlign:'center', marginTop:18 }}>
         <button className="link" onClick={() => nav('/legal')}>Privacy & Terms</button>
@@ -272,7 +288,7 @@ export default function Profile() {
       </div>
 
       {!confirmDel ? (
-        <button className="link" style={{ display:'block', margin:'14px auto 0', color:'var(--subtle)', fontSize:13 }} onClick={() => setConfirmDel(true)}>Delete my account</button>
+      <button className="link" style={{ display:'block', margin:'14px auto 0', color:'var(--subtle)', fontSize:13 }} onClick={() => setConfirmDel(true)}>Delete my account</button>
       ) : (
         <div className="card" style={{ marginTop:14, borderColor:'var(--rust)' }}>
           <p style={{ fontSize:14, marginBottom:10 }}>Permanently delete your account and all your data? This can't be undone.</p>
@@ -311,7 +327,7 @@ function NotifToggle() {
       setErr(e.message || 'Could not change notifications.');
     }
     setBusy(false);
-    };
+  };
 
   if (!supported) {
     return (
