@@ -1022,5 +1022,15 @@ function QbankCard({ nav }) {
     </button>
   );
 }
+    <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontWeight: 800, fontSize: 14.5, color: 'var(--ink)' }}>Qbank Tracker</div>
+        {stats.loading
+          ? <div style={{ height: 11, width: 130, borderRadius: 6, background: 'var(--paper-2)', marginTop: 4 }} />
+          : <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 1 }}>{subtitle}</div>}
+      </div>
+      <span style={{ width: 26, height: 26, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', color: 'var(--forest)', fontWeight: 800, flexShrink: 0 }}>›</span>
+    </button>
+  );
+}
   
                                                                                               
