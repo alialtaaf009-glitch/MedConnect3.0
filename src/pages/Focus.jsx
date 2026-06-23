@@ -88,13 +88,17 @@ function Breathe() {
 
 export default function Focus() {
   return (
-    <div className="screen">
-      <h1 className="h1">Focus ☕</h1>
-      <p className="voice sub" style={{ marginBottom: 16, fontSize: 14.5 }}>
-        Coffee in hand? Good. Set a block, tap the box for full-screen, and guard it like an exam hall.
-      </p>
-      <StudyTimer />
-      <TakeABreak />
+    <div className="screen" style={{ padding: 0 }}>
+      <div style={{ background: '#1f4d3f', color: '#fff', padding: '18px 20px 30px' }}>
+        <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 26, fontWeight: 900, lineHeight: 1 }}>Focus ☕</h1>
+        <p style={{ fontSize: 12.5, opacity: 0.85, marginTop: 5, lineHeight: 1.45 }}>
+          Set a block, tap the box for full-screen, and guard it like an exam hall.
+        </p>
+      </div>
+      <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -18, position: 'relative', padding: '18px 16px', minHeight: '64vh' }}>
+        <StudyTimer />
+        <TakeABreak />
+      </div>
     </div>
   );
 }
@@ -114,4 +118,3 @@ function TakeABreak() {
     </>
   );
 }
-
