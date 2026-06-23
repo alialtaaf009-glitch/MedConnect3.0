@@ -218,7 +218,7 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'country' && (
-      <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
         {orderedCountries.map(([flag, country, exams], idx) => (
         <div key={country} style={{ borderTop: idx === 0 ? 'none' : '1px solid var(--line)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '11px 18px', cursor: 'pointer' }}
@@ -473,18 +473,21 @@ function QuickRow({ user, nav, onGreen }) {
   const launchBloom = (e, color, key) => {
     let x = window.innerWidth / 2, y = window.innerHeight / 2;
     try { const r = e.currentTarget.getBoundingClientRect(); x = r.left + r.width / 2; y = r.top + r.height / 2; } catch (_) {}
-    if (enterImmersive) enterImmersive(); // hide the app's top bar + nav FIRST (before the slide)
     setBloom({ color, origin: { x, y }, key });
     setBloomGrown(false);
-    if (setBar) setBar(color); // colour the system bars to match
-    // wait two frames so the start state (translateY 100%) paints before we animate up
-    requestAnimationFrame(() => requestAnimationFrame(() => setBloomGrown(true)));
+    if (setBar) setBar(color); // colour the status strip to match
+    // wait two frames so the start state (translateY 100%) paints, then slide up + go immersive together
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      setBloomGrown(true);
+      if (enterImmersive) enterImmersive();
+    }));
   };
   const closeBloom = () => {
-    setBloomGrown(false);
+    setBloomGrown(false); // slide the panel down
+    // keep the bar coloured + immersive WHILE it slides, then restore everything together
     setTimeout(() => {
       setBloom(null);
-      if (setBar) setBar(null); // restore system bars AFTER the panel has slid away
+      if (setBar) setBar(null);
       if (exitImmersive) exitImmersive();
     }, 460);
   };
@@ -632,17 +635,18 @@ function QuickRow({ user, nav, onGreen }) {
         );
       })()}
       {bloom && (() => {
-        const examTs = user?.exam_date ? new Date(user.exam_date).getTime() : null;
+      const examTs = user?.exam_date ? new Date(user.exam_date).getTime() : null;
         const dLeft = examTs ? Math.ceil((examTs - Date.now()) / 86400000) : null;
         const best = Math.max(user?.longest_streak || 0, streak);
         const title = bloom.key === 'countdown' ? 'Countdown' : bloom.key === 'streak' ? 'Study Streak' : bloom.key === 'qbank' ? 'Qbank Tracker' : 'Flashcards';
         return createPortal((
           <div style={{ position: 'fixed', inset: 0, zIndex: 5000, overflow: 'hidden', pointerEvents: bloomGrown ? 'auto' : 'none' }}>
+            <style>{`@keyframes bloomSlideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes bloomSlideDown{from{transform:translateY(0)}to{transform:translateY(100%)}}`}</style>
             <div style={{
               position: 'absolute', inset: 0, background: bloom.color,
               transform: bloomGrown ? 'translateY(0)' : 'translateY(100%)',
               willChange: 'transform',
-              transition: 'transform .46s cubic-bezier(0.16, 1, 0.3, 1)',
+              animation: bloomGrown ? 'bloomSlideUp .46s cubic-bezier(0.16,1,0.3,1) both' : 'bloomSlideDown .42s cubic-bezier(0.4,0,0.2,1) both',
               display: 'flex', flexDirection: 'column',
             }}>
               {/* coloured top bar — covers the real top bar, blends with status strip above */}
@@ -995,7 +999,7 @@ function QbankCard({ nav }) {
   }, []);
 
   const subtitle = stats.empty
-    ? 'Start tracking your question progress'
+  ? 'Start tracking your question progress'
     : `${stats.done} done · ${stats.acc}% accuracy${stats.banks > 1 ? ` · ${stats.banks} banks` : ''}`;
 
   return (
