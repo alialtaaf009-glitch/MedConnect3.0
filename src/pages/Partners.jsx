@@ -123,13 +123,13 @@ export default function Partners() {
           {toast}
         </div>
       )}
-      <div style={{ background: 'var(--section-hero)', color: '#fff', padding: '18px 20px 32px' }}>
+      <div style={{ background: 'var(--section-hero)', color: '#fff', padding: '18px 20px 32px', minHeight: 150, boxSizing: 'border-box' }}>
         <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 26, fontWeight: 900, lineHeight: 1 }}>Study Partners</h1>
         <p style={{ fontSize: 12.5, opacity: 0.85, marginTop: 5 }}>Find, connect, and study together.</p>
         <div style={{ display: 'flex', gap: 22, marginTop: 16 }}>
-          <div><div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 22, fontWeight: 900, lineHeight: 1 }}>{matches.length}</div><div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.82, marginTop: 3 }}>matches</div></div>
-          <div><div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 22, fontWeight: 900, lineHeight: 1 }}>{conns.connected?.length || 0}</div><div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.82, marginTop: 3 }}>partners</div></div>
-          <div><div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 22, fontWeight: 900, lineHeight: 1 }}>{reqCount}</div><div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.82, marginTop: 3 }}>requests</div></div>
+          <div><div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 22, fontWeight: 900, lineHeight: 1, color: 'var(--gold)' }}>{matches.length}</div><div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.82, marginTop: 3 }}>matches</div></div>
+          <div><div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 22, fontWeight: 900, lineHeight: 1, color: 'var(--gold)' }}>{conns.connected?.length || 0}</div><div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.82, marginTop: 3 }}>partners</div></div>
+          <div><div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 22, fontWeight: 900, lineHeight: 1, color: 'var(--gold)' }}>{reqCount}</div><div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.82, marginTop: 3 }}>requests</div></div>
         </div>
       </div>
       <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -20, position: 'relative', padding: '18px 16px', minHeight: '60vh' }}>
@@ -275,4 +275,4 @@ export default function Partners() {
       )}
     </div>
   );
-}
+                                                                                                                   }
