@@ -17,6 +17,7 @@ import Motivation from './pages/Motivation.jsx';
 import Legal from './pages/Legal.jsx';
 import Reset from './pages/Reset.jsx';
 import About from './pages/About.jsx';
+import AboutDev from './pages/AboutDev.jsx';
 import LabValues from './pages/LabValues.jsx';
 import Formulas from './pages/Formulas.jsx';
 import Qbank from './pages/Qbank.jsx';
@@ -149,6 +150,9 @@ function Drawer({ open, onClose, user }) {
           <div className="drawer-sect">App</div>
           <button className="drawer-item" onClick={() => go('/about')}>
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg>About MedConnect
+          </button>
+          <button className="drawer-item" onClick={() => go('/about-dev')}>
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>About the developer
           </button>
           <button className="drawer-item" onClick={() => go('/legal')}>
             <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /></svg>Privacy &amp; Terms
@@ -470,6 +474,7 @@ export default function App() {
         <Route path="/motivation" element={<Motivation />} />
         <Route path="/legal" element={<Legal />} />
         <Route path="/about" element={<About />} />
+        <Route path="/about-dev" element={<AboutDev />} />
         <Route path="/labs" element={<LabValues />} />
         <Route path="/formulas" element={<Formulas />} />
         <Route path="/qbank" element={<Qbank />} />
@@ -485,3 +490,4 @@ export default function App() {
     </div>
   );
 }
+
