@@ -218,7 +218,7 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'country' && (
-        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+      <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
         {orderedCountries.map(([flag, country, exams], idx) => (
         <div key={country} style={{ borderTop: idx === 0 ? 'none' : '1px solid var(--line)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '11px 18px', cursor: 'pointer' }}
@@ -473,17 +473,20 @@ function QuickRow({ user, nav, onGreen }) {
   const launchBloom = (e, color, key) => {
     let x = window.innerWidth / 2, y = window.innerHeight / 2;
     try { const r = e.currentTarget.getBoundingClientRect(); x = r.left + r.width / 2; y = r.top + r.height / 2; } catch (_) {}
+    if (enterImmersive) enterImmersive(); // hide the app's top bar + nav FIRST (before the slide)
     setBloom({ color, origin: { x, y }, key });
     setBloomGrown(false);
     if (setBar) setBar(color); // colour the system bars to match
-    if (enterImmersive) enterImmersive(); // hide the app's top bar + nav
+    // wait two frames so the start state (translateY 100%) paints before we animate up
     requestAnimationFrame(() => requestAnimationFrame(() => setBloomGrown(true)));
   };
   const closeBloom = () => {
     setBloomGrown(false);
-    if (setBar) setBar(null); // restore system bars to theme colour
-    if (exitImmersive) exitImmersive(); // bring the top bar + nav back
-    setTimeout(() => setBloom(null), 460);
+    setTimeout(() => {
+      setBloom(null);
+      if (setBar) setBar(null); // restore system bars AFTER the panel has slid away
+      if (exitImmersive) exitImmersive();
+    }, 460);
   };
   // safety: whenever there's no open bloom, ensure the system bar + immersive are reset
   useEffect(() => {
@@ -992,7 +995,7 @@ function QbankCard({ nav }) {
   }, []);
 
   const subtitle = stats.empty
-  ? 'Start tracking your question progress'
+    ? 'Start tracking your question progress'
     : `${stats.done} done · ${stats.acc}% accuracy${stats.banks > 1 ? ` · ${stats.banks} banks` : ''}`;
 
   return (
