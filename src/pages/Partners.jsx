@@ -123,7 +123,7 @@ export default function Partners() {
           {toast}
         </div>
       )}
-      <div style={{ background: '#1f4d3f', color: '#fff', padding: '18px 20px 32px' }}>
+      <div style={{ background: 'var(--section-hero)', color: '#fff', padding: '18px 20px 32px' }}>
         <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 26, fontWeight: 900, lineHeight: 1 }}>Study Partners</h1>
         <p style={{ fontSize: 12.5, opacity: 0.85, marginTop: 5 }}>Find, connect, and study together.</p>
         <div style={{ display: 'flex', gap: 22, marginTop: 16 }}>
