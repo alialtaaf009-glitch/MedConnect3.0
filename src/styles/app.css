@@ -464,3 +464,13 @@ button:active { -webkit-tap-highlight-color: transparent; }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 .tab-pop { animation: tabPop .34s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+/* ===== Add to the BOTTOM of app-1.css ===== */
+/* Home green band — uses the SAME values as .topbar so they always match */
+
+.mc-home-band {
+  background: var(--topbar-bg, var(--forest));
+}
+[data-theme="dark"] .mc-home-band {
+  background: var(--topbar-bg, #14241c);
+}
+
