@@ -460,8 +460,14 @@ function QuickRow({ user, nav, onGreen }) {
 
   // ---- circle bloom: grows from the tapped circle into a full-screen, half-and-half coloured panel ----
   const { setBar } = useTheme();
-  const MORALE = ['Small steps every day add up to big results.', 'Consistency beats intensity.', 'You are closer than you were yesterday.', 'Trust the process — keep showing up.', 'Progress, not perfection.', 'Every question makes you sharper.', 'Discipline today, freedom tomorrow.'];
-  const [moraleLine] = useState(() => MORALE[Math.floor(Math.random() * MORALE.length)]);
+  const MORALE = {
+    countdown: ['Small steps every day add up to big results.', 'Trust the process — keep showing up.', 'The date is fixed; your effort compounds.'],
+    streak: ['Consistency beats intensity.', 'Discipline today, freedom tomorrow.', 'Show up again — that is the whole secret.'],
+    qbank: ['Every question makes you sharper.', 'Progress, not perfection.', 'Wrong answers today, right ones on the day.'],
+    flashcards: ['Review beats re-reading, every time.', 'Spaced repetition is quiet superpower.', 'A few cards now saves hours later.'],
+  };
+  const [moralePick] = useState(() => Math.floor(Math.random() * 3));
+  const moraleFor = (key) => (MORALE[key] || MORALE.streak)[moralePick % (MORALE[key] || MORALE.streak).length];
   const [bloom, setBloom] = useState(null); // { color, origin:{x,y}, key, navTo } | null
   const [bloomGrown, setBloomGrown] = useState(false);
   const launchBloom = (e, color, key) => {
@@ -477,7 +483,7 @@ function QuickRow({ user, nav, onGreen }) {
     setBloomGrown(false);
     if (setBar) setBar(null); // restore system bars to theme colour
     if (exitImmersive) exitImmersive(); // bring the top bar + nav back
-    setTimeout(() => setBloom(null), 380);
+    setTimeout(() => setBloom(null), 460);
   };
   // safety: whenever there's no open bloom, ensure the system bar + immersive are reset
   useEffect(() => {
@@ -508,7 +514,7 @@ function QuickRow({ user, nav, onGreen }) {
 
         {/* Flashcards — navigates */}
         {!hideFc && (
-        <Circle tint="#fbeccb" color="#c08a1e" glow="0 6px 14px rgba(192,138,30,.20)" label="Flashcards" selected={false} badge={due ? due : null} onClick={(e) => launchBloom(e, '#c08a1e', 'flashcards')}>
+        <Circle tint="#fbe3da" color="#e8916b" glow="0 6px 14px rgba(232,145,107,.22)" label="Flashcards" selected={false} badge={due ? due : null} onClick={(e) => launchBloom(e, '#e8916b', 'flashcards')}>
           <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="6" width="13" height="12" rx="2" /><path d="M7 10h5M7 13.5h3" /><path d="M20 8.5v8a2 2 0 0 1-2 2H8.5" /></svg>
         </Circle>
         )}
@@ -628,13 +634,12 @@ function QuickRow({ user, nav, onGreen }) {
         const best = Math.max(user?.longest_streak || 0, streak);
         const title = bloom.key === 'countdown' ? 'Countdown' : bloom.key === 'streak' ? 'Study Streak' : bloom.key === 'qbank' ? 'Qbank Tracker' : 'Flashcards';
         return createPortal((
-          <div style={{ position: 'fixed', inset: 0, zIndex: 5000, overflow: 'hidden', pointerEvents: bloomGrown ? 'auto' : 'none', opacity: bloomGrown ? 1 : 0, transition: 'opacity .32s ease' }}>
+          <div style={{ position: 'fixed', inset: 0, zIndex: 5000, overflow: 'hidden', pointerEvents: bloomGrown ? 'auto' : 'none' }}>
             <div style={{
               position: 'absolute', inset: 0, background: bloom.color,
-              transformOrigin: 'center',
-              transform: bloomGrown ? 'scale(1)' : 'scale(0.96)',
-              willChange: 'transform, opacity',
-              transition: 'transform .42s cubic-bezier(0.16, 1, 0.3, 1)',
+              transform: bloomGrown ? 'translateY(0)' : 'translateY(100%)',
+              willChange: 'transform',
+              transition: 'transform .46s cubic-bezier(0.16, 1, 0.3, 1)',
               display: 'flex', flexDirection: 'column',
             }}>
               {/* coloured top bar — covers the real top bar, blends with status strip above */}
@@ -647,7 +652,7 @@ function QuickRow({ user, nav, onGreen }) {
               </div>
 
               {/* coloured hero */}
-              <div style={{ flexShrink: 0, background: bloom.color, color: '#fff', textAlign: 'center', padding: '14px 24px 36px', opacity: bloomGrown ? 1 : 0, transition: 'opacity .3s ease .08s' }}>
+              <div style={{ flexShrink: 0, background: bloom.color, color: '#fff', textAlign: 'center', padding: '14px 24px 36px' }}>
                 {bloom.key === 'countdown' && (
                   <>
                     <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.5, textTransform: 'uppercase', opacity: 0.85 }}>{user?.exam || 'Your exam'}</div>
@@ -684,12 +689,12 @@ function QuickRow({ user, nav, onGreen }) {
               </div>
 
               {/* light sheet */}
-              <div style={{ flex: 1, background: 'var(--paper)', borderRadius: '24px 24px 0 0', marginTop: -16, overflowY: 'auto', WebkitOverflowScrolling: 'touch', opacity: bloomGrown ? 1 : 0, transition: 'opacity .3s ease .1s' }}>
+              <div style={{ flex: 1, background: 'var(--paper)', borderRadius: '24px 24px 0 0', marginTop: -16, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
                 {bloom.key === 'countdown' && (
                   <div style={{ textAlign: 'center', padding: '26px 22px' }}>
                     <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 14 }}>{examTs ? new Date(user.exam_date).toDateString() : 'Add your exam date in Profile.'}</div>
                     <div style={{ display: 'inline-block', fontSize: 13, fontWeight: 700, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 999, padding: '7px 16px' }}>{coachLine(dLeft ?? 999)}</div>
-                    <p style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 15, lineHeight: 1.5, color: 'var(--ink)', fontStyle: 'italic', margin: '18px auto 0', maxWidth: 260 }}>"{moraleLine}"</p>
+                    <p style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 15, lineHeight: 1.5, color: 'var(--ink)', fontStyle: 'italic', margin: '18px auto 0', maxWidth: 260 }}>"{moraleFor('countdown')}"</p>
                     <button className="btn ghost" style={{ marginTop: 20, maxWidth: 220, margin: '20px auto 0' }} onClick={closeBloom}>Back to it</button>
                   </div>
                 )}
@@ -712,7 +717,7 @@ function QuickRow({ user, nav, onGreen }) {
                       <button className="btn btn-cta" style={{ maxWidth: 220, margin: '0 auto' }} disabled={marking} onClick={markStudy}>{marking ? '…' : 'Mark today ✓'}</button>
                     )}
                     <button className="btn ghost" style={{ marginTop: 10, maxWidth: 220, margin: '10px auto 0' }} onClick={closeBloom}>Keep going</button>
-                    <p style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 15, lineHeight: 1.5, color: 'var(--ink)', fontStyle: 'italic', margin: '18px auto 0', maxWidth: 260 }}>"{moraleLine}"</p>
+                    <p style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 15, lineHeight: 1.5, color: 'var(--ink)', fontStyle: 'italic', margin: '18px auto 0', maxWidth: 260 }}>"{moraleFor('streak')}"</p>
                   </div>
                 )}
                 {bloom.key === 'qbank' && (
@@ -760,8 +765,9 @@ function QuickRow({ user, nav, onGreen }) {
                         </div>
                       </div>
                     ) : (
-                    <button onClick={() => setAddingTopic(true)} style={{ width: '100%', border: 'none', borderRadius: 999, padding: '14px', fontSize: 14, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', color: '#fff', background: '#147a8a' }}>+ Add topic</button>
+                      <button onClick={() => setAddingTopic(true)} style={{ width: '100%', border: 'none', borderRadius: 999, padding: '14px', fontSize: 14, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', color: '#fff', background: '#147a8a' }}>+ Add topic</button>
                     )}
+                    <p style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 14.5, lineHeight: 1.5, color: 'var(--muted)', fontStyle: 'italic', textAlign: 'center', margin: '18px auto 0', maxWidth: 260 }}>"{moraleFor('qbank')}"</p>
                   </div>
                 )}
                 {bloom.key === 'flashcards' && (
@@ -774,14 +780,14 @@ function QuickRow({ user, nav, onGreen }) {
                           style={{ width: '100%', padding: '11px 14px', borderRadius: 999, border: '1.5px solid var(--line)', fontSize: 14, fontFamily: 'inherit', background: 'var(--paper)', color: 'var(--ink)', marginBottom: 9 }} />
                         <div style={{ display: 'flex', gap: 8 }}>
                           <button onClick={() => { setAddingDeck(false); setDName(''); setDTag(''); }} style={{ flex: 1, border: '1.5px solid var(--line)', background: 'var(--card)', color: 'var(--muted)', borderRadius: 999, padding: '11px', fontSize: 13, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>Cancel</button>
-                          <button onClick={saveDeck} disabled={savingDeck || !dName.trim()} style={{ flex: 1, border: 'none', background: '#c08a1e', color: '#fff', borderRadius: 999, padding: '11px', fontSize: 13, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', opacity: dName.trim() ? 1 : 0.5 }}>{savingDeck ? 'Creating…' : 'Create deck'}</button>
+                          <button onClick={saveDeck} disabled={savingDeck || !dName.trim()} style={{ flex: 1, border: 'none', background: '#e8916b', color: '#fff', borderRadius: 999, padding: '11px', fontSize: 13, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', opacity: dName.trim() ? 1 : 0.5 }}>{savingDeck ? 'Creating…' : 'Create deck'}</button>
                         </div>
                       </div>
                     ) : (
                       <>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                           <h3 style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--muted)' }}>Your decks</h3>
-                          <button onClick={() => setAddingDeck(true)} aria-label="New deck" style={{ width: 36, height: 36, borderRadius: '50%', background: '#c08a1e', color: '#fff', border: 'none', fontSize: 22, display: 'grid', placeItems: 'center', cursor: 'pointer', lineHeight: 1 }}>+</button>
+                          <button onClick={() => setAddingDeck(true)} aria-label="New deck" style={{ width: 36, height: 36, borderRadius: '50%', background: '#e8916b', color: '#fff', border: 'none', fontSize: 22, display: 'grid', placeItems: 'center', cursor: 'pointer', lineHeight: 1 }}>+</button>
                         </div>
                         {decks && decks.length === 0 ? (
                           <div style={{ textAlign: 'center', padding: '24px 16px' }}>
@@ -812,7 +818,7 @@ function QuickRow({ user, nav, onGreen }) {
                                       </div>
                                     ) : (
                                       <div style={{ display: 'flex', gap: 8 }}>
-                                        <button onClick={() => { closeBloom(); setTimeout(() => nav('/flashcards'), 300); }} style={{ flex: 1, border: 'none', background: '#c08a1e', color: '#fff', borderRadius: 999, padding: '10px', fontSize: 13, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer' }}>{d.due_count > 0 ? `Review ${d.due_count} due` : 'Study deck'}</button>
+                                        <button onClick={() => { closeBloom(); setTimeout(() => nav('/flashcards'), 300); }} style={{ flex: 1, border: 'none', background: '#e8916b', color: '#fff', borderRadius: 999, padding: '10px', fontSize: 13, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer' }}>{d.due_count > 0 ? `Review ${d.due_count} due` : 'Study deck'}</button>
                                         <button onClick={() => setConfirmDelDeck(d.id)} aria-label="Delete deck" style={{ flexShrink: 0, width: 40, border: '1.5px solid var(--line)', background: 'var(--card)', color: 'var(--rust)', borderRadius: 999, display: 'grid', placeItems: 'center', cursor: 'pointer' }}>
                                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg>
                                         </button>
@@ -827,6 +833,7 @@ function QuickRow({ user, nav, onGreen }) {
                         )}
                       </>
                     )}
+                    <p style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 14.5, lineHeight: 1.5, color: 'var(--muted)', fontStyle: 'italic', textAlign: 'center', margin: '18px auto 0', maxWidth: 260 }}>"{moraleFor('flashcards')}"</p>
                   </div>
                 )}
               </div>
@@ -985,7 +992,7 @@ function QbankCard({ nav }) {
   }, []);
 
   const subtitle = stats.empty
-    ? 'Start tracking your question progress'
+  ? 'Start tracking your question progress'
     : `${stats.done} done · ${stats.acc}% accuracy${stats.banks > 1 ? ` · ${stats.banks} banks` : ''}`;
 
   return (
