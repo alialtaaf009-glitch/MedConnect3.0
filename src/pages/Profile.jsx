@@ -19,6 +19,19 @@ const FOCUS = ['Working full-time', 'Working part-time', 'Full-time study', 'On 
 const GENDER = ['Male', 'Female', 'Prefer not to say'];
 const STUDY_STYLES = ['Active recaller', 'Visual learner', 'Deep work / silence', 'Structured / Pomodoro', 'Body doubling'];
 const TIMES = ['Early mornings','Daytime','Evenings','Late nights'];
+const PREFERS = ['Solo study','Group study','Accountability partner','Quiz me','Discuss cases'];
+const RIGHT_NOW = ['Just started','Mid-prep','Final stretch','Retaking','Helping others'];
+
+// tags are packed into the existing `bio` column as JSON {p, r}
+function unpackBio(bio) {
+  if (!bio) return { p: '', r: '', legacy: '' };
+  try {
+    const o = JSON.parse(bio);
+    if (o && (typeof o.p === 'string' || typeof o.r === 'string')) return { p: o.p || '', r: o.r || '', legacy: '' };
+  } catch (e) {}
+  return { p: '', r: '', legacy: bio };
+}
+function packBio(p, r) { return JSON.stringify({ p: p || '', r: r || '' }); }
 
 // chips that can be DESELECTED — tap a selected chip to clear it
 function Chips({ label, options, value, onChange, optional }) {
@@ -55,13 +68,6 @@ function MultiChips({ label, hint, options, value, onChange }) {
   );
 }
 
-// light profanity guard for the public bio (blocks the obvious; report covers the rest)
-const BANNED = ['fuck','shit','bitch','cunt','asshole','dick','pussy','nigger','faggot','whore','slut','rape','porn'];
-function hasProfanity(text) {
-  const t = (text || '').toLowerCase();
-  return BANNED.some((w) => new RegExp('\\b' + w + '\\b').test(t));
-}
-
 export default function Profile() {
   const { user, logout, setUser } = useAuth();
   const { mode, toggle } = useTheme();
@@ -91,17 +97,15 @@ export default function Profile() {
   const [regCouncil, setRegCouncil] = useState(user?.reg_council || '');
   const [regNumber, setRegNumber] = useState(user?.reg_number || '');
   const [medicalSchool, setMedicalSchool] = useState(user?.medical_school || '');
-  const [bio, setBio] = useState(user?.bio || '');
+  const [prefers, setPrefers] = useState(() => unpackBio(user?.bio).p);
+  const [rightNow, setRightNow] = useState(() => unpackBio(user?.bio).r);
   const [busy, setBusy] = useState(false);
   const [confirmDel, setConfirmDel] = useState(false);
 
   const save = async () => {
-    if (hasProfanity(bio)) {
-      window.alert('Please keep your bio professional — it looks like it contains inappropriate language. This is a doctors-only space.');
-      return;
-    }
     setBusy(true);
     try {
+      const bio = packBio(prefers, rightNow);
       const { user: updated } = await api.updateProfile({ name, avatar, country, timezone, questionBank, studyTime, examDate, attempt, regCouncil, regNumber, medicalSchool, bio, focus, gender, studyStyles, exam });
       setUser(updated);
       setEditing(false);
@@ -137,8 +141,8 @@ export default function Profile() {
         <label className="label">Display name</label>
         <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
 
-        <label className="label">Short bio <span style={{ textTransform:'none', letterSpacing:0, fontWeight:400 }}>(optional — what you're looking for)</span></label>
-        <textarea className="input" rows={3} style={{ resize:'vertical', fontFamily:'inherit' }} placeholder="e.g. MRCP Part 1 in May, looking for an evening study partner to do PassMedicine questions together." value={bio} onChange={(e) => setBio(e.target.value)} maxLength={300} />
+        <MultiChips label="Prefers" hint="How do you like to study with a partner?" options={PREFERS} value={prefers} onChange={setPrefers} />
+        <MultiChips label="Right now" hint="Where are you in your prep?" options={RIGHT_NOW} value={rightNow} onChange={setRightNow} />
 
         <label className="label">Exam</label>
         <select className="input" value={exam} onChange={(e) => setExam(e.target.value)}>
@@ -189,12 +193,21 @@ export default function Profile() {
         <div style={{ width:84, height:84, borderRadius:'50%', background:'var(--paper-2)', border:'1.5px solid var(--line)', display:'grid', placeItems:'center', fontSize:42, margin:'0 auto 12px' }}>{user?.avatar || '🩺'}</div>
         <h1 className="h1" style={{ fontSize:24 }}>{user?.name}</h1>
         <p className="sub">{user?.country}</p>
-        {user?.bio && (
-          <p className="voice" style={{ fontSize:15, lineHeight:1.5, color:'var(--muted)', maxWidth:340, margin:'8px auto 0', display:'flex', alignItems:'flex-start', gap:6, justifyContent:'center' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0, marginTop:3, opacity:.75 }}><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.3 8.9 8.9 0 0 1-3.8-.85L3 20l1.1-4.2A8 8 0 0 1 3.5 11.5 8.38 8.38 0 0 1 12 3.2a8.38 8.38 0 0 1 9 8.3z" /></svg>
-            <span>{user.bio}</span>
-          </p>
-        )}
+        {(() => {
+          const b = unpackBio(user?.bio);
+          const tags = [...b.p.split(',').map(s=>s.trim()).filter(Boolean), ...b.r.split(',').map(s=>s.trim()).filter(Boolean)];
+          if (tags.length) return (
+            <div style={{ display:'flex', flexWrap:'wrap', gap:6, justifyContent:'center', maxWidth:320, margin:'10px auto 0' }}>
+              {tags.map((tag) => (
+                <span key={tag} style={{ fontSize:12, fontWeight:600, background:'var(--paper-2)', color:'var(--forest)', padding:'4px 11px', borderRadius:999 }}>{tag}</span>
+              ))}
+            </div>
+          );
+          if (b.legacy) return (
+            <p className="voice" style={{ fontSize:15, lineHeight:1.5, color:'var(--muted)', maxWidth:340, margin:'8px auto 0', textAlign:'center' }}>{b.legacy}</p>
+          );
+          return null;
+        })()}
       </div>
       <div className="card" style={{ marginTop:16 }}>
         <Row k="Exam" v={user?.exam} />
@@ -298,7 +311,7 @@ function NotifToggle() {
       setErr(e.message || 'Could not change notifications.');
     }
     setBusy(false);
-  };
+    };
 
   if (!supported) {
     return (
