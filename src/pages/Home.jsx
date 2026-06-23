@@ -828,7 +828,7 @@ function QuickRow({ user, nav, onGreen }) {
                                       </div>
                                     ) : (
                                       <div style={{ display: 'flex', gap: 8 }}>
-                                        <button onClick={() => { closeBloom(); setTimeout(() => nav('/flashcards'), 300); }} style={{ flex: 1, border: 'none', background: '#e8916b', color: '#fff', borderRadius: 999, padding: '10px', fontSize: 13, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer' }}>{d.due_count > 0 ? `Review ${d.due_count} due` : 'Study deck'}</button>
+                                        <button onClick={() => { if (setBar) setBar(null); closeBloom(); setTimeout(() => nav('/flashcards'), 460); }} style={{ flex: 1, border: 'none', background: '#e8916b', color: '#fff', borderRadius: 999, padding: '10px', fontSize: 13, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer' }}>{d.due_count > 0 ? `Review ${d.due_count} due` : 'Study deck'}</button>
                                         <button onClick={() => setConfirmDelDeck(d.id)} aria-label="Delete deck" style={{ flexShrink: 0, width: 40, border: '1.5px solid var(--line)', background: 'var(--card)', color: 'var(--rust)', borderRadius: 999, display: 'grid', placeItems: 'center', cursor: 'pointer' }}>
                                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg>
                                         </button>
@@ -1026,4 +1026,3 @@ function QbankCard({ nav }) {
     </button>
   );
 }
-            
