@@ -119,8 +119,10 @@ export default function Partners() {
   return (
     <div className="screen" style={{ padding: 0 }}>
       {toast && (
-        <div style={{ position: 'fixed', left: '50%', bottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)', transform: 'translateX(-50%)', zIndex: 200, background: 'var(--forest)', color: '#fff', fontSize: 13, fontWeight: 700, padding: '11px 20px', borderRadius: 999, boxShadow: '0 6px 20px rgba(20,40,30,.3)', maxWidth: '90%', textAlign: 'center', animation: 'tabPop .3s ease both' }}>
-          {toast}
+        <div style={{ position: 'fixed', left: 0, right: 0, bottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)', zIndex: 200, display: 'flex', justifyContent: 'center', pointerEvents: 'none', padding: '0 16px' }}>
+          <div style={{ background: 'var(--forest)', color: '#fff', fontSize: 13, fontWeight: 700, padding: '11px 20px', borderRadius: 999, boxShadow: '0 6px 20px rgba(20,40,30,.3)', maxWidth: '90%', textAlign: 'center', animation: 'tabPop .3s ease both' }}>
+            {toast}
+          </div>
         </div>
       )}
       <div style={{ background: 'var(--section-hero)', color: '#fff', padding: '18px 20px 32px', minHeight: 150, boxSizing: 'border-box' }}>
@@ -275,4 +277,4 @@ export default function Partners() {
       )}
     </div>
   );
-                                                                                                                   }
+  }
