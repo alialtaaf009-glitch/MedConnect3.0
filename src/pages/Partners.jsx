@@ -3,7 +3,33 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { examColor } from '../lib/examColors';
 import { useAuth } from '../context/Auth.jsx';
+import { useTheme } from '../context/Theme.jsx';
+
+function useSectionColor(color) {
+  const { setBar } = useTheme();
+  useEffect(() => {
+    document.documentElement.style.setProperty('--topbar-bg', color);
+    if (setBar) setBar(color);
+    return () => {
+      document.documentElement.style.removeProperty('--topbar-bg');
+      if (setBar) setBar(null);
+    };
+  }, [color, setBar]);
+}
 import { isOnline } from '../lib/presence';
+
+// sets the top bar + status strip to a section colour while mounted
+function useSectionColor(color) {
+  const { setBar } = useTheme();
+  useEffect(() => {
+    document.documentElement.style.setProperty('--topbar-bg', color);
+    if (setBar) setBar(color);
+    return () => {
+      document.documentElement.style.removeProperty('--topbar-bg');
+      if (setBar) setBar(null);
+    };
+  }, [color, setBar]);
+}
 
 // Local starring of partners (this device). Stored as an array of partner ids.
 const STAR_KEY = 'starred_partners_v1';
@@ -29,7 +55,9 @@ function EmptyState({ title, sub }) {
 }
 
 export default function Partners() {
+  useSectionColor('#4a5bb8');
   const { user } = useAuth();
+  useSectionColor('#4a5bb8');
   const nav = useNavigate();
   const [params] = useSearchParams();
   const filterExam = params.get('exam');
@@ -117,14 +145,22 @@ export default function Partners() {
   );
 
   return (
-    <div className="screen">
+    <div className="screen" style={{ padding: 0 }}>
       {toast && (
         <div style={{ position: 'fixed', left: '50%', bottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)', transform: 'translateX(-50%)', zIndex: 200, background: 'var(--forest)', color: '#fff', fontSize: 13, fontWeight: 700, padding: '11px 20px', borderRadius: 999, boxShadow: '0 6px 20px rgba(20,40,30,.3)', maxWidth: '90%', textAlign: 'center', animation: 'tabPop .3s ease both' }}>
           {toast}
         </div>
       )}
-      <h1 className="h1" style={{ fontFamily: "'Fraunces',Georgia,serif", color: 'var(--forest)' }}>Study Partners</h1>
-      <p className="sub" style={{ marginBottom: 14 }}>Find, connect, and study together.</p>
+      <div style={{ background: '#4a5bb8', color: '#fff', padding: '18px 20px 32px' }}>
+        <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 26, fontWeight: 900, lineHeight: 1 }}>Study Partners</h1>
+        <p style={{ fontSize: 12.5, opacity: 0.85, marginTop: 5 }}>Find, connect, and study together.</p>
+        <div style={{ display: 'flex', gap: 22, marginTop: 16 }}>
+          <div><div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 22, fontWeight: 900, lineHeight: 1 }}>{matches.length}</div><div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.82, marginTop: 3 }}>matches</div></div>
+          <div><div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 22, fontWeight: 900, lineHeight: 1 }}>{conns.connected?.length || 0}</div><div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.82, marginTop: 3 }}>partners</div></div>
+          <div><div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 22, fontWeight: 900, lineHeight: 1 }}>{reqCount}</div><div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.82, marginTop: 3 }}>requests</div></div>
+        </div>
+      </div>
+      <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -20, position: 'relative', padding: '18px 16px', minHeight: '60vh' }}>
 
       <Tabs />
 
@@ -252,6 +288,7 @@ export default function Partners() {
         </>
       )}
       </div>
+      </div>
 
       {peek && (
         <div onClick={() => setPeek(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'grid', placeItems: 'center', zIndex: 100, padding: 24 }}>
@@ -266,4 +303,3 @@ export default function Partners() {
       )}
     </div>
   );
-                                                                                                                                                                           }
