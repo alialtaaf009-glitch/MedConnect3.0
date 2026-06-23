@@ -3,21 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { examColor } from '../lib/examColors';
 import { useAuth } from '../context/Auth.jsx';
-import { useTheme } from '../context/Theme.jsx';
 import { isOnline } from '../lib/presence';
-
-// sets the top bar + status strip to a section colour while mounted
-function useSectionColor(color) {
-  const { setBar } = useTheme();
-  useEffect(() => {
-    document.documentElement.style.setProperty('--topbar-bg', color);
-    if (setBar) setBar(color);
-    return () => {
-      document.documentElement.style.removeProperty('--topbar-bg');
-      if (setBar) setBar(null);
-    };
-  }, [color, setBar]);
-}
 
 // Local starring of partners (this device). Stored as an array of partner ids.
 const STAR_KEY = 'starred_partners_v1';
@@ -43,7 +29,6 @@ function EmptyState({ title, sub }) {
 }
 
 export default function Partners() {
-  useSectionColor('#4a5bb8');
   const { user } = useAuth();
   const nav = useNavigate();
   const [params] = useSearchParams();
@@ -138,7 +123,7 @@ export default function Partners() {
           {toast}
         </div>
       )}
-      <div style={{ background: '#4a5bb8', color: '#fff', padding: '18px 20px 32px' }}>
+      <div style={{ background: '#1f4d3f', color: '#fff', padding: '18px 20px 32px' }}>
         <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 26, fontWeight: 900, lineHeight: 1 }}>Study Partners</h1>
         <p style={{ fontSize: 12.5, opacity: 0.85, marginTop: 5 }}>Find, connect, and study together.</p>
         <div style={{ display: 'flex', gap: 22, marginTop: 16 }}>
