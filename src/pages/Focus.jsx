@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, lazy, Suspense } from 'react';
 import StudyTimer from '../components/StudyTimer.jsx';
-import TileGame from '../components/TileGame.jsx';
+const TileGame = lazy(() => import('../components/TileGame.jsx'));
 import { useBack } from '../context/Back.jsx';
 
 
@@ -89,13 +89,13 @@ function Breathe() {
 export default function Focus() {
   return (
     <div className="screen" style={{ padding: 0 }}>
-      <div style={{ background: 'var(--section-hero)', color: '#fff', padding: '18px 20px 30px' }}>
+      <div style={{ background: 'var(--section-hero)', color: '#fff', padding: '18px 20px 32px' }}>
         <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 26, fontWeight: 900, lineHeight: 1 }}>Focus ☕</h1>
         <p style={{ fontSize: 12.5, opacity: 0.85, marginTop: 5, lineHeight: 1.45 }}>
           Set a block, tap the box for full-screen, and guard it like an exam hall.
         </p>
       </div>
-      <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -18, position: 'relative', padding: '18px 16px', minHeight: '64vh' }}>
+      <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -20, position: 'relative', padding: '18px 16px', minHeight: '60vh' }}>
         <StudyTimer />
         <TakeABreak />
       </div>
@@ -114,7 +114,7 @@ function TakeABreak() {
         <button onClick={() => setTab('breathe')} style={{ flex: 1, border: 'none', borderRadius: 999, padding: '9px', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', background: tab === 'breathe' ? 'var(--card)' : 'transparent', color: tab === 'breathe' ? 'var(--forest)' : 'var(--muted)', boxShadow: tab === 'breathe' ? '0 1px 4px rgba(0,0,0,.08)' : 'none', transition: 'all .15s' }}>🫁 Breathing</button>
         <button onClick={() => setTab('game')} style={{ flex: 1, border: 'none', borderRadius: 999, padding: '9px', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', background: tab === 'game' ? 'var(--card)' : 'transparent', color: tab === 'game' ? 'var(--forest)' : 'var(--muted)', boxShadow: tab === 'game' ? '0 1px 4px rgba(0,0,0,.08)' : 'none', transition: 'all .15s' }}>🫀 Memory</button>
       </div>
-      {tab === 'breathe' ? <Breathe /> : <TileGame />}
+      {tab === 'breathe' ? <Breathe /> : <Suspense fallback={<div className="center" style={{ minHeight: 160 }}><div className="spinner" /></div>}><TileGame /></Suspense>}
     </>
   );
 }
