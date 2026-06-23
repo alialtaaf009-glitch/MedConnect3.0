@@ -172,6 +172,11 @@ function ExploreBrowse() {
         <button className={`tab ${browseMode === 'country' ? 'on' : ''}`} onClick={() => { setBrowseMode('country'); setOpenExam(''); }}>By Country</button>
         <button className={`tab ${browseMode === 'exam' ? 'on' : ''}`} onClick={() => { setBrowseMode('exam'); setOpenExam(''); }}>By Exam</button>
       </div>
+          <>
+      <div className="tabs" style={{ marginBottom: 14 }}>
+        <button className={`tab ${browseMode === 'country' ? 'on' : ''}`} onClick={() => { setBrowseMode('country'); setOpenExam(''); }}>By Country</button>
+        <button className={`tab ${browseMode === 'exam' ? 'on' : ''}`} onClick={() => { setBrowseMode('exam'); setOpenExam(''); }}>By Exam</button>
+      </div>
 
       {((browseMode === 'country' && pinC.length > 0) || (browseMode === 'exam' && pinE.length > 0)) && (
         <button onClick={() => setPinnedOnly(!pinnedOnly)}
@@ -218,7 +223,7 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'country' && (
-      <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
         {orderedCountries.map(([flag, country, exams], idx) => (
         <div key={country} style={{ borderTop: idx === 0 ? 'none' : '1px solid var(--line)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '11px 18px', cursor: 'pointer' }}
@@ -504,7 +509,7 @@ function QuickRow({ user, nav, onGreen }) {
   return (
     <>
       <style>{`
-      @keyframes qBadge{0%{transform:scale(0)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
+        @keyframes qBadge{0%{transform:scale(0)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
         .qi-press{transition:transform .4s cubic-bezier(0.16,1,0.3,1)}
         .qi-press:active .qi-shape{transform:scale(.9)}
         .qi-press:active{transform:scale(.97)}
@@ -538,7 +543,8 @@ function QuickRow({ user, nav, onGreen }) {
               <circle cx="32" cy="32" r={R2} fill="none" stroke={finalStretch ? '#d98a1e' : '#1f9bb8'} strokeWidth="5" strokeLinecap="round" strokeDasharray={C2} strokeDashoffset={C2 * (1 - frac)} style={{ transition: 'stroke-dashoffset .6s ease' }} />
             </svg>
             <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-              <b style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: daysLeft > 99 ? 16 : 19, color: finalStretch ? '#c0533f' : '#15795a', lineHeight: 1 }}>{daysLeft > 0 ? daysLeft : daysLeft === 0 ? '0' : '—'}</b>
+              <b style={{ fontFamily: "'Fraunces',Georgia,serif",
+                         fontWeight: 900, fontSize: daysLeft > 99 ? 16 : 19, color: finalStretch ? '#c0533f' : '#15795a', lineHeight: 1 }}>{daysLeft > 0 ? daysLeft : daysLeft === 0 ? '0' : '—'}</b>
               <span style={{ fontSize: 7.5, fontWeight: 800, letterSpacing: 1, color: '#5a8a7a', marginTop: 1 }}>{daysLeft >= 0 ? 'DAYS' : 'PASSED'}</span>
             </div>
           </Circle>
@@ -598,7 +604,7 @@ function QuickRow({ user, nav, onGreen }) {
       })()}
 
       {stOpen && (() => {
-        const best = Math.max(user?.longest_streak || 0, streak);
+      const best = Math.max(user?.longest_streak || 0, streak);
         const line = !studiedToday
           ? 'One tap keeps the flame alive.'
           : streak >= best && streak > 1
@@ -802,7 +808,8 @@ function QuickRow({ user, nav, onGreen }) {
                         </div>
                         {decks && decks.length === 0 ? (
                           <div style={{ textAlign: 'center', padding: '24px 16px' }}>
-                            <div style={{ fontSize: 38, marginBottom: 10 }}>🗂️</div>
+                            <div style={{ fontSize: 38, marginBottom: 10 }}>🗂
+                              </div>
                             <p style={{ fontSize: 13.5, color: 'var(--muted)' }}>No decks yet. Tap + to make your first one.</p>
                           </div>
                         ) : (
@@ -885,7 +892,7 @@ export default function Home() {
       url: 'https://med-connect3-0.vercel.app',
     };
     try {
-       (navigator.share) { await navigator.share(data); return; }
+      if (navigator.share) { await navigator.share(data); return; }
     } catch (e) { if (e?.name === 'AbortError') return; }
     try {
       await navigator.clipboard.writeText(`${data.text} ${data.url}`);
@@ -898,7 +905,8 @@ export default function Home() {
       {/* ===== GREEN BAND: greeting + motivation quote + nudges + quick circles ===== */}
       <div className="mc-home-band" style={{ padding: '14px 18px 40px', color: '#fff' }}>
         <div onClick={() => setShowMotivation(true)} style={{ cursor: 'pointer', position: 'relative' }}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--gold)', marginBottom: 8 }}>
+          <div style={{ fontSize: 10,
+                       fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--gold)', marginBottom: 8 }}>
             Hi Dr. {(user?.name || '').replace(/^Dr\.?\s+/i, '').split(' ')[0] || 'Doctor'} — a thought for today
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -1026,4 +1034,5 @@ function QbankCard({ nav }) {
       <span style={{ width: 26, height: 26, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', color: 'var(--forest)', fontWeight: 800, flexShrink: 0 }}>›</span>
     </button>
   );
-}
+    }
+  
