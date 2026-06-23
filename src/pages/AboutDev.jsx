@@ -24,15 +24,19 @@ export default function AboutDev() {
   return (
     <div className="screen">
       <style>{`@keyframes docWig{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
-        @keyframes eggVault{from{opacity:0;transform:scale(1.08)}to{opacity:1;transform:scale(1)}}`}</style>
+        @keyframes eggVault{from{opacity:0;transform:scale(1.08)}to{opacity:1;transform:scale(1)}}
+        @keyframes docPulse{0%{transform:scale(1);opacity:.7}70%{transform:scale(1.35);opacity:0}100%{transform:scale(1.35);opacity:0}}`}</style>
 
       <h1 className="h1">About the developer</h1>
 
       <div className="card" style={{ textAlign: 'center', padding: '22px 16px' }}>
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
           <div style={{ position: 'relative', width: 72, height: 72 }}>
+            {taps === 0 && !reveal && (
+              <span aria-hidden="true" style={{ position: 'absolute', inset: -2, borderRadius: '50%', border: '2px solid var(--forest)', animation: 'docPulse 1.8s ease-out infinite', pointerEvents: 'none' }} />
+            )}
             <div key={wig} onClick={tapDoc} role="button" aria-label="Tap me"
-              style={{ width: 72, height: 72, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: 36, boxShadow: '0 4px 12px rgba(31,77,63,.18)', cursor: 'pointer', animation: wig ? 'docWig .4s ease' : 'none', userSelect: 'none' }}>👨‍⚕️</div>
+              style={{ width: 72, height: 72, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: 36, boxShadow: '0 4px 12px rgba(31,77,63,.18)', cursor: 'pointer', animation: wig ? 'docWig .4s ease' : 'none', userSelect: 'none', position: 'relative' }}>👨‍⚕️</div>
             <span style={{ position: 'absolute', top: -4, right: -6, fontSize: 22, pointerEvents: 'none' }}>✨</span>
           </div>
         </div>
