@@ -96,7 +96,7 @@ export default function Osce() {
   if (active) return <Station name={active} minutes={EXAM_MINUTES[exam] || 8} onBack={() => setActive(null)} />;
 
   return (
-    <div className="screen">
+    <div className="screen" style={{ padding: 0 }}>
       {showPro && (
         <div onClick={() => setShowPro(false)} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.5)', display:'grid', placeItems:'center', zIndex:100, padding:24 }}>
           <div className="card" onClick={(e) => e.stopPropagation()} style={{ maxWidth:340, textAlign:'center' }}>
@@ -117,8 +117,16 @@ export default function Osce() {
           </div>
         </div>
       )}
-      <h1 className="h1">OSCE Practice</h1>
-      <p className="sub" style={{ marginBottom:14 }}>Timed station practice — solo, or live with a partner over a video link.</p>
+      <div style={{ background: '#1f4d3f', color: '#fff', padding: '18px 20px 32px' }}>
+        <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 26, fontWeight: 900, lineHeight: 1 }}>OSCE Practice</h1>
+        <p style={{ fontSize: 12.5, opacity: 0.85, marginTop: 5 }}>Timed station practice — solo or with a partner.</p>
+        <div style={{ display: 'flex', gap: 22, marginTop: 16 }}>
+          <div><div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 22, fontWeight: 900, lineHeight: 1 }}>{stations.length}</div><div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.82, marginTop: 3 }}>stations</div></div>
+          <div><div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 22, fontWeight: 900, lineHeight: 1 }}>{exams.length}</div><div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.82, marginTop: 3 }}>exams</div></div>
+          <div><div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 22, fontWeight: 900, lineHeight: 1 }}>{isPro ? '∞' : FREE}</div><div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.82, marginTop: 3 }}>{isPro ? 'unlocked' : 'free'}</div></div>
+        </div>
+      </div>
+      <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -20, position: 'relative', padding: '18px 16px', minHeight: '60vh' }}>
 
       {/* exam selector — 2-column grid of pills */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9, marginBottom: 16 }}>
@@ -156,6 +164,7 @@ export default function Osce() {
           </div>
         );
       })}
+      </div>
       </div>
     </div>
   );
