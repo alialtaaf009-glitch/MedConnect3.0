@@ -92,7 +92,7 @@ function ConversationList({ nav, me }) {
 
   return (
     <div className="screen" style={{ padding: 0 }}>
-      <div style={{ background: '#1f4d3f', color: '#fff', padding: '18px 20px 28px' }}>
+      <div style={{ background: 'var(--section-hero)', color: '#fff', padding: '18px 20px 28px' }}>
         <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 26, fontWeight: 900, lineHeight: 1 }}>Messages</h1>
         <p style={{ fontSize: 12.5, opacity: 0.85, marginTop: 5 }}>Your study conversations and groups.</p>
       </div>
