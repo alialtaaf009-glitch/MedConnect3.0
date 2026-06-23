@@ -732,7 +732,7 @@ function QuickRow({ user, nav, onGreen }) {
                   </div>
                 )}
                 {bloom.key === 'qbank' && (
-            <div style={{ padding: '20px 16px' }}>
+                  <div style={{ padding: '20px 16px' }}>
                     {qStats.empty ? (
                       <div style={{ textAlign: 'center', padding: '24px 16px' }}>
                         <div style={{ fontSize: 38, marginBottom: 10 }}>📊</div>
