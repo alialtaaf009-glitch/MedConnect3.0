@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 const ThemeCtx = createContext(null);
 
 // the resting (no-bloom) system-bar colour per theme
-const BAR = { light: '#1f4d3f', dark: '#1a3a30' };
+const BAR = { light: '#1f4d3f', dark: '#1d4034' };
 
 // update the <meta name="theme-color"> tag — this colours the phone's
 // status bar (above the top bar) and gesture/nav area (below the tab bar)
