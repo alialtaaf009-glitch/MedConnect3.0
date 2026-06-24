@@ -108,16 +108,25 @@ export default function Focus() {
 
 // Deep Focus setup card — lock state lives in FocusLockCtx (above routing),
 // so the overlay persists even when the user navigates away.
-const PRESETS = [[0,25],[0,45],[1,0],[1,30],[2,0]];
+const PRESETS = [[0,25],[0,45],[1,0],[1,30]];
 function DeepFocus() {
   const { startLock } = useFocusLock();
   const [open, setOpen] = useState(false);
   const [hrs, setHrs] = useState(1);
   const [mins, setMins] = useState(0);
   const [method, setMethod] = useState('hold');
+  const [custom, setCustom] = useState(false);
+  const [customH, setCustomH] = useState('');
+  const [customM, setCustomM] = useState('');
+
+  const selectPreset = (h, m) => { setCustom(false); setHrs(h); setMins(m); };
+  const selectCustom = () => { setCustom(true); setCustomH(''); setCustomM(''); };
+
+  const effectiveH = custom ? (parseInt(customH) || 0) : hrs;
+  const effectiveM = custom ? (parseInt(customM) || 0) : mins;
 
   const start = () => {
-    const total = hrs * 3600 + mins * 60;
+    const total = effectiveH * 3600 + effectiveM * 60;
     if (total <= 0) return;
     startLock(total, method);
     setOpen(false);
@@ -136,23 +145,41 @@ function DeepFocus() {
             {open ? 'Cancel' : 'Set session →'}
           </button>
         </div>
-        <p style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.5 }}>Lock the app for a set time. Break glass to exit early — but make it count.</p>
+        <p style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.5 }}>Lock the app for a set time. Emergency exit is available, but make it count.</p>
         {open && (
           <div style={{ marginTop: 16, animation: 'tabPop .25s ease both' }}>
             <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 8 }}>Duration</div>
-            <div style={{ display: 'flex', gap: 7, marginBottom: 14, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 7, marginBottom: custom ? 10 : 14, flexWrap: 'wrap' }}>
               {PRESETS.map(([h, m]) => {
-                const on = hrs === h && mins === m;
+                const on = !custom && hrs === h && mins === m;
                 const label = `${h > 0 ? h + 'h' : ''}${m > 0 ? (h > 0 ? ' ' : '') + m + 'm' : ''}`;
                 return (
-                  <button key={h + '-' + m} onClick={() => { setHrs(h); setMins(m); }}
+                  <button key={h + '-' + m} onClick={() => selectPreset(h, m)}
                     style={{ flex: 1, minWidth: 44, border: `1.5px solid ${on ? 'var(--forest)' : 'var(--line)'}`, background: on ? 'var(--paper-2)' : 'var(--card)', color: on ? 'var(--forest)' : 'var(--muted)', borderRadius: 10, padding: '8px 2px', fontSize: 11, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer', transition: 'all .15s' }}>
                     {label}
                   </button>
                 );
               })}
+              <button onClick={selectCustom}
+                style={{ flex: 1, minWidth: 44, border: `1.5px solid ${custom ? 'var(--forest)' : 'var(--line)'}`, background: custom ? 'var(--paper-2)' : 'var(--card)', color: custom ? 'var(--forest)' : 'var(--muted)', borderRadius: 10, padding: '8px 2px', fontSize: 11, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer', transition: 'all .15s' }}>
+                Custom
+              </button>
             </div>
-            <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 8 }}>Break-glass override</div>
+            {custom && (
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 14, animation: 'tabPop .2s ease both' }}>
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <input type="number" min="0" max="23" placeholder="0" value={customH} onChange={e => setCustomH(e.target.value)}
+                    style={{ width: '100%', border: '1.5px solid var(--line)', borderRadius: 10, padding: '9px 10px', fontSize: 15, fontWeight: 700, fontFamily: 'inherit', color: 'var(--ink)', background: 'var(--card)', outline: 'none', textAlign: 'center' }} />
+                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)', flexShrink: 0 }}>hr</span>
+                </div>
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <input type="number" min="0" max="59" placeholder="0" value={customM} onChange={e => setCustomM(e.target.value)}
+                    style={{ width: '100%', border: '1.5px solid var(--line)', borderRadius: 10, padding: '9px 10px', fontSize: 15, fontWeight: 700, fontFamily: 'inherit', color: 'var(--ink)', background: 'var(--card)', outline: 'none', textAlign: 'center' }} />
+                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)', flexShrink: 0 }}>min</span>
+                </div>
+              </div>
+            )}
+            <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 8 }}>Emergency exit</div>
             <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
               {[['hold', '⏱', 'Hold 10 seconds', 'Press & hold to exit'], ['phrase', '✍️', 'Type a phrase', '"I am losing focus"']].map(([k, ic, t, sub]) => (
                 <div key={k} onClick={() => setMethod(k)}
@@ -163,7 +190,9 @@ function DeepFocus() {
                 </div>
               ))}
             </div>
-            <button onClick={start} style={{ width: '100%', border: 'none', borderRadius: 14, padding: 13, fontSize: 14, fontWeight: 800, fontFamily: 'inherit', background: 'linear-gradient(135deg,var(--forest),#2c6a55)', color: '#fff', cursor: 'pointer', boxShadow: '0 4px 16px rgba(31,77,63,.28)' }}>
+            <button onClick={start}
+              disabled={effectiveH === 0 && effectiveM === 0}
+              style={{ width: '100%', border: 'none', borderRadius: 14, padding: 13, fontSize: 14, fontWeight: 800, fontFamily: 'inherit', background: (effectiveH > 0 || effectiveM > 0) ? 'linear-gradient(135deg,var(--forest),#2c6a55)' : 'var(--line)', color: (effectiveH > 0 || effectiveM > 0) ? '#fff' : 'var(--muted)', cursor: (effectiveH > 0 || effectiveM > 0) ? 'pointer' : 'default', boxShadow: (effectiveH > 0 || effectiveM > 0) ? '0 4px 16px rgba(31,77,63,.28)' : 'none', transition: 'all .2s' }}>
               Start deep focus →
             </button>
           </div>
@@ -188,5 +217,3 @@ function TakeABreak() {
     </>
   );
 }
-
-                                                          
