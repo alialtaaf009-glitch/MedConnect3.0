@@ -520,7 +520,7 @@ function DeepFocusLocked({ lock, onUnlock }) {
             <div onMouseDown={startHold} onMouseUp={endHold} onMouseLeave={endHold} onTouchStart={startHold} onTouchEnd={endHold}
               style={{ position: 'relative', width: 220, height: 52, borderRadius: 999, border: '1.5px solid rgba(255,255,255,.28)', background: 'rgba(255,255,255,.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden', userSelect: 'none', WebkitUserSelect: 'none' }}>
               <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: holdPct + '%', background: 'rgba(192,83,63,.55)', borderRadius: 999 }} />
-              <span style={{ position: 'relative', fontSize: 13, fontWeight: 700, letterSpacing: .3, opacity: .9 }}>Hold {HOLD_SECS}s to break glass</span>
+              <span style={{ position: 'relative', fontSize: 13, fontWeight: 700, letterSpacing: .3, opacity: .9 }}>Hold {HOLD_SECS}s to emergency exit</span>
             </div>
             <div style={{ fontSize: 11, opacity: .5 }}>are you sure you need to stop?</div>
           </div>
