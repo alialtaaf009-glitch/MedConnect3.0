@@ -182,6 +182,14 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'exam' && (
+      <button onClick={() => setPinnedOnly(!pinnedOnly)}
+          style={{ display: 'flex', alignItems: 'center', gap: 7, margin: '0 auto 16px', padding: '7px 15px', borderRadius: 999, border: '1.5px solid var(--line)', background: pinnedOnly ? 'var(--forest)' : 'transparent', color: pinnedOnly ? '#fff' : 'var(--forest)', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', transition: 'all .2s' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill={pinnedOnly ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15 8.5 22 9.3 17 14 18.3 21 12 17.5 5.7 21 7 14 2 9.3 9 8.5 12 2" /></svg>
+          {pinnedOnly ? 'Showing your starred' : 'Show starred only'}
+        </button>
+      )}
+
+      {browseMode === 'exam' && (
         <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
           {orderedExams.map(({ flag, country, exam, parts }, idx) => {
               const key = 'exam|' + country + '|' + exam;
@@ -524,7 +532,7 @@ function QuickRow({ user, nav, onGreen }) {
 
         {/* Flashcards — navigates */}
         {!hideFc && (
-        <Circle tint="#fbe3da" color="#e8916b" glow="0 6px 14px rgba(232,145,107,.22)" label="Flashcards" selected={false} badge={due ? due : null} onClick={(e) => launchBloom(e, '#e8916b', 'flashcards')}>
+        <Circle tint="#fbe3da" color="#e8916b" glow="0 6px 14px rgba(232,145,107,.22)" label="Flashcards" selected={false} badge={due ? due : null} onClick={(e) => launchBloom(e, '#c47a3a', 'flashcards')}>
           <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="6" width="13" height="12" rx="2" /><path d="M7 10h5M7 13.5h3" /><path d="M20 8.5v8a2 2 0 0 1-2 2H8.5" /></svg>
         </Circle>
       )}
@@ -731,7 +739,7 @@ function QuickRow({ user, nav, onGreen }) {
                   </div>
                 )}
                 {bloom.key === 'qbank' && (
-                  <div style={{ padding: '20px 16px' }}>
+            <div style={{ padding: '20px 16px' }}>
                     {qStats.empty ? (
                       <div style={{ textAlign: 'center', padding: '24px 16px' }}>
                         <div style={{ fontSize: 38, marginBottom: 10 }}>📊</div>
