@@ -137,7 +137,7 @@ function ProTeaser() {
         <div style={{ position: 'absolute', right: 16, bottom: 8, fontSize: 42, opacity: .18, color: 'var(--gold)', fontFamily: "'Fraunces',serif", fontWeight: 900 }}>✦</div>
         <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1.2, color: 'var(--gold)', textTransform: 'uppercase', marginBottom: 7, position: 'relative' }}>Unlock more</div>
         <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 17, position: 'relative', marginBottom: 5 }}>Clinical Insights Pro</div>
-        <div style={{ fontSize: 13, opacity: .88, lineHeight: 1.6, position: 'relative' }}>Go deeper on every topic — flash summaries, high-yield mnemonics, and SBA-style questions across 12+ exams. Everything you need, nothing you don't.</div>
+        <div style={{ fontSize: 13, opacity: .88, lineHeight: 1.6, position: 'relative' }}>Go deeper on every topic — flash summaries, high-yield mnemonics, and SBA-style questions across 12+ exams.</div>
       </div>
       <button
         onClick={() => nav('/pro')}
