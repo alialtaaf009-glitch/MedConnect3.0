@@ -22,7 +22,13 @@ export default function AboutDev() {
   const prompt = taps > 0 && taps <= EGG_PROMPTS.length ? EGG_PROMPTS[taps - 1] : null;
 
   return (
-    <div className="screen">
+    <div className="screen" style={{ padding: 0 }}>
+      <div style={{ background: 'var(--section-hero)', color: '#fff', padding: '18px 20px 32px', minHeight: 150, boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1.2, color: 'var(--gold)', textTransform: 'uppercase', marginBottom: 7 }}>✦ Behind the app</div>
+        <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 26, lineHeight: 1 }}>About the Developer</h1>
+        <p style={{ fontSize: 12.5, opacity: .85, marginTop: 6, lineHeight: 1.5 }}>The story behind MedConnect — one doctor's side project.</p>
+      </div>
+      <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -20, position: 'relative', padding: '20px 16px 24px', minHeight: '60vh' }}>
       <style>{`@keyframes docWig{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
         @keyframes eggVault{from{opacity:0;transform:scale(1.08)}to{opacity:1;transform:scale(1)}}
         @keyframes docPulse{0%{transform:scale(1);opacity:.7}70%{transform:scale(1.35);opacity:0}100%{transform:scale(1.35);opacity:0}}`}</style>
@@ -84,6 +90,7 @@ export default function AboutDev() {
           <div style={{ position: 'absolute', bottom: 'calc(env(safe-area-inset-bottom,0px) + 24px)', fontSize: 10.5, color: '#5a5a5a', padding: '0 30px' }}>you really tapped 3 times for this 💀</div>
         </div>
       ), document.body)}
+      </div>
     </div>
   );
 }
