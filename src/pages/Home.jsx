@@ -182,7 +182,7 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'exam' && (
-        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+      <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
           {orderedExams.map(({ flag, country, exam, parts }, idx) => {
               const key = 'exam|' + country + '|' + exam;
               const ecx = examColor(exam);
@@ -554,7 +554,7 @@ function QuickRow({ user, nav, onGreen }) {
 
 
       {cdOpen && user?.exam_date && (() => {
-        const examTs = new Date(user.exam_date).getTime();
+      const examTs = new Date(user.exam_date).getTime();
         const diff = Math.max(0, examTs - nowTs);
         const totSec = Math.floor(diff / 1000);
         const totDays = Math.floor(totSec / 86400);
@@ -794,7 +794,7 @@ function QuickRow({ user, nav, onGreen }) {
                         </div>
                       </div>
                     ) : (
-                    <>
+                      <>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                           <h3 style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--muted)' }}>Your decks</h3>
                           <button onClick={() => setAddingDeck(true)} aria-label="New deck" style={{ width: 36, height: 36, borderRadius: '50%', background: '#e8916b', color: '#fff', border: 'none', fontSize: 22, display: 'grid', placeItems: 'center', cursor: 'pointer', lineHeight: 1 }}>+</button>
@@ -852,7 +852,8 @@ function QuickRow({ user, nav, onGreen }) {
         ), document.body);
       })()}
     </>
-    }
+  );
+}
 export default function Home() {
   const { user } = useAuth();
   const nav = useNavigate();
@@ -932,7 +933,7 @@ export default function Home() {
               <Row n={first} />
               {rest.length > 0 && nudgesOpen && rest.map((n) => <Row key={n.id} n={n} divided />)}
               {rest.length > 0 && (
-                <button onClick={() => setNudgesOpen(!nudgesOpen)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '10px', borderTop: '1px solid rgba(255,255,255,.15)', background: 'rgba(255,255,255,.08)', border: 'none', color: '#fff', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+              <button onClick={() => setNudgesOpen(!nudgesOpen)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '10px', borderTop: '1px solid rgba(255,255,255,.15)', background: 'rgba(255,255,255,.08)', border: 'none', color: '#fff', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
                   {nudgesOpen ? 'Show less' : `Show ${rest.length} more`}
                   <span style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(255,255,255,.2)', display: 'grid', placeItems: 'center', transition: 'transform .25s ease', transform: nudgesOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
