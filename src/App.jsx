@@ -4,7 +4,6 @@ import { useAuth } from './context/Auth.jsx';
 import { useTheme } from './context/Theme.jsx';
 import { useBack } from './context/Back.jsx';
 import { useTimer } from './context/Timer.jsx';
-import { FocusLockProvider, useFocusLock } from './context/FocusLock.jsx';
 import { api } from './lib/api';
 import SignIn from './pages/SignIn.jsx';
 import Setup from './pages/Setup.jsx';
@@ -24,6 +23,7 @@ import Formulas from './pages/Formulas.jsx';
 import Qbank from './pages/Qbank.jsx';
 import Flashcards from './pages/Flashcards.jsx';
 import Resources from './pages/Resources.jsx';
+import ClinicalInsights from './pages/ClinicalInsights.jsx';
 import Pro from './pages/Pro.jsx';
 import Checklist from './components/Checklist.jsx';
 import AddPartner from './pages/AddPartner.jsx';
@@ -137,6 +137,9 @@ function Drawer({ open, onClose, user }) {
           </button>
           <button className="drawer-item" onClick={() => go('/resources')}>
             <svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2V5z" /><path d="M8 7h7M8 11h7M8 15h4" /></svg>Resources
+          </button>
+          <button className="drawer-item" onClick={() => go('/clinical-insights')}>
+            <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 2.4-1.2 4.5-3 5.7V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.3C6.2 13.5 5 11.4 5 9a7 7 0 0 1 7-7z"/><path d="M9 21h6M10 17v-2a2 2 0 0 0-2-2M14 17v-2a2 2 0 0 1 2-2"/></svg>Clinical Insights
           </button>
           <div className="drawer-div" />
           <div className="drawer-sect">Grow</div>
@@ -467,110 +470,31 @@ export default function App() {
 
   // main app
   return (
-    <FocusLockProvider>
-      <AppShell user={user} />
-    </FocusLockProvider>
-  );
-}
-
-// ── DeepFocusLocked: full-screen overlay rendered at app level so routing can't escape it ──
-const PHRASE = 'i am losing focus';
-const HOLD_SECS = 10;
-
-function DeepFocusLocked({ lock, onUnlock }) {
-  const [holdPct, setHoldPct] = useState(0);
-  const holdRef = useRef(null);
-  const [typed, setTyped] = useState('');
-  const phraseMatch = typed.trim().toLowerCase() === PHRASE;
-
-  const startHold = () => {
-    const start = Date.now();
-    holdRef.current = setInterval(() => {
-      const pct = Math.min(100, ((Date.now() - start) / (HOLD_SECS * 1000)) * 100);
-      setHoldPct(pct);
-      if (pct >= 100) { clearInterval(holdRef.current); onUnlock(); }
-    }, 80);
-  };
-  const endHold = () => { clearInterval(holdRef.current); setHoldPct(0); };
-
-  const h = String(Math.floor(lock.secsLeft / 3600)).padStart(2, '0');
-  const m = String(Math.floor((lock.secsLeft % 3600) / 60)).padStart(2, '0');
-  const s = String(lock.secsLeft % 60).padStart(2, '0');
-
-  return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'linear-gradient(160deg,#1b3d30 0%,#163028 100%)', display: 'flex', flexDirection: 'column', color: '#fff', overflowY: 'auto' }}>
-      <div style={{ padding: 'calc(env(safe-area-inset-top,0px) + 14px) 20px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,.08)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <span style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 17 }}>Deep Focus</span>
-        </div>
-        <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, opacity: .6, textTransform: 'uppercase' }}>Active</span>
-      </div>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '28px 24px 20px', textAlign: 'center' }}>
-        <div style={{ width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,.06)', border: '2.5px solid rgba(255,255,255,.12)', display: 'grid', placeItems: 'center', marginBottom: 22 }}>
-          <div>
-            <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 36, lineHeight: 1 }}>{h}:{m}:{s}</div>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, opacity: .6, marginTop: 5, textTransform: 'uppercase' }}>Remaining</div>
-          </div>
-        </div>
-        <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 22, marginBottom: 8 }}>Stay in the zone.</div>
-        <div style={{ fontSize: 12.5, opacity: .75, lineHeight: 1.55, maxWidth: 240, marginBottom: 32 }}>Your app is locked until your focus session ends. You've got this.</div>
-        {lock.method === 'hold' ? (
-          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-            <div onMouseDown={startHold} onMouseUp={endHold} onMouseLeave={endHold} onTouchStart={startHold} onTouchEnd={endHold}
-              style={{ position: 'relative', width: 220, height: 52, borderRadius: 999, border: '1.5px solid rgba(255,255,255,.28)', background: 'rgba(255,255,255,.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden', userSelect: 'none', WebkitUserSelect: 'none' }}>
-              <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: holdPct + '%', background: 'rgba(192,83,63,.55)', borderRadius: 999 }} />
-              <span style={{ position: 'relative', fontSize: 13, fontWeight: 700, letterSpacing: .3, opacity: .9 }}>Hold {HOLD_SECS}s to emergency exit</span>
-            </div>
-            <div style={{ fontSize: 11, opacity: .5 }}>are you sure you need to stop?</div>
-          </div>
-        ) : (
-          <div style={{ width: '100%' }}>
-            <textarea value={typed} onChange={(e) => setTyped(e.target.value)} placeholder='type "I am losing focus" to unlock'
-              style={{ width: '100%', background: 'rgba(255,255,255,.07)', border: '1.5px solid rgba(255,255,255,.18)', borderRadius: 14, padding: '12px 14px', color: '#fff', fontSize: 13.5, fontFamily: 'inherit', resize: 'none', outline: 'none', minHeight: 60, lineHeight: 1.45, caretColor: '#e0b341' }} />
-            <div style={{ fontSize: 11, opacity: .5, textAlign: 'center', margin: '8px 0 12px' }}>type it slowly. mean it. then decide.</div>
-            <button disabled={!phraseMatch} onClick={() => phraseMatch && onUnlock()}
-              style={{ width: '100%', border: 'none', borderRadius: 12, padding: 13, fontSize: 13, fontWeight: 700, fontFamily: 'inherit', cursor: phraseMatch ? 'pointer' : 'default', background: phraseMatch ? '#c0532b' : 'rgba(255,255,255,.1)', color: phraseMatch ? '#fff' : 'rgba(255,255,255,.35)', transition: 'all .2s' }}>
-              Unlock session
-            </button>
-          </div>
-        )}
-      </div>
+    <div className={`app ${immersive ? 'immersive' : ''}`}>
+      {!immersive && <TopBar user={user} />}
+      <Routes>
+        <Route path="/home" element={<Home />} />
+        <Route path="/partners" element={<Partners />} />
+        <Route path="/osce" element={<Osce />} />
+        <Route path="/chat" element={<Chat />} />
+        <Route path="/focus" element={<Focus />} />
+        <Route path="/motivation" element={<Motivation />} />
+        <Route path="/legal" element={<Legal />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/about-dev" element={<AboutDev />} />
+        <Route path="/labs" element={<LabValues />} />
+        <Route path="/formulas" element={<Formulas />} />
+        <Route path="/qbank" element={<Qbank />} />
+        <Route path="/flashcards" element={<Flashcards />} />
+        <Route path="/resources" element={<Resources />} />
+        <Route path="/clinical-insights" element={<ClinicalInsights />} />
+        <Route path="/pro" element={<Pro />} />
+        <Route path="/connections" element={<Navigate to="/partners?tab=mine" replace />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/add/:id" element={<AddPartner />} />
+        <Route path="*" element={<Navigate to="/home" replace />} />
+      </Routes>
+      {!immersive && <TabBar />}
     </div>
-  );
-}
-
-function AppShell({ user }) {
-  const { immersive } = useBack();
-  const { lock, endLock } = useFocusLock();
-  return (
-    <>
-      {lock && <DeepFocusLocked lock={lock} onUnlock={endLock} />}
-      <div className={`app ${immersive ? 'immersive' : ''}`}>
-        {!immersive && <TopBar user={user} />}
-        <Routes>
-          <Route path="/home" element={<Home />} />
-          <Route path="/partners" element={<Partners />} />
-          <Route path="/osce" element={<Osce />} />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/focus" element={<Focus />} />
-          <Route path="/motivation" element={<Motivation />} />
-          <Route path="/legal" element={<Legal />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/about-dev" element={<AboutDev />} />
-          <Route path="/labs" element={<LabValues />} />
-          <Route path="/formulas" element={<Formulas />} />
-          <Route path="/qbank" element={<Qbank />} />
-          <Route path="/flashcards" element={<Flashcards />} />
-          <Route path="/resources" element={<Resources />} />
-          <Route path="/pro" element={<Pro />} />
-          <Route path="/connections" element={<Navigate to="/partners?tab=mine" replace />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/add/:id" element={<AddPartner />} />
-          <Route path="*" element={<Navigate to="/home" replace />} />
-        </Routes>
-        {!immersive && <TabBar />}
-      </div>
-    </>
   );
 }
