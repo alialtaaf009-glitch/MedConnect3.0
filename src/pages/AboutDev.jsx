@@ -33,7 +33,6 @@ export default function AboutDev() {
         @keyframes eggVault{from{opacity:0;transform:scale(1.08)}to{opacity:1;transform:scale(1)}}
         @keyframes docPulse{0%{transform:scale(1);opacity:.7}70%{transform:scale(1.35);opacity:0}100%{transform:scale(1.35);opacity:0}}`}</style>
 
-      <h1 className="h1">About the developer</h1>
 
       <div className="card" style={{ textAlign: 'center', padding: '22px 16px' }}>
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
