@@ -43,18 +43,16 @@ export default function Pro() {
       {/* ── LIGHT SHEET ── */}
       <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -20, position: 'relative', padding: '20px 16px 24px', minHeight: '60vh' }}>
         {FEATURES.map(([ic, title, desc, featured]) => featured ? (
-          <div key={title} style={{ background: 'linear-gradient(135deg,#1f4d3f,#2c6a55)', borderRadius: 16, padding: '14px 16px', marginBottom: 10, color: '#fff', boxShadow: '0 6px 18px rgba(31,77,63,.18)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 5 }}>
-              <span style={{ fontSize: 22 }}>{ic}</span>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14.5, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 7 }}>
-                  {title}
-                  {!isPro && <span style={{ opacity: .7, display: 'inline-flex' }}><LockIcon /></span>}
-                </div>
+          <div key={title} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 2px', borderBottom: '1px solid var(--line)' }}>
+            <div style={{ fontSize: 24, flexShrink: 0, width: 30, textAlign: 'center' }}>{ic}</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 14.5, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 7 }}>
+                {title}
+                {!isPro && <span style={{ color: 'var(--subtle)', display: 'inline-flex' }}><LockIcon /></span>}
+                <span style={{ fontSize: 10, fontWeight: 800, background: '#f6edd6', color: 'var(--gold)', padding: '3px 8px', borderRadius: 999, letterSpacing: .4 }}>NEW</span>
               </div>
-              <span style={{ fontSize: 10, fontWeight: 800, background: 'rgba(224,179,65,.25)', color: 'var(--gold)', padding: '3px 9px', borderRadius: 999, letterSpacing: .5, flexShrink: 0 }}>NEW</span>
+              <div style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.5, marginTop: 2 }}>{desc}</div>
             </div>
-            <div style={{ fontSize: 12.5, opacity: .85, lineHeight: 1.5 }}>{desc}</div>
           </div>
         ) : (
           <div key={title} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 2px', borderBottom: '1px solid var(--line)' }}>
