@@ -9,9 +9,6 @@ export default function Legal() {
       <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -20, position: 'relative', padding: '20px 16px 24px', minHeight: '60vh' }}>
 
       <div className="card">
-        <p className="sub" style={{ fontSize: 12, marginBottom: 14 }}>
-          This is a starting template, not legal advice. Have it reviewed by a professional before relying on it for a public launch.
-        </p>
 
         <h2 style={{ fontSize: 17, fontWeight: 700, margin: '14px 0 6px' }}>Privacy</h2>
         <p style={{ fontSize: 14, lineHeight: 1.6 }}>
