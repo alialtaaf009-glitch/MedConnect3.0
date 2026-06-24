@@ -72,7 +72,13 @@ export default function Formulas() {
   }).filter(([, m]) => m.length > 0);
 
   return (
-    <div className="screen">
+    <div className="screen" style={{ padding: 0 }}>
+      <div style={{ background: 'var(--section-hero)', color: '#fff', padding: '18px 20px 32px', minHeight: 150, boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1.2, color: 'var(--gold)', textTransform: 'uppercase', marginBottom: 7 }}>✦ Reference</div>
+        <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 26, lineHeight: 1 }}>Formulas</h1>
+        <p style={{ fontSize: 12.5, opacity: .85, marginTop: 6, lineHeight: 1.5 }}>Common clinical calculations — reference only.</p>
+      </div>
+      <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -20, position: 'relative', padding: '20px 16px 24px', minHeight: '60vh' }}>
       <h1 className="h1" style={{ fontFamily: "'Fraunces',Georgia,serif", color: 'var(--forest)' }}>Formulas</h1>
       <p className="sub" style={{ marginBottom: 12 }}>Common clinical formulas for quick recall.</p>
 
@@ -95,6 +101,8 @@ export default function Formulas() {
           </div>
         );
       })}
+      </div>
     </div>
   );
 }
+
