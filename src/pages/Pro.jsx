@@ -14,7 +14,7 @@ const FEATURES = [
 ];
 
 export default function Pro() {
-  const isPro = false; // payments not live yet — everyone sees the upgrade view
+  const isPro = false;
 
   const notify = () => {
     const subject = encodeURIComponent('Notify me about MedConnect Pro');
@@ -23,49 +23,59 @@ export default function Pro() {
   };
 
   return (
-    <div className="screen">
-      <div style={{ textAlign: 'center', marginBottom: 26 }}>
-        <div style={{ fontSize: 38, marginBottom: 8 }}>👑</div>
-        <h1 className="h1" style={{ fontFamily: "'Fraunces',Georgia,serif", color: 'var(--forest)', marginBottom: 6 }}>MedConnect Pro</h1>
-        {isPro
-          ? <p className="sub">You're a Pro member — thank you for supporting MedConnect 💛</p>
-          : <p className="sub" style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--gold)' }}>Coming soon</p>}
-        <p className="sub" style={{ fontSize: 13.5, lineHeight: 1.6, maxWidth: 280, margin: '10px auto 0', color: 'var(--muted)' }}>Built for doctors who are serious about their exams — more tools, deeper content, no compromises.</p>
+    <div className="screen" style={{ padding: 0 }}>
+      {/* ── GREEN HERO ── */}
+      <div style={{ background: 'var(--section-hero)', color: '#fff', padding: '18px 20px 32px', minHeight: 150, boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
+        {/* gold glow */}
+        <div style={{ position: 'absolute', right: -24, top: -24, width: 130, height: 130, borderRadius: '50%', background: 'radial-gradient(circle,rgba(224,179,65,.22),rgba(224,179,65,0) 70%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', right: 14, bottom: -10, fontSize: 96, opacity: .1, lineHeight: 1, pointerEvents: 'none' }}>👑</div>
+        <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1.2, color: 'var(--gold)', textTransform: 'uppercase', marginBottom: 7, position: 'relative' }}>
+          {isPro ? '✦ Active' : '✦ Coming soon'}
+        </div>
+        <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 26, lineHeight: 1, position: 'relative' }}>MedConnect Pro</h1>
+        <p style={{ fontSize: 12.5, opacity: .85, marginTop: 6, lineHeight: 1.55, maxWidth: '84%', position: 'relative' }}>
+          {isPro
+            ? "You're a Pro member — thank you for supporting MedConnect 💛"
+            : 'Built for doctors who are serious about their exams — more tools, deeper content, no compromises.'}
+        </p>
       </div>
 
-      {FEATURES.map(([ic, title, desc, featured]) => featured ? (
-        <div key={title} style={{ background: 'linear-gradient(135deg,var(--forest),#2c6a55)', borderRadius: 16, padding: '14px 16px', marginBottom: 6, color: '#fff' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 5 }}>
-            <span style={{ fontSize: 22 }}>{ic}</span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14.5, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 7 }}>
-                {title}
-                {!isPro && <span style={{ opacity: .7, display: 'inline-flex' }}><LockIcon /></span>}
+      {/* ── LIGHT SHEET ── */}
+      <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -20, position: 'relative', padding: '20px 16px 24px', minHeight: '60vh' }}>
+        {FEATURES.map(([ic, title, desc, featured]) => featured ? (
+          <div key={title} style={{ background: 'linear-gradient(135deg,#1f4d3f,#2c6a55)', borderRadius: 16, padding: '14px 16px', marginBottom: 10, color: '#fff', boxShadow: '0 6px 18px rgba(31,77,63,.18)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 5 }}>
+              <span style={{ fontSize: 22 }}>{ic}</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 14.5, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 7 }}>
+                  {title}
+                  {!isPro && <span style={{ opacity: .7, display: 'inline-flex' }}><LockIcon /></span>}
+                </div>
               </div>
+              <span style={{ fontSize: 10, fontWeight: 800, background: 'rgba(224,179,65,.25)', color: 'var(--gold)', padding: '3px 9px', borderRadius: 999, letterSpacing: .5, flexShrink: 0 }}>NEW</span>
             </div>
-            <span style={{ fontSize: 10, fontWeight: 800, background: 'rgba(224,179,65,.25)', color: 'var(--gold)', padding: '3px 9px', borderRadius: 999, letterSpacing: .5, flexShrink: 0 }}>NEW</span>
+            <div style={{ fontSize: 12.5, opacity: .85, lineHeight: 1.5 }}>{desc}</div>
           </div>
-          <div style={{ fontSize: 12.5, opacity: .85, lineHeight: 1.5 }}>{desc}</div>
-        </div>
-      ) : (
-        <div key={title} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 2px' }}>
-          <div style={{ fontSize: 24, flexShrink: 0, width: 30, textAlign: 'center' }}>{ic}</div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 14.5, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 7 }}>
-              {title}
-              {!isPro && <span style={{ color: 'var(--subtle)', display: 'inline-flex' }}><LockIcon /></span>}
+        ) : (
+          <div key={title} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 2px', borderBottom: '1px solid var(--line)' }}>
+            <div style={{ fontSize: 24, flexShrink: 0, width: 30, textAlign: 'center' }}>{ic}</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 14.5, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 7 }}>
+                {title}
+                {!isPro && <span style={{ color: 'var(--subtle)', display: 'inline-flex' }}><LockIcon /></span>}
+              </div>
+              <div style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.5, marginTop: 2 }}>{desc}</div>
             </div>
-            <div style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.5, marginTop: 2 }}>{desc}</div>
           </div>
-        </div>
-      ))}
+        ))}
 
-      {!isPro && (
-        <div style={{ marginTop: 22, textAlign: 'center' }}>
-          <button className="btn" style={{ maxWidth: 260, margin: '0 auto' }} onClick={notify}>Notify me when available</button>
-          <p className="sub" style={{ fontSize: 11.5, marginTop: 12, lineHeight: 1.5 }}>Everything in the app today stays free. Pro just adds more.</p>
-        </div>
-      )}
+        {!isPro && (
+          <div style={{ marginTop: 24, textAlign: 'center' }}>
+            <button className="btn" style={{ maxWidth: 260, margin: '0 auto' }} onClick={notify}>Notify me when available</button>
+            <p className="sub" style={{ fontSize: 11.5, marginTop: 12, lineHeight: 1.5 }}>Everything in the app today stays free. Pro just adds more.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
