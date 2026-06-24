@@ -1,7 +1,12 @@
 export default function Legal() {
   return (
-    <div className="screen">
-      <h1 className="h1" style={{ margin: '12px 0' }}>Privacy & Terms</h1>
+    <div className="screen" style={{ padding: 0 }}>
+      <div style={{ background: 'var(--section-hero)', color: '#fff', padding: '18px 20px 32px', minHeight: 150, boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1.2, color: 'var(--gold)', textTransform: 'uppercase', marginBottom: 7 }}>✦ Legal</div>
+        <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 26, lineHeight: 1 }}>Privacy & Terms</h1>
+        <p style={{ fontSize: 12.5, opacity: .85, marginTop: 6, lineHeight: 1.5 }}>How we handle your data and what you agree to.</p>
+      </div>
+      <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -20, position: 'relative', padding: '20px 16px 24px', minHeight: '60vh' }}>
 
       <div className="card">
         <p className="sub" style={{ fontSize: 12, marginBottom: 14 }}>
@@ -32,6 +37,7 @@ export default function Legal() {
           Questions about your data or these terms?
           Email us at <strong>medconnectsupport.io@gmail.com</strong> and we'll help.
         </p>
+      </div>
       </div>
     </div>
   );
