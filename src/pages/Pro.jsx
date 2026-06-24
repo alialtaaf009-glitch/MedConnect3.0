@@ -6,6 +6,7 @@ const LockIcon = ({ size = 13 }) => (
 );
 
 const FEATURES = [
+  ['🧠', 'Clinical Insights — 12+ exams', 'Full high-yield summaries, mnemonics, and SBA-style questions for MRCP, PLAB, USMLE, FCPS, AMC, SMLE, MRCS and more.', true],
   ['🌈', 'More colours & themes', 'Exclusive wallpaper backgrounds and fonts for your quotes.'],
   ['🩺', 'Full OSCE station bank', 'Every station for your exam, with marking schemes and timed mocks.'],
   ['🌿', 'More Take a Break exercises', 'New guided breathing patterns and quick reset routines.'],
@@ -29,9 +30,24 @@ export default function Pro() {
         {isPro
           ? <p className="sub">You're a Pro member — thank you for supporting MedConnect 💛</p>
           : <p className="sub" style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--gold)' }}>Coming soon</p>}
+        <p className="sub" style={{ fontSize: 13.5, lineHeight: 1.6, maxWidth: 280, margin: '10px auto 0', color: 'var(--muted)' }}>Built for doctors who are serious about their exams — more tools, deeper content, no compromises.</p>
       </div>
 
-      {FEATURES.map(([ic, title, desc]) => (
+      {FEATURES.map(([ic, title, desc, featured]) => featured ? (
+        <div key={title} style={{ background: 'linear-gradient(135deg,var(--forest),#2c6a55)', borderRadius: 16, padding: '14px 16px', marginBottom: 6, color: '#fff' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 5 }}>
+            <span style={{ fontSize: 22 }}>{ic}</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 14.5, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 7 }}>
+                {title}
+                {!isPro && <span style={{ opacity: .7, display: 'inline-flex' }}><LockIcon /></span>}
+              </div>
+            </div>
+            <span style={{ fontSize: 10, fontWeight: 800, background: 'rgba(224,179,65,.25)', color: 'var(--gold)', padding: '3px 9px', borderRadius: 999, letterSpacing: .5, flexShrink: 0 }}>NEW</span>
+          </div>
+          <div style={{ fontSize: 12.5, opacity: .85, lineHeight: 1.5 }}>{desc}</div>
+        </div>
+      ) : (
         <div key={title} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 2px' }}>
           <div style={{ fontSize: 24, flexShrink: 0, width: 30, textAlign: 'center' }}>{ic}</div>
           <div style={{ flex: 1 }}>
