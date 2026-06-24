@@ -55,7 +55,7 @@ export default function Checklist() {
 
       {items.length === 0 && (
         <div style={{ fontSize: 12.5, color: 'var(--subtle)', fontStyle: 'italic', padding: '2px 0 8px' }}>
-          No tasks yet — add one below and pick a colour to organise.
+          No tasks yet — add one below and pick a color to organise.
         </div>
       )}
 
@@ -65,7 +65,7 @@ export default function Checklist() {
           <div key={i.id}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0' }}>
               {/* color dot — tap to pick color */}
-              <button onClick={() => setPickingFor(pickingFor === i.id ? null : i.id)} aria-label="Pick colour"
+              <button onClick={() => setPickingFor(pickingFor === i.id ? null : i.id)} aria-label="Pick color"
                 style={{ width: 13, height: 13, borderRadius: '50%', background: c.dot, border: `2px solid ${i.color === 'none' ? 'var(--line)' : c.dot}`, flexShrink: 0, cursor: 'pointer', padding: 0 }} />
               {/* checkbox */}
               <button onClick={() => toggle(i.id)} aria-label={i.done ? 'Mark not done' : 'Mark done'}
@@ -93,7 +93,7 @@ export default function Checklist() {
             style={{ width: 40, height: 40, fontSize: 22, padding: 0, borderRadius: '50%', flexShrink: 0, display: 'grid', placeItems: 'center', lineHeight: 1 }}>+</button>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, paddingLeft: 2 }}>
-          <span style={{ fontSize: 11, color: 'var(--subtle)', fontWeight: 600 }}>Colour:</span>
+          
           <ColorPicker selected={draftColor} onPick={setDraftColor} />
         </div>
       </div>
