@@ -116,7 +116,7 @@ function ConversationList({ nav, me }) {
             const init = (c.name || 'Dr').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('');
             const unread = c.last_sender == c.other_id && new Date(c.last_at).getTime() > Number(localStorage.getItem('chat_read_' + c.other_id) || 0);
             return (
-              <div key={c.other_id} style={{ position: 'relative', borderTop: idx === 0 ? 'none' : '1px solid var(--line)' }}>
+              <div key={c.other_id} style={{ position: 'relative', borderTop: idx === 0 ? 'none' : '1px solid var(--line)', overflow: 'hidden' }}>
                 <button onClick={() => delChat(c)} aria-label="Delete chat" style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: 74, background: 'var(--rust)', color: '#fff', border: 'none', display: 'grid', placeItems: 'center', cursor: 'pointer' }}><IcoTrash /></button>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', padding: '11px 16px', background: 'var(--card)', position: 'relative', zIndex: 1, transform: swipeId === c.other_id ? 'translateX(-82px)' : 'translateX(0)', transition: 'transform .22s ease' }}
                 onTouchStart={(e) => pressStart(c, e.touches[0].clientX)} onTouchEnd={() => pressEnd(c)} onTouchMove={(e) => pressMove(e.touches[0].clientX)}
