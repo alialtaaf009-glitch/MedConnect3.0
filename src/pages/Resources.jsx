@@ -26,7 +26,6 @@ export default function Resources() {
         <p style={{ fontSize: 12.5, opacity: .85, marginTop: 6, lineHeight: 1.5 }}>Curated free references to support your revision.</p>
       </div>
       <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -20, position: 'relative', padding: '20px 16px 24px', minHeight: '60vh' }}>
-      <h1 className="h1">Resources 📚</h1>
       <p className="sub" style={{ marginBottom: 18 }}>
         Trusted, <b>free</b> references doctors actually use. Opens in your browser.
       </p>
