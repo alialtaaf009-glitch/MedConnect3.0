@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useBack } from '../context/Back.jsx';
 import { useAuth } from '../context/Auth.jsx';
 import { api } from '../lib/api.js';
 import { examColor } from '../lib/examColors.js';
@@ -6,6 +8,9 @@ import { examColor } from '../lib/examColors.js';
 // Qbank progress tracker — solo by default, optional per-partner sharing.
 // All sharing/compare is INLINE (no modals) so nothing can clip off-screen.
 export default function Qbank() {
+  const nav = useNavigate();
+  const { registerBack } = useBack();
+  useEffect(() => registerBack(() => nav(-1)), [registerBack, nav]);
   const { user } = useAuth();
   const color = examColor(user?.exam) || '#1f4d3f';
 
