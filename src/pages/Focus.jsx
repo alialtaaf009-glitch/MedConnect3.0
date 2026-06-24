@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, lazy, Suspense } from 'react';
 import { useFocusLock } from '../context/FocusLock.jsx';
 import StudyTimer from '../components/StudyTimer.jsx';
 const TileGame = lazy(() => import('../components/TileGame.jsx'));
+// preload so there's no flash when Memory tab is first tapped
+const preloadTileGame = () => import('../components/TileGame.jsx');
 import { useBack } from '../context/Back.jsx';
 
 
@@ -205,6 +207,7 @@ function DeepFocus() {
 // Unified "Take a break" section with a pill toggle: Breathing | Memory
 function TakeABreak() {
   const [tab, setTab] = useState('breathe');
+  useEffect(() => { preloadTileGame(); }, []); // preload silently on mount
   return (
     <>
       <div style={{ borderTop: '1px solid var(--line)', margin: '24px 0 16px' }} />
