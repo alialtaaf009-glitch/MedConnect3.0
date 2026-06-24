@@ -182,14 +182,6 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'exam' && (
-      <button onClick={() => setPinnedOnly(!pinnedOnly)}
-          style={{ display: 'flex', alignItems: 'center', gap: 7, margin: '0 auto 16px', padding: '7px 15px', borderRadius: 999, border: '1.5px solid var(--line)', background: pinnedOnly ? 'var(--forest)' : 'transparent', color: pinnedOnly ? '#fff' : 'var(--forest)', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', transition: 'all .2s' }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill={pinnedOnly ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15 8.5 22 9.3 17 14 18.3 21 12 17.5 5.7 21 7 14 2 9.3 9 8.5 12 2" /></svg>
-          {pinnedOnly ? 'Showing your starred' : 'Show starred only'}
-        </button>
-      )}
-
-      {browseMode === 'exam' && (
         <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
           {orderedExams.map(({ flag, country, exam, parts }, idx) => {
               const key = 'exam|' + country + '|' + exam;
@@ -494,14 +486,11 @@ function QuickRow({ user, nav, onGreen }) {
   };
   const closeBloom = () => {
     setBloomClosing(true);
-    setBloomGrown(false); // slide the panel down
-    // keep the bar coloured + immersive WHILE it slides, then restore everything together
-    setTimeout(() => {
-      setBloom(null);
-      setBloomClosing(false);
-      if (setBar) setBar(null);
-      if (exitImmersive) exitImmersive();
-    }, 460);
+    setBloomGrown(false);
+    // restore topbar + status bar immediately so there's no lag on back press
+    if (setBar) setBar(null);
+    if (exitImmersive) exitImmersive();
+    setTimeout(() => { setBloom(null); setBloomClosing(false); }, 460);
   };
   // safety: whenever there's no open bloom, ensure the system bar + immersive are reset
   useEffect(() => {
@@ -650,10 +639,13 @@ function QuickRow({ user, nav, onGreen }) {
         const dLeft = examTs ? Math.ceil((examTs - Date.now()) / 86400000) : null;
         const best = Math.max(user?.longest_streak || 0, streak);
         const title = bloom.key === 'countdown' ? 'Countdown' : bloom.key === 'streak' ? 'Study Streak' : bloom.key === 'qbank' ? 'Qbank Tracker' : 'Flashcards';
+        let swipeStartY = 0;
+        const onTouchStart = (e) => { swipeStartY = e.touches[0].clientY; };
+        const onTouchEnd = (e) => { if (e.changedTouches[0].clientY - swipeStartY > 80) closeBloom(); };
         return createPortal((
           <div style={{ position: 'fixed', inset: 0, zIndex: 5000, overflow: 'hidden', pointerEvents: bloomGrown ? 'auto' : 'none' }}>
             <style>{`@keyframes bloomSlideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes bloomSlideDown{from{transform:translateY(0)}to{transform:translateY(100%)}}`}</style>
-            <div style={{
+            <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} style={{
               position: 'absolute', inset: 0, background: bloom.color,
               transform: bloomGrown ? 'translateY(0)' : 'translateY(100%)',
               willChange: 'transform',
@@ -739,7 +731,7 @@ function QuickRow({ user, nav, onGreen }) {
                   </div>
                 )}
                 {bloom.key === 'qbank' && (
-            <div style={{ padding: '20px 16px' }}>
+                  <div style={{ padding: '20px 16px' }}>
                     {qStats.empty ? (
                       <div style={{ textAlign: 'center', padding: '24px 16px' }}>
                         <div style={{ fontSize: 38, marginBottom: 10 }}>📊</div>
@@ -802,7 +794,7 @@ function QuickRow({ user, nav, onGreen }) {
                         </div>
                       </div>
                     ) : (
-                      <>
+                    <>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                           <h3 style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--muted)' }}>Your decks</h3>
                           <button onClick={() => setAddingDeck(true)} aria-label="New deck" style={{ width: 36, height: 36, borderRadius: '50%', background: '#e8916b', color: '#fff', border: 'none', fontSize: 22, display: 'grid', placeItems: 'center', cursor: 'pointer', lineHeight: 1 }}>+</button>
@@ -836,7 +828,7 @@ function QuickRow({ user, nav, onGreen }) {
                                       </div>
                                     ) : (
                                       <div style={{ display: 'flex', gap: 8 }}>
-                                        <button onClick={() => { if (setBar) setBar(null); closeBloom(); setTimeout(() => nav('/flashcards'), 460); }} style={{ flex: 1, border: 'none', background: '#e8916b', color: '#fff', borderRadius: 999, padding: '10px', fontSize: 13, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer' }}>{d.due_count > 0 ? `Review ${d.due_count} due` : 'Study deck'}</button>
+                                        <button onClick={() => { closeBloom(); setTimeout(() => nav('/flashcards'), 460); }} style={{ flex: 1, border: 'none', background: '#e8916b', color: '#fff', borderRadius: 999, padding: '10px', fontSize: 13, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer' }}>{d.due_count > 0 ? `Review ${d.due_count} due` : 'Study deck'}</button>
                                         <button onClick={() => setConfirmDelDeck(d.id)} aria-label="Delete deck" style={{ flexShrink: 0, width: 40, border: '1.5px solid var(--line)', background: 'var(--card)', color: 'var(--rust)', borderRadius: 999, display: 'grid', placeItems: 'center', cursor: 'pointer' }}>
                                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg>
                                         </button>
@@ -860,8 +852,7 @@ function QuickRow({ user, nav, onGreen }) {
         ), document.body);
       })()}
     </>
-  );
-}
+    }
 export default function Home() {
   const { user } = useAuth();
   const nav = useNavigate();
