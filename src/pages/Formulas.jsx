@@ -79,7 +79,6 @@ export default function Formulas() {
         <p style={{ fontSize: 12.5, opacity: .85, marginTop: 6, lineHeight: 1.5 }}>Common clinical calculations — reference only.</p>
       </div>
       <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -20, position: 'relative', padding: '20px 16px 24px', minHeight: '60vh' }}>
-      <h1 className="h1" style={{ fontFamily: "'Fraunces',Georgia,serif", color: 'var(--forest)' }}>Formulas</h1>
       <p className="sub" style={{ marginBottom: 12 }}>Common clinical formulas for quick recall.</p>
 
       <input className="input" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search — e.g. BMI, anion gap, EDD…" style={{ marginBottom: 8, borderRadius: 999, padding: "12px 18px" }} />
@@ -105,4 +104,3 @@ export default function Formulas() {
     </div>
   );
 }
-
