@@ -12,7 +12,7 @@ const EXAMS = [
     topics: [
       { name: 'Cardiology', detail: 'ECGs, murmurs, HF, HOCM, WPW, pericarditis', fire: true, tag: 'Highest yield' },
       { name: 'Nephrology', detail: 'AKI vs CKD, electrolytes, renal tubular disorders, SIADH' },
-      { name: 'Respiratory', detail: 'Spirometry patterns, COPD, interstitial lung disease, pleural' },
+      { name: 'Respiratory', detail: 'Spirometry patterns, COPD, interstitial lung disease, pleural effusion & pneumothorax' },
       { name: 'Endocrinology', detail: 'Diabetes, thyroid, adrenal, pituitary, MEN syndromes', fire: true, tag: 'Frequently tested' },
       { name: 'Neurology', detail: 'Stroke syndromes, MS, epilepsy, UMN vs LMN, cranial nerves' },
       { name: 'Rheumatology', detail: 'RA, SLE, vasculitis, crystal arthropathies, myositis' },
@@ -83,13 +83,6 @@ const EXAMS = [
   },
 ];
 
-const PRO_PERKS = [
-  'Full topic summaries with key facts',
-  'High-yield mnemonics per topic',
-  'SBA-style practice questions',
-  'Covers 12+ exams including SMLE & MRCS',
-];
-
 // ── Sub-components ────────────────────────────────────────────────────────────
 function ExamCard({ exam }) {
   const [open, setOpen] = useState(false);
@@ -144,18 +137,16 @@ function ProTeaser() {
         <div style={{ position: 'absolute', right: 16, bottom: 8, fontSize: 42, opacity: .18, color: 'var(--gold)', fontFamily: "'Fraunces',serif", fontWeight: 900 }}>✦</div>
         <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1.2, color: 'var(--gold)', textTransform: 'uppercase', marginBottom: 7, position: 'relative' }}>Unlock more</div>
         <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 17, position: 'relative', marginBottom: 5 }}>Clinical Insights Pro</div>
-        <div style={{ fontSize: 12, opacity: .85, lineHeight: 1.5, maxWidth: '85%', position: 'relative', marginBottom: 12 }}>Flash summaries, mnemonics, and SBA questions — for every topic, for every exam.</div>
-        <div style={{ background: 'rgba(255,255,255,.1)', borderRadius: 12, padding: '10px 12px', position: 'relative' }}>
-          {PRO_PERKS.map((p, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, opacity: .92, marginBottom: i < PRO_PERKS.length - 1 ? 6 : 0 }}>
-              <span style={{ color: 'var(--gold)', fontWeight: 800 }}>✓</span>{p}
-            </div>
-          ))}
-        </div>
+        <div style={{ fontSize: 13, opacity: .88, lineHeight: 1.6, position: 'relative' }}>Go deeper on every topic — flash summaries, high-yield mnemonics, and SBA-style questions across 12+ exams. Everything you need, nothing you don't.</div>
       </div>
       <button
         onClick={() => nav('/pro')}
-        style={{ width: '100%', border: 'none', padding: '14px', fontSize: 14, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', background: 'linear-gradient(135deg,#c9952b,#e0b341)', color: '#1f1404', letterSpacing: .2 }}
+        className="btn-bouncy"
+        style={{ width: '100%', border: 'none', padding: '14px', fontSize: 14, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', background: 'linear-gradient(135deg,#c9952b,#e0b341)', color: '#1f1404', letterSpacing: .2, transition: 'transform .3s cubic-bezier(.34,1.7,.5,1), box-shadow .2s', WebkitTapHighlightColor: 'transparent' }}
+        onMouseDown={e => e.currentTarget.style.transform='scale(.96)'}
+        onMouseUp={e => { e.currentTarget.style.transform='scale(1.04)'; setTimeout(()=>e.currentTarget.style.transform='scale(1)',200); }}
+        onTouchStart={e => e.currentTarget.style.transform='scale(.94)'}
+        onTouchEnd={e => { e.currentTarget.style.transform='scale(1.05)'; setTimeout(()=>e.currentTarget.style.transform='scale(1)',250); }}
       >
         Upgrade to Pro →
       </button>
