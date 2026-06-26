@@ -889,7 +889,7 @@ export default function Home() {
       url: 'https://med-connect3-0.vercel.app',
     };
     try {
-       (navigator.share) { await navigator.share(data); return; }
+     if  (navigator.share) { await navigator.share(data); return; }
     } catch (e) { if (e?.name === 'AbortError') return; }
     try {
       await navigator.clipboard.writeText(`${data.text} ${data.url}`);
