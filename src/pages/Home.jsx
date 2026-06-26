@@ -182,7 +182,7 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'exam' && (
-      <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
           {orderedExams.map(({ flag, country, exam, parts }, idx) => {
               const key = 'exam|' + country + '|' + exam;
               const ecx = examColor(exam);
@@ -271,7 +271,7 @@ function ExploreBrowse() {
 
 // Quick row: Qbank · Flashcards · Countdown · Streak (circles). Stats open inline; tools navigate.
 function QuickRow({ user, nav, onGreen }) {
-  const { enterImmersive, exitImmersive } = useBack();
+  const { enterImmersive, exitImmersive, registerBack, clearBack } = useBack();
   // user-hideable tiles (Profile -> Home screen)
   const hideCd = localStorage.getItem('hide_countdown') === '1';
   const hideSt = localStorage.getItem('hide_streak') === '1';
@@ -497,6 +497,11 @@ function QuickRow({ user, nav, onGreen }) {
     if (!bloom) { if (setBar) setBar(null); if (exitImmersive) exitImmersive(); }
     return () => { if (setBar) setBar(null); if (exitImmersive) exitImmersive(); };
   }, [bloom, setBar, exitImmersive]);
+
+  // register bloom's close as the back handler so phone back button/gesture works correctly
+  useEffect(() => {
+    if (bloom) { registerBack(() => closeBloom()); return () => clearBack(); }
+  }, [!!bloom]);
 
   return (
     <>
@@ -884,7 +889,7 @@ export default function Home() {
       url: 'https://med-connect3-0.vercel.app',
     };
     try {
-      if (navigator.share) { await navigator.share(data); return; }
+       (navigator.share) { await navigator.share(data); return; }
     } catch (e) { if (e?.name === 'AbortError') return; }
     try {
       await navigator.clipboard.writeText(`${data.text} ${data.url}`);
@@ -933,7 +938,7 @@ export default function Home() {
               <Row n={first} />
               {rest.length > 0 && nudgesOpen && rest.map((n) => <Row key={n.id} n={n} divided />)}
               {rest.length > 0 && (
-              <button onClick={() => setNudgesOpen(!nudgesOpen)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '10px', borderTop: '1px solid rgba(255,255,255,.15)', background: 'rgba(255,255,255,.08)', border: 'none', color: '#fff', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+                <button onClick={() => setNudgesOpen(!nudgesOpen)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '10px', borderTop: '1px solid rgba(255,255,255,.15)', background: 'rgba(255,255,255,.08)', border: 'none', color: '#fff', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
                   {nudgesOpen ? 'Show less' : `Show ${rest.length} more`}
                   <span style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(255,255,255,.2)', display: 'grid', placeItems: 'center', transition: 'transform .25s ease', transform: nudgesOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
