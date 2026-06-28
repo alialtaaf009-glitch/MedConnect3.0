@@ -26,6 +26,7 @@ import Flashcards from './pages/Flashcards.jsx';
 import Resources from './pages/Resources.jsx';
 import ClinicalInsights from './pages/ClinicalInsights.jsx';
 import NotesVault from './pages/NotesVault.jsx';
+import StudyPlanner from './pages/StudyPlanner.jsx';
 import Pro from './pages/Pro.jsx';
 import Checklist from './components/Checklist.jsx';
 import AddPartner from './pages/AddPartner.jsx';
@@ -145,6 +146,9 @@ function Drawer({ open, onClose, user }) {
           </button>
           <button className="drawer-item" onClick={() => go('/notes')}>
             <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>Notes Vault
+          </button>
+          <button className="drawer-item" onClick={() => go('/planner')}>
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h2M14 14h2M8 18h2M14 18h2"/></svg>Study Planner
           </button>
           <div className="drawer-div" />
           <div className="drawer-sect">Grow</div>
@@ -327,7 +331,7 @@ function TopBar({ user }) {
                   const name = c.requester_name || 'Someone';
                   const exam = c.requester_exam || '';
                   const av = c.requester_avatar || '🩺';
-                return (
+                  return (
                     <div key={c.id} onClick={() => { setBellOpen(false); nav('/partners?tab=requests'); }}
                       style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 18px', cursor: 'pointer', borderTop: '1px solid var(--line)' }}
                       onMouseEnter={(e) => e.currentTarget.style.background = 'var(--paper-2)'}
@@ -573,6 +577,7 @@ function AppInner() {
         <Route path="/resources" element={<Resources />} />
         <Route path="/clinical-insights" element={<ClinicalInsights />} />
         <Route path="/notes" element={<NotesVault />} />
+        <Route path="/planner" element={<StudyPlanner />} />
         <Route path="/pro" element={<Pro />} />
         <Route path="/connections" element={<Navigate to="/partners?tab=mine" replace />} />
         <Route path="/profile" element={<Profile />} />
