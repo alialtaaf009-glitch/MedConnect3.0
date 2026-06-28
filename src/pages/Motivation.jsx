@@ -80,7 +80,7 @@ export default function Motivation({ onBack }) {
   };
 
   return (
-    <div className="screen" style={{ padding: 0 }}>
+    <div style={{ paddingBottom: 80 }}>
       <div style={{ background: 'var(--section-hero)', color: '#fff', padding: '18px 20px 32px', minHeight: 150, boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', right: -8, bottom: -16, fontSize: 90, opacity: .1, lineHeight: 1, pointerEvents: 'none' }}>✦</div>
         <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1.2, color: 'var(--gold)', textTransform: 'uppercase', marginBottom: 7, position: 'relative' }}>✦ Daily Motivation</div>
