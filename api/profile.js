@@ -141,6 +141,13 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true });
       }
 
+      if (body.action === 'delete_bank') {
+        if (!body.bank) return res.status(400).json({ error: 'bank required' });
+        await sql`DELETE FROM qbank_progress WHERE user_id = ${uid} AND bank = ${body.bank}`;
+        await sql`DELETE FROM share_grants WHERE grantor_id = ${uid} AND bank = ${body.bank}`;
+        return res.status(200).json({ ok: true });
+      }
+
       // toggle sharing with a partner for a bank: grant on = insert, off = delete row
       if (body.action === 'set_share') {
         const grantee = parseInt(body.partnerId, 10);
