@@ -28,28 +28,21 @@ function NoteEditor({ note, onSave, onClose }) {
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(0,0,0,.45)', display: 'flex', alignItems: 'flex-end' }}>
-      <div style={{ width: '100%', background: 'var(--paper)', borderRadius: '26px 26px 0 0', maxHeight: '82vh', display: 'flex', flexDirection: 'column' }}>
-        {/* header — fixed */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 18px 14px', flexShrink: 0 }}>
+      <div style={{ width: '100%', background: 'var(--paper)', borderRadius: '26px 26px 0 0', padding: '18px 18px calc(env(safe-area-inset-bottom, 0px) + 24px)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
           <span style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 18, color: 'var(--ink)' }}>{note?.id ? 'Edit note' : 'New note'}</span>
           <button onClick={onClose} style={{ background: 'var(--paper-2)', border: 'none', borderRadius: '50%', width: 32, height: 32, display: 'grid', placeItems: 'center', cursor: 'pointer', color: 'var(--muted)', fontSize: 18 }}>×</button>
         </div>
-        {/* body — scrollable */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0 18px 16px', minHeight: 0 }}>
-          <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Title" maxLength={100}
-            style={{ width: '100%', border: '1.5px solid var(--line)', borderRadius: 12, padding: '11px 13px', fontSize: 14, fontWeight: 700, fontFamily: 'inherit', color: 'var(--ink)', background: 'var(--card)', outline: 'none', marginBottom: 10 }} />
-          <textarea value={body} onChange={e => setBody(e.target.value)} placeholder="Your notes, mnemonics, summaries..." rows={5}
-            style={{ width: '100%', border: '1.5px solid var(--line)', borderRadius: 12, padding: '11px 13px', fontSize: 13.5, fontFamily: "'Newsreader', Georgia, serif", color: 'var(--ink)', background: 'var(--card)', outline: 'none', resize: 'none', lineHeight: 1.6, marginBottom: 10 }} />
-          <input value={tags} onChange={e => setTags(e.target.value)} placeholder="Tag (e.g. Cardiology, MRCP)" maxLength={60}
-            style={{ width: '100%', border: '1.5px solid var(--line)', borderRadius: 12, padding: '11px 13px', fontSize: 13, fontFamily: 'inherit', color: 'var(--ink)', background: 'var(--card)', outline: 'none' }} />
-        </div>
-        {/* save — pinned at bottom, always visible */}
-        <div style={{ padding: '12px 18px calc(env(safe-area-inset-bottom, 0px) + 16px)', borderTop: '1px solid var(--line)', flexShrink: 0 }}>
-          <button onClick={save} disabled={saving || !title.trim()}
-            style={{ width: '100%', border: 'none', borderRadius: 14, padding: 13, fontSize: 14, fontWeight: 800, fontFamily: 'inherit', background: title.trim() ? 'linear-gradient(135deg,var(--forest),#2c6a55)' : 'var(--line)', color: title.trim() ? '#fff' : 'var(--muted)', cursor: title.trim() ? 'pointer' : 'default', transition: 'all .2s' }}>
-            {saving ? 'Saving…' : note?.id ? 'Save changes' : 'Create note'}
-          </button>
-        </div>
+        <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Title" maxLength={100}
+          style={{ width: '100%', border: '1.5px solid var(--line)', borderRadius: 12, padding: '11px 13px', fontSize: 14, fontWeight: 700, fontFamily: 'inherit', color: 'var(--ink)', background: 'var(--card)', outline: 'none', marginBottom: 10 }} />
+        <textarea value={body} onChange={e => setBody(e.target.value)} placeholder="Your notes, mnemonics, summaries..." rows={5}
+          style={{ width: '100%', border: '1.5px solid var(--line)', borderRadius: 12, padding: '11px 13px', fontSize: 13.5, fontFamily: "'Newsreader', Georgia, serif", color: 'var(--ink)', background: 'var(--card)', outline: 'none', resize: 'none', lineHeight: 1.6, marginBottom: 10 }} />
+        <input value={tags} onChange={e => setTags(e.target.value)} placeholder="Tag (e.g. Cardiology, MRCP)" maxLength={60}
+          style={{ width: '100%', border: '1.5px solid var(--line)', borderRadius: 12, padding: '11px 13px', fontSize: 13, fontFamily: 'inherit', color: 'var(--ink)', background: 'var(--card)', outline: 'none', marginBottom: 14 }} />
+        <button onClick={save} disabled={saving || !title.trim()}
+          style={{ width: '100%', border: 'none', borderRadius: 14, padding: 14, fontSize: 14, fontWeight: 800, fontFamily: 'inherit', background: title.trim() ? 'linear-gradient(135deg,var(--forest),#2c6a55)' : 'var(--line)', color: title.trim() ? '#fff' : 'var(--muted)', cursor: title.trim() ? 'pointer' : 'default', transition: 'all .2s' }}>
+          {saving ? 'Saving…' : note?.id ? 'Save changes' : 'Create note'}
+        </button>
       </div>
     </div>
   );
@@ -274,4 +267,4 @@ export default function NotesVault() {
       )}
     </div>
   );
-                                        }
+}
