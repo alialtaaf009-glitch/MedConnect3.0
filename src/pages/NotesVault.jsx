@@ -111,7 +111,7 @@ export default function NotesVault() {
     Promise.all([
       api.notes().then(d => setNotes(d.notes || [])),
       api.notesShared().then(d => setShared(d.shared || [])),
-      api.connections().then(d => setPartners(d.connections || [])),
+      api.connections().then(d => setPartners(d.connected || [])),
     ]).finally(() => setLoading(false));
   }, []);
 
@@ -231,7 +231,7 @@ export default function NotesVault() {
 
         {/* FAB */}
         <button onClick={() => setEditor('new')}
-          style={{ position: 'fixed', bottom: 82, right: 'max(18px, calc(50vw - 222px))', width: 48, height: 48, borderRadius: '50%', background: 'var(--forest)', color: '#fff', border: 'none', fontSize: 26, fontWeight: 300, display: 'grid', placeItems: 'center', boxShadow: '0 6px 20px rgba(31,77,63,.35)', cursor: 'pointer', zIndex: 100, lineHeight: 1 }}>+</button>
+          style={{ position: 'fixed', bottom: 'calc(env(safe-area-inset-bottom, 0px) + 86px)', right: 'max(18px, calc(50vw - 222px))', width: 48, height: 48, borderRadius: '50%', background: 'var(--forest)', color: '#fff', border: 'none', fontSize: 26, fontWeight: 300, display: 'grid', placeItems: 'center', boxShadow: '0 6px 20px rgba(31,77,63,.35)', cursor: 'pointer', zIndex: 100, lineHeight: 1 }}>+</button>
       </div>
 
       {/* modals */}
@@ -246,5 +246,5 @@ export default function NotesVault() {
       )}
     </div>
   );
-                }
+            }
 
