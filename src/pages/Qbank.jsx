@@ -116,6 +116,18 @@ export default function Qbank() {
     })();
   };
 
+  const deleteBank = async () => {
+    if (!confirm(`Delete the "${bank}" Qbank and all its topics? This can't be undone.`)) return;
+    const target = bank;
+    const remaining = banks.filter((b) => b !== target);
+    // optimistic local removal
+    setRows((prev) => prev.filter((r) => r.bank !== target));
+    setBanks(remaining.length ? remaining : ['PassMedicine']);
+    setBank(remaining[0] || 'PassMedicine');
+    setSharingWith((prev) => prev.filter((g) => g.bank !== target));
+    try { await api.qbankDeleteBank(target); } catch (e) {}
+  };
+
   const openShareSection = async () => {
     const next = !shareSection;
     setShareSection(next);
@@ -187,7 +199,10 @@ export default function Qbank() {
           ) : (
             <>
               <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 0.5, textTransform: 'uppercase', opacity: 0.85 }}>{bank} · Overall</div>
-              <button onClick={() => { setRenameVal(bank); setRenaming(true); }} style={{ background: 'none', border: 'none', color: '#fff', opacity: 0.8, fontSize: 11, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>Rename</button>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <button onClick={() => { setRenameVal(bank); setRenaming(true); }} style={{ background: 'none', border: 'none', color: '#fff', opacity: 0.8, fontSize: 11, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>Rename</button>
+                <button onClick={deleteBank} style={{ background: 'none', border: 'none', color: '#fff', opacity: 0.8, fontSize: 11, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>Delete</button>
+              </div>
             </>
           )}
         </div>
@@ -209,10 +224,10 @@ export default function Qbank() {
       </div>
 
       {/* INLINE sharing toggle */}
-      <button onClick={openShareSection} className="btn ghost" style={{ width: '100%', marginBottom: shareSection ? 10 : 18, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-        👥 Manage sharing
+      <button onClick={openShareSection} style={{ width: '100%', marginBottom: shareSection ? 10 : 18, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 14, padding: '13px', fontSize: 14, fontWeight: 700, fontFamily: 'inherit', color: 'var(--ink)', cursor: 'pointer' }}>
+        👥 Share progress with partners
         {shareCount > 0 && <span style={{ background: color, color: '#fff', fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '2px 8px' }}>Sharing with {shareCount}</span>}
-        <span style={{ marginLeft: 4, transform: shareSection ? 'rotate(180deg)' : 'none', transition: 'transform .2s', display: 'inline-block' }}>▾</span>
+        <span style={{ marginLeft: 4, transform: shareSection ? 'rotate(180deg)' : 'none', transition: 'transform .2s', display: 'inline-block', color: 'var(--muted)' }}>▾</span>
       </button>
 
       {/* INLINE sharing panel — part of the page, scrolls naturally, no modal */}
