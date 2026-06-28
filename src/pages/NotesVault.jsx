@@ -27,8 +27,8 @@ function NoteEditor({ note, onSave, onClose }) {
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(0,0,0,.45)', display: 'flex', alignItems: 'flex-end' }}>
-      <div style={{ width: '100%', background: 'var(--paper)', borderRadius: '26px 26px 0 0', padding: '18px 18px calc(env(safe-area-inset-bottom, 0px) + 24px)' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(0,0,0,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px 14px' }}>
+      <div style={{ width: '100%', maxWidth: 420, maxHeight: '88vh', overflowY: 'auto', background: 'var(--paper)', borderRadius: 22, padding: '18px 18px 20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
           <span style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 18, color: 'var(--ink)' }}>{note?.id ? 'Edit note' : 'New note'}</span>
           <button onClick={onClose} style={{ background: 'var(--paper-2)', border: 'none', borderRadius: '50%', width: 32, height: 32, display: 'grid', placeItems: 'center', cursor: 'pointer', color: 'var(--muted)', fontSize: 18 }}>×</button>
