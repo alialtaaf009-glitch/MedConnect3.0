@@ -25,6 +25,7 @@ import Qbank from './pages/Qbank.jsx';
 import Flashcards from './pages/Flashcards.jsx';
 import Resources from './pages/Resources.jsx';
 import ClinicalInsights from './pages/ClinicalInsights.jsx';
+import NotesVault from './pages/NotesVault.jsx';
 import Pro from './pages/Pro.jsx';
 import Checklist from './components/Checklist.jsx';
 import AddPartner from './pages/AddPartner.jsx';
@@ -141,6 +142,9 @@ function Drawer({ open, onClose, user }) {
           </button>
           <button className="drawer-item" onClick={() => go('/clinical-insights')}>
             <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 2.4-1.2 4.5-3 5.7V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.3C6.2 13.5 5 11.4 5 9a7 7 0 0 1 7-7z"/><path d="M9 21h6M10 17v-2a2 2 0 0 0-2-2M14 17v-2a2 2 0 0 1 2-2"/></svg>Clinical Insights
+          </button>
+          <button className="drawer-item" onClick={() => go('/notes')}>
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>Notes Vault
           </button>
           <div className="drawer-div" />
           <div className="drawer-sect">Grow</div>
@@ -323,7 +327,7 @@ function TopBar({ user }) {
                   const name = c.requester_name || 'Someone';
                   const exam = c.requester_exam || '';
                   const av = c.requester_avatar || '🩺';
-                  return (
+                return (
                     <div key={c.id} onClick={() => { setBellOpen(false); nav('/partners?tab=requests'); }}
                       style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 18px', cursor: 'pointer', borderTop: '1px solid var(--line)' }}
                       onMouseEnter={(e) => e.currentTarget.style.background = 'var(--paper-2)'}
@@ -568,6 +572,7 @@ function AppInner() {
         <Route path="/flashcards" element={<Flashcards />} />
         <Route path="/resources" element={<Resources />} />
         <Route path="/clinical-insights" element={<ClinicalInsights />} />
+        <Route path="/notes" element={<NotesVault />} />
         <Route path="/pro" element={<Pro />} />
         <Route path="/connections" element={<Navigate to="/partners?tab=mine" replace />} />
         <Route path="/profile" element={<Profile />} />
