@@ -111,7 +111,19 @@ export default function NotesVault() {
     Promise.all([
       api.notes().then(d => setNotes(d.notes || [])),
       api.notesShared().then(d => setShared(d.shared || [])),
-      api.connections().then(d => setPartners(d.connected || [])),
+      api.connections().then(d => {
+      const uid = user?.id;
+      const mapped = (d.connected || []).map(c => {
+        const iAm = c.requester === uid;
+        return {
+          id:     iAm ? c.recipient     : c.requester,
+          name:   iAm ? c.recipient_name  : c.requester_name,
+          exam:   iAm ? c.recipient_exam  : c.requester_exam,
+          avatar: iAm ? c.recipient_avatar: c.requester_avatar,
+        };
+      });
+      setPartners(mapped);
+    }),
     ]).finally(() => setLoading(false));
   }, []);
 
@@ -161,9 +173,13 @@ export default function NotesVault() {
 
       {/* sheet */}
       <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -20, position: 'relative', padding: '20px 16px 90px', minHeight: '60vh' }}>
-        <div className="tabs" style={{ marginBottom: 16 }}>
-          <button className={`tab ${tab === 'mine' ? 'on' : ''}`} onClick={() => setTab('mine')}>Mine {notes.length > 0 ? notes.length : ''}</button>
-          <button className={`tab ${tab === 'shared' ? 'on' : ''}`} onClick={() => setTab('shared')}>Shared with me {shared.length > 0 ? shared.length : ''}</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+          <div className="tabs" style={{ flex: 1, marginBottom: 0 }}>
+            <button className={`tab ${tab === 'mine' ? 'on' : ''}`} onClick={() => setTab('mine')}>Mine {notes.length > 0 ? notes.length : ''}</button>
+            <button className={`tab ${tab === 'shared' ? 'on' : ''}`} onClick={() => setTab('shared')}>Shared with me {shared.length > 0 ? shared.length : ''}</button>
+          </div>
+          <button onClick={() => setEditor('new')}
+            style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--forest)', color: '#fff', border: 'none', fontSize: 22, fontWeight: 300, display: 'grid', placeItems: 'center', boxShadow: '0 4px 14px rgba(31,77,63,.28)', cursor: 'pointer', flexShrink: 0, lineHeight: 1 }}>+</button>
         </div>
 
         {loading && <div className="center" style={{ minHeight: 120 }}><div className="spinner" /></div>}
@@ -229,9 +245,7 @@ export default function NotesVault() {
           </>
         )}
 
-        {/* FAB */}
-        <button onClick={() => setEditor('new')}
-          style={{ position: 'fixed', bottom: 'calc(env(safe-area-inset-bottom, 0px) + 86px)', right: 'max(18px, calc(50vw - 222px))', width: 48, height: 48, borderRadius: '50%', background: 'var(--forest)', color: '#fff', border: 'none', fontSize: 26, fontWeight: 300, display: 'grid', placeItems: 'center', boxShadow: '0 6px 20px rgba(31,77,63,.35)', cursor: 'pointer', zIndex: 100, lineHeight: 1 }}>+</button>
+
       </div>
 
       {/* modals */}
@@ -246,5 +260,4 @@ export default function NotesVault() {
       )}
     </div>
   );
-            }
-
+}
