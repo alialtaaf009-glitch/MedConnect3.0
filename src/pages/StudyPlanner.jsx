@@ -32,8 +32,12 @@ function BlockEditor({ block, day, onSave, onClose }) {
       const res = block?.id
         ? await api.blockUpdate(block.id, day, time, topic.trim(), duration, note, color)
         : await api.blockCreate(day, time, topic.trim(), duration, note, color);
+      if (!res?.block) throw new Error('No block returned from server');
       onSave(res.block);
-    } catch (_) {} finally { setSaving(false); }
+    } catch (e) {
+      alert('Could not save block:\n' + (e?.message || 'unknown error'));
+      setSaving(false);
+    }
   };
 
   return (
@@ -226,4 +230,4 @@ export default function StudyPlanner() {
   );
 }
 const navBtnS = { width: 30, height: 30, borderRadius: '50%', background: 'var(--card)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', cursor: 'pointer', color: 'var(--forest)', fontSize: 16 };
-        
+
