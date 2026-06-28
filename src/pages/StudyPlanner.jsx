@@ -132,8 +132,9 @@ export default function StudyPlanner() {
   for (let i = 0; i < startOffset; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
+  const dayKey = (d) => (typeof d === 'string' ? d.slice(0, 10) : ymd(new Date(d)));
   const blocksByDay = {};
-  blocks.forEach(b => { (blocksByDay[b.day] = blocksByDay[b.day] || []).push(b); });
+  blocks.forEach(b => { const k = dayKey(b.day); (blocksByDay[k] = blocksByDay[k] || []).push(b); });
 
   const selBlocks = (blocksByDay[selected] || []).slice().sort((a, b) => (a.time || '').localeCompare(b.time || ''));
   const selDate = new Date(selected + 'T00:00:00');
