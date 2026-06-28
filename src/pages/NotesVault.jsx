@@ -28,7 +28,7 @@ function NoteEditor({ note, onSave, onClose }) {
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(0,0,0,.45)', display: 'flex', alignItems: 'flex-end' }}>
-      <div style={{ width: '100%', background: 'var(--paper)', borderRadius: '26px 26px 0 0', padding: '20px 18px 36px', maxHeight: '90vh', overflowY: 'auto' }}>
+      <div style={{ width: '100%', background: 'var(--paper)', borderRadius: '26px 26px 0 0', padding: '20px 18px calc(env(safe-area-inset-bottom, 0px) + 36px)', maxHeight: '90vh', overflowY: 'auto' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
           <span style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 18, color: 'var(--ink)' }}>{note?.id ? 'Edit note' : 'New note'}</span>
           <button onClick={onClose} style={{ background: 'var(--paper-2)', border: 'none', borderRadius: '50%', width: 32, height: 32, display: 'grid', placeItems: 'center', cursor: 'pointer', color: 'var(--muted)', fontSize: 18 }}>×</button>
@@ -62,14 +62,14 @@ function SharePicker({ note, partners, onShare, onClose }) {
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(0,0,0,.45)', display: 'flex', alignItems: 'flex-end' }}>
-      <div style={{ width: '100%', background: 'var(--paper)', borderRadius: '26px 26px 0 0', padding: '20px 18px 36px' }}>
+      <div style={{ width: '100%', background: 'var(--paper)', borderRadius: '26px 26px 0 0', padding: '20px 18px calc(env(safe-area-inset-bottom, 0px) + 28px)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
           <span style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 18, color: 'var(--ink)' }}>Share note</span>
           <button onClick={onClose} style={{ background: 'var(--paper-2)', border: 'none', borderRadius: '50%', width: 32, height: 32, display: 'grid', placeItems: 'center', cursor: 'pointer', color: 'var(--muted)', fontSize: 18 }}>×</button>
         </div>
         <p style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 14, lineHeight: 1.4 }}>"{note.title}"</p>
         {!partners.length && <p style={{ fontSize: 13, color: 'var(--muted)', textAlign: 'center', padding: '16px 0' }}>No study partners yet — connect with someone first.</p>}
-        <div style={{ background: 'var(--card)', borderRadius: 16, overflow: 'hidden', border: '1.5px solid var(--line)', marginBottom: 14 }}>
+        <div style={{ background: 'var(--card)', borderRadius: 16, overflow: 'hidden', border: '1.5px solid var(--line)', marginBottom: 14, maxHeight: 220, overflowY: 'auto' }}>
           {partners.map((p, i) => (
             <div key={p.id} onClick={() => setPicked(p.id)}
               style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderTop: i > 0 ? '1px solid var(--line)' : 'none', cursor: 'pointer', background: picked === p.id ? 'var(--paper-2)' : 'transparent' }}>
