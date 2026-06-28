@@ -218,7 +218,7 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'country' && (
-        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+      <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
         {orderedCountries.map(([flag, country, exams], idx) => (
         <div key={country} style={{ borderTop: idx === 0 ? 'none' : '1px solid var(--line)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '11px 18px', cursor: 'pointer' }}
@@ -448,7 +448,7 @@ function QuickRow({ user, nav, onGreen }) {
           <span style={{ position: 'absolute', top: -2, right: -2, minWidth: 18, height: 18, padding: '0 4px', borderRadius: 999, background: 'var(--rust)', color: '#fff', fontSize: 9, fontWeight: 800, display: 'grid', placeItems: 'center', border: `2px solid ${onGreen ? '#1c4337' : 'var(--paper)'}`, zIndex: 3, animation: 'qBadge .5s cubic-bezier(.34,1.7,.5,1) both' }}>{badge}</span>
         )}
         {children}
-      </div>
+        </div>
       <div style={{ fontSize: 11, fontWeight: 700, color: onGreen ? 'rgba(255,255,255,.85)' : 'var(--muted)', textAlign: 'center', lineHeight: 1.15 }}>{label}</div>
     </div>
   );
@@ -597,7 +597,7 @@ function QuickRow({ user, nav, onGreen }) {
       })()}
 
       {stOpen && (() => {
-      const best = Math.max(user?.longest_streak || 0, streak);
+        const best = Math.max(user?.longest_streak || 0, streak);
         const line = !studiedToday
           ? 'One tap keeps the flame alive.'
           : streak >= best && streak > 1
@@ -724,7 +724,7 @@ function QuickRow({ user, nav, onGreen }) {
                       {studiedToday ? '🔥 Today is logged — see you tomorrow' : '🔥 Tap below to log today'}
                     </div>
                     {!studiedToday && (
-                    <button className="btn btn-cta" style={{ maxWidth: 220, margin: '0 auto' }} disabled={marking} onClick={markStudy}>{marking ? '…' : 'Mark today ✓'}</button>
+                      <button className="btn btn-cta" style={{ maxWidth: 220, margin: '0 auto' }} disabled={marking} onClick={markStudy}>{marking ? '…' : 'Mark today ✓'}</button>
                     )}
                     <button className="btn ghost" style={{ marginTop: 10, maxWidth: 220, margin: '10px auto 0' }} onClick={closeBloom}>Keep going</button>
                     <p style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 15, lineHeight: 1.5, color: 'var(--ink)', fontStyle: 'italic', margin: '18px auto 0', maxWidth: 260 }}>"{moraleFor('streak')}"</p>
@@ -781,7 +781,7 @@ function QuickRow({ user, nav, onGreen }) {
                   </div>
                 )}
                 {bloom.key === 'flashcards' && (
-                  <div style={{ padding: '20px 16px' }}>
+            <div style={{ padding: '20px 16px' }}>
                     {addingDeck ? (
                       <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 18, padding: 14, marginBottom: 16 }}>
                         <input value={dName} onChange={(e) => setDName(e.target.value)} placeholder="Deck name" autoFocus
@@ -827,7 +827,7 @@ function QuickRow({ user, nav, onGreen }) {
                                         <button onClick={() => removeDeck(d.id)} disabled={deletingDeck} style={{ border: 'none', background: 'var(--rust)', color: '#fff', borderRadius: 999, padding: '7px 14px', fontSize: 12, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer' }}>{deletingDeck ? '…' : 'Delete'}</button>
                                       </div>
                                     ) : (
-                                    <div style={{ display: 'flex', gap: 8 }}>
+                                      <div style={{ display: 'flex', gap: 8 }}>
                                         <button onClick={() => { closeBloom(); setTimeout(() => nav('/flashcards'), 300); }} style={{ flex: 1, border: 'none', background: '#e8916b', color: '#fff', borderRadius: 999, padding: '10px', fontSize: 13, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer' }}>{d.due_count > 0 ? `Review ${d.due_count} due` : 'Study deck'}</button>
                                         <button onClick={() => setConfirmDelDeck(d.id)} aria-label="Delete deck" style={{ flexShrink: 0, width: 40, border: '1.5px solid var(--line)', background: 'var(--card)', color: 'var(--rust)', borderRadius: 999, display: 'grid', placeItems: 'center', cursor: 'pointer' }}>
                                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg>
@@ -974,7 +974,7 @@ export default function Home() {
       </div>
 
       {showMotivation && (
-        <div className="fs-open" style={{ position: 'fixed', inset: 0, background: 'var(--section-hero)', zIndex: 1000, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <div className="fs-open" style={{ position: 'fixed', inset: 0, background: 'var(--section-hero)', zIndex: 1000, overflowY: 'auto', WebkitOverflowScrolling: 'touch', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 56px)' }}>
           <div className="fs-content" style={{ minHeight: '100%', position: 'relative' }}>
             <Motivation onBack={() => setShowMotivation(false)} />
           </div>
