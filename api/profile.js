@@ -271,9 +271,11 @@ export default async function handler(req, res) {
       if (body.action === 'block_create') {
         const { day, time, topic, duration, note, color } = body;
         if (!day || !topic?.trim()) return res.status(400).json({ error: 'day and topic required' });
-        await ensureBlocksTable();
-        const rows = await sql`INSERT INTO study_blocks (user_id, day, time, topic, duration, note, color) VALUES (${uid}, ${day}, ${time || ''}, ${topic.trim()}, ${duration || ''}, ${note || ''}, ${color || 'c1'}) RETURNING *`;
-        return res.status(200).json({ block: rows[0] });
+        try {
+          await ensureBlocksTable();
+          const rows = await sql`INSERT INTO study_blocks (user_id, day, time, topic, duration, note, color) VALUES (${uid}, ${day}, ${time || ''}, ${topic.trim()}, ${duration || ''}, ${note || ''}, ${color || 'c1'}) RETURNING *`;
+          return res.status(200).json({ block: rows[0] });
+        } catch (e) { return res.status(500).json({ error: 'block_create failed: ' + (e.message || e) }); }
       }
       if (body.action === 'block_update') {
         const { id, day, time, topic, duration, note, color } = body;
