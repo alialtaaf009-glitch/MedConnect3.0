@@ -81,6 +81,16 @@ export default async function handler(req, res) {
         return res.status(200).json({ notes });
       } catch (e) { return res.status(500).json({ error: 'Could not load notes' }); }
     }
+    // ---- Study blocks: GET /api/profile?blocks=1&from=ISO&to=ISO ----
+    if (req.query.blocks) {
+      try {
+        await ensureBlocksTable();
+        const from = req.query.from || '1970-01-01';
+        const to = req.query.to || '2999-12-31';
+        const blocks = await sql`SELECT * FROM study_blocks WHERE user_id = ${uid} AND day >= ${from} AND day <= ${to} ORDER BY day, time`;
+        return res.status(200).json({ blocks });
+      } catch (e) { return res.status(500).json({ error: 'Could not load blocks' }); }
+    }
     // ---- Notes shared with me: GET /api/profile?notes_shared=1 ----
     if (req.query.notes_shared) {
       try {
@@ -257,6 +267,35 @@ export default async function handler(req, res) {
         await sql`UPDATE note_shares SET saved = true WHERE id = ${share_id}`;
         return res.status(200).json({ note: newNote[0] });
       }
+      // ── Study blocks ────────────────────────────────────────────────────────
+      if (body.action === 'block_create') {
+        const { day, time, topic, duration, note, color } = body;
+        if (!day || !topic?.trim()) return res.status(400).json({ error: 'day and topic required' });
+        await ensureBlocksTable();
+        const rows = await sql`INSERT INTO study_blocks (user_id, day, time, topic, duration, note, color) VALUES (${uid}, ${day}, ${time || ''}, ${topic.trim()}, ${duration || ''}, ${note || ''}, ${color || 'c1'}) RETURNING *`;
+        return res.status(200).json({ block: rows[0] });
+      }
+      if (body.action === 'block_update') {
+        const { id, day, time, topic, duration, note, color } = body;
+        if (!id) return res.status(400).json({ error: 'id required' });
+        await ensureBlocksTable();
+        const rows = await sql`UPDATE study_blocks SET day = ${day}, time = ${time || ''}, topic = ${topic}, duration = ${duration || ''}, note = ${note || ''}, color = ${color || 'c1'} WHERE id = ${id} AND user_id = ${uid} RETURNING *`;
+        return res.status(200).json({ block: rows[0] });
+      }
+      if (body.action === 'block_toggle') {
+        const { id } = body;
+        if (!id) return res.status(400).json({ error: 'id required' });
+        await ensureBlocksTable();
+        const rows = await sql`UPDATE study_blocks SET done = NOT done WHERE id = ${id} AND user_id = ${uid} RETURNING *`;
+        return res.status(200).json({ block: rows[0] });
+      }
+      if (body.action === 'block_delete') {
+        const { id } = body;
+        if (!id) return res.status(400).json({ error: 'id required' });
+        await ensureBlocksTable();
+        await sql`DELETE FROM study_blocks WHERE id = ${id} AND user_id = ${uid}`;
+        return res.status(200).json({ ok: true });
+      }
       return res.status(400).json({ error: 'Unknown action' });
     } catch (e) {
       return res.status(500).json({ error: 'Qbank write failed: ' + (e.message || e) });
@@ -345,46 +384,18 @@ async function ensureDeckTables() {
     )`;
 }
 
-async function ensureQbankTables() {
+async function ensureBlocksTable() {
   await sql`
-    CREATE TABLE IF NOT EXISTS qbank_progress (
+    CREATE TABLE IF NOT EXISTS study_blocks (
+      id SERIAL PRIMARY KEY,
       user_id INTEGER NOT NULL,
-      bank TEXT NOT NULL,
+      day DATE NOT NULL,
+      time TEXT DEFAULT '',
       topic TEXT NOT NULL,
-      done INTEGER DEFAULT 0,
-      total INTEGER DEFAULT 0,
-      correct INTEGER DEFAULT 0,
-      PRIMARY KEY (user_id, bank, topic)
-    )`;
-  await sql`
-    CREATE TABLE IF NOT EXISTS share_grants (
-      grantor_id INTEGER NOT NULL,
-      grantee_id INTEGER NOT NULL,
-      bank TEXT NOT NULL,
-      created_at TIMESTAMPTZ DEFAULT now(),
-      PRIMARY KEY (grantor_id, grantee_id, bank)
-    )`;
-}
-
-async function ensureNotesTables() {
-  await sql`
-    CREATE TABLE IF NOT EXISTS notes (
-      id SERIAL PRIMARY KEY,
-      user_id INTEGER NOT NULL,
-      title TEXT NOT NULL,
-      body TEXT DEFAULT '',
-      tags TEXT DEFAULT '',
-      created_at TIMESTAMPTZ DEFAULT now(),
-      updated_at TIMESTAMPTZ DEFAULT now()
-    )`;
-  await sql`
-    CREATE TABLE IF NOT EXISTS note_shares (
-      id SERIAL PRIMARY KEY,
-      note_id INTEGER NOT NULL,
-      shared_by INTEGER NOT NULL,
-      shared_with INTEGER NOT NULL,
-      saved BOOLEAN DEFAULT FALSE,
-      created_at TIMESTAMPTZ DEFAULT now(),
-      UNIQUE (note_id, shared_by, shared_with)
+      duration TEXT DEFAULT '',
+      note TEXT DEFAULT '',
+      color TEXT DEFAULT 'c1',
+      done BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMPTZ DEFAULT now()
     )`;
 }
