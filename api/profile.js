@@ -401,3 +401,47 @@ async function ensureBlocksTable() {
       created_at TIMESTAMPTZ DEFAULT now()
     )`;
 }
+
+async function ensureQbankTables() {
+  await sql`
+    CREATE TABLE IF NOT EXISTS qbank_progress (
+      user_id INTEGER NOT NULL,
+      bank TEXT NOT NULL,
+      topic TEXT NOT NULL,
+      done INTEGER DEFAULT 0,
+      total INTEGER DEFAULT 0,
+      correct INTEGER DEFAULT 0,
+      PRIMARY KEY (user_id, bank, topic)
+    )`;
+  await sql`
+    CREATE TABLE IF NOT EXISTS share_grants (
+      grantor_id INTEGER NOT NULL,
+      grantee_id INTEGER NOT NULL,
+      bank TEXT NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT now(),
+      PRIMARY KEY (grantor_id, grantee_id, bank)
+    )`;
+}
+
+async function ensureNotesTables() {
+  await sql`
+    CREATE TABLE IF NOT EXISTS notes (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL,
+      title TEXT NOT NULL,
+      body TEXT DEFAULT '',
+      tags TEXT DEFAULT '',
+      created_at TIMESTAMPTZ DEFAULT now(),
+      updated_at TIMESTAMPTZ DEFAULT now()
+    )`;
+  await sql`
+    CREATE TABLE IF NOT EXISTS note_shares (
+      id SERIAL PRIMARY KEY,
+      note_id INTEGER NOT NULL,
+      shared_by INTEGER NOT NULL,
+      shared_with INTEGER NOT NULL,
+      saved BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMPTZ DEFAULT now(),
+      UNIQUE (note_id, shared_by, shared_with)
+    )`;
+}
