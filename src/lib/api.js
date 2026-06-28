@@ -62,6 +62,7 @@ export const api = {
   deckRateCard: (cardId, rating) => req('/profile', { method: 'POST', body: { action: 'deck_rate_card', cardId, rating } }),
   qbankSave: (bank, topic, done, total, correct) => { invalidate('qbank'); return req('/profile', { method: 'POST', body: { action: 'save_progress', bank, topic, done, total, correct } }); },
   qbankDeleteTopic: (bank, topic) => { invalidate('qbank'); return req('/profile', { method: 'POST', body: { action: 'delete_topic', bank, topic } }); },
+  qbankDeleteBank: (bank) => { invalidate('qbank'); return req('/profile', { method: 'POST', body: { action: 'delete_bank', bank } }); },
   qbankSetShare: (partnerId, bank, on) => { invalidate('qbank'); return req('/profile', { method: 'POST', body: { action: 'set_share', partnerId, bank, on } }); },
   qbankCompare: (partnerId, bank) => cached(`compare:${partnerId}:${bank}`, 30000, () => req(`/profile?compare=${partnerId}&bank=${encodeURIComponent(bank)}`)),
   unreadMessages: () => req('/messages?scope=unread'),
