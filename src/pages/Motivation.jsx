@@ -87,7 +87,7 @@ export default function Motivation({ onBack }) {
         <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 26, lineHeight: 1, position: 'relative' }}>Motivation</h1>
         <p style={{ fontSize: 12.5, opacity: .85, marginTop: 6, lineHeight: 1.5, position: 'relative' }}>Your daily thought — save the ones that move you.</p>
       </div>
-      <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -20, position: 'relative', padding: '20px 16px 100px' }}>
+      <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -20, position: 'relative', padding: '20px 16px 100px', minHeight: '100vh' }}>
       <div className="tabs" style={{ marginBottom: 18 }}>
         <button className={`tab ${tab === 'today' ? 'on' : ''}`} onClick={() => setTab('today')}>Today</button>
         <button className={`tab ${tab === 'favs' ? 'on' : ''}`} onClick={() => setTab('favs')}>Favourites {favIds.length || ''}</button>
