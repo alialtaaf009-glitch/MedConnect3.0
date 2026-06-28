@@ -271,7 +271,7 @@ function ExploreBrowse() {
 
 // Quick row: Qbank · Flashcards · Countdown · Streak (circles). Stats open inline; tools navigate.
 function QuickRow({ user, nav, onGreen }) {
-  const { enterImmersive, exitImmersive, registerBack, clearBack } = useBack();
+  const { enterImmersive, exitImmersive } = useBack();
   // user-hideable tiles (Profile -> Home screen)
   const hideCd = localStorage.getItem('hide_countdown') === '1';
   const hideSt = localStorage.getItem('hide_streak') === '1';
@@ -486,22 +486,20 @@ function QuickRow({ user, nav, onGreen }) {
   };
   const closeBloom = () => {
     setBloomClosing(true);
-    setBloomGrown(false);
-    // restore topbar + status bar immediately so there's no lag on back press
-    if (setBar) setBar(null);
-    if (exitImmersive) exitImmersive();
-    setTimeout(() => { setBloom(null); setBloomClosing(false); }, 460);
+    setBloomGrown(false); // slide the panel down
+    // keep the bar coloured + immersive WHILE it slides, then restore everything together
+    setTimeout(() => {
+      setBloom(null);
+      setBloomClosing(false);
+      if (setBar) setBar(null);
+      if (exitImmersive) exitImmersive();
+    }, 460);
   };
   // safety: whenever there's no open bloom, ensure the system bar + immersive are reset
   useEffect(() => {
     if (!bloom) { if (setBar) setBar(null); if (exitImmersive) exitImmersive(); }
     return () => { if (setBar) setBar(null); if (exitImmersive) exitImmersive(); };
   }, [bloom, setBar, exitImmersive]);
-
-  // register bloom's close as the back handler so phone back button/gesture works correctly
-  useEffect(() => {
-    if (bloom) { registerBack(() => closeBloom()); return () => clearBack(); }
-  }, [!!bloom]);
 
   return (
     <>
@@ -526,7 +524,7 @@ function QuickRow({ user, nav, onGreen }) {
 
         {/* Flashcards — navigates */}
         {!hideFc && (
-        <Circle tint="#fbe3da" color="#e8916b" glow="0 6px 14px rgba(232,145,107,.22)" label="Flashcards" selected={false} badge={due ? due : null} onClick={(e) => launchBloom(e, '#c47a3a', 'flashcards')}>
+        <Circle tint="#fbe3da" color="#e8916b" glow="0 6px 14px rgba(232,145,107,.22)" label="Flashcards" selected={false} badge={due ? due : null} onClick={(e) => launchBloom(e, '#e8916b', 'flashcards')}>
           <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="6" width="13" height="12" rx="2" /><path d="M7 10h5M7 13.5h3" /><path d="M20 8.5v8a2 2 0 0 1-2 2H8.5" /></svg>
         </Circle>
       )}
@@ -559,7 +557,7 @@ function QuickRow({ user, nav, onGreen }) {
 
 
       {cdOpen && user?.exam_date && (() => {
-      const examTs = new Date(user.exam_date).getTime();
+        const examTs = new Date(user.exam_date).getTime();
         const diff = Math.max(0, examTs - nowTs);
         const totSec = Math.floor(diff / 1000);
         const totDays = Math.floor(totSec / 86400);
@@ -599,7 +597,7 @@ function QuickRow({ user, nav, onGreen }) {
       })()}
 
       {stOpen && (() => {
-        const best = Math.max(user?.longest_streak || 0, streak);
+      const best = Math.max(user?.longest_streak || 0, streak);
         const line = !studiedToday
           ? 'One tap keeps the flame alive.'
           : streak >= best && streak > 1
@@ -644,13 +642,10 @@ function QuickRow({ user, nav, onGreen }) {
         const dLeft = examTs ? Math.ceil((examTs - Date.now()) / 86400000) : null;
         const best = Math.max(user?.longest_streak || 0, streak);
         const title = bloom.key === 'countdown' ? 'Countdown' : bloom.key === 'streak' ? 'Study Streak' : bloom.key === 'qbank' ? 'Qbank Tracker' : 'Flashcards';
-        let swipeStartY = 0;
-        const onTouchStart = (e) => { swipeStartY = e.touches[0].clientY; };
-        const onTouchEnd = (e) => { if (e.changedTouches[0].clientY - swipeStartY > 80) closeBloom(); };
         return createPortal((
           <div style={{ position: 'fixed', inset: 0, zIndex: 5000, overflow: 'hidden', pointerEvents: bloomGrown ? 'auto' : 'none' }}>
             <style>{`@keyframes bloomSlideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes bloomSlideDown{from{transform:translateY(0)}to{transform:translateY(100%)}}`}</style>
-            <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} style={{
+            <div style={{
               position: 'absolute', inset: 0, background: bloom.color,
               transform: bloomGrown ? 'translateY(0)' : 'translateY(100%)',
               willChange: 'transform',
@@ -729,7 +724,7 @@ function QuickRow({ user, nav, onGreen }) {
                       {studiedToday ? '🔥 Today is logged — see you tomorrow' : '🔥 Tap below to log today'}
                     </div>
                     {!studiedToday && (
-                      <button className="btn btn-cta" style={{ maxWidth: 220, margin: '0 auto' }} disabled={marking} onClick={markStudy}>{marking ? '…' : 'Mark today ✓'}</button>
+                    <button className="btn btn-cta" style={{ maxWidth: 220, margin: '0 auto' }} disabled={marking} onClick={markStudy}>{marking ? '…' : 'Mark today ✓'}</button>
                     )}
                     <button className="btn ghost" style={{ marginTop: 10, maxWidth: 220, margin: '10px auto 0' }} onClick={closeBloom}>Keep going</button>
                     <p style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 15, lineHeight: 1.5, color: 'var(--ink)', fontStyle: 'italic', margin: '18px auto 0', maxWidth: 260 }}>"{moraleFor('streak')}"</p>
@@ -832,8 +827,8 @@ function QuickRow({ user, nav, onGreen }) {
                                         <button onClick={() => removeDeck(d.id)} disabled={deletingDeck} style={{ border: 'none', background: 'var(--rust)', color: '#fff', borderRadius: 999, padding: '7px 14px', fontSize: 12, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer' }}>{deletingDeck ? '…' : 'Delete'}</button>
                                       </div>
                                     ) : (
-                                      <div style={{ display: 'flex', gap: 8 }}>
-                                        <button onClick={() => { closeBloom(); setTimeout(() => nav('/flashcards'), 460); }} style={{ flex: 1, border: 'none', background: '#e8916b', color: '#fff', borderRadius: 999, padding: '10px', fontSize: 13, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer' }}>{d.due_count > 0 ? `Review ${d.due_count} due` : 'Study deck'}</button>
+                                    <div style={{ display: 'flex', gap: 8 }}>
+                                        <button onClick={() => { closeBloom(); setTimeout(() => nav('/flashcards'), 300); }} style={{ flex: 1, border: 'none', background: '#e8916b', color: '#fff', borderRadius: 999, padding: '10px', fontSize: 13, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer' }}>{d.due_count > 0 ? `Review ${d.due_count} due` : 'Study deck'}</button>
                                         <button onClick={() => setConfirmDelDeck(d.id)} aria-label="Delete deck" style={{ flexShrink: 0, width: 40, border: '1.5px solid var(--line)', background: 'var(--card)', color: 'var(--rust)', borderRadius: 999, display: 'grid', placeItems: 'center', cursor: 'pointer' }}>
                                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg>
                                         </button>
@@ -889,7 +884,7 @@ export default function Home() {
       url: 'https://med-connect3-0.vercel.app',
     };
     try {
-     if  (navigator.share) { await navigator.share(data); return; }
+      if (navigator.share) { await navigator.share(data); return; }
     } catch (e) { if (e?.name === 'AbortError') return; }
     try {
       await navigator.clipboard.writeText(`${data.text} ${data.url}`);
@@ -979,7 +974,7 @@ export default function Home() {
       </div>
 
       {showMotivation && (
-        <div className="fs-open" style={{ position: 'fixed', inset: 0, background: 'var(--paper)', zIndex: 1000, overflowY: 'auto', WebkitOverflowScrolling: 'touch', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 72px)' }}>
+        <div className="fs-open" style={{ position: 'fixed', inset: 0, background: 'var(--section-hero)', zIndex: 1000, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
           <div className="fs-content" style={{ minHeight: '100%', position: 'relative' }}>
             <Motivation onBack={() => setShowMotivation(false)} />
           </div>
