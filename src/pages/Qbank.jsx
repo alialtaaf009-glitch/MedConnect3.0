@@ -149,9 +149,14 @@ export default function Qbank() {
   const shareCount = sharingWith.filter((g) => g.bank === bank).length;
 
   return (
-    <div className="screen">
-      <h1 className="serif" style={{ fontSize: 24, fontWeight: 700, color: 'var(--ink)' }}>Qbank Tracker</h1>
-      <p className="sub" style={{ marginBottom: 16 }}>Track your question-bank progress, solo or shared.</p>
+    <div className="screen" style={{ padding: 0 }}>
+      <div style={{ background: 'var(--section-hero)', color: '#fff', padding: '18px 20px 32px', minHeight: 150, boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', right: -8, bottom: -16, fontSize: 88, opacity: .1, lineHeight: 1, pointerEvents: 'none' }}>📊</div>
+        <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1.2, color: 'var(--gold)', textTransform: 'uppercase', marginBottom: 7, position: 'relative' }}>✦ Progress</div>
+        <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 24, lineHeight: 1, position: 'relative' }}>Qbank Tracker</h1>
+        <p style={{ fontSize: 12.5, opacity: .85, marginTop: 6, lineHeight: 1.5, position: 'relative' }}>Track your question-bank progress — solo or shared with a partner.</p>
+      </div>
+      <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -20, position: 'relative', padding: '20px 16px 90px', minHeight: '60vh' }}>
 
       {/* bank selector */}
       <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 14, paddingBottom: 4, alignItems: 'center' }}>
@@ -285,6 +290,7 @@ export default function Qbank() {
 
       {/* partners sharing WITH me — inline, with inline expand-to-compare */}
       <SharedToMe bank={bank} grants={sharedToMe} compareId={compareId} compareName={compareName} compareRows={compareRows} bankRows={bankRows} color={color} accColor={accColor} onToggle={toggleCompare} />
+      </div>
     </div>
   );
 }
