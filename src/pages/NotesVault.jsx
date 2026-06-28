@@ -61,8 +61,8 @@ function SharePicker({ note, partners, onShare, onClose }) {
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(0,0,0,.45)', display: 'flex', alignItems: 'flex-end' }}>
-      <div style={{ width: '100%', background: 'var(--paper)', borderRadius: '26px 26px 0 0', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(0,0,0,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px 14px' }}>
+      <div style={{ width: '100%', maxWidth: 420, maxHeight: '88vh', background: 'var(--paper)', borderRadius: 22, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* header — fixed */}
         <div style={{ padding: '18px 18px 10px', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
@@ -72,7 +72,7 @@ function SharePicker({ note, partners, onShare, onClose }) {
           <p style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.4 }}>"{note.title}"</p>
         </div>
         {/* partner list — scrollable */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0 18px' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0 18px', minHeight: 0 }}>
           {!partners.length && <p style={{ fontSize: 13, color: 'var(--muted)', textAlign: 'center', padding: '24px 0' }}>No study partners yet — connect with someone first.</p>}
           {partners.map((p, i) => (
             <div key={p.id} onClick={() => setPicked(p.id)}
@@ -88,8 +88,8 @@ function SharePicker({ note, partners, onShare, onClose }) {
             </div>
           ))}
         </div>
-        {/* send — pinned at bottom */}
-        <div style={{ padding: '12px 18px calc(env(safe-area-inset-bottom, 0px) + 16px)', borderTop: '1px solid var(--line)', flexShrink: 0 }}>
+        {/* send — pinned at bottom of the card */}
+        <div style={{ padding: '12px 18px 16px', borderTop: '1px solid var(--line)', flexShrink: 0 }}>
           <button onClick={share} disabled={!picked || sharing}
             style={{ width: '100%', border: 'none', borderRadius: 14, padding: 13, fontSize: 14, fontWeight: 800, fontFamily: 'inherit', background: picked ? 'linear-gradient(135deg,var(--forest),#2c6a55)' : 'var(--line)', color: picked ? '#fff' : 'var(--muted)', cursor: picked ? 'pointer' : 'default', transition: 'all .2s' }}>
             {sharing ? 'Sharing…' : picked ? `Send to ${partners.find(p => p.id === picked)?.name?.split(' ')[0] || 'partner'} →` : 'Select a partner'}
