@@ -73,7 +73,31 @@ export default async function handler(req, res) {
         return res.status(200).json({ deck: null, cards: [] });
       }
     }
-    const target = parseInt(req.query.user, 10);
+    // ---- Notes: GET /api/profile?notes=1 ----
+    if (req.query.notes) {
+      try {
+        await ensureNotesTables();
+        const notes = await sql`SELECT * FROM notes WHERE user_id = ${uid} ORDER BY updated_at DESC`;
+        return res.status(200).json({ notes });
+      } catch (e) { return res.status(500).json({ error: 'Could not load notes' }); }
+    }
+    // ---- Notes shared with me: GET /api/profile?notes_shared=1 ----
+    if (req.query.notes_shared) {
+      try {
+        await ensureNotesTables();
+        const shared = await sql`
+          SELECT ns.id as share_id, ns.saved, ns.created_at as shared_at,
+                 n.title, n.body, n.tags,
+                 u.name as from_name, u.avatar as from_avatar, u.id as from_id
+          FROM note_shares ns
+          JOIN notes n ON n.id = ns.note_id
+          JOIN users u ON u.id = ns.shared_by
+          WHERE ns.shared_with = ${uid}
+          ORDER BY ns.created_at DESC`;
+        return res.status(200).json({ shared });
+      } catch (e) { return res.status(500).json({ error: 'Could not load shared notes' }); }
+    }
+
     if (!target) return res.status(400).json({ error: 'user id required' });
     try {
       const rows = await sql`SELECT id, name, avatar, exam, country FROM users WHERE id = ${target}`;
@@ -192,6 +216,47 @@ export default async function handler(req, res) {
         }
       }
 
+      // ── Notes CRUD ──────────────────────────────────────────────────────────
+      if (body.action === 'note_create') {
+        const { title, body: noteBody, tags } = body;
+        if (!title?.trim()) return res.status(400).json({ error: 'title required' });
+        await ensureNotesTables();
+        const rows = await sql`INSERT INTO notes (user_id, title, body, tags) VALUES (${uid}, ${title.trim()}, ${noteBody || ''}, ${tags || ''}) RETURNING *`;
+        return res.status(200).json({ note: rows[0] });
+      }
+      if (body.action === 'note_update') {
+        const { id, title, body: noteBody, tags } = body;
+        if (!id) return res.status(400).json({ error: 'id required' });
+        await ensureNotesTables();
+        const rows = await sql`UPDATE notes SET title = ${title}, body = ${noteBody || ''}, tags = ${tags || ''}, updated_at = now() WHERE id = ${id} AND user_id = ${uid} RETURNING *`;
+        return res.status(200).json({ note: rows[0] });
+      }
+      if (body.action === 'note_delete') {
+        const { id } = body;
+        if (!id) return res.status(400).json({ error: 'id required' });
+        await ensureNotesTables();
+        await sql`DELETE FROM notes WHERE id = ${id} AND user_id = ${uid}`;
+        return res.status(200).json({ ok: true });
+      }
+      if (body.action === 'note_share') {
+        const { id, partner_id } = body;
+        if (!id || !partner_id) return res.status(400).json({ error: 'id and partner_id required' });
+        await ensureNotesTables();
+        await sql`INSERT INTO note_shares (note_id, shared_by, shared_with) VALUES (${id}, ${uid}, ${partner_id}) ON CONFLICT DO NOTHING`;
+        return res.status(200).json({ ok: true });
+      }
+      if (body.action === 'note_save') {
+        const { share_id } = body;
+        if (!share_id) return res.status(400).json({ error: 'share_id required' });
+        await ensureNotesTables();
+        // copy note into user's own vault
+        const shareRows = await sql`SELECT n.title, n.body, n.tags FROM note_shares ns JOIN notes n ON n.id = ns.note_id WHERE ns.id = ${share_id} AND ns.shared_with = ${uid}`;
+        if (!shareRows.length) return res.status(404).json({ error: 'Not found' });
+        const { title, body: nb, tags } = shareRows[0];
+        const newNote = await sql`INSERT INTO notes (user_id, title, body, tags) VALUES (${uid}, ${title}, ${nb}, ${tags}) RETURNING *`;
+        await sql`UPDATE note_shares SET saved = true WHERE id = ${share_id}`;
+        return res.status(200).json({ note: newNote[0] });
+      }
       return res.status(400).json({ error: 'Unknown action' });
     } catch (e) {
       return res.status(500).json({ error: 'Qbank write failed: ' + (e.message || e) });
@@ -298,5 +363,28 @@ async function ensureQbankTables() {
       bank TEXT NOT NULL,
       created_at TIMESTAMPTZ DEFAULT now(),
       PRIMARY KEY (grantor_id, grantee_id, bank)
+    )`;
+}
+
+async function ensureNotesTables() {
+  await sql`
+    CREATE TABLE IF NOT EXISTS notes (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL,
+      title TEXT NOT NULL,
+      body TEXT DEFAULT '',
+      tags TEXT DEFAULT '',
+      created_at TIMESTAMPTZ DEFAULT now(),
+      updated_at TIMESTAMPTZ DEFAULT now()
+    )`;
+  await sql`
+    CREATE TABLE IF NOT EXISTS note_shares (
+      id SERIAL PRIMARY KEY,
+      note_id INTEGER NOT NULL,
+      shared_by INTEGER NOT NULL,
+      shared_with INTEGER NOT NULL,
+      saved BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMPTZ DEFAULT now(),
+      UNIQUE (note_id, shared_by, shared_with)
     )`;
 }
