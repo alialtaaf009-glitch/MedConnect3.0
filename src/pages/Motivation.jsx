@@ -80,15 +80,9 @@ export default function Motivation({ onBack }) {
   };
 
   return (
-    <div style={{ paddingBottom: 80 }}>
-      <div style={{ background: 'var(--section-hero)', color: '#fff', padding: '18px 20px 32px', minHeight: 150, boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', right: -8, bottom: -16, fontSize: 90, opacity: .1, lineHeight: 1, pointerEvents: 'none' }}>✦</div>
-        <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1.2, color: 'var(--gold)', textTransform: 'uppercase', marginBottom: 7, position: 'relative' }}>✦ Daily Motivation</div>
-        <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 26, lineHeight: 1, position: 'relative' }}>Motivation</h1>
-        <p style={{ fontSize: 12.5, opacity: .85, marginTop: 6, lineHeight: 1.5, position: 'relative' }}>Your daily thought — save the ones that move you.</p>
-      </div>
-      <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -20, position: 'relative', padding: '20px 16px 24px', minHeight: '60vh' }}>
-      <div className="tabs" style={{ marginBottom: 18 }}>
+    <div className="screen">
+      <h1 className="h1">Daily Motivation</h1>
+      <div className="tabs" style={{ marginTop: 14 }}>
         <button className={`tab ${tab === 'today' ? 'on' : ''}`} onClick={() => setTab('today')}>Today</button>
         <button className={`tab ${tab === 'favs' ? 'on' : ''}`} onClick={() => setTab('favs')}>Favourites {favIds.length || ''}</button>
       </div>
@@ -150,7 +144,6 @@ export default function Motivation({ onBack }) {
           })}
         </>
       )}
-      </div>
     </div>
   );
 }
