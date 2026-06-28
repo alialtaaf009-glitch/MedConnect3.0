@@ -92,6 +92,12 @@ export const api = {
   noteDelete: (id) => req('/profile', { method: 'POST', body: { action: 'note_delete', id } }),
   noteShare: (noteId, partnerId) => req('/profile', { method: 'POST', body: { action: 'note_share', id: noteId, partner_id: partnerId } }),
   noteSave: (shareId) => req('/profile', { method: 'POST', body: { action: 'note_save', share_id: shareId } }),
+  // Study planner
+  blocks: (from, to) => req(`/profile?blocks=1&from=${from}&to=${to}`),
+  blockCreate: (day, time, topic, duration, note, color) => req('/profile', { method: 'POST', body: { action: 'block_create', day, time, topic, duration, note, color } }),
+  blockUpdate: (id, day, time, topic, duration, note, color) => req('/profile', { method: 'POST', body: { action: 'block_update', id, day, time, topic, duration, note, color } }),
+  blockToggle: (id) => req('/profile', { method: 'POST', body: { action: 'block_toggle', id } }),
+  blockDelete: (id) => req('/profile', { method: 'POST', body: { action: 'block_delete', id } }),
   getStats: () => req('/stats'),
   resetRequest: (email) => req('/reset', { method: 'POST', body: { action: 'request', email } }),
   resetConfirm: (token, password) => req('/reset', { method: 'POST', body: { action: 'confirm', token, password } }),
