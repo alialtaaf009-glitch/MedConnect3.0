@@ -218,7 +218,7 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'country' && (
-      <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
         {orderedCountries.map(([flag, country, exams], idx) => (
         <div key={country} style={{ borderTop: idx === 0 ? 'none' : '1px solid var(--line)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '11px 18px', cursor: 'pointer' }}
@@ -448,7 +448,7 @@ function QuickRow({ user, nav, onGreen }) {
           <span style={{ position: 'absolute', top: -2, right: -2, minWidth: 18, height: 18, padding: '0 4px', borderRadius: 999, background: 'var(--rust)', color: '#fff', fontSize: 9, fontWeight: 800, display: 'grid', placeItems: 'center', border: `2px solid ${onGreen ? '#1c4337' : 'var(--paper)'}`, zIndex: 3, animation: 'qBadge .5s cubic-bezier(.34,1.7,.5,1) both' }}>{badge}</span>
         )}
         {children}
-        </div>
+      </div>
       <div style={{ fontSize: 11, fontWeight: 700, color: onGreen ? 'rgba(255,255,255,.85)' : 'var(--muted)', textAlign: 'center', lineHeight: 1.15 }}>{label}</div>
     </div>
   );
@@ -781,7 +781,7 @@ function QuickRow({ user, nav, onGreen }) {
                   </div>
                 )}
                 {bloom.key === 'flashcards' && (
-            <div style={{ padding: '20px 16px' }}>
+                  <div style={{ padding: '20px 16px' }}>
                     {addingDeck ? (
                       <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 18, padding: 14, marginBottom: 16 }}>
                         <input value={dName} onChange={(e) => setDName(e.target.value)} placeholder="Deck name" autoFocus
@@ -867,6 +867,20 @@ export default function Home() {
 
   const [nudges, setNudges] = useState([]);
   const [nudgesOpen, setNudgesOpen] = useState(false);
+
+  // today's study plan (collapsed strip)
+  const [todayBlocks, setTodayBlocks] = useState([]);
+  const [planOpen, setPlanOpen] = useState(false);
+  useEffect(() => {
+    const t = new Date();
+    const ds = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+    api.blocks(ds, ds).then(d => setTodayBlocks(d.blocks || [])).catch(() => {});
+  }, []);
+  const toggleBlock = (id) => {
+    setTodayBlocks(prev => prev.map(b => b.id === id ? { ...b, done: !b.done } : b));
+    api.blockToggle(id).catch(() => setTodayBlocks(prev => prev.map(b => b.id === id ? { ...b, done: !b.done } : b)));
+  };
+
   const [dismissed, setDismissed] = useState(() => { try { return JSON.parse(localStorage.getItem('dismissed_nudges') || '[]'); } catch (e) { return []; } });
   const dismissNudge = (id) => {
     setDismissed((prev) => { const next = [...new Set([...prev, id])]; try { localStorage.setItem('dismissed_nudges', JSON.stringify(next)); } catch (e) {} return next; });
@@ -940,6 +954,56 @@ export default function Home() {
                   </span>
                 </button>
               )}
+            </div>
+          );
+        })()}
+
+        {todayBlocks.length > 0 && (() => {
+          const sorted = todayBlocks.slice().sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+          const doneCount = sorted.filter(b => b.done).length;
+          const allDone = doneCount === sorted.length;
+          const nextBlock = sorted.find(b => !b.done);
+          const colorBar = (id) => ({ c1: '#2c8a5a', c2: '#c47a3a', c3: '#1f9bb8', c4: '#d24a30' }[id] || '#2c8a5a');
+
+          if (allDone) {
+            return (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 9, background: 'rgba(224,179,65,.16)', border: '1px solid rgba(224,179,65,.3)', borderRadius: 14, padding: '11px 14px', marginTop: 14, color: '#fff' }}>
+                <span style={{ fontSize: 15 }}>✨</span>
+                <span style={{ flex: 1, fontSize: 12.5, fontWeight: 700, color: 'var(--gold)' }}>Today's plan complete — nice work!</span>
+              </div>
+            );
+          }
+          if (!planOpen) {
+            return (
+              <div onClick={() => setPlanOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: 9, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.14)', borderRadius: 14, padding: '11px 14px', marginTop: 14, color: '#fff', cursor: 'pointer' }}>
+                <span style={{ fontSize: 14 }}>📅</span>
+                <span style={{ flex: 1, fontSize: 12.5, fontWeight: 600 }}>
+                  <b style={{ color: 'var(--gold)', fontWeight: 800 }}>{sorted.length - doneCount} left today</b>
+                  {nextBlock && ` · next: ${nextBlock.topic}${nextBlock.time ? ' ' + nextBlock.time : ''}`}
+                </span>
+                <span style={{ opacity: .7, display: 'grid', placeItems: 'center' }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round"><path d="M9 6l6 6-6 6" /></svg>
+                </span>
+              </div>
+            );
+          }
+          return (
+            <div style={{ marginTop: 14, borderRadius: 16, overflow: 'hidden', background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.14)', color: '#fff' }}>
+              <div onClick={() => setPlanOpen(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 14px 9px', cursor: 'pointer' }}>
+                <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: .8, textTransform: 'uppercase', color: 'var(--gold)' }}>📅 Today's plan · {doneCount} of {sorted.length} done</span>
+                <span onClick={(e) => { e.stopPropagation(); nav('/planner'); }} style={{ fontSize: 11, fontWeight: 600, opacity: .85, display: 'flex', alignItems: 'center', gap: 4 }}>View all
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round"><path d="M9 6l6 6-6 6" /></svg>
+                </span>
+              </div>
+              {sorted.map((b, i) => (
+                <div key={b.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px', borderTop: '1px solid rgba(255,255,255,.1)', opacity: b.done ? .6 : 1 }}>
+                  {b.time && <span style={{ fontSize: 11, fontWeight: 700, opacity: .85, width: 56, flexShrink: 0 }}>{b.time}</span>}
+                  <span style={{ flex: 1, fontSize: 13, fontWeight: 600, textDecoration: b.done ? 'line-through' : 'none' }}>{b.topic}</span>
+                  <button onClick={() => toggleBlock(b.id)} aria-label="Mark done" style={{ width: 20, height: 20, borderRadius: '50%', border: b.done ? 'none' : '1.5px solid rgba(255,255,255,.4)', background: b.done ? 'var(--gold)' : 'transparent', display: 'grid', placeItems: 'center', flexShrink: 0, cursor: 'pointer', padding: 0 }}>
+                    {b.done && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#1f1404" strokeWidth="3.5" strokeLinecap="round"><path d="M5 12l5 5L20 7" /></svg>}
+                  </button>
+                </div>
+              ))}
             </div>
           );
         })()}
@@ -1026,3 +1090,4 @@ function QbankCard({ nav }) {
     </button>
   );
 }
+            
