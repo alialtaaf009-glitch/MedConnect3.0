@@ -86,7 +86,7 @@ function StarIcon({ filled }) {
       style={{ display: 'block' }}>
       <path d="M12 3.2c.4 0 .77.23.95.6l2.18 4.46 4.92.72c.83.12 1.16 1.14.56 1.72l-3.56 3.47.84 4.9c.14.82-.72 1.45-1.46 1.06L12 17.8l-4.4 2.32c-.74.39-1.6-.24-1.46-1.06l.84-4.9-3.56-3.47c-.6-.58-.27-1.6.56-1.72l4.92-.72L11.05 3.8c.18-.37.55-.6.95-.6z" />
     </svg>
-  );
+    );
 }
 
 function Flag({ country, emoji, size = 34, ring }) {
@@ -218,7 +218,7 @@ function ExploreBrowse() {
       )}
 
       {browseMode === 'country' && (
-        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
+      <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
         {orderedCountries.map(([flag, country, exams], idx) => (
         <div key={country} style={{ borderTop: idx === 0 ? 'none' : '1px solid var(--line)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '11px 18px', cursor: 'pointer' }}
@@ -597,7 +597,7 @@ function QuickRow({ user, nav, onGreen }) {
       })()}
 
       {stOpen && (() => {
-        const best = Math.max(user?.longest_streak || 0, streak);
+      const best = Math.max(user?.longest_streak || 0, streak);
         const line = !studiedToday
           ? 'One tap keeps the flame alive.'
           : streak >= best && streak > 1
@@ -777,6 +777,10 @@ function QuickRow({ user, nav, onGreen }) {
                     ) : (
                       <button onClick={() => setAddingTopic(true)} style={{ width: '100%', border: 'none', borderRadius: 999, padding: '14px', fontSize: 14, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', color: '#fff', background: '#147a8a' }}>+ Add topic</button>
                     )}
+                    <button onClick={() => { closeBloom(); setTimeout(() => nav('/qbank'), 460); }} style={{ width: '100%', border: '1.5px solid var(--line)', background: 'var(--card)', borderRadius: 999, padding: '13px', fontSize: 13.5, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer', color: 'var(--ink)', marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+                      View full tracker &amp; sharing →
+                    </button>
                     <p style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 14.5, lineHeight: 1.5, color: 'var(--muted)', fontStyle: 'italic', textAlign: 'center', margin: '18px auto 0', maxWidth: 260 }}>"{moraleFor('qbank')}"</p>
                   </div>
                 )}
