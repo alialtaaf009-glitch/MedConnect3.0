@@ -1,5 +1,5 @@
 // MedConnect service worker — enables PWA install + a basic offline shell.
-const CACHE = 'medconnect-v5';
+const CACHE = 'medconnect-v6';
 const APP_SHELL = ['/', '/index.html'];
 
 self.addEventListener('install', (event) => {
@@ -31,16 +31,14 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // For other assets: serve from cache if present, otherwise fetch + cache.
+  // For other assets: network-first so new deploys are always picked up,
+  // falling back to cache only when offline.
   event.respondWith(
-    caches.match(request).then((cached) =>
-      cached ||
-      fetch(request).then((res) => {
-        const copy = res.clone();
-        caches.open(CACHE).then((c) => c.put(request, copy));
-        return res;
-      })
-    )
+    fetch(request).then((res) => {
+      const copy = res.clone();
+      caches.open(CACHE).then((c) => c.put(request, copy));
+      return res;
+    }).catch(() => caches.match(request))
   );
 });
 
