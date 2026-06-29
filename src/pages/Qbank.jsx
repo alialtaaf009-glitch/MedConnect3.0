@@ -170,6 +170,9 @@ export default function Qbank() {
       </div>
       <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -20, position: 'relative', padding: '20px 16px 90px', minHeight: '60vh' }}>
 
+      {/* DEPLOY MARKER - remove later */}
+      <div style={{ background: '#e0b341', color: '#1f1404', fontSize: 11, fontWeight: 800, textAlign: 'center', padding: '6px', borderRadius: 8, marginBottom: 12 }}>✓ v2 with sharing — if you see this, new code is live</div>
+
       {/* bank selector */}
       <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 14, paddingBottom: 4, alignItems: 'center' }}>
         {banks.map((b) => (
