@@ -271,7 +271,7 @@ function ExploreBrowse() {
 
 // Quick row: Qbank · Flashcards · Countdown · Streak (circles). Stats open inline; tools navigate.
 function QuickRow({ user, nav, onGreen }) {
-  const { enterImmersive, exitImmersive } = useBack();
+  const { enterImmersive, exitImmersive, registerBack, clearBack } = useBack();
   // user-hideable tiles (Profile -> Home screen)
   const hideCd = localStorage.getItem('hide_countdown') === '1';
   const hideSt = localStorage.getItem('hide_streak') === '1';
@@ -486,20 +486,18 @@ function QuickRow({ user, nav, onGreen }) {
   };
   const closeBloom = () => {
     setBloomClosing(true);
-    setBloomGrown(false); // slide the panel down
-    // keep the bar coloured + immersive WHILE it slides, then restore everything together
-    setTimeout(() => {
-      setBloom(null);
-      setBloomClosing(false);
-      if (setBar) setBar(null);
-      if (exitImmersive) exitImmersive();
-    }, 460);
+    setBloomGrown(false);
+    if (setBar) setBar(null);
+    if (exitImmersive) exitImmersive();
+    setTimeout(() => { setBloom(null); setBloomClosing(false); }, 460);
   };
-  // safety: whenever there's no open bloom, ensure the system bar + immersive are reset
   useEffect(() => {
     if (!bloom) { if (setBar) setBar(null); if (exitImmersive) exitImmersive(); }
     return () => { if (setBar) setBar(null); if (exitImmersive) exitImmersive(); };
   }, [bloom, setBar, exitImmersive]);
+  useEffect(() => {
+    if (bloom) { registerBack(() => closeBloom()); return () => clearBack(); }
+  }, [!!bloom]);
 
   return (
     <>
