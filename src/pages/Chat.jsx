@@ -124,7 +124,7 @@ function ConversationList({ nav, me }) {
                 onContextMenu={(e) => e.preventDefault()}
                 onClick={() => { if (longFired.current) return; if (swipeId) { setSwipeId(null); return; } nav(`/chat?with=${c.other_id}&name=${encodeURIComponent(c.name)}&av=${encodeURIComponent(c.avatar || '')}`); }}>
                 <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: c.avatar ? 22 : 15, color: 'var(--forest)', fontWeight: 600, flexShrink: 0 }}>{c.avatar || init}</div>
-                <div className="grow">
+                <div className="grow" style={{ flex: 1, minWidth: 0 }}>
                   <div className="name">{c.name}</div>
                   <div className="meta" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: unread ? 700 : 400, color: unread ? 'var(--ink)' : undefined }}>
                     {c.last_sender == c.other_id ? '' : 'You: '}{c.last_body}
