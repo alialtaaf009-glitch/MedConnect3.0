@@ -117,7 +117,8 @@ export default function Osce() {
           </div>
         </div>
       )}
-      <div style={{ background: 'var(--section-hero)', color: '#fff', padding: '18px 20px 32px', minHeight: 150, boxSizing: 'border-box' }}>
+      <div style={{ background: 'var(--section-hero)', color: '#fff', padding: '18px 20px 32px', minHeight: 150, boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', right: -8, bottom: -16, fontSize: 90, opacity: .1, lineHeight: 1, pointerEvents: 'none' }}>🩺</div>
         <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 26, fontWeight: 900, lineHeight: 1 }}>OSCE Practice</h1>
         <p style={{ fontSize: 12.5, opacity: 0.85, marginTop: 5 }}>Timed station practice — solo or with a partner.</p>
         <div style={{ display: 'flex', gap: 22, marginTop: 16 }}>
