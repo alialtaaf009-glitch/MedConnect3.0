@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { sql, signToken, safeUser, readBody } from './_shared/util.js';
+import { sql, signToken, safeUser, readBody, checkRateLimit, recordAttempt } from './_shared/util.js';
 
 const GOOGLE_CLIENT_ID = '402347146267-47oui3qdf8sir6do5115ejdi5gdgok6r.apps.googleusercontent.com';
 
@@ -22,6 +22,9 @@ async function verifyGoogleToken(credential) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   try {
+    const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
+    const allowed = await checkRateLimit(ip, 8, 15 * 60 * 1000);
+    if (!allowed) return res.status(429).json({ error: 'Too many attempts. Try again in a few minutes.' });
     const body = readBody(req);
 
     // ---- Google sign-in path ----
@@ -53,7 +56,7 @@ export default async function handler(req, res) {
     if (!user) return res.status(401).json({ error: 'Invalid credentials' });
 
     const ok = await bcrypt.compare(password, user.password_hash);
-    if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!ok) { await recordAttempt(ip); return res.status(401).json({ error: 'Invalid credentials' }); }
 
     return res.status(200).json({ token: signToken(user), user: safeUser(user) });
   } catch (e) {
