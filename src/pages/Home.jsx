@@ -515,7 +515,7 @@ function QuickRow({ user, nav, onGreen }) {
       <div style={{ display: 'flex', gap: 10, margin: '2px 0 4px', paddingTop: 8 }}>
         {/* Qbank — navigates */}
         {!hideQb && (
-        <Circle tint="#dff0e4" color="#147a52" glow="0 6px 14px rgba(20,122,82,.18)" label="Qbank" selected={false} onClick={(e) => launchBloom(e, '#147a8a', 'qbank')}>
+        <Circle tint="#a8e6c1" color="#087a4f" glow="0 6px 16px rgba(8,122,79,.4)" label="Qbank" selected={false} onClick={(e) => launchBloom(e, '#147a8a', 'qbank')}>
           <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><rect x="7" y="12" width="3" height="6" /><rect x="12" y="8" width="3" height="10" /><rect x="17" y="14" width="3" height="4" /></svg>
         </Circle>
         )}
@@ -543,7 +543,7 @@ function QuickRow({ user, nav, onGreen }) {
         
         {/* Streak — fire is the mark-today tap; circle body opens detail */}
         {!hideSt && (
-          <Circle tint="#fde0d8" color="#d24a30" glow="0 6px 14px rgba(210,74,48,.22)" label="Streak" onClick={(e) => launchBloom(e, '#d24a30', 'streak')}>
+          <Circle tint="#ffb8a0" color="#d63a1a" glow="0 6px 16px rgba(214,58,26,.42)" label="Streak" onClick={(e) => launchBloom(e, '#d24a30', 'streak')}>
             <span
               onClick={(e) => { e.stopPropagation(); if (!studiedToday) markStudy(); }}
               style={{ position: 'absolute', top: -6, right: -6, fontSize: 17, zIndex: 4, cursor: 'pointer', filter: studiedToday ? 'drop-shadow(0 1px 3px rgba(210,74,48,.4))' : 'grayscale(.7) opacity(.55) drop-shadow(0 1px 2px rgba(0,0,0,.12))' }}
@@ -913,9 +913,6 @@ export default function Home() {
       {/* ===== GREEN BAND: greeting + motivation quote + nudges + quick circles ===== */}
       <div className="mc-home-band" style={{ padding: '14px 18px 40px', color: '#fff' }}>
         <div onClick={() => setShowMotivation(true)} style={{ cursor: 'pointer', position: 'relative' }}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--gold)', marginBottom: 8 }}>
-            Hi Dr. {(user?.name || '').replace(/^Dr\.?\s+/i, '').split(' ')[0] || 'Doctor'} — a thought for today
-          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ flex: 1, fontFamily: "'Newsreader', Georgia, serif", fontSize: 18, fontWeight: 500, lineHeight: 1.42 }}>
               <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: 25, fontWeight: 700, color: 'var(--gold)', verticalAlign: '-9px', lineHeight: 0, marginRight: 1 }}>“</span>{quote.text}<span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: 25, fontWeight: 700, color: 'var(--gold)', verticalAlign: '-9px', lineHeight: 0, marginLeft: 1 }}>”</span>
@@ -1017,7 +1014,7 @@ export default function Home() {
 
       {/* ===== CURVED LIGHT SHEET: Explore + invite + footer ===== */}
       <div style={{ background: 'var(--paper)', borderRadius: '28px 28px 0 0', marginTop: -28, position: 'relative', zIndex: 1, padding: '24px 18px 20px' }}>
-        <h2 className="serif" style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 21, fontWeight: 900, letterSpacing: '-0.3px', color: 'var(--forest)', margin: '0 0 12px' }}>Explore Study Partners</h2>
+        <h2 className="serif" style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 21, fontWeight: 900, letterSpacing: '-0.3px', color: 'var(--forest)', margin: '0 0 12px', textAlign: 'center' }}>Explore Study Partners</h2>
 
         <ExploreBrowse />
 
