@@ -70,10 +70,10 @@ export default function SignIn() {
           For doctors, by doctors
         </div>
         <p style={{ color: 'var(--ink)', fontSize: 15, fontWeight: 600, marginBottom: 6 }}>
-          Find the right study partner for your medical exam.
+          Find your study partner for board exams.
         </p>
         <p className="sub" style={{ fontSize: 13.5, lineHeight: 1.5, marginTop: 0 }}>
-          Match with verified doctors preparing for the same boards, the same exam parts, and on a compatible timeline — wherever they are in the world.
+          Matched by exam, timeline, and country — worldwide.
         </p>
       </div>
 
