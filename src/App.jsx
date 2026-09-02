@@ -29,6 +29,7 @@ import NotesVault from './pages/NotesVault.jsx';
 import StudyPlanner from './pages/StudyPlanner.jsx';
 import Pro from './pages/Pro.jsx';
 import Checklist from './components/Checklist.jsx';
+import OfflineBanner from './components/OfflineBanner.jsx';
 import AddPartner from './pages/AddPartner.jsx';
 
 function Icon({ name }) {
@@ -559,6 +560,8 @@ function AppInner() {
     <>
       {lock && <DeepFocusLocked lock={lock} onUnlock={endLock} />}
       <div className={`app ${immersive ? 'immersive' : ''}`}>
+      <OfflineBanner />
+      {!immersive && <TopBar user={user} />}
       {!immersive && <TopBar user={user} />}
       <Routes>
         <Route path="/home" element={<Home />} />
