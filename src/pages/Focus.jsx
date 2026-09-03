@@ -212,7 +212,7 @@ function TakeABreak() {
   return (
     <>
       <div style={{ borderTop: '1px solid var(--line)', margin: '24px 0 16px' }} />
-      <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 12 }}>Take a break</div>
+      <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 12, textAlign: 'center' }}>Take A Break</div>
       <div style={{ display: 'flex', background: 'var(--paper-2)', borderRadius: 999, padding: 4, marginBottom: 14 }}>
         <button onClick={() => setTab('breathe')} style={{ flex: 1, border: 'none', borderRadius: 999, padding: '9px', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', background: tab === 'breathe' ? 'var(--card)' : 'transparent', color: tab === 'breathe' ? 'var(--forest)' : 'var(--muted)', boxShadow: tab === 'breathe' ? '0 1px 4px rgba(0,0,0,.08)' : 'none', transition: 'all .15s' }}>🫁 Breathing</button>
         <button onClick={() => setTab('game')} style={{ flex: 1, border: 'none', borderRadius: 999, padding: '9px', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', background: tab === 'game' ? 'var(--card)' : 'transparent', color: tab === 'game' ? 'var(--forest)' : 'var(--muted)', boxShadow: tab === 'game' ? '0 1px 4px rgba(0,0,0,.08)' : 'none', transition: 'all .15s' }}>🫀 Memory</button>
