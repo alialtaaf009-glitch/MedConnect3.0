@@ -562,7 +562,6 @@ function AppInner() {
       <div className={`app ${immersive ? 'immersive' : ''}`}>
       <OfflineBanner />
       {!immersive && <TopBar user={user} />}
-      {!immersive && <TopBar user={user} />}
       <Routes>
         <Route path="/home" element={<Home />} />
         <Route path="/partners" element={<Partners />} />
