@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { examColor } from '../lib/examColors';
@@ -37,6 +37,19 @@ export default function Partners() {
 
   const initialTab = params.get('tab') === 'mine' ? 'mine' : params.get('tab') === 'requests' ? 'requests' : 'discover';
   const [tab, setTab] = useState(initialTab);
+  const TAB_ORDER = ['discover', 'mine', 'requests'];
+  const touchStart = useRef(null);
+  const onTouchStart = (e) => { touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }; };
+  const onTouchEnd = (e) => {
+    if (!touchStart.current) return;
+    const dx = e.changedTouches[0].clientX - touchStart.current.x;
+    const dy = e.changedTouches[0].clientY - touchStart.current.y;
+    touchStart.current = null;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    const idx = TAB_ORDER.indexOf(tab);
+    if (dx < 0 && idx < TAB_ORDER.length - 1) setTab(TAB_ORDER[idx + 1]);
+    else if (dx > 0 && idx > 0) setTab(TAB_ORDER[idx - 1]);
+  };
 
   const [matches, setMatches] = useState([]);
   const [conns, setConns] = useState({ connected: [], pending: [], requests: [] });
@@ -139,7 +152,7 @@ export default function Partners() {
 
       <Tabs />
 
-      <div key={tab} className="tab-pop">
+      <div key={tab} className="tab-pop" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       {tab === 'discover' && (
         <>
           {examLabel && (
