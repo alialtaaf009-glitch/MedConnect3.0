@@ -91,22 +91,6 @@ export default async function handler(req, res) {
         return res.status(200).json({ blocks });
       } catch (e) { return res.status(500).json({ error: 'Could not load blocks' }); }
     }
-    // ---- Notes shared with me: GET /api/profile?notes_shared=1 ----
-    if (req.query.notes_shared) {
-      try {
-        await ensureNotesTables();
-        const shared = await sql`
-          SELECT ns.id as share_id, ns.saved, ns.created_at as shared_at,
-                 n.title, n.body, n.tags,
-                 u.name as from_name, u.avatar as from_avatar, u.id as from_id
-          FROM note_shares ns
-          JOIN notes n ON n.id = ns.note_id
-          JOIN users u ON u.id = ns.shared_by
-          WHERE ns.shared_with = ${uid}
-          ORDER BY ns.created_at DESC`;
-        return res.status(200).json({ shared });
-      } catch (e) { return res.status(500).json({ error: 'Could not load shared notes' }); }
-    }
 
     if (!target) return res.status(400).json({ error: 'user id required' });
     try {
@@ -255,17 +239,8 @@ export default async function handler(req, res) {
         await sql`DELETE FROM notes WHERE id = ${id} AND user_id = ${uid}`;
         return res.status(200).json({ ok: true });
       }
-      if (body.action === 'note_share') {
-        const { id, partner_id } = body;
-        if (!id || !partner_id) return res.status(400).json({ error: 'id and partner_id required' });
-        await ensureNotesTables();
-        await sql`INSERT INTO note_shares (note_id, shared_by, shared_with) VALUES (${id}, ${uid}, ${partner_id}) ON CONFLICT DO NOTHING`;
-        return res.status(200).json({ ok: true });
-      }
-      if (body.action === 'note_save') {
-        const { share_id } = body;
-        if (!share_id) return res.status(400).json({ error: 'share_id required' });
-        await ensureNotesTables();
+    
+  
         // copy note into user's own vault
         const shareRows = await sql`SELECT n.title, n.body, n.tags FROM note_shares ns JOIN notes n ON n.id = ns.note_id WHERE ns.id = ${share_id} AND ns.shared_with = ${uid}`;
         if (!shareRows.length) return res.status(404).json({ error: 'Not found' });
