@@ -241,14 +241,7 @@ export default async function handler(req, res) {
       }
     
   
-        // copy note into user's own vault
-        const shareRows = await sql`SELECT n.title, n.body, n.tags FROM note_shares ns JOIN notes n ON n.id = ns.note_id WHERE ns.id = ${share_id} AND ns.shared_with = ${uid}`;
-        if (!shareRows.length) return res.status(404).json({ error: 'Not found' });
-        const { title, body: nb, tags } = shareRows[0];
-        const newNote = await sql`INSERT INTO notes (user_id, title, body, tags) VALUES (${uid}, ${title}, ${nb}, ${tags}) RETURNING *`;
-        await sql`UPDATE note_shares SET saved = true WHERE id = ${share_id}`;
-        return res.status(200).json({ note: newNote[0] });
-      }
+      
       // ── Study blocks ────────────────────────────────────────────────────────
       if (body.action === 'block_create') {
         const { day, time, topic, duration, note, color } = body;
