@@ -66,13 +66,15 @@ export default function Pro() {
             </div>
           </div>
         ))}
-        <div style={{ background: 'var(--card)', borderRadius: 12, padding: 16, border: '1px dashed var(--line)', marginTop: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-            <span style={{ fontSize: 18 }}>🎓</span>
-            <div style={{ fontSize: 14, fontWeight: 700 }}>Tutors for exams</div>
-            <span style={{ fontSize: 10, fontWeight: 800, background: '#f6edd6', color: 'var(--gold)', padding: '3px 8px', borderRadius: 999, letterSpacing: 0.4, marginLeft: 'auto' }}>SOON</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 2px', borderBottom: '1px solid var(--line)' }}>
+          <div style={{ fontSize: 24, flexShrink: 0, width: 30, textAlign: 'center' }}>🎓</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 14.5, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 7 }}>
+              Tutors for exams
+              <span style={{ fontSize: 10, fontWeight: 800, background: '#f6edd6', color: 'var(--gold)', padding: '3px 8px', borderRadius: 999, letterSpacing: 0.4 }}>SOON</span>
+            </div>
+            <div style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.5, marginTop: 2 }}>1:1 sessions with senior doctors who've cleared your exam. In the works.</div>
           </div>
-          <div style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.5 }}>1:1 sessions with senior doctors who've cleared your exam. In the works.</div>
         </div>
 
         {!isPro && (
