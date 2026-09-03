@@ -23,19 +23,6 @@ export default function Chat() {
 function ConversationList({ nav, me }) {
   const [params] = useSearchParams();
   const [tab, setTab] = useState(params.get('tab') === 'groups' ? 'groups' : 'direct');
-  const MODE_ORDER = ['direct', 'groups'];
-  const touchStart = useRef(null);
-  const onTouchStart = (e) => { touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }; };
-  const onTouchEnd = (e) => {
-    if (!touchStart.current) return;
-    const dx = e.changedTouches[0].clientX - touchStart.current.x;
-    const dy = e.changedTouches[0].clientY - touchStart.current.y;
-    touchStart.current = null;
-    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-    const idx = MODE_ORDER.indexOf(tab);
-    if (dx < 0 && idx < MODE_ORDER.length - 1) setTab(MODE_ORDER[idx + 1]);
-    else if (dx > 0 && idx > 0) setTab(MODE_ORDER[idx - 1]);
-  };
   const [convos, setConvos] = useState([]);
   const [groups, setGroups] = useState([]);
   const [status, setStatus] = useState('loading');
@@ -43,6 +30,21 @@ function ConversationList({ nav, me }) {
   const [gname, setGname] = useState('');
   const [friends, setFriends] = useState([]);
   const [picked, setPicked] = useState([]);
+
+  // swipe between Direct / Groups tabs
+  const MODE_ORDER = ['direct', 'groups'];
+  const tabTouchStart = useRef(null);
+  const onTabTouchStart = (e) => { tabTouchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }; };
+  const onTabTouchEnd = (e) => {
+    if (!tabTouchStart.current) return;
+    const dx = e.changedTouches[0].clientX - tabTouchStart.current.x;
+    const dy = e.changedTouches[0].clientY - tabTouchStart.current.y;
+    tabTouchStart.current = null;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    const idx = MODE_ORDER.indexOf(tab);
+    if (dx < 0 && idx < MODE_ORDER.length - 1) setTab(MODE_ORDER[idx + 1]);
+    else if (dx > 0 && idx > 0) setTab(MODE_ORDER[idx - 1]);
+  };
 
   // delete a chat — reachable by long-press OR swipe-left
   const [swipeId, setSwipeId] = useState(null);
@@ -110,13 +112,12 @@ function ConversationList({ nav, me }) {
         <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 26, fontWeight: 900, lineHeight: 1 }}>Messages</h1>
         <p style={{ fontSize: 12.5, opacity: 0.85, marginTop: 5 }}>Your study <span style={{ color: 'var(--gold)', fontWeight: 700 }}>conversations</span> and groups.</p>
       </div>
-      <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -20, position: 'relative', padding: '18px 16px', minHeight: '60vh' }}>
+      <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -20, position: 'relative', padding: '18px 16px', minHeight: '60vh' }} onTouchStart={onTabTouchStart} onTouchEnd={onTabTouchEnd}>
       <div className="tabs" style={{ marginBottom: 14 }}>
         <button className={`tab ${tab === 'direct' ? 'on' : ''}`} onClick={() => setTab('direct')}>Direct</button>
         <button className={`tab ${tab === 'groups' ? 'on' : ''}`} onClick={() => setTab('groups')}>Groups</button>
       </div>
 
-      <div key={tab} className="tab-pop" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       {tab === 'direct' && (
         <>
           {convos.length === 0 && (
@@ -182,7 +183,6 @@ function ConversationList({ nav, me }) {
           )}
         </>
       )}
-      </div>
       </div>
 
       {creating && (
