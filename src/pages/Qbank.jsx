@@ -152,10 +152,10 @@ export default function Qbank() {
     try { await api.qbankSetShare(pid, bank, on); } catch (e) {}
   };
 
-  const toggleCompare = async (pid, name) => {
+  const toggleCompare = async (pid, name, theirBank) => {
     if (compareId === pid) { setCompareId(null); return; }
     setCompareId(pid); setCompareName(name); setCompareRows([]);
-    try { const d = await api.qbankCompare(pid, bank); setCompareRows(d.progress || []); } catch (e) { setCompareRows([]); }
+    try { const d = await api.qbankCompare(pid, theirBank); setCompareRows(d.progress || []); } catch (e) { setCompareRows([]); }
   };
 
   const shareCount = sharingWith.filter((g) => g.bank === bank).length;
