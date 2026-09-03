@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
-import { useAuth } from '../context/Auth.jsx';
 
 // ── Tag pill ────────────────────────────────────────────────────────────────
 function Tag({ label }) {
@@ -48,90 +47,17 @@ function NoteEditor({ note, onSave, onClose }) {
   );
 }
 
-// ── Share picker modal ──────────────────────────────────────────────────────
-function SharePicker({ note, partners, onShare, onClose }) {
-  const [picked, setPicked] = useState(null);
-  const [sharing, setSharing] = useState(false);
-
-  const share = async () => {
-    if (!picked) return;
-    setSharing(true);
-    try { await api.noteShare(note.id, picked); onShare(); }
-    catch (_) {} finally { setSharing(false); }
-  };
-
-  return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(0,0,0,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px 14px' }}>
-      <div style={{ width: '100%', maxWidth: 420, maxHeight: '88vh', background: 'var(--paper)', borderRadius: 22, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {/* header — fixed */}
-        <div style={{ padding: '18px 18px 10px', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-            <span style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 18, color: 'var(--ink)' }}>Share note</span>
-            <button onClick={onClose} style={{ background: 'var(--paper-2)', border: 'none', borderRadius: '50%', width: 32, height: 32, display: 'grid', placeItems: 'center', cursor: 'pointer', color: 'var(--muted)', fontSize: 18 }}>×</button>
-          </div>
-          <p style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.4 }}>"{note.title}"</p>
-        </div>
-        {/* partner list — scrollable */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0 18px', minHeight: 0 }}>
-          {!partners.length && <p style={{ fontSize: 13, color: 'var(--muted)', textAlign: 'center', padding: '24px 0' }}>No study partners yet — connect with someone first.</p>}
-          {partners.map((p, i) => (
-            <div key={p.id} onClick={() => setPicked(p.id)}
-              style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 14, marginBottom: 7, cursor: 'pointer', background: picked === p.id ? 'var(--paper-2)' : 'var(--card)', border: `1.5px solid ${picked === p.id ? 'var(--forest)' : 'var(--line)'}` }}>
-              <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', fontSize: 18, flexShrink: 0 }}>{p.avatar || '🧑‍⚕️'}</div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--ink)' }}>{p.name}</div>
-                {p.exam && <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 1 }}>{p.exam}</div>}
-              </div>
-              <div style={{ width: 22, height: 22, borderRadius: '50%', background: picked === p.id ? 'var(--forest)' : 'transparent', border: picked === p.id ? 'none' : '1.5px solid var(--line)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-                {picked === p.id && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><path d="M5 12l5 5L20 7"/></svg>}
-              </div>
-            </div>
-          ))}
-        </div>
-        {/* send — pinned at bottom of the card */}
-        <div style={{ padding: '12px 18px 16px', borderTop: '1px solid var(--line)', flexShrink: 0 }}>
-          <button onClick={share} disabled={!picked || sharing}
-            style={{ width: '100%', border: 'none', borderRadius: 14, padding: 13, fontSize: 14, fontWeight: 800, fontFamily: 'inherit', background: picked ? 'linear-gradient(135deg,var(--forest),#2c6a55)' : 'var(--line)', color: picked ? '#fff' : 'var(--muted)', cursor: picked ? 'pointer' : 'default', transition: 'all .2s' }}>
-            {sharing ? 'Sharing…' : picked ? `Send to ${partners.find(p => p.id === picked)?.name?.split(' ')[0] || 'partner'} →` : 'Select a partner'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ── Main page ───────────────────────────────────────────────────────────────
 export default function NotesVault() {
-  const { user } = useAuth();
-  const [tab, setTab] = useState('mine');
   const [notes, setNotes] = useState([]);
-  const [shared, setShared] = useState([]);
-  const [partners, setPartners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editor, setEditor] = useState(null); // null | 'new' | note object
-  const [sharePicker, setSharePicker] = useState(null); // null | note
   const [toast, setToast] = useState('');
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 2500); };
 
   useEffect(() => {
-    Promise.all([
-      api.notes().then(d => setNotes(d.notes || [])),
-      api.notesShared().then(d => setShared(d.shared || [])),
-      api.connections().then(d => {
-      const uid = user?.id;
-      const mapped = (d.connected || []).map(c => {
-        const iAm = c.requester === uid;
-        return {
-          id:     iAm ? c.recipient     : c.requester,
-          name:   iAm ? c.recipient_name  : c.requester_name,
-          exam:   iAm ? c.recipient_exam  : c.requester_exam,
-          avatar: iAm ? c.recipient_avatar: c.requester_avatar,
-        };
-      });
-      setPartners(mapped);
-    }),
-    ]).finally(() => setLoading(false));
+    api.notes().then(d => setNotes(d.notes || [])).finally(() => setLoading(false));
   }, []);
 
   const handleSave = (note) => {
@@ -151,15 +77,6 @@ export default function NotesVault() {
     } catch (_) {}
   };
 
-  const handleSaveShared = async (shareId) => {
-    try {
-      const res = await api.noteSave(shareId);
-      setNotes(prev => [res.note, ...prev]);
-      setShared(prev => prev.map(s => s.share_id === shareId ? { ...s, saved: true } : s));
-      showToast('Saved to My Notes ✓');
-    } catch (_) {}
-  };
-
   const fmt = (ts) => {
     const d = new Date(ts), now = new Date();
     const diff = Math.floor((now - d) / 60000);
@@ -175,89 +92,44 @@ export default function NotesVault() {
         <div style={{ position: 'absolute', right: -8, bottom: -16, fontSize: 90, opacity: .1, lineHeight: 1, pointerEvents: 'none' }}>📝</div>
         <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1.2, color: 'var(--gold)', textTransform: 'uppercase', marginBottom: 7, position: 'relative' }}>✦ Notes Vault</div>
         <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 26, lineHeight: 1, position: 'relative' }}>My Notes</h1>
-        <p style={{ fontSize: 12.5, opacity: .85, marginTop: 6, lineHeight: 1.5, position: 'relative' }}>Personal notes & mnemonics — share any with a study partner.</p>
+        <p style={{ fontSize: 12.5, opacity: .85, marginTop: 6, lineHeight: 1.5, position: 'relative' }}>Personal notes & mnemonics.</p>
       </div>
 
       {/* sheet */}
       <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -20, position: 'relative', padding: '20px 16px 90px', minHeight: '60vh' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-          <div className="tabs" style={{ flex: 1, marginBottom: 0 }}>
-            <button className={`tab ${tab === 'mine' ? 'on' : ''}`} onClick={() => setTab('mine')}>Mine {notes.length > 0 ? notes.length : ''}</button>
-            <button className={`tab ${tab === 'shared' ? 'on' : ''}`} onClick={() => setTab('shared')}>Shared with me {shared.length > 0 ? shared.length : ''}</button>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 16 }}>
           <button onClick={() => setEditor('new')}
             style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--forest)', color: '#fff', border: 'none', fontSize: 22, fontWeight: 300, display: 'grid', placeItems: 'center', boxShadow: '0 4px 14px rgba(31,77,63,.28)', cursor: 'pointer', flexShrink: 0, lineHeight: 1 }}>+</button>
         </div>
 
         {loading && <div className="center" style={{ minHeight: 120 }}><div className="spinner" /></div>}
 
-        {/* MY NOTES */}
-        {!loading && tab === 'mine' && (
-          <>
-            {notes.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '36px 20px', color: 'var(--muted)' }}>
-                <div style={{ fontSize: 38, marginBottom: 12 }}>📝</div>
-                <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)', marginBottom: 6 }}>No notes yet</p>
-                <p style={{ fontSize: 12.5, lineHeight: 1.5 }}>Tap + to jot down a mnemonic, summary or key fact.</p>
-              </div>
-            )}
-            {notes.map(n => (
-              <div key={n.id} className="card" style={{ padding: '13px 14px', marginBottom: 9, cursor: 'pointer' }} onClick={() => setEditor(n)}>
-                <div style={{ fontWeight: 800, fontSize: 13.5, color: 'var(--ink)', marginBottom: 4 }}>{n.title}</div>
-                {n.body && <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{n.body}</div>}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
-                  {n.tags && <Tag label={n.tags} />}
-                  <span style={{ fontSize: 10, color: 'var(--muted)', marginLeft: 'auto' }}>{fmt(n.updated_at)}</span>
-                  <button onClick={e => { e.stopPropagation(); setSharePicker(n); }}
-                    style={{ background: 'none', border: '1px solid var(--line)', borderRadius: 8, padding: '3px 8px', fontSize: 10.5, fontWeight: 700, color: 'var(--forest)', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
-                    Share
-                  </button>
-                  <button onClick={e => { e.stopPropagation(); if (confirm('Delete this note?')) handleDelete(n.id); }}
-                    style={{ background: 'none', border: '1px solid #fde0d8', borderRadius: 8, padding: '3px 8px', fontSize: 10.5, fontWeight: 700, color: 'var(--rust)', cursor: 'pointer', fontFamily: 'inherit' }}>
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
-          </>
+        {!loading && notes.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '36px 20px', color: 'var(--muted)' }}>
+            <div style={{ fontSize: 38, marginBottom: 12 }}>📝</div>
+            <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)', marginBottom: 6 }}>No notes yet</p>
+            <p style={{ fontSize: 12.5, lineHeight: 1.5 }}>Tap + to jot down a mnemonic, summary or key fact.</p>
+          </div>
         )}
 
-        {/* SHARED WITH ME */}
-        {!loading && tab === 'shared' && (
-          <>
-            {shared.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '36px 20px', color: 'var(--muted)' }}>
-                <div style={{ fontSize: 38, marginBottom: 12 }}>🤝</div>
-                <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)', marginBottom: 6 }}>Nothing shared yet</p>
-                <p style={{ fontSize: 12.5, lineHeight: 1.5 }}>When a study partner shares notes with you, they'll appear here.</p>
-              </div>
-            )}
-            {shared.map(s => (
-              <div key={s.share_id} className="card" style={{ padding: '13px 14px', marginBottom: 9 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                  <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', fontSize: 13, flexShrink: 0 }}>{s.from_avatar || '🧑‍⚕️'}</div>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)' }}>from {s.from_name} · {fmt(s.shared_at)}</span>
-                </div>
-                <div style={{ fontWeight: 800, fontSize: 13.5, color: 'var(--ink)', marginBottom: 4 }}>{s.title}</div>
-                {s.body && <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{s.body}</div>}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8 }}>
-                  {s.tags && <Tag label={s.tags} />}
-                  {s.saved
-                    ? <span style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--forest)', marginLeft: 'auto' }}>✓ Saved to mine</span>
-                    : <button onClick={() => handleSaveShared(s.share_id)} style={{ marginLeft: 'auto', background: 'var(--paper-2)', border: 'none', borderRadius: 8, padding: '5px 10px', fontSize: 11, fontWeight: 700, color: 'var(--forest)', cursor: 'pointer', fontFamily: 'inherit' }}>Save to mine</button>}
-                </div>
-              </div>
-            ))}
-          </>
-        )}
-
-
+        {!loading && notes.map(n => (
+          <div key={n.id} className="card" style={{ padding: '13px 14px', marginBottom: 9, cursor: 'pointer' }} onClick={() => setEditor(n)}>
+            <div style={{ fontWeight: 800, fontSize: 13.5, color: 'var(--ink)', marginBottom: 4 }}>{n.title}</div>
+            {n.body && <div style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{n.body}</div>}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+              {n.tags && <Tag label={n.tags} />}
+              <span style={{ fontSize: 10, color: 'var(--muted)', marginLeft: 'auto' }}>{fmt(n.updated_at)}</span>
+              <button onClick={e => { e.stopPropagation(); if (confirm('Delete this note?')) handleDelete(n.id); }}
+                style={{ background: 'none', border: '1px solid #fde0d8', borderRadius: 8, padding: '3px 8px', fontSize: 10.5, fontWeight: 700, color: 'var(--rust)', cursor: 'pointer', fontFamily: 'inherit' }}>
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* modals */}
       {editor && <NoteEditor note={editor === 'new' ? null : editor} onSave={handleSave} onClose={() => setEditor(null)} />}
-      {sharePicker && <SharePicker note={sharePicker} partners={partners} onShare={() => { setSharePicker(null); showToast('Note shared ✓'); }} onClose={() => setSharePicker(null)} />}
 
       {/* toast */}
       {toast && (
