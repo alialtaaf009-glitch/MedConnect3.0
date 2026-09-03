@@ -1028,12 +1028,7 @@ export default function Home() {
           </div>
         {invited && <p className="sub" style={{ fontSize: 12, marginTop: 8, textAlign: 'center', color: 'var(--forest)', fontWeight: 700 }}>Link copied — paste it anywhere! ✓</p>}
 
-        {/* signature footer */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, margin: '28px 0 8px', opacity: 0.55 }}>
-          <span style={{ height: 1, width: 28, background: 'var(--line)' }} />
-          <span style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'var(--muted)', textTransform: 'uppercase' }}>For doctors, by doctors</span>
-          <span style={{ height: 1, width: 28, background: 'var(--line)' }} />
-        </div>
+
       </div>
 
       {showMotivation && (
