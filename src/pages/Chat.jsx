@@ -23,6 +23,19 @@ export default function Chat() {
 function ConversationList({ nav, me }) {
   const [params] = useSearchParams();
   const [tab, setTab] = useState(params.get('tab') === 'groups' ? 'groups' : 'direct');
+  const MODE_ORDER = ['direct', 'groups'];
+  const touchStart = useRef(null);
+  const onTouchStart = (e) => { touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }; };
+  const onTouchEnd = (e) => {
+    if (!touchStart.current) return;
+    const dx = e.changedTouches[0].clientX - touchStart.current.x;
+    const dy = e.changedTouches[0].clientY - touchStart.current.y;
+    touchStart.current = null;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    const idx = MODE_ORDER.indexOf(tab);
+    if (dx < 0 && idx < MODE_ORDER.length - 1) setTab(MODE_ORDER[idx + 1]);
+    else if (dx > 0 && idx > 0) setTab(MODE_ORDER[idx - 1]);
+  };
   const [convos, setConvos] = useState([]);
   const [groups, setGroups] = useState([]);
   const [status, setStatus] = useState('loading');
@@ -103,6 +116,7 @@ function ConversationList({ nav, me }) {
         <button className={`tab ${tab === 'groups' ? 'on' : ''}`} onClick={() => setTab('groups')}>Groups</button>
       </div>
 
+      <div key={tab} className="tab-pop" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       {tab === 'direct' && (
         <>
           {convos.length === 0 && (
@@ -168,6 +182,7 @@ function ConversationList({ nav, me }) {
           )}
         </>
       )}
+      </div>
       </div>
 
       {creating && (
