@@ -314,7 +314,7 @@ function SharedToMe({ bank, grants, compareId, compareName, compareRows, bankRow
   const [list, setList] = useState([]);
   useEffect(() => {
     let active = true;
-    const mine = (grants || []).filter((g) => g.bank === bank);
+    const mine = grants || [];
     if (!mine.length) { setList([]); return; }
     (async () => {
       try {
@@ -324,7 +324,7 @@ function SharedToMe({ bank, grants, compareId, compareName, compareRows, bankRow
           const c = rows.find((r) => r.requester == g.grantor_id || r.recipient == g.grantor_id);
           let name = 'Partner', avatar = '🩺';
           if (c) { const iAmReq = c.requester != g.grantor_id; name = iAmReq ? c.recipient_name : c.requester_name; avatar = iAmReq ? c.recipient_avatar : c.requester_avatar; }
-          return { id: g.grantor_id, name, avatar };
+          return { id: g.grantor_id, name, avatar, bank: g.bank };
         });
         if (active) setList(named);
       } catch (e) {}
@@ -342,7 +342,7 @@ function SharedToMe({ bank, grants, compareId, compareName, compareRows, bankRow
         const topics = open ? [...new Set([...compareRows.map((r) => r.topic), ...bankRows.map((r) => r.topic)])] : [];
         return (
           <div key={p.id} style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 14, marginBottom: 8, overflow: 'hidden' }}>
-            <button onClick={() => onToggle(p.id, p.name)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '11px 13px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
+            <button onClick={() => onToggle(p.id, p.name, p.bank)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '11px 13px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
               <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--paper-2)', display: 'grid', placeItems: 'center', fontSize: 18 }}>{p.avatar || '🩺'}</div>
               <span style={{ flex: 1, textAlign: 'left', fontWeight: 700, fontSize: 14, color: 'var(--ink)' }}>{p.name}</span>
               <span className="link" style={{ fontSize: 13, fontWeight: 700 }}>{open ? 'Hide' : 'Compare'} <span style={{ display: 'inline-block', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>▾</span></span>
