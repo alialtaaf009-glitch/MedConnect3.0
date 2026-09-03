@@ -148,11 +148,11 @@ export default function Partners() {
           <div><div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 22, fontWeight: 900, lineHeight: 1, color: 'var(--gold)' }}>{reqCount}</div><div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.82, marginTop: 3 }}>requests</div></div>
         </div>
       </div>
-      <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -20, position: 'relative', padding: '18px 16px', minHeight: '60vh' }}>
+      <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -20, position: 'relative', padding: '18px 16px', minHeight: '60vh' }} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
 
       <Tabs />
 
-      <div key={tab} className="tab-pop" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+      <div key={tab} className="tab-pop">
       {tab === 'discover' && (
         <>
           {examLabel && (
