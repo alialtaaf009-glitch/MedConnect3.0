@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/Auth.jsx';
@@ -122,6 +122,19 @@ function ExploreBrowse() {
   const setOpenExam = (v) => { setOpenExamRaw(v); lsSet('explore_open_exam', v); };
   const [browseMode, setBrowseModeRaw] = useState(() => ls('explore_mode', 'country'));
   const setBrowseMode = (v) => { setBrowseModeRaw(v); lsSet('explore_mode', v); };
+  const MODE_ORDER = ['country', 'exam'];
+  const modeTouchStart = useRef(null);
+  const onModeTouchStart = (e) => { modeTouchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }; };
+  const onModeTouchEnd = (e) => {
+    if (!modeTouchStart.current) return;
+    const dx = e.changedTouches[0].clientX - modeTouchStart.current.x;
+    const dy = e.changedTouches[0].clientY - modeTouchStart.current.y;
+    modeTouchStart.current = null;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    const idx = MODE_ORDER.indexOf(browseMode);
+    if (dx < 0 && idx < MODE_ORDER.length - 1) setBrowseMode(MODE_ORDER[idx + 1]);
+    else if (dx > 0 && idx > 0) setBrowseMode(MODE_ORDER[idx - 1]);
+  };
   // starred countries/exams float to the top; a toggle lets you show only your pinned set
   const [pinC, setPinC] = useState(() => { try { return JSON.parse(localStorage.getItem('pin_countries') || '[]'); } catch (e) { return []; } });
   const [pinE, setPinE] = useState(() => { try { return JSON.parse(localStorage.getItem('pin_exams') || '[]'); } catch (e) { return []; } });
@@ -167,7 +180,7 @@ function ExploreBrowse() {
   })();
 
   return (
-    <>
+    <div onTouchStart={onModeTouchStart} onTouchEnd={onModeTouchEnd}>
       <div className="tabs" style={{ marginBottom: 14 }}>
         <button className={`tab ${browseMode === 'country' ? 'on' : ''}`} onClick={() => { setBrowseMode('country'); setOpenExam(''); }}>By Country</button>
         <button className={`tab ${browseMode === 'exam' ? 'on' : ''}`} onClick={() => { setBrowseMode('exam'); setOpenExam(''); }}>By Exam</button>
@@ -265,7 +278,7 @@ function ExploreBrowse() {
         ))}
         </div>
       )}
-    </>
+    </div>
   );
 }
 
