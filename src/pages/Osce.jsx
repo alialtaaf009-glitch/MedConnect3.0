@@ -10,7 +10,8 @@ const STATIONS = {
   'FCPS — IMM / Clinical': ['Examine the cardiovascular system','Take a fever history','Counsel on warfarin','Examine the chest','Diabetic foot assessment','Explain a CT head finding'],
   'MRCEM / FRCEM — OSCE': ['Manage the breathless patient','ECG interpretation','Trauma primary survey','Breaking bad news in ED','Joint aspiration consent','Paediatric fever assessment'],
   'MRCGP — SCA / CSA': ['Tired all the time','Manage a worried parent','Contraception counselling','Low mood consultation','Explain a new diagnosis','Telephone triage call'],
-  'ORE — Part 2 (Clinical)': ['Examine a carious lower molar','Explain root canal treatment'],
+  'ORE — Part 2 (Clinical)': ['Examine a carious lower molar','Explain root canal treatment','Extraction consent','Assess a swollen face','Denture fitting review','Child dental trauma history'],
+  'ADC Exam': ['Oral cancer screening exam','Explain a filling procedure','Periodontal disease counselling','Manage post-extraction bleeding','Crown preparation consent','Assess a jaw fracture'],
 };
 const FREE = 3;
 
@@ -32,6 +33,7 @@ const EXAM_MINUTES = {
   'MRCEM / FRCEM — OSCE': 7,     // MRCEM OSCE stations ~7 min
   'MRCGP — SCA / CSA': 12,       // GP consultations run ~12 min
   'ORE — Part 2 (Clinical)': 8,  // dental OSCE-style stations, ~8 min
+  'ADC Exam': 8,
 };
 
 // what MedConnect Pro unlocks (shown under locked stations)
@@ -50,6 +52,7 @@ const TOTAL_STATIONS = {
   'MRCEM / FRCEM — OSCE': '150+',
   'MRCGP — SCA / CSA': '180+',
   'ORE — Part 2 (Clinical)': '80+',
+  'ADC Exam': '70+',
 };
 
 // fuller scenario text — sets the scene and the task clearly (still the candidate's task only)
@@ -81,6 +84,17 @@ const SCENARIOS = {
   // ---- ORE Part 2 (Clinical) ----
   'Examine a carious lower molar': 'A 34-year-old patient attends complaining of pain in their lower left back tooth when eating something cold. Take a focused dental history, then examine the tooth and surrounding structures, and outline your likely diagnosis and initial management options to the examiner.',
   'Explain root canal treatment': 'A 29-year-old has been told they need root canal treatment on an upper incisor following a diagnosis of irreversible pulpitis. Explain the procedure in plain terms — including what it involves, the risks and benefits, the alternatives, and what to expect afterwards — and respond to their questions.',
+  'Extraction consent': 'A 40-year-old has been advised to have a lower wisdom tooth extracted due to recurrent infection. Take informed consent: explain the procedure, the common and serious risks including nerve injury, the alternatives, and what recovery involves — and answer their questions.',
+  'Assess a swollen face': 'A 27-year-old attends urgently with a swollen, painful right cheek that has developed over two days, alongside fever and difficulty opening their mouth fully. Take a focused history, examine the swelling and the likely dental source, and outline your immediate management and when same-day referral is needed.',
+  'Denture fitting review': 'A 68-year-old returns for review two weeks after being fitted with a new upper complete denture, reporting soreness and looseness when eating. Assess the fit and their symptoms, identify likely causes, and explain the adjustments and advice you would offer.',
+  'Child dental trauma history': 'A parent brings in their 8-year-old who fell at the playground an hour ago and has a chipped, slightly loose front tooth. Take a focused history from the parent and child, assess the injury, and explain your immediate management and follow-up plan.',
+  // ---- ADC Exam ----
+  'Oral cancer screening exam': 'A 55-year-old smoker attends for a routine check-up. Perform a systematic extra-oral and intra-oral soft tissue examination looking for signs of oral cancer, describing your findings to the examiner and explaining what you would do if you found a suspicious lesion.',
+  'Explain a filling procedure': 'A 31-year-old has been told they need a filling in a lower back tooth following a small cavity found on X-ray. Explain the procedure in plain terms, including what it involves, the material options, the risks and benefits, and what to expect afterwards.',
+  'Periodontal disease counselling': 'A 45-year-old is found to have moderate gum disease with bleeding on probing at their check-up. Explain the diagnosis, the causes and risks of untreated disease, and agree a management and oral hygiene plan with them.',
+  'Manage post-extraction bleeding': 'A patient calls back two hours after having a tooth extracted, reporting ongoing bleeding from the socket. Take a focused history, explain the first-aid steps to control the bleeding, and outline when they need to be seen urgently.',
+  'Crown preparation consent': 'A 52-year-old requires a crown on a heavily restored molar tooth. Take informed consent: explain the preparation process, the need for a temporary crown, the risks including possible need for root canal treatment later, and the alternatives.',
+  'Assess a jaw fracture': 'A young adult presents after a fall with jaw pain, difficulty biting together properly, and swelling along the lower jaw. Take a focused history, perform a relevant examination looking for signs of a fracture, and outline your immediate management and referral plan.',
 };
 
 const LockIcon = ({ size = 14 }) => (
@@ -195,12 +209,10 @@ function Station({ name, minutes, onBack }) {
   const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
   const ss = String(seconds % 60).padStart(2, '0');
   const scenario = SCENARIOS[name] || 'Read the station title and practise your structured approach: introduce yourself, take a focused history or perform the task, summarise, and give a differential and plan.';
-
   const [creatingRoom, setCreatingRoom] = useState(false);
   const [inCall, setInCall] = useState(false);
   const callFrameRef = useRef(null);
   const callWrapRef = useRef(null);
-
   // join the Daily room embedded INSIDE the app (no browser URL bar)
   const joinRoom = () => {
     setShowShare(false);
@@ -221,13 +233,11 @@ function Station({ name, minutes, onBack }) {
       }
     }, 50);
   };
-
   const leaveCall = () => {
     try { callFrameRef.current?.destroy(); } catch (e) {}
     callFrameRef.current = null;
     setInCall(false);
   };
-
   const startVideo = async () => {
     setCreatingRoom(true);
     let url = '';
@@ -259,7 +269,6 @@ function Station({ name, minutes, onBack }) {
     setCreatingRoom(false);
     setShowShare(true);
   };
-
   const [sentTo, setSentTo] = useState(null);
   const shareTo = async (friendId) => {
     try {
@@ -268,7 +277,6 @@ function Station({ name, minutes, onBack }) {
       setTimeout(() => setSentTo(null), 2500);
     } catch (e) {}
   };
-
   return (
     <div className="screen">
       {inCall && (
@@ -286,6 +294,7 @@ function Station({ name, minutes, onBack }) {
             <h2 className="serif" style={{ fontSize:18, fontWeight:700, marginBottom:6 }}>📹 Practise with a partner</h2>
             <p className="sub" style={{ fontSize:13, marginBottom:6 }}>Your private video room is ready. Invite a partner first, then join when you're both set.</p>
             <p className="sub" style={{ fontSize:11.5, marginBottom:14, color:'var(--subtle)' }}>🔒 Free, private room — no sign-up or app needed.</p>
+
             {friends.length > 0 && (
               <>
                 <div style={{ fontSize:11, fontWeight:800, letterSpacing:0.5, textTransform:'uppercase', color:'var(--subtle)', marginBottom:8 }}>Invite a partner</div>
