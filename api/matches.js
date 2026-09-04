@@ -10,13 +10,15 @@ export default async function handler(req, res) {
     // broad exam family = text before the "—" (e.g. "MRCP — PACES" -> "MRCP")
     const family = (me.exam || '').split('—')[0].trim();
 
-    // candidates: everyone else with a complete profile, not already linked.
+    // candidates: everyone else with a complete profile, same profession, not already linked.
     // We DON'T hard-filter by exam here — we fetch broadly, then SCORE by closeness,
-    // so the Partners tab is never mysteriously empty.
+    // so the Partners tab is never mysteriously empty. Profession IS a hard filter though,
+    // since a dentist and a medical doctor share essentially no real study overlap.
     const rows = await sql`
       SELECT u.* FROM users u
       WHERE u.id <> ${uid}
         AND u.profile_complete = TRUE
+        AND u.profession = COALESCE(${me.profession}, 'medical')
         AND u.id NOT IN (
           SELECT recipient FROM connections WHERE requester = ${uid}
           UNION
