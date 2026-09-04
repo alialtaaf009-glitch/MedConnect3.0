@@ -7,7 +7,6 @@ import { useTheme } from '../context/Theme.jsx';
 import { quoteOfTheDay } from '../lib/quotes';
 import Motivation from './Motivation.jsx';
 import { api } from '../lib/api';
-
 // country -> exams -> parts (three levels, like the prototype)
 const CATALOG = [
   ['🇺🇸', 'United States', [
@@ -68,10 +67,7 @@ const DENTAL_CATALOG = [
     ['NEET-MDS', ['Postgraduate Dental Entrance']],
   ]],
 ];
-
-
 // country-code map for round flag images (flagcdn.com)
-
 // v1 vibrancy: each exam family carries its own signature color
 const EXAM_COLORS = {
   'USMLE': '#1a5a8a', 'MRCP': '#1a6b5a', 'MRCS': '#2a6a8a', 'MRCPCH': '#1a7a4a',
@@ -84,7 +80,6 @@ const EXAM_COLORS = {
   'INBDE': '#1a5a8a', 'ORE': '#1a7a6a', 'FCPS Dental': '#1a7a4a', 'MDS': '#3a6a3a', 'ADC Exam': '#1a5f7a', 'SDLE': '#2e4a7a', 'NEET-MDS': '#3a7a4a',
 };
 const examColor = (exam) => EXAM_COLORS[exam] || EXAM_COLORS[exam.split(' ')[0]] || 'var(--forest)';
-
 // one clean representative colour per country (for the ring accent)
 const FLAG_COLOR = {
   'United States': '#3c3b6e',
@@ -95,9 +90,7 @@ const FLAG_COLOR = {
   'India': '#FF9933',
 };
 const flagColor = (country) => FLAG_COLOR[country] || 'var(--forest)';
-
 const FLAG_CODE = { 'United States': 'us', 'United Kingdom': 'gb', 'Pakistan': 'pk', 'Australia': 'au', 'Saudi Arabia': 'sa', 'India': 'in' };
-
 // cute rounded-point star — fills gold when active, soft outline when not
 function StarIcon({ filled }) {
   return (
@@ -132,125 +125,15 @@ function DotRing({ color, size = 30 }) {
     </span>
   );
 }
-
-// "Explore study partners" browser: by-country / by-exam trees with partner counts
-function ExploreBrowse() {
-  const nav = useNavigate();
-  const ls = (k, d) => { try { return localStorage.getItem(k) ?? d; } catch (e) { return d; } };
-  const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
-  const [openCountry, setOpenCountryRaw] = useState(() => ls('explore_open_country', ''));
-  const setOpenCountry = (v) => { setOpenCountryRaw(v); lsSet('explore_open_country', v); };
-  const [openExam, setOpenExamRaw] = useState(() => ls('explore_open_exam', ''));
-  const setOpenExam = (v) => { setOpenExamRaw(v); lsSet('explore_open_exam', v); };
-  const [browseMode, setBrowseModeRaw] = useState(() => ls('explore_mode', 'country'));
-  const setBrowseMode = (v) => { setBrowseModeRaw(v); lsSet('explore_mode', v); };
-  const MODE_ORDER = ['country', 'exam'];
-  const modeTouchStart = useRef(null);
-  const onModeTouchStart = (e) => { modeTouchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }; };
-  const onModeTouchEnd = (e) => {
-    if (!modeTouchStart.current) return;
-    const dx = e.changedTouches[0].clientX - modeTouchStart.current.x;
-    const dy = e.changedTouches[0].clientY - modeTouchStart.current.y;
-    modeTouchStart.current = null;
-    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-    const idx = MODE_ORDER.indexOf(browseMode);
-    if (dx < 0 && idx < MODE_ORDER.length - 1) setBrowseMode(MODE_ORDER[idx + 1]);
-    else if (dx > 0 && idx > 0) setBrowseMode(MODE_ORDER[idx - 1]);
-  };
-  // starred countries/exams float to the top; a toggle lets you show only your pinned set
-  const [pinC, setPinC] = useState(() => { try { return JSON.parse(localStorage.getItem('pin_countries') || '[]'); } catch (e) { return []; } });
-  const [pinE, setPinE] = useState(() => { try { return JSON.parse(localStorage.getItem('pin_exams') || '[]'); } catch (e) { return []; } });
-  const [pinnedOnly, setPinnedOnlyRaw] = useState(() => ls('explore_pinned_only', '0') === '1');
-  const setPinnedOnly = (v) => { const next = typeof v === 'function' ? v(pinnedOnly) : v; setPinnedOnlyRaw(next); lsSet('explore_pinned_only', next ? '1' : '0'); };
-  const togglePinC = (name) => setPinC((p) => { const n = p.includes(name) ? p.filter((x) => x !== name) : [...p, name]; localStorage.setItem('pin_countries', JSON.stringify(n)); return n; });
-  const togglePinE = (key) => setPinE((p) => { const n = p.includes(key) ? p.filter((x) => x !== key) : [...p, key]; localStorage.setItem('pin_exams', JSON.stringify(n)); return n; });
-
-  const [counts, setCounts] = useState({});
-  useEffect(() => { api.getStats().then((d) => setCounts(d.counts || {})).catch(() => {}); }, []);
-
-  // counts for a specific exam PART (best-effort mapping to users' exam strings)
-  const partCount = (exam, part) => {
-    const fam = exam.split(' ')[0];
-    const SPECIAL = { 'PLAB 1 / AKT': 'PLAB 1 / UKMLA AKT', 'PLAB 2 / CPSA': 'PLAB 2 / UKMLA CPSA' };
-    // signup stores e.g. "FCPS — Part 1 — Radiology"; the catalog label is "FCPS Part 1"
-    const dashed = exam.replace(/^(\w+)\s+(Part\s+\d+)$/, '$1 — $2'); // "FCPS Part 1" -> "FCPS — Part 1"
-    const candidates = [SPECIAL[part], `${exam} — ${part}`, `${dashed} — ${part}`, `${fam} — ${part}`, exam === 'SMLE' ? 'SMLE' : null];
-    let n = 0;
-    for (const k of candidates) if (k && counts[k]) n = Math.max(n, counts[k]);
-    return n;
-  };
-  const examCount = (label) => {
-    const family = label.split(' ')[0];
-    let n = 0;
-    for (const [key, val] of Object.entries(counts)) {
-      if (key.split('—')[0].trim().split(' ')[0] === family) n = Math.max(n, val);
-    }
-    return n;
-  };
-
-  const orderedCountries = (() => {
-    const p = CATALOG.filter((x) => pinC.includes(x[1]));
-    const r = CATALOG.filter((x) => !pinC.includes(x[1]));
-    return pinnedOnly && pinC.length ? p : [...p, ...r];
-  })();
-  const allExams = CATALOG.flatMap(([flag, country, exams]) => exams.map(([exam, parts]) => ({ flag, country, exam, parts })));
-  const orderedExams = (() => {
-    const kk = (x) => 'exam|' + x.country + '|' + x.exam;
-    const p = allExams.filter((x) => pinE.includes(kk(x)));
-    const r = allExams.filter((x) => !pinE.includes(kk(x)));
-    return pinnedOnly && pinE.length ? p : [...p, ...r];
-  })();
-
+// small ringed dot used as the exam accent token
+function DotRing({ color, size = 30 }) {
   return (
-    <div onTouchStart={onModeTouchStart} onTouchEnd={onModeTouchEnd}>
-      <div className="tabs" style={{ marginBottom: 14 }}>
-        <button className={`tab ${browseMode === 'country' ? 'on' : ''}`} onClick={() => { setBrowseMode('country'); setOpenExam(''); }}>By Country</button>
-        <button className={`tab ${browseMode === 'exam' ? 'on' : ''}`} onClick={() => { setBrowseMode('exam'); setOpenExam(''); }}>By Exam</button>
-      </div>
-
-      {((browseMode === 'country' && pinC.length > 0) || (browseMode === 'exam' && pinE.length > 0)) && (
-        <button onClick={() => setPinnedOnly(!pinnedOnly)}
-          style={{ display: 'flex', alignItems: 'center', gap: 7, margin: '0 auto 16px', padding: '7px 15px', borderRadius: 999, border: '1.5px solid var(--line)', background: pinnedOnly ? 'var(--forest)' : 'transparent', color: pinnedOnly ? '#fff' : 'var(--forest)', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', transition: 'all .2s' }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill={pinnedOnly ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15 8.5 22 9.3 17 14 18.3 21 12 17.5 5.7 21 7 14 2 9.3 9 8.5 12 2" /></svg>
-          {pinnedOnly ? 'Showing your starred' : 'Show starred only'}
-        </button>
-      )}
-
-      {browseMode === 'exam' && (
-        <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
-          {orderedExams.map(({ flag, country, exam, parts }, idx) => {
-              const key = 'exam|' + country + '|' + exam;
-              const ecx = examColor(exam);
-              return (
-                <div key={key} style={{ borderTop: idx === 0 ? 'none' : '1px solid var(--line)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 18px', cursor: 'pointer' }}
-                    onClick={() => setOpenExam(openExam === key ? '' : key)}>
-                    <Flag country={country} emoji={flag} size={30} ring={flagColor(country)} />
-                    <span style={{ flex: 1, fontWeight: 600 }}>{exam}</span>
-                    {examCount(exam) >= 2 && (
-                      <span style={{ fontSize: 11, color: '#fff', background: ecx, borderRadius: 20, padding: '3px 9px', fontWeight: 700 }}>
-                        {examCount(exam)}
-                      </span>
-                    )}
-                    <span className={`star-btn ${pinE.includes(key) ? 'on twinkle' : ''}`} onClick={(e) => { e.stopPropagation(); togglePinE(key); }} style={{ width: 28, display: 'inline-flex', justifyContent: 'center', flexShrink: 0 }}><StarIcon filled={pinE.includes(key)} /></span>
-                    <span className={`chev-round ${openExam === key ? 'open' : ''}`} style={{ width: 24, height: 24 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg></span>
-                  </div>
-                  {openExam === key && parts.map((part) => {
-                    return (
-                      <div key={part} style={{ padding: '11px 18px 11px 22px', borderTop: '1px solid var(--line)', background: 'var(--paper-2)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 11 }}
-                        onClick={() => nav(`/partners?exam=${encodeURIComponent(exam)}&part=${encodeURIComponent(part)}`)}>
-                        <DotRing color={ecx} size={20} />
-                        <span style={{ fontWeight: 600, fontSize: 14, flex: 1 }}>{part}</span>
-                        {partCount(exam, part) >= 1 && <span style={{ fontSize: 10.5, color: '#fff', background: examColor(exam), borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 6 }}>{partCount(exam, part)}</span>}
-                        <span className="chev-round" style={{ width: 24, height: 24 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg></span>
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
-        </div>
-      )}
+    <span style={{ width: size, height: size, borderRadius: '50%', display: 'grid', placeItems: 'center', flexShrink: 0, boxShadow: `0 0 0 2.5px ${color}, 0 0 0 4.5px var(--card)` }}>
+      <span style={{ width: size * 0.4, height: size * 0.4, borderRadius: '50%', background: color }} />
+    </span>
+  );
+}
+// "Explore study partners" browser: by-country / by-exam trees with partner counts
 function ExploreBrowse() {
   const nav = useNavigate();
   const ls = (k, d) => { try { return localStorage.getItem(k) ?? d; } catch (e) { return d; } };
@@ -279,10 +162,8 @@ function ExploreBrowse() {
   const [pinnedOnly, setPinnedOnlyRaw] = useState(() => ls('explore_pinned_only', '0') === '1');
   const setPinnedOnly = (v) => { const next = typeof v === 'function' ? v(pinnedOnly) : v; setPinnedOnlyRaw(next); lsSet('explore_pinned_only', next ? '1' : '0'); };
   const togglePinC = (name) => setPinC((p) => { const n = p.includes(name) ? p.filter((x) => x !== name) : [...p, name]; localStorage.setItem('pin_countries', JSON.stringify(n)); return n; });
-
   const [counts, setCounts] = useState({});
   useEffect(() => { api.getStats().then((d) => setCounts(d.counts || {})).catch(() => {}); }, []);
-
   // counts for a specific exam PART (best-effort mapping to users' exam strings)
   const partCount = (exam, part) => {
     const fam = exam.split(' ')[0];
@@ -302,21 +183,18 @@ function ExploreBrowse() {
     }
     return n;
   };
-
   const activeCatalog = profession === 'medical' ? CATALOG : DENTAL_CATALOG;
   const orderedCountries = (() => {
     const p = activeCatalog.filter((x) => pinC.includes(x[1]));
     const r = activeCatalog.filter((x) => !pinC.includes(x[1]));
     return pinnedOnly && pinC.length ? p : [...p, ...r];
   })();
-
   return (
     <div onTouchStart={onModeTouchStart} onTouchEnd={onModeTouchEnd}>
       <div className="tabs" style={{ marginBottom: 14 }}>
         <button className={`tab ${profession === 'medical' ? 'on' : ''}`} onClick={() => setProfession('medical')}>Medical</button>
         <button className={`tab ${profession === 'dental' ? 'on' : ''}`} onClick={() => setProfession('dental')}>Dental</button>
       </div>
-
       {pinC.length > 0 && (
         <button onClick={() => setPinnedOnly(!pinnedOnly)}
           style={{ display: 'flex', alignItems: 'center', gap: 7, margin: '0 auto 16px', padding: '7px 15px', borderRadius: 999, border: '1.5px solid var(--line)', background: pinnedOnly ? 'var(--forest)' : 'transparent', color: pinnedOnly ? '#fff' : 'var(--forest)', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', transition: 'all .2s' }}>
@@ -324,7 +202,6 @@ function ExploreBrowse() {
           {pinnedOnly ? 'Showing your starred' : 'Show starred only'}
         </button>
       )}
-
       <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
         {orderedCountries.map(([flag, country, exams], idx) => (
         <div key={country} style={{ borderTop: idx === 0 ? 'none' : '1px solid var(--line)' }}>
@@ -337,7 +214,6 @@ function ExploreBrowse() {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
             </span>
           </div>
-
           {openCountry === country && exams.map(([exam, parts]) => {
             const key = country + '|' + exam;
             return (
@@ -373,9 +249,7 @@ function ExploreBrowse() {
       </div>
     </div>
   );
-      }
 }
-
 // Quick row: Qbank · Flashcards · Countdown · Streak (circles). Stats open inline; tools navigate.
 function QuickRow({ user, nav, onGreen }) {
   const { enterImmersive, exitImmersive, registerBack, clearBack } = useBack();
@@ -384,14 +258,12 @@ function QuickRow({ user, nav, onGreen }) {
   const hideSt = localStorage.getItem('hide_streak') === '1';
   const hideQb = localStorage.getItem('hide_qbank') === '1';
   const hideFc = localStorage.getItem('hide_flashcards') === '1';
-
   // exam countdown
   let daysLeft = null;
   if (user?.exam_date) {
     const t = new Date(user.exam_date).getTime();
     if (!isNaN(t)) daysLeft = Math.ceil((t - Date.now()) / 86400000);
   }
-
   // streak
   const [streak, setStreak] = useState(user?.current_streak || 0);
   // remember today's mark locally (keyed to the date) so the button doesn't revert on re-render
@@ -457,7 +329,6 @@ function QuickRow({ user, nav, onGreen }) {
     const t = setInterval(() => setNowTs(Date.now()), 1000);
     return () => clearInterval(t);
   }, [cdOpen]);
-
   // adaptive coach line — urgency without panic
   const coachLine = (d) => {
     if (d > 60) return 'Plenty of runway.';
@@ -466,7 +337,6 @@ function QuickRow({ user, nav, onGreen }) {
     if (d >= 0) return 'Trust your prep. Rest well.';
     return 'Update your exam date in Profile.';
   };
-
   // ---- Qbank summary (folded in from QbankCard) ----
   const [qStats, setQStats] = useState({ loading: true });
   const [qTopics, setQTopics] = useState([]); // top topics for the bloom pill-list
@@ -489,7 +359,6 @@ function QuickRow({ user, nav, onGreen }) {
   };
   useEffect(() => { loadQbank(); }, []);
   const qSub = qStats.loading ? 'Loading…' : qStats.empty ? 'Start tracking your progress' : `${qStats.done} done · ${qStats.acc}% accuracy`;
-
   // inline add-topic form (in the Qbank bloom)
   const [addingTopic, setAddingTopic] = useState(false);
   const [tDraft, setTDraft] = useState({ topic: '', done: '', total: '', correct: '' });
@@ -504,7 +373,6 @@ function QuickRow({ user, nav, onGreen }) {
       loadQbank();
     } catch (e) {} finally { setSavingTopic(false); }
   };
-
   // ---- Flashcards: decks + due totals for the bloom summary ----
   const [due, setDue] = useState(null);
   const [decks, setDecks] = useState(null); // null = loading, [] = none
@@ -516,7 +384,6 @@ function QuickRow({ user, nav, onGreen }) {
     }).catch(() => { setDecks([]); setDue(0); });
   };
   useEffect(() => { loadDecks(); }, []);
-
   // inline create-deck form (in the Flashcards bloom)
   const [addingDeck, setAddingDeck] = useState(false);
   const [dName, setDName] = useState('');
@@ -546,7 +413,6 @@ function QuickRow({ user, nav, onGreen }) {
     cards: decks.reduce((a, x) => a + (x.card_count || 0), 0),
     due: decks.reduce((a, x) => a + (x.due_count || 0), 0),
   } : null;
-
   // shared circle wrapper
   const Circle = ({ tint, color, glow, onClick, badge, selected, children, label }) => (
     <div onClick={onClick} className="qi-press" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }}>
@@ -559,12 +425,10 @@ function QuickRow({ user, nav, onGreen }) {
       <div style={{ fontSize: 11, fontWeight: 700, color: onGreen ? 'rgba(255,255,255,.85)' : 'var(--muted)', textAlign: 'center', lineHeight: 1.15 }}>{label}</div>
     </div>
   );
-
   const finalStretch = daysLeft != null && daysLeft > 0 && daysLeft <= 10;
   const WINDOW = 180;
   const frac = daysLeft == null ? 0 : (daysLeft > 0 ? Math.max(0, Math.min(1, (WINDOW - daysLeft) / WINDOW)) : 1);
   const R2 = 27, C2 = 2 * Math.PI * R2;
-
   // ---- circle bloom: grows from the tapped circle into a full-screen, half-and-half coloured panel ----
   const { setBar } = useTheme();
   const MORALE = {
@@ -605,7 +469,6 @@ function QuickRow({ user, nav, onGreen }) {
   useEffect(() => {
     if (bloom) { registerBack(() => closeBloom()); return () => clearBack(); }
   }, [!!bloom]);
-
   return (
     <>
       <style>{`
@@ -617,7 +480,6 @@ function QuickRow({ user, nav, onGreen }) {
           .qi-press:active .qi-shape{transform:scale(.94)}
         }
       `}</style>
-
       {/* paddingTop gives the fire breathing room from the motivation box */}
       <div style={{ display: 'flex', gap: 10, margin: '2px 0 4px', paddingTop: 8 }}>
         {/* Qbank — navigates */}
@@ -628,7 +490,8 @@ function QuickRow({ user, nav, onGreen }) {
         )}
 
         {/* Flashcards — navigates */}
-        {!hideFc && (
+        
+{!hideFc && (
         <Circle tint="#fbe3da" color="#e8916b" glow="0 6px 14px rgba(232,145,107,.22)" label="Flashcards" selected={false} badge={due ? due : null} onClick={(e) => launchBloom(e, '#e8916b', 'flashcards')}>
           <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="6" width="13" height="12" rx="2" /><path d="M7 10h5M7 13.5h3" /><path d="M20 8.5v8a2 2 0 0 1-2 2H8.5" /></svg>
         </Circle>
@@ -659,8 +522,6 @@ function QuickRow({ user, nav, onGreen }) {
           </Circle>
         )}
       </div>
-
-
       {cdOpen && user?.exam_date && (() => {
         const examTs = new Date(user.exam_date).getTime();
         const diff = Math.max(0, examTs - nowTs);
@@ -700,7 +561,6 @@ function QuickRow({ user, nav, onGreen }) {
           </div>
         );
       })()}
-
       {stOpen && (() => {
       const best = Math.max(user?.longest_streak || 0, streak);
         const line = !studiedToday
@@ -792,7 +652,7 @@ function QuickRow({ user, nav, onGreen }) {
                   </>
                 )}
                 {bloom.key === 'flashcards' && (
-                  <>
+            <>
                     <div style={{ fontSize: 30, marginBottom: 4 }}>🗂️</div>
                     <div style={{ display: 'flex', justifyContent: 'center', gap: 26 }}>
                       <div><div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 30, fontWeight: 900, lineHeight: 1 }}>{deckStats?.decks ?? 0}</div><div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5, opacity: 0.85, marginTop: 3 }}>decks</div></div>
@@ -802,7 +662,6 @@ function QuickRow({ user, nav, onGreen }) {
                   </>
                 )}
               </div>
-
               {/* light sheet */}
               <div style={{ flex: 1, background: 'var(--paper)', borderRadius: '24px 24px 0 0', marginTop: -16, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
                 {bloom.key === 'countdown' && (
@@ -962,7 +821,7 @@ function QuickRow({ user, nav, onGreen }) {
       })()}
     </>
   );
-}
+                          }
 export default function Home() {
   const { user } = useAuth();
   const nav = useNavigate();
@@ -973,10 +832,8 @@ export default function Home() {
   useEffect(() => {
     if (showMotivation) { registerBack(() => setShowMotivation(false)); return () => clearBack(); }
   }, [showMotivation, registerBack, clearBack]);
-
   const [nudges, setNudges] = useState([]);
   const [nudgesOpen, setNudgesOpen] = useState(false);
-
   // today's study plan (collapsed strip)
   const [todayBlocks, setTodayBlocks] = useState([]);
   const [planOpen, setPlanOpen] = useState(false);
@@ -989,16 +846,13 @@ export default function Home() {
     setTodayBlocks(prev => prev.map(b => b.id === id ? { ...b, done: !b.done } : b));
     api.blockToggle(id).catch(() => setTodayBlocks(prev => prev.map(b => b.id === id ? { ...b, done: !b.done } : b)));
   };
-
   const [dismissed, setDismissed] = useState(() => { try { return JSON.parse(localStorage.getItem('dismissed_nudges') || '[]'); } catch (e) { return []; } });
   const dismissNudge = (id) => {
     setDismissed((prev) => { const next = [...new Set([...prev, id])]; try { localStorage.setItem('dismissed_nudges', JSON.stringify(next)); } catch (e) {} return next; });
   };
   const liveNudges = nudges.filter((n) => !dismissed.includes(n.id));
-
   const [invited, setInvited] = useState(false);
   useEffect(() => { api.connections().then((d) => setNudges(d.nudges || [])).catch(() => {}); }, []);
-
   // native share sheet on Android & iOS; clipboard fallback elsewhere
   const inviteFriend = async () => {
     const data = {
@@ -1014,7 +868,6 @@ export default function Home() {
       setInvited(true); setTimeout(() => setInvited(false), 3000);
     } catch (e) {}
   };
-
   return (
     <div className="screen" style={{ padding: 0 }}>
       {/* ===== GREEN BAND: greeting + motivation quote + nudges + quick circles ===== */}
@@ -1028,7 +881,6 @@ export default function Home() {
             <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,0.14)', display: 'grid', placeItems: 'center', fontSize: 16, flexShrink: 0 }}>›</div>
           </div>
         </div>
-
         {liveNudges.length > 0 && (() => {
           const first = liveNudges[0];
       const rest = liveNudges.slice(1);
@@ -1063,14 +915,12 @@ export default function Home() {
             </div>
           );
         })()}
-
         {todayBlocks.length > 0 && (() => {
           const sorted = todayBlocks.slice().sort((a, b) => (a.time || '').localeCompare(b.time || ''));
           const doneCount = sorted.filter(b => b.done).length;
           const allDone = doneCount === sorted.length;
           const nextBlock = sorted.find(b => !b.done);
           const colorBar = (id) => ({ c1: '#2c8a5a', c2: '#c47a3a', c3: '#1f9bb8', c4: '#d24a30' }[id] || '#2c8a5a');
-
           if (allDone) {
             return (
               <div style={{ display: 'flex', alignItems: 'center', gap: 9, background: 'rgba(224,179,65,.16)', border: '1px solid rgba(224,179,65,.3)', borderRadius: 14, padding: '11px 14px', marginTop: 14, color: '#fff' }}>
@@ -1113,18 +963,14 @@ export default function Home() {
             </div>
           );
         })()}
-
         <div style={{ marginTop: 18 }}>
           <QuickRow user={user} nav={nav} onGreen />
         </div>
       </div>
-
       {/* ===== CURVED LIGHT SHEET: Explore + invite + footer ===== */}
       <div style={{ background: 'var(--paper)', borderRadius: '28px 28px 0 0', marginTop: -28, position: 'relative', zIndex: 1, padding: '24px 18px 20px' }}>
         <h2 className="serif" style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 21, fontWeight: 900, letterSpacing: '-0.3px', color: 'var(--forest)', margin: '0 0 12px', textAlign: 'center' }}>Explore Study Partners</h2>
-
         <ExploreBrowse />
-
         {/* invite a colleague — slim rust pill, native share sheet (Android & iOS), clipboard fallback */}
         <div onClick={inviteFriend} style={{ display: 'flex', alignItems: 'center', gap: 12, borderRadius: 999, padding: '12px 16px', marginTop: 20, cursor: 'pointer', background: 'linear-gradient(135deg, #1f4d3f 0%, #2c6a55 100%)', color: '#fff', boxShadow: '0 4px 14px rgba(31,77,63,.25)' }}>
           <span style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,.2)', display: 'grid', placeItems: 'center', fontSize: 19, flexShrink: 0 }}>👋</span>
@@ -1134,10 +980,7 @@ export default function Home() {
           </span>
           </div>
         {invited && <p className="sub" style={{ fontSize: 12, marginTop: 8, textAlign: 'center', color: 'var(--forest)', fontWeight: 700 }}>Link copied — paste it anywhere! ✓</p>}
-
-
       </div>
-
       {showMotivation && (
         <div className="fs-open" style={{ position: 'fixed', inset: 0, background: 'var(--section-hero)', zIndex: 1000, overflowY: 'auto', WebkitOverflowScrolling: 'touch', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 56px)' }}>
           <div className="fs-content" style={{ minHeight: '100%', position: 'relative' }}>
@@ -1148,7 +991,6 @@ export default function Home() {
     </div>
   );
 }
-
 // Slim Qbank summary card — shows overall progress, taps through to the full tracker.
 function QbankCard({ nav }) {
   const [stats, setStats] = useState({ loading: true });
