@@ -31,6 +31,7 @@ import Pro from './pages/Pro.jsx';
 import Checklist from './components/Checklist.jsx';
 import OfflineBanner from './components/OfflineBanner.jsx';
 import AddPartner from './pages/AddPartner.jsx';
+import { APP_VERSION } from './lib/version.js';
 
 function Icon({ name }) {
   const common = { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none',
@@ -176,7 +177,7 @@ function Drawer({ open, onClose, user }) {
             <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="M16 17l5-5-5-5M21 12H9" /></svg>Log out
           </button>
         </div>
-        <div className="drawer-foot">MedConnect v1.1.1 · Connect. Study. Succeed.</div>
+        <div className="drawer-foot">MedConnect v{APP_VERSION} · Connect. Study. Succeed.</div>
       </aside>
 
       {confirmLogout && (
@@ -349,7 +350,6 @@ function TopBar({ user }) {
               </div>
             )}
             </div>
-
             {notifs.requests.length > 0 && (
               <div onClick={() => { setBellOpen(false); nav('/partners?tab=requests'); }}
                 style={{ padding: '13px 18px', textAlign: 'center', borderTop: '1px solid var(--line)', fontSize: 13, fontWeight: 700, color: 'var(--forest)', cursor: 'pointer', flexShrink: 0, background: 'var(--card)' }}>
@@ -359,7 +359,6 @@ function TopBar({ user }) {
           </div>
         </div>
       )}
-
       <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} user={user} />
     </>
   );
@@ -369,7 +368,6 @@ function TabBar() {
   const timerRunning = !!timer?.running;
   const [hasUnread, setHasUnread] = useState(false);
   const [hasRequests, setHasRequests] = useState(false);
-
   // poll conversations; show a dot on Chat if any incoming message is newer
   // than what we've marked as read (stored locally per the helper).
   useEffect(() => {
@@ -427,167 +425,5 @@ function TabBar() {
         </NavLink>
       ))}
     </nav>
-  );
-}
-
-
-// ── Deep Focus locked overlay ─────────────────────────────────────────────────
-const PHRASE = 'i am losing focus';
-const HOLD_SECS = 10;
-
-function DeepFocusLocked({ lock, onUnlock }) {
-  const [holdPct, setHoldPct] = useState(0);
-  const holdRef = useRef(null);
-  const [typed, setTyped] = useState('');
-  const phraseMatch = typed.trim().toLowerCase() === PHRASE;
-
-  const startHold = () => {
-    const t = Date.now();
-    holdRef.current = setInterval(() => {
-      const pct = Math.min(100, ((Date.now() - t) / (HOLD_SECS * 1000)) * 100);
-      setHoldPct(pct);
-      if (pct >= 100) { clearInterval(holdRef.current); onUnlock(); }
-    }, 80);
-  };
-  const endHold = () => { clearInterval(holdRef.current); setHoldPct(0); };
-
-  const h = String(Math.floor(lock.secsLeft / 3600)).padStart(2, '0');
-  const m = String(Math.floor((lock.secsLeft % 3600) / 60)).padStart(2, '0');
-  const sc = String(lock.secsLeft % 60).padStart(2, '0');
-
-  return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'linear-gradient(160deg,#1b3d30 0%,#163028 100%)', display: 'flex', flexDirection: 'column', color: '#fff', overflowY: 'auto' }}>
-      <div style={{ padding: 'calc(env(safe-area-inset-top,0px) + 14px) 20px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,.08)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <span style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 17 }}>Deep Focus</span>
-        </div>
-        <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, opacity: .6, textTransform: 'uppercase' }}>Active</span>
-      </div>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '28px 24px 20px', textAlign: 'center' }}>
-        <div style={{ width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,.06)', border: '2.5px solid rgba(255,255,255,.12)', display: 'grid', placeItems: 'center', marginBottom: 22 }}>
-          <div>
-            <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 36, lineHeight: 1 }}>{h}:{m}:{sc}</div>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, opacity: .6, marginTop: 5, textTransform: 'uppercase' }}>Remaining</div>
-          </div>
-        </div>
-        <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 900, fontSize: 22, marginBottom: 8 }}>Stay in the zone.</div>
-        <div style={{ fontSize: 12.5, opacity: .75, lineHeight: 1.55, maxWidth: 240, marginBottom: 32 }}>Your app is locked until your focus session ends. You've got this.</div>
-        {lock.method === 'hold' ? (
-          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-            <div onMouseDown={startHold} onMouseUp={endHold} onMouseLeave={endHold} onTouchStart={startHold} onTouchEnd={endHold}
-              style={{ position: 'relative', width: 220, height: 52, borderRadius: 999, border: '1.5px solid rgba(255,255,255,.28)', background: 'rgba(255,255,255,.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden', userSelect: 'none', WebkitUserSelect: 'none' }}>
-              <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: holdPct + '%', background: 'rgba(192,83,63,.55)', borderRadius: 999 }} />
-              <span style={{ position: 'relative', fontSize: 13, fontWeight: 700, letterSpacing: .3, opacity: .9 }}>Hold {HOLD_SECS}s to emergency exit</span>
-            </div>
-            <div style={{ fontSize: 11, opacity: .5 }}>are you sure you need to stop?</div>
-          </div>
-        ) : (
-          <div style={{ width: '100%' }}>
-            <textarea value={typed} onChange={(e) => setTyped(e.target.value)} placeholder='type "I am losing focus" to unlock'
-              style={{ width: '100%', background: 'rgba(255,255,255,.07)', border: '1.5px solid rgba(255,255,255,.18)', borderRadius: 14, padding: '12px 14px', color: '#fff', fontSize: 13.5, fontFamily: 'inherit', resize: 'none', outline: 'none', minHeight: 60, lineHeight: 1.45, caretColor: '#e0b341' }} />
-            <div style={{ fontSize: 11, opacity: .5, textAlign: 'center', margin: '8px 0 12px' }}>type it slowly. mean it. then decide.</div>
-            <button disabled={!phraseMatch} onClick={() => phraseMatch && onUnlock()}
-              style={{ width: '100%', border: 'none', borderRadius: 12, padding: 13, fontSize: 13, fontWeight: 700, fontFamily: 'inherit', cursor: phraseMatch ? 'pointer' : 'default', background: phraseMatch ? '#c0532b' : 'rgba(255,255,255,.1)', color: phraseMatch ? '#fff' : 'rgba(255,255,255,.35)', transition: 'all .2s' }}>
-              Unlock session
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-export default function App() {
-  return (
-    <FocusLockProvider>
-      <AppInner />
-    </FocusLockProvider>
-  );
-}
-
-function AppInner() {
-  const { user, loading } = useAuth();
-  const { mode, toggle } = useTheme();
-  const { immersive } = useBack();
-  const { lock, endLock } = useFocusLock();
-
-  // hold the splash long enough for the draw animation to finish, even if auth resolves instantly
-  const [splashDone, setSplashDone] = useState(false);
-  useEffect(() => {
-    const t = setTimeout(() => setSplashDone(true), 800);
-    return () => clearTimeout(t);
-  }, []);
-
-  if (loading || !splashDone) return (
-    <div className="app">
-      <div className="center splash" style={{ flexDirection: 'column', gap: 14 }}>
-        <img src="/pwa-192.png" alt="MedConnect" className="splash-logo" />
-        <div className="splash-brand">MedConnect</div>
-        <div className="splash-tag"><span>Connect.</span> <span>Study.</span> <span>Succeed.</span></div>
-      </div>
-    </div>
-  );
-
-  // not signed in
-  if (!user) {
-    return (
-      <div className="app">
-        <button className="themebtn" onClick={toggle}>{mode === 'dark' ? '☀️' : '🌙'}</button>
-        <Routes>
-          <Route path="/legal" element={<Legal />} />
-          <Route path="/reset" element={<Reset />} />
-          <Route path="/add/:id" element={<SignIn />} />
-          <Route path="*" element={<SignIn />} />
-        </Routes>
-      </div>
-    );
-  }
-
-  // signed in but profile not set up
-  if (!user.profile_complete) {
-    return (
-      <div className="app">
-        <Routes>
-          <Route path="*" element={<Setup />} />
-        </Routes>
-      </div>
-    );
-  }
-
-  // main app
-  return (
-    <>
-      {lock && <DeepFocusLocked lock={lock} onUnlock={endLock} />}
-      <div className={`app ${immersive ? 'immersive' : ''}`}>
-      <OfflineBanner />
-      {!immersive && <TopBar user={user} />}
-      <Routes>
-        <Route path="/home" element={<Home />} />
-        <Route path="/partners" element={<Partners />} />
-        <Route path="/osce" element={<Osce />} />
-        <Route path="/chat" element={<Chat />} />
-        <Route path="/focus" element={<Focus />} />
-        <Route path="/motivation" element={<Motivation />} />
-        <Route path="/legal" element={<Legal />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/about-dev" element={<AboutDev />} />
-        <Route path="/labs" element={<LabValues />} />
-        <Route path="/formulas" element={<Formulas />} />
-        <Route path="/qbank" element={<Qbank />} />
-        <Route path="/flashcards" element={<Flashcards />} />
-        <Route path="/resources" element={<Resources />} />
-        <Route path="/clinical-insights" element={<ClinicalInsights />} />
-        <Route path="/notes" element={<NotesVault />} />
-        <Route path="/planner" element={<StudyPlanner />} />
-        <Route path="/pro" element={<Pro />} />
-        <Route path="/connections" element={<Navigate to="/partners?tab=mine" replace />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/add/:id" element={<AddPartner />} />
-        <Route path="*" element={<Navigate to="/home" replace />} />
-      </Routes>
-      {!immersive && <TabBar />}
-      </div>
-    </>
   );
 }
