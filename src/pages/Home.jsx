@@ -47,6 +47,27 @@ const CATALOG = [
     ['NEET-SS', ['Super-specialty entrance']],
   ]],
 ];
+const DENTAL_CATALOG = [
+  ['🇺🇸', 'United States', [
+    ['INBDE', ['Integrated National Board Dental Examination']],
+  ]],
+  ['🇬🇧', 'United Kingdom', [
+    ['ORE', ['Part 1 (Written)', 'Part 2 (Clinical)']],
+  ]],
+  ['🇵🇰', 'Pakistan', [
+    ['FCPS Dental', ['Oral & Maxillofacial Surgery', 'Operative Dentistry & Endodontics', 'Prosthodontics', 'Orthodontics']],
+    ['MDS', ['Oral & Maxillofacial Surgery', 'Operative Dentistry & Endodontics', 'Prosthodontics', 'Orthodontics', 'Paedodontics']],
+  ]],
+  ['🇦🇺', 'Australia', [
+    ['ADC Exam', ['Written & Clinical Assessment']],
+  ]],
+  ['🇸🇦', 'Saudi Arabia', [
+    ['SDLE', ['Saudi Dental Licensing Exam']],
+  ]],
+  ['🇮🇳', 'India', [
+    ['NEET-MDS', ['Postgraduate Dental Entrance']],
+  ]],
+];
 
 
 // country-code map for round flag images (flagcdn.com)
@@ -60,6 +81,7 @@ const EXAM_COLORS = {
   'AMC': '#1a5f7a', 'RACP': '#1a6b5a', 'RACS': '#2a5a6a',
   'SMLE': '#2e4a7a', 'Saudi Board': '#1a6b8a', 'SCFHS Prometric': '#2a6a8a',
   'NEET-PG': '#3a7a4a', 'INI-CET': '#1a7a6a', 'FMGE / NExT': '#1a5a8a', 'NEET-SS': '#2a6a7a',
+  'INBDE': '#1a5a8a', 'ORE': '#1a7a6a', 'FCPS Dental': '#1a7a4a', 'MDS': '#3a6a3a', 'ADC Exam': '#1a5f7a', 'SDLE': '#2e4a7a', 'NEET-MDS': '#3a7a4a',
 };
 const examColor = (exam) => EXAM_COLORS[exam] || EXAM_COLORS[exam.split(' ')[0]] || 'var(--forest)';
 
@@ -229,8 +251,80 @@ function ExploreBrowse() {
             })}
         </div>
       )}
+function ExploreBrowse() {
+  const nav = useNavigate();
+  const ls = (k, d) => { try { return localStorage.getItem(k) ?? d; } catch (e) { return d; } };
+  const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+  const [openCountry, setOpenCountryRaw] = useState(() => ls('explore_open_country', ''));
+  const setOpenCountry = (v) => { setOpenCountryRaw(v); lsSet('explore_open_country', v); };
+  const [openExam, setOpenExamRaw] = useState(() => ls('explore_open_exam', ''));
+  const setOpenExam = (v) => { setOpenExamRaw(v); lsSet('explore_open_exam', v); };
+  const [profession, setProfessionRaw] = useState(() => ls('explore_profession', 'medical'));
+  const setProfession = (v) => { setProfessionRaw(v); lsSet('explore_profession', v); setOpenCountry(''); setOpenExam(''); };
+  const MODE_ORDER = ['medical', 'dental'];
+  const modeTouchStart = useRef(null);
+  const onModeTouchStart = (e) => { modeTouchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }; };
+  const onModeTouchEnd = (e) => {
+    if (!modeTouchStart.current) return;
+    const dx = e.changedTouches[0].clientX - modeTouchStart.current.x;
+    const dy = e.changedTouches[0].clientY - modeTouchStart.current.y;
+    modeTouchStart.current = null;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    const idx = MODE_ORDER.indexOf(profession);
+    if (dx < 0 && idx < MODE_ORDER.length - 1) setProfession(MODE_ORDER[idx + 1]);
+    else if (dx > 0 && idx > 0) setProfession(MODE_ORDER[idx - 1]);
+  };
+  // starred countries float to the top; a toggle lets you show only your pinned set
+  const [pinC, setPinC] = useState(() => { try { return JSON.parse(localStorage.getItem('pin_countries') || '[]'); } catch (e) { return []; } });
+  const [pinnedOnly, setPinnedOnlyRaw] = useState(() => ls('explore_pinned_only', '0') === '1');
+  const setPinnedOnly = (v) => { const next = typeof v === 'function' ? v(pinnedOnly) : v; setPinnedOnlyRaw(next); lsSet('explore_pinned_only', next ? '1' : '0'); };
+  const togglePinC = (name) => setPinC((p) => { const n = p.includes(name) ? p.filter((x) => x !== name) : [...p, name]; localStorage.setItem('pin_countries', JSON.stringify(n)); return n; });
 
-      {browseMode === 'country' && (
+  const [counts, setCounts] = useState({});
+  useEffect(() => { api.getStats().then((d) => setCounts(d.counts || {})).catch(() => {}); }, []);
+
+  // counts for a specific exam PART (best-effort mapping to users' exam strings)
+  const partCount = (exam, part) => {
+    const fam = exam.split(' ')[0];
+    const SPECIAL = { 'PLAB 1 / AKT': 'PLAB 1 / UKMLA AKT', 'PLAB 2 / CPSA': 'PLAB 2 / UKMLA CPSA' };
+    // signup stores e.g. "FCPS — Part 1 — Radiology"; the catalog label is "FCPS Part 1"
+    const dashed = exam.replace(/^(\w+)\s+(Part\s+\d+)$/, '$1 — $2'); // "FCPS Part 1" -> "FCPS — Part 1"
+    const candidates = [SPECIAL[part], `${exam} — ${part}`, `${dashed} — ${part}`, `${fam} — ${part}`, exam === 'SMLE' ? 'SMLE' : null];
+    let n = 0;
+    for (const k of candidates) if (k && counts[k]) n = Math.max(n, counts[k]);
+    return n;
+  };
+  const examCount = (label) => {
+    const family = label.split(' ')[0];
+    let n = 0;
+    for (const [key, val] of Object.entries(counts)) {
+      if (key.split('—')[0].trim().split(' ')[0] === family) n = Math.max(n, val);
+    }
+    return n;
+  };
+
+  const activeCatalog = profession === 'medical' ? CATALOG : DENTAL_CATALOG;
+  const orderedCountries = (() => {
+    const p = activeCatalog.filter((x) => pinC.includes(x[1]));
+    const r = activeCatalog.filter((x) => !pinC.includes(x[1]));
+    return pinnedOnly && pinC.length ? p : [...p, ...r];
+  })();
+
+  return (
+    <div onTouchStart={onModeTouchStart} onTouchEnd={onModeTouchEnd}>
+      <div className="tabs" style={{ marginBottom: 14 }}>
+        <button className={`tab ${profession === 'medical' ? 'on' : ''}`} onClick={() => setProfession('medical')}>Medical</button>
+        <button className={`tab ${profession === 'dental' ? 'on' : ''}`} onClick={() => setProfession('dental')}>Dental</button>
+      </div>
+
+      {pinC.length > 0 && (
+        <button onClick={() => setPinnedOnly(!pinnedOnly)}
+          style={{ display: 'flex', alignItems: 'center', gap: 7, margin: '0 auto 16px', padding: '7px 15px', borderRadius: 999, border: '1.5px solid var(--line)', background: pinnedOnly ? 'var(--forest)' : 'transparent', color: pinnedOnly ? '#fff' : 'var(--forest)', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', transition: 'all .2s' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill={pinnedOnly ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15 8.5 22 9.3 17 14 18.3 21 12 17.5 5.7 21 7 14 2 9.3 9 8.5 12 2" /></svg>
+          {pinnedOnly ? 'Showing your starred' : 'Show starred only'}
+        </button>
+      )}
+
       <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 2px 10px rgba(20,40,30,.08)' }}>
         {orderedCountries.map(([flag, country, exams], idx) => (
         <div key={country} style={{ borderTop: idx === 0 ? 'none' : '1px solid var(--line)' }}>
@@ -254,7 +348,7 @@ function ExploreBrowse() {
                   <span style={{ flex: 1 }}>{exam}</span>
                   {examCount(exam) >= 2 && (
                     <span style={{ fontSize: 11, color: '#fff', background: examColor(exam), borderRadius: 20, padding: '3px 9px', marginRight: 8, fontWeight: 700 }}>
-                      {examCount(exam)} doctors
+                      {examCount(exam)} {profession === 'medical' ? 'doctors' : 'dentists'}
                     </span>
                   )}
                   <span className={`chev-round ${openExam === key ? 'open' : ''}`} style={{ width: 24, height: 24 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg></span>
@@ -276,10 +370,10 @@ function ExploreBrowse() {
           })}
         </div>
         ))}
-        </div>
-      )}
+      </div>
     </div>
   );
+      }
 }
 
 // Quick row: Qbank · Flashcards · Countdown · Streak (circles). Stats open inline; tools navigate.
