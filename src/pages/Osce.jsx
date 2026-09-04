@@ -10,6 +10,7 @@ const STATIONS = {
   'FCPS — IMM / Clinical': ['Examine the cardiovascular system','Take a fever history','Counsel on warfarin','Examine the chest','Diabetic foot assessment','Explain a CT head finding'],
   'MRCEM / FRCEM — OSCE': ['Manage the breathless patient','ECG interpretation','Trauma primary survey','Breaking bad news in ED','Joint aspiration consent','Paediatric fever assessment'],
   'MRCGP — SCA / CSA': ['Tired all the time','Manage a worried parent','Contraception counselling','Low mood consultation','Explain a new diagnosis','Telephone triage call'],
+  'ORE — Part 2 (Clinical)': ['Examine a carious lower molar','Explain root canal treatment'],
 };
 const FREE = 3;
 
@@ -30,6 +31,7 @@ const EXAM_MINUTES = {
   'FCPS — IMM / Clinical': 10,   // FCPS clinical/long-short cases
   'MRCEM / FRCEM — OSCE': 7,     // MRCEM OSCE stations ~7 min
   'MRCGP — SCA / CSA': 12,       // GP consultations run ~12 min
+  'ORE — Part 2 (Clinical)': 8,  // dental OSCE-style stations, ~8 min
 };
 
 // what MedConnect Pro unlocks (shown under locked stations)
@@ -47,6 +49,7 @@ const TOTAL_STATIONS = {
   'FCPS — IMM / Clinical': '120+',
   'MRCEM / FRCEM — OSCE': '150+',
   'MRCGP — SCA / CSA': '180+',
+  'ORE — Part 2 (Clinical)': '80+',
 };
 
 // fuller scenario text — sets the scene and the task clearly (still the candidate's task only)
@@ -75,6 +78,9 @@ const SCENARIOS = {
   'Tired all the time': 'A 34-year-old attends your GP surgery saying they have felt exhausted for the last three months. Take a focused history exploring physical, psychological and social causes, agree a shared management plan, and safety-net appropriately within the consultation.',
   'Manage a worried parent': 'A parent has brought their 3-year-old to your GP clinic with a few days of fever and reduced appetite, and is very anxious. Take a focused history, address their concerns and ideas, explain your assessment, and agree a safe plan together including clear safety-netting.',
   'Contraception counselling': 'A 24-year-old attends to discuss starting contraception. Explore their needs and preferences, take a relevant history including any contraindications, explain the suitable options in a balanced way, and support them to reach a shared decision.',
+  // ---- ORE Part 2 (Clinical) ----
+  'Examine a carious lower molar': 'A 34-year-old patient attends complaining of pain in their lower left back tooth when eating something cold. Take a focused dental history, then examine the tooth and surrounding structures, and outline your likely diagnosis and initial management options to the examiner.',
+  'Explain root canal treatment': 'A 29-year-old has been told they need root canal treatment on an upper incisor following a diagnosis of irreversible pulpitis. Explain the procedure in plain terms — including what it involves, the risks and benefits, the alternatives, and what to expect afterwards — and respond to their questions.',
 };
 
 const LockIcon = ({ size = 14 }) => (
@@ -280,7 +286,6 @@ function Station({ name, minutes, onBack }) {
             <h2 className="serif" style={{ fontSize:18, fontWeight:700, marginBottom:6 }}>📹 Practise with a partner</h2>
             <p className="sub" style={{ fontSize:13, marginBottom:6 }}>Your private video room is ready. Invite a partner first, then join when you're both set.</p>
             <p className="sub" style={{ fontSize:11.5, marginBottom:14, color:'var(--subtle)' }}>🔒 Free, private room — no sign-up or app needed.</p>
-
             {friends.length > 0 && (
               <>
                 <div style={{ fontSize:11, fontWeight:800, letterSpacing:0.5, textTransform:'uppercase', color:'var(--subtle)', marginBottom:8 }}>Invite a partner</div>
