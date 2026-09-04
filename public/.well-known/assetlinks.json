@@ -1,9 +1,9 @@
 [{
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "app.vercel.med_connect3_0.twa",
-        "sha256_cert_fingerprints": ["C3:AA:96:0C:6D:68:91:F3:5D:D7:0F:5C:19:74:67:6F:24:75:30:A9:D3:A9:DE:C8:21:F7:73:33:27:1C:69:19"]
-      }
-    }]
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "app.vercel.med_connect3_0.twa",
+    "sha256_cert_fingerprints": ["4F:5E:D1:4B:2E:97:EE:B9:9B:97:DE:CE:FF:D4:18:7F:09:A0:4E:E6:CD:60:30:B3:52:6F:20:1E:42:F1:4D:B9"]
+  }
+}]
 
