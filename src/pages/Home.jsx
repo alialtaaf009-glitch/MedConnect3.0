@@ -655,6 +655,7 @@ function QuickRow({ user, nav, onGreen }) {
         const title = bloom.key === 'countdown' ? 'Countdown' : bloom.key === 'streak' ? 'Study Streak' : bloom.key === 'qbank' ? 'Qbank Tracker' : 'Flashcards';
         return createPortal((
           <div style={{ position: 'fixed', inset: 0, zIndex: 5000, overflow: 'hidden', pointerEvents: bloomGrown ? 'auto' : 'none' }}>
+            <div className="bloom-panel" style={{ position: 'fixed', inset: 0, zIndex: 5000, overflow: 'hidden', pointerEvents: bloomGrown ? 'auto' : 'none' }}>
             <style>{`@keyframes bloomSlideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes bloomSlideDown{from{transform:translateY(0)}to{transform:translateY(100%)}}`}</style>
             <div style={{
               position: 'absolute', inset: 0, background: bloom.color,
