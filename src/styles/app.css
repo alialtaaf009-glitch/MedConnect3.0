@@ -52,7 +52,7 @@ body {
       linear-gradient(160deg, #0e1512 0%, #14110c 100%);
   }
   .app {
-    max-width: 440px;
+    max-width: 520px;
     margin: 28px auto;
     min-height: 300px;
     background: var(--paper);
@@ -73,6 +73,9 @@ body {
   }
   /* keep notification panel / sheets aligned to the panel width */
   .topbar { border-radius: 28px 28px 0 0; }
+}
+@media (min-width: 1024px) {
+  .app { max-width: 600px; }
 }
 @media (min-width: 700px) {
   /* a little breathing room so content never hides behind the floating nav */
