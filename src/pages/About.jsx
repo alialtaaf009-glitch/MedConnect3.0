@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { APP_VERSION } from '../lib/version.js';
 
 export default function About() {
   const nav = useNavigate();
@@ -33,7 +34,7 @@ export default function About() {
       <div className="card" style={{ textAlign: 'center' }}>
         <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: 22, fontWeight: 900, color: 'var(--forest)' }}>MedConnect</div>
         <div style={{ fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--rust)', fontWeight: 700, marginTop: 4 }}>Connect · Study · Succeed</div>
-        <div style={{ fontSize: 11, color: 'var(--subtle)', marginTop: 10 }}>Version 1.1.1</div>
+        <div style={{ fontSize: 11, color: 'var(--subtle)', marginTop: 10 }}>Version {APP_VERSION}</div>
         <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 6, fontStyle: 'italic' }}>iOS app under development, coming soon!</div>
       </div>
     
