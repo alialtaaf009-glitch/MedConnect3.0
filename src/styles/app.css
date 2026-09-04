@@ -75,6 +75,10 @@ body {
   .topbar { border-radius: 28px 28px 0 0; }
 }
 @media (min-width: 1024px) {
+  @media (min-width: 1440px) {
+  .app { max-width: 760px; }
+  .bloom-panel, .fs-open { width: 760px !important; }
+  }
   .app { max-width: 600px; }
 }
 @media (min-width: 700px) {
