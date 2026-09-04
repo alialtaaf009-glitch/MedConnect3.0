@@ -11,6 +11,7 @@ export default function SignIn() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const googleBtnRef = useRef(null);
@@ -81,7 +82,17 @@ export default function SignIn() {
         <input className="input" placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} />
       )}
       <input className="input" placeholder="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-      <input className="input" placeholder="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+      <div style={{ position: 'relative' }}>
+        <input className="input" placeholder="Password" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} style={{ paddingRight: 44 }} />
+        <button type="button" onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? 'Hide password' : 'Show password'}
+          style={{ position: 'absolute', right: 12, top: 0, bottom: 13, display: 'flex', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', padding: 4 }}>
+          {showPassword ? (
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.3 5.3A10.4 10.4 0 0112 5c5 0 9 4 10.5 7-.6 1.2-1.5 2.5-2.7 3.6M6.5 6.5C4.6 7.8 3.1 9.6 1.5 12c1.5 3 5.5 7 10.5 7 1.4 0 2.7-.3 3.9-.8" /></svg>
+          ) : (
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z" /></svg>
+          )}
+        </button>
+      </div>
 
       {err && <p style={{ color: 'var(--rose)', fontSize: 13, marginBottom: 10 }}>{err}</p>}
       <button className="btn" onClick={submit} disabled={busy}>
@@ -112,4 +123,3 @@ export default function SignIn() {
     </div>
   );
 }
-
