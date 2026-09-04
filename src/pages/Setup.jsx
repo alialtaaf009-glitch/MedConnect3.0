@@ -6,6 +6,7 @@ const SUBJECTS = {
   'FCPS — Part 1': ['Medicine & Allied', 'Surgery & Allied', 'Gynae & Obs', 'Paediatrics', 'Anaesthesia', 'Radiology', 'Pathology', 'Ophthalmology', 'ENT', 'Psychiatry'],
   'FCPS — Part 2': ['Medicine', 'Surgery', 'Gynae & Obs', 'Paediatrics', 'Anaesthesia', 'Radiology', 'Pathology', 'Ophthalmology', 'ENT', 'Psychiatry'],
 };
+const PROFESSIONS = ['Medical', 'Dental'];
 const EXAMS = ['MRCP — Part 1','MRCP — Part 2 (Written)','MRCP — PACES','MRCS — Part A','MRCS — Part B (OSCE)',
   'PLAB 1 / UKMLA AKT','PLAB 2 / UKMLA CPSA','USMLE — Step 1','USMLE — Step 2 CK','FCPS — Part 1','FCPS — Part 2','AMC — Part 1','SMLE','Other'];
 const COUNTRIES = ['Pakistan','United Kingdom','United States','Saudi Arabia / Gulf','Australia','India','Other'];
@@ -32,6 +33,7 @@ function Chips({ label, options, value, onChange, optional }) {
 
 export default function Setup() {
   const { setUser } = useAuth();
+  const [profession, setProfession] = useState(PROFESSIONS[0]);
   const [exam, setExam] = useState(EXAMS[0]);
   const [subject, setSubject] = useState('');
   const [country, setCountry] = useState(COUNTRIES[0]);
@@ -44,8 +46,8 @@ export default function Setup() {
   const save = async () => {
     setBusy(true); setErr('');
     try {
-      const fullExam = (SUBJECTS[exam] && subject) ? `${exam} — ${subject}` : exam;
-      const { user } = await api.updateProfile({ exam: fullExam, country, timezone, questionBank, studyTime });
+      const fullExam = (profession === 'Medical' && SUBJECTS[exam] && subject) ? `${exam} — ${subject}` : exam;
+      const { user } = await api.updateProfile({ profession: profession.toLowerCase(), exam: fullExam, country, timezone, questionBank, studyTime });
       setUser(user);
     } catch (e) { setErr(e.message); } finally { setBusy(false); }
   };
@@ -54,8 +56,17 @@ export default function Setup() {
     <div className="screen">
       <h1 className="h1" style={{ textAlign: 'center', fontSize: 23 }}>Set up your profile</h1>
       <p className="sub" style={{ textAlign: 'center', marginBottom: 8 }}>This powers your matches. Takes 30 seconds.</p>
-      <Chips label="Exam you're preparing for" options={EXAMS} value={exam} onChange={(v) => { setExam(v); setSubject(''); }} />
-      {SUBJECTS[exam] && <Chips label="Which subject / specialty?" options={SUBJECTS[exam]} value={subject} onChange={setSubject} />}
+      <Chips label="Medical or dental?" options={PROFESSIONS} value={profession} onChange={(v) => { setProfession(v); if (v === 'Dental') setExam('Other'); }} />
+      {profession === 'Medical' ? (
+        <>
+          <Chips label="Exam you're preparing for" options={EXAMS} value={exam} onChange={(v) => { setExam(v); setSubject(''); }} />
+          {SUBJECTS[exam] && <Chips label="Which subject / specialty?" options={SUBJECTS[exam]} value={subject} onChange={setSubject} />}
+        </>
+      ) : (
+        <div className="card" style={{ padding: 14, marginBottom: 16 }}>
+          <p className="sub" style={{ margin: 0 }}>Dental exam options are coming very soon — for now we'll mark your exam as "Other" so you can still get set up and start connecting.</p>
+        </div>
+      )}
       <Chips label="Country" options={COUNTRIES} value={country} onChange={setCountry} />
       <Chips label="Timezone" options={TIMEZONES} value={timezone} onChange={setTimezone} />
       <Chips label="Question bank" options={QBANKS} value={questionBank} onChange={setQuestionBank} optional />
