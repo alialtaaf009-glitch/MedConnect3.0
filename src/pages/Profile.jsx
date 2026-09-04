@@ -4,8 +4,7 @@ import { api } from '../lib/api';
 import { pushSupported, isSubscribed, subscribePush, unsubscribePush } from '../lib/push.js';
 import { useAuth } from '../context/Auth.jsx';
 import { useTheme } from '../context/Theme.jsx';
-
-const APP_VERSION = '1.0.0';
+import { APP_VERSION } from '../lib/version.js';
 
 const AVATARS = ['🩺','💉','🧬','🦴','🫀','🧠','👨‍⚕️','👩‍⚕️','🥼','🔬','💊','🚑',
   '🐱','🦊','🦉','🐼','🐨','🦁','🐸','🦋','🐧','🐢','🦄','🐙',
@@ -314,12 +313,10 @@ function NotifToggle() {
   const [busy, setBusy] = useState(false);
   const [supported, setSupported] = useState(true);
   const [err, setErr] = useState('');
-
   useEffect(() => {
     setSupported(pushSupported());
     isSubscribed().then(setOn);
   }, []);
-
   const flip = async () => {
     if (busy) return;
     setBusy(true); setErr('');
@@ -334,7 +331,6 @@ function NotifToggle() {
     }
     setBusy(false);
   };
-
   if (!supported) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', opacity: 0.7 }}>
@@ -344,7 +340,6 @@ function NotifToggle() {
       </div>
     );
   }
-
   return (
     <>
       <div style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', cursor: 'pointer' }} onClick={flip}>
