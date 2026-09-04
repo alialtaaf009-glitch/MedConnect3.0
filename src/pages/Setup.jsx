@@ -6,9 +6,13 @@ const SUBJECTS = {
   'FCPS — Part 1': ['Medicine & Allied', 'Surgery & Allied', 'Gynae & Obs', 'Paediatrics', 'Anaesthesia', 'Radiology', 'Pathology', 'Ophthalmology', 'ENT', 'Psychiatry'],
   'FCPS — Part 2': ['Medicine', 'Surgery', 'Gynae & Obs', 'Paediatrics', 'Anaesthesia', 'Radiology', 'Pathology', 'Ophthalmology', 'ENT', 'Psychiatry'],
 };
+const DENTAL_SUBJECTS = {
+  'FCPS — Dental': ['Oral & Maxillofacial Surgery', 'Operative Dentistry / Endodontics', 'Prosthodontics', 'Orthodontics'],
+};
 const PROFESSIONS = ['Medical', 'Dental'];
 const EXAMS = ['MRCP — Part 1','MRCP — Part 2 (Written)','MRCP — PACES','MRCS — Part A','MRCS — Part B (OSCE)',
   'PLAB 1 / UKMLA AKT','PLAB 2 / UKMLA CPSA','USMLE — Step 1','USMLE — Step 2 CK','FCPS — Part 1','FCPS — Part 2','AMC — Part 1','SMLE','Other'];
+const DENTAL_EXAMS = ['INBDE','ORE — Part 1','ORE — Part 2','FCPS — Dental','NEET-MDS','SDLE','ADC Exam','Other'];
 const COUNTRIES = ['Pakistan','United Kingdom','United States','Saudi Arabia / Gulf','Australia','India','Other'];
 const QBANKS = ['PassMedicine','Pastest','BMJ OnExamination','Plabable','UWorld','AMBOSS','MRCPUK Question Bank','Marrow','PrepLadder','DAMS','Cerebellum','eGurukul','Other'];
 const TIMES = ['Early mornings','Daytime','Evenings','Late nights'];
@@ -43,10 +47,13 @@ export default function Setup() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
 
+  const examOptions = profession === 'Medical' ? EXAMS : DENTAL_EXAMS;
+  const subjectOptions = profession === 'Medical' ? SUBJECTS : DENTAL_SUBJECTS;
+
   const save = async () => {
     setBusy(true); setErr('');
     try {
-      const fullExam = (profession === 'Medical' && SUBJECTS[exam] && subject) ? `${exam} — ${subject}` : exam;
+      const fullExam = (subjectOptions[exam] && subject) ? `${exam} — ${subject}` : exam;
       const { user } = await api.updateProfile({ profession: profession.toLowerCase(), exam: fullExam, country, timezone, questionBank, studyTime });
       setUser(user);
     } catch (e) { setErr(e.message); } finally { setBusy(false); }
@@ -56,17 +63,9 @@ export default function Setup() {
     <div className="screen">
       <h1 className="h1" style={{ textAlign: 'center', fontSize: 23 }}>Set up your profile</h1>
       <p className="sub" style={{ textAlign: 'center', marginBottom: 8 }}>This powers your matches. Takes 30 seconds.</p>
-      <Chips label="Medical or dental?" options={PROFESSIONS} value={profession} onChange={(v) => { setProfession(v); if (v === 'Dental') setExam('Other'); }} />
-      {profession === 'Medical' ? (
-        <>
-          <Chips label="Exam you're preparing for" options={EXAMS} value={exam} onChange={(v) => { setExam(v); setSubject(''); }} />
-          {SUBJECTS[exam] && <Chips label="Which subject / specialty?" options={SUBJECTS[exam]} value={subject} onChange={setSubject} />}
-        </>
-      ) : (
-        <div className="card" style={{ padding: 14, marginBottom: 16 }}>
-          <p className="sub" style={{ margin: 0 }}>Dental exam options are coming very soon — for now we'll mark your exam as "Other" so you can still get set up and start connecting.</p>
-        </div>
-      )}
+      <Chips label="Medical or dental?" options={PROFESSIONS} value={profession} onChange={(v) => { setProfession(v); setExam(v === 'Medical' ? EXAMS[0] : DENTAL_EXAMS[0]); setSubject(''); }} />
+      <Chips label="Exam you're preparing for" options={examOptions} value={exam} onChange={(v) => { setExam(v); setSubject(''); }} />
+      {subjectOptions[exam] && <Chips label="Which subject / specialty?" options={subjectOptions[exam]} value={subject} onChange={setSubject} />}
       <Chips label="Country" options={COUNTRIES} value={country} onChange={setCountry} />
       <Chips label="Timezone" options={TIMEZONES} value={timezone} onChange={setTimezone} />
       <Chips label="Question bank" options={QBANKS} value={questionBank} onChange={setQuestionBank} optional />
