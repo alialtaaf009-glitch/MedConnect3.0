@@ -92,6 +92,7 @@ export default async function handler(req, res) {
       } catch (e) { return res.status(500).json({ error: 'Could not load blocks' }); }
     }
 
+    const target = req.query.user;
     if (!target) return res.status(400).json({ error: 'user id required' });
     try {
       const rows = await sql`SELECT id, name, avatar, exam, country FROM users WHERE id = ${target}`;
@@ -239,9 +240,6 @@ export default async function handler(req, res) {
         await sql`DELETE FROM notes WHERE id = ${id} AND user_id = ${uid}`;
         return res.status(200).json({ ok: true });
       }
-    
-  
-      
       // ── Study blocks ────────────────────────────────────────────────────────
       if (body.action === 'block_create') {
         const { day, time, topic, duration, note, color } = body;
@@ -404,6 +402,16 @@ async function ensureNotesTables() {
     CREATE TABLE IF NOT EXISTS notes (
       id SERIAL PRIMARY KEY,
       user_id INTEGER NOT NULL,
+      title TEXT NOT NULL,
+      body TEXT DEFAULT '',
+      tags TEXT DEFAULT '',
+      created_at TIMESTAMPTZ DEFAULT now(),
+      updated_at TIMESTAMPTZ DEFAULT now()
+    )`;
+  await sql`
+    CREATE TABLE IF NOT EXISTS note_shares (
+      id SERIAL PRIMARY KEY,
+   user_id INTEGER NOT NULL,
       title TEXT NOT NULL,
       body TEXT DEFAULT '',
       tags TEXT DEFAULT '',
