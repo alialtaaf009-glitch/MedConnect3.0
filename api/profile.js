@@ -290,6 +290,7 @@ export default async function handler(req, res) {
     await sql`
       UPDATE users SET
         name = COALESCE(${body.name}, name),
+        profession = COALESCE(${body.profession}, profession),
         exam = COALESCE(${body.exam}, exam),
         country = COALESCE(${body.country}, country),
         attempt = COALESCE(${body.attempt}, attempt),
