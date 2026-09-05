@@ -276,6 +276,18 @@ export default function Profile() {
         <NotifToggle />
       </div>
 
+      <div className="label" style={{ marginTop: 18 }}>Appearance</div>
+      <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 18, overflow: 'hidden', boxShadow: '0 4px 14px rgba(31,77,63,.04)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', cursor: 'pointer' }} onClick={toggle}>
+          <span style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>Dark mode
+            <span style={{ display: 'block', fontSize: 11.5, fontWeight: 400, color: 'var(--subtle)' }}>Switch between light and dark theme</span>
+          </span>
+          <span style={{ width: 42, height: 24, borderRadius: 999, background: mode === 'dark' ? 'var(--forest)' : 'var(--line)', position: 'relative', transition: 'background .2s ease', flexShrink: 0 }}>
+            <span style={{ position: 'absolute', top: 2.5, left: mode === 'dark' ? 20.5 : 3, width: 19, height: 19, borderRadius: '50%', background: '#fff', transition: 'left .2s ease', boxShadow: '0 1px 3px rgba(0,0,0,.2)' }} />
+          </span>
+        </div>
+      </div>
+
       {!confirmLogout ? (
         <button className="btn ghost" style={{ marginTop:16, color:'var(--rust)', borderColor:'var(--rust)' }} onClick={() => setConfirmLogout(true)}>Log out</button>
       ) : (
@@ -301,12 +313,10 @@ export default function Profile() {
           <button className="btn ghost" style={{ marginTop:8 }} onClick={() => setConfirmDel(false)}>Cancel</button>
         </div>
       )}
-
       <p className="meta" style={{ textAlign:'center', marginTop:20, fontSize:11, opacity:0.7 }}>MedConnect v{APP_VERSION}</p>
     </div>
   );
 }
-
 // Push notifications opt-in toggle
 function NotifToggle() {
   const [on, setOn] = useState(false);
