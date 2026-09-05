@@ -68,7 +68,7 @@ export default function SignIn() {
 
       <div style={{ marginBottom: 26 }}>
         <div style={{ fontWeight: 700, color: 'var(--teal)', fontSize: 13, letterSpacing: '.5px', textTransform: 'uppercase', marginBottom: 8 }}>
-          For doctors, by doctors
+          For doctors and dentists
         </div>
         <p style={{ color: 'var(--ink)', fontSize: 15, fontWeight: 600, marginBottom: 6 }}>
           Find your study partner for board exams.
