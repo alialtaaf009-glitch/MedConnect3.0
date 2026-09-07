@@ -55,7 +55,7 @@ export default function AboutDev() {
         )}
 
         <p style={{ fontSize: 13.5, lineHeight: 1.65, color: 'var(--ink)', marginTop: 14 }}>
-          Built by a doctor who understands the challenges of exam preparation. MedConnect was created to make studying less isolated and more collaborative.
+          Built by a doctor who understands the challenges of exam preparation for doctors and dentists alike. MedConnect was created to make studying less isolated and more collaborative.
         </p>
         <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 12, fontStyle: 'italic' }}>
           Made with care in Lahore, Pakistan. 🌿
@@ -73,7 +73,7 @@ export default function AboutDev() {
           <div style={{ width: 1, background: 'var(--line)', alignSelf: 'stretch', margin: '10px 0' }} />
           <div style={{ flex: 1, padding: '12px 8px', textAlign: 'center' }}>
             <div style={{ fontSize: 20 }}>🩺</div>
-            <div style={{ fontSize: 10, color: 'var(--muted)', fontWeight: 600, marginTop: 4, lineHeight: 1.3 }}>for doctors,<br />by a doctor</div>
+            <div style={{ fontSize: 10, color: 'var(--muted)', fontWeight: 600, marginTop: 4, lineHeight: 1.3 }}>for doctors & dentists,<br />by a doctor</div>
           </div>
         </div>
       </div>
