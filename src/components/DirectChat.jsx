@@ -5,8 +5,12 @@ import { isOnline } from '../lib/presence';
 import { useBack } from '../context/Back.jsx';
 
 export default function DirectChat({ me, withId, withName, withAv, onBack }) {
-  const { registerBack, clearBack } = useBack();
-  useEffect(() => { registerBack(() => onBack()); return () => clearBack(); }, [onBack, registerBack, clearBack]);
+  const { registerBack, clearBack, enterImmersive, exitImmersive } = useBack();
+  useEffect(() => {
+    registerBack(() => onBack());
+    enterImmersive(); // hide the global top bar + nav — this screen owns the whole viewport now
+    return () => { clearBack(); exitImmersive(); };
+  }, [onBack, registerBack, clearBack, enterImmersive, exitImmersive]);
   const [messages, setMessages] = useState([]);
   const [avatars, setAvatars] = useState({});
   const [peer, setPeer] = useState(null);
@@ -22,23 +26,31 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
   const endRef = useRef(null);
   const inputRef = useRef(null);
 
-  // track the REAL visible viewport height, since dvh is unreliable once the
-  // on-screen keyboard opens inside a TWA — this keeps the input pinned correctly
+  // ---- reactions: long-press a bubble to open a small emoji picker ----
+  const REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
+  const [reactions, setReactions] = useState({}); // { [messageId]: { emoji: { count, mine } } }
+  const [pickerFor, setPickerFor] = useState(null);
+  const pressTimer = useRef(null);
+  const startPress = (id) => { pressTimer.current = setTimeout(() => { if (navigator.vibrate) { try { navigator.vibrate(15); } catch (e) {} } setPickerFor(id); }, 450); };
+  const cancelPress = () => clearTimeout(pressTimer.current);
+  const react = async (msgId, emoji) => {
+    setPickerFor(null);
+    try { await api.toggleReaction(msgId, 'direct', emoji); await load(); } catch (e) {}
+  };
+
+  // track the REAL visible viewport height (shrinks correctly when the keyboard opens).
+  // Now that this screen is immersive (no topbar/tabbar competing for space), this is
+  // simply the full available height — no offset math, no keyboard-state guessing.
   const [vh, setVh] = useState(() => (window.visualViewport ? window.visualViewport.height : window.innerHeight));
-  const fullVh = useRef(vh); // the tallest height we've seen = keyboard-closed baseline
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
-    const onResize = () => {
-      setVh(vv.height);
-      if (vv.height > fullVh.current) fullVh.current = vv.height;
-    };
+    const onResize = () => setVh(vv.height);
     vv.addEventListener('resize', onResize);
     return () => vv.removeEventListener('resize', onResize);
   }, []);
-  const keyboardOpen = fullVh.current - vh > 100; // meaningful shrink = keyboard is up
 
-  const load = () => api.conversation(withId).then((d) => { setMessages(d.messages || []); if (d.avatars) setAvatars(d.avatars); if (d.peer) setPeer(d.peer); localStorage.setItem('chat_read_' + withId, String(Date.now())); }).catch(() => {});
+  const load = () => api.conversation(withId).then((d) => { setMessages(d.messages || []); if (d.avatars) setAvatars(d.avatars); if (d.peer) setPeer(d.peer); setReactions(d.reactions || {}); localStorage.setItem('chat_read_' + withId, String(Date.now())); }).catch(() => {});
   useEffect(() => { load(); const t = setInterval(load, 4000); return () => clearInterval(t); }, [withId]);
   // only scroll when a genuinely new message lands (not on every 4s poll)
   const lastMsgId = messages.length ? messages[messages.length - 1].id : 0;
@@ -87,8 +99,11 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
   const item = { display: 'flex', alignItems: 'center', gap: 9 };
 
   return (
-    <div className="screen" style={{ display: 'flex', flexDirection: 'column', height: (keyboardOpen ? vh - 76 : vh - 76 - 60) + 'px', overflow: 'hidden' }}>
+    <div className="screen" style={{ display: 'flex', flexDirection: 'column', height: vh + 'px', overflow: 'hidden', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 14px)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+        <button onClick={onBack} aria-label="Back" style={{ background: 'none', border: 'none', color: 'var(--ink)', cursor: 'pointer', display: 'grid', placeItems: 'center', padding: 0, width: 26, height: 26, flexShrink: 0 }}>
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+        </button>
         <div onClick={() => setShowPeer(true)} style={{ position: 'relative', cursor: 'pointer', flexShrink: 0 }}>
           <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: withAv ? 20 : 13, color: 'var(--forest)', fontWeight: 700 }}>{withAv || theirInit}</div>
           {peer && isOnline(peer.last_seen) && <span style={{ position: 'absolute', bottom: 0, right: 0, width: 11, height: 11, borderRadius: '50%', background: '#3aaa6f', border: '2px solid var(--paper)' }} />}
@@ -140,15 +155,30 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
                     <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--subtle)', background: 'var(--paper-2)', padding: '4px 12px', borderRadius: 999 }}>{label}</span>
                   </div>
                 )}
-                <div style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', alignItems: 'flex-end', gap: 7, marginBottom: 8 }}>
+                <div style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', alignItems: 'flex-end', gap: 7, marginBottom: reactions[m.id] ? 2 : 8 }}>
                   {!mine && <Avatar emoji={avatars[m.sender] || withAv} init={theirInit} />}
-                  <div style={{
+                  <div
+                    onTouchStart={() => startPress(m.id)} onTouchEnd={cancelPress} onTouchMove={cancelPress}
+                    onMouseDown={() => startPress(m.id)} onMouseUp={cancelPress} onMouseLeave={cancelPress}
+                    style={{
+                    position: 'relative',
                     maxWidth: '72%', padding: '10px 13px', borderRadius: 14, fontSize: 14,
                     background: mine ? 'var(--forest)' : 'var(--card)',
                     color: mine ? '#ffffff' : 'var(--ink)',
                     border: mine ? 'none' : '1.5px solid var(--line)',
                     whiteSpace: 'pre-line', wordBreak: 'break-word',
+                    userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none',
                   }}>
+                    {pickerFor === m.id && (
+                      <>
+                        <div onClick={() => setPickerFor(null)} style={{ position: 'fixed', inset: 0, zIndex: 300 }} />
+                        <div style={{ position: 'absolute', bottom: '100%', marginBottom: 6, [mine ? 'right' : 'left']: 0, display: 'flex', gap: 4, background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 999, padding: '6px 8px', boxShadow: '0 6px 20px rgba(0,0,0,.18)', zIndex: 301 }}>
+                          {REACTIONS.map((e) => (
+                            <button key={e} onClick={() => react(m.id, e)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', padding: 2, lineHeight: 1 }}>{e}</button>
+                          ))}
+                        </div>
+                      </>
+                    )}
                     {parts.map((p, i) =>
                       /^https?:\/\//.test(p)
                         ? <a key={i} href={p} target="_blank" rel="noreferrer" style={{ color: mine ? '#cdeee2' : 'var(--forest)', textDecoration: 'underline' }}>{p}</a>
@@ -158,6 +188,16 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
                   </div>
                   {mine && <Avatar emoji={avatars[m.sender] || me?.avatar} init={myInit} />}
                 </div>
+                {reactions[m.id] && Object.keys(reactions[m.id]).length > 0 && (
+                  <div style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', gap: 4, marginBottom: 8, paddingRight: mine ? 37 : 0, paddingLeft: mine ? 0 : 37 }}>
+                    {Object.entries(reactions[m.id]).map(([emoji, info]) => (
+                      <button key={emoji} onClick={() => react(m.id, emoji)}
+                        style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 12, padding: '2px 8px', borderRadius: 999, cursor: 'pointer', background: info.mine ? 'var(--paper-2)' : 'var(--card)', border: info.mine ? '1.5px solid var(--forest)' : '1px solid var(--line)' }}>
+                        <span>{emoji}</span>{info.count > 1 && <span style={{ color: 'var(--muted)', fontWeight: 600 }}>{info.count}</span>}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             );
           });
@@ -184,4 +224,5 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
       </div>
     </div>
   );
-}
+  }
+    
