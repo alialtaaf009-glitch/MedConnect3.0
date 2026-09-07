@@ -25,6 +25,13 @@ function BlockEditor({ block, day, onSave, onClose }) {
   const [color, setColor] = useState(block?.color || 'c1');
   const [saving, setSaving] = useState(false);
 
+  // lock the background page from scrolling while this modal is open (stops scroll bleed)
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
   const save = async () => {
     if (!topic.trim()) return;
     setSaving(true);
@@ -231,4 +238,5 @@ export default function StudyPlanner() {
   );
 }
 const navBtnS = { width: 30, height: 30, borderRadius: '50%', background: 'var(--card)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', cursor: 'pointer', color: 'var(--forest)', fontSize: 16 };
+
 
