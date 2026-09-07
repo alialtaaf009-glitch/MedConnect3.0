@@ -4,8 +4,12 @@ import { SendIcon, IcoPlus, IcoUsers, IcoLeave, IcoTrash, otherPerson, Stamp } f
 import { useBack } from '../context/Back.jsx';
 
 export default function GroupChat({ me, groupId, onBack }) {
-  const { registerBack, clearBack } = useBack();
-  useEffect(() => { registerBack(() => onBack()); return () => clearBack(); }, [onBack, registerBack, clearBack]);
+  const { registerBack, clearBack, enterImmersive, exitImmersive } = useBack();
+  useEffect(() => {
+    registerBack(() => onBack());
+    enterImmersive(); // hide the global top bar + nav — this screen owns the whole viewport now
+    return () => { clearBack(); exitImmersive(); };
+  }, [onBack, registerBack, clearBack, enterImmersive, exitImmersive]);
   const [data, setData] = useState({ messages: [], members: [], group: null });
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
@@ -14,6 +18,30 @@ export default function GroupChat({ me, groupId, onBack }) {
   const [membersOpen, setMembersOpen] = useState(false);
   const [friends, setFriends] = useState([]);
   const endRef = useRef(null);
+  const inputRef = useRef(null);
+
+  // ---- reactions: long-press a bubble to open a small emoji picker ----
+  const REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
+  const [pickerFor, setPickerFor] = useState(null);
+  const pressTimer = useRef(null);
+  const startPress = (id) => { pressTimer.current = setTimeout(() => { if (navigator.vibrate) { try { navigator.vibrate(15); } catch (e) {} } setPickerFor(id); }, 450); };
+  const cancelPress = () => clearTimeout(pressTimer.current);
+  const react = async (msgId, emoji) => {
+    setPickerFor(null);
+    try { await api.toggleReaction(msgId, 'group', emoji); await load(); } catch (e) {}
+  };
+
+  // track the REAL visible viewport height (shrinks correctly when the keyboard opens).
+  // Now that this screen is immersive (no topbar/tabbar competing for space), this is
+  // simply the full available height — no offset math, no keyboard-state guessing.
+  const [vh, setVh] = useState(() => (window.visualViewport ? window.visualViewport.height : window.innerHeight));
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const onResize = () => setVh(vv.height);
+    vv.addEventListener('resize', onResize);
+    return () => vv.removeEventListener('resize', onResize);
+  }, []);
 
   const load = () => api.group(groupId).then((d) => setData(d)).catch(() => {});
   useEffect(() => { load(); const t = setInterval(load, 4000); return () => clearInterval(t); }, [groupId]);
@@ -25,7 +53,18 @@ export default function GroupChat({ me, groupId, onBack }) {
     if (!text.trim() || sending) return;
     setSending(true);
     const b = text.trim(); setText('');
-    try { await api.sendGroupMessage(groupId, b); await load(); } catch (e) {} finally { setSending(false); }
+    // show it instantly — don't wait on the network before it appears
+    const tempId = 'temp-' + Date.now();
+    setData((prev) => ({ ...prev, messages: [...(prev.messages || []), { id: tempId, sender: me?.id, sender_name: me?.name, sender_avatar: me?.avatar, body: b, created_at: new Date().toISOString() }] }));
+    try {
+      await api.sendGroupMessage(groupId, b);
+      await load(); // reconciles with the real saved message, replacing the temp one
+    } catch (e) {
+      setData((prev) => ({ ...prev, messages: (prev.messages || []).filter((m) => m.id !== tempId) })); // roll back if it failed
+    } finally {
+      setSending(false);
+      inputRef.current?.focus(); // keep the keyboard open for the next message
+    }
   };
   const openAdd = async () => {
     setMenu(false);
@@ -51,8 +90,11 @@ export default function GroupChat({ me, groupId, onBack }) {
   const item = { display: 'flex', alignItems: 'center', gap: 9 };
 
   return (
-    <div className="screen" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100dvh - 76px - 60px)', overflow: 'hidden' }}>
+    <div className="screen" style={{ display: 'flex', flexDirection: 'column', height: vh + 'px', overflow: 'hidden', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 14px)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+        <button onClick={onBack} aria-label="Back" style={{ background: 'none', border: 'none', color: 'var(--ink)', cursor: 'pointer', display: 'grid', placeItems: 'center', padding: 0, width: 26, height: 26, flexShrink: 0 }}>
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+        </button>
         <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => setMembersOpen(true)}>
           <h2 style={{ fontSize: 17, fontWeight: 600 }}>{data.group?.name || 'Group'}</h2>
           <div className="meta">{(data.members || []).length} members · tap to view</div>
@@ -79,14 +121,40 @@ export default function GroupChat({ me, groupId, onBack }) {
           const mine = m.sender == me?.id;
           const init = (m.sender_name || 'Dr').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('');
           const parts = m.body.split(/(https?:\/\/[^\s]+)/g);
+          const msgReactions = (data.reactions || {})[m.id];
           return (
-            <div key={m.id} style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', alignItems: 'flex-end', gap: 7, marginBottom: 8 }}>
-              {!mine && <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--paper-2)', border: '1px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: m.sender_avatar ? 16 : 11, color: 'var(--forest)', fontWeight: 700, flexShrink: 0 }}>{m.sender_avatar || init}</div>}
-              <div style={{ maxWidth: '72%', padding: '8px 12px', borderRadius: 14, fontSize: 14, background: mine ? 'var(--forest)' : 'var(--card)', color: mine ? '#fff' : 'var(--ink)', border: mine ? 'none' : '1.5px solid var(--line)', whiteSpace: 'pre-line', wordBreak: 'break-word' }}>
-                {!mine && <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--rust)', marginBottom: 2 }}>{m.sender_name}</div>}
-                {parts.map((p, i) => /^https?:\/\//.test(p) ? <a key={i} href={p} target="_blank" rel="noreferrer" style={{ color: mine ? '#cdeee2' : 'var(--forest)', textDecoration: 'underline' }}>{p}</a> : p)}
-                <Stamp ts={m.created_at} light={mine} />
+            <div key={m.id}>
+              <div style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', alignItems: 'flex-end', gap: 7, marginBottom: msgReactions ? 2 : 8 }}>
+                {!mine && <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--paper-2)', border: '1px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: m.sender_avatar ? 16 : 11, color: 'var(--forest)', fontWeight: 700, flexShrink: 0 }}>{m.sender_avatar || init}</div>}
+                <div
+                  onTouchStart={() => startPress(m.id)} onTouchEnd={cancelPress} onTouchMove={cancelPress}
+                  onMouseDown={() => startPress(m.id)} onMouseUp={cancelPress} onMouseLeave={cancelPress}
+                  style={{ position: 'relative', maxWidth: '72%', padding: '8px 12px', borderRadius: 14, fontSize: 14, background: mine ? 'var(--forest)' : 'var(--card)', color: mine ? '#fff' : 'var(--ink)', border: mine ? 'none' : '1.5px solid var(--line)', whiteSpace: 'pre-line', wordBreak: 'break-word', userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}>
+                  {pickerFor === m.id && (
+                    <>
+                      <div onClick={() => setPickerFor(null)} style={{ position: 'fixed', inset: 0, zIndex: 300 }} />
+                      <div style={{ position: 'absolute', bottom: '100%', marginBottom: 6, [mine ? 'right' : 'left']: 0, display: 'flex', gap: 4, background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 999, padding: '6px 8px', boxShadow: '0 6px 20px rgba(0,0,0,.18)', zIndex: 301 }}>
+                        {REACTIONS.map((e) => (
+                          <button key={e} onClick={() => react(m.id, e)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', padding: 2, lineHeight: 1 }}>{e}</button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                  {!mine && <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--rust)', marginBottom: 2 }}>{m.sender_name}</div>}
+                  {parts.map((p, i) => /^https?:\/\//.test(p) ? <a key={i} href={p} target="_blank" rel="noreferrer" style={{ color: mine ? '#cdeee2' : 'var(--forest)', textDecoration: 'underline' }}>{p}</a> : p)}
+                  <Stamp ts={m.created_at} light={mine} />
+                </div>
               </div>
+              {msgReactions && Object.keys(msgReactions).length > 0 && (
+                <div style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', gap: 4, marginBottom: 8, paddingRight: mine ? 0 : 0, paddingLeft: mine ? 0 : 37 }}>
+                  {Object.entries(msgReactions).map(([emoji, info]) => (
+                    <button key={emoji} onClick={() => react(m.id, emoji)}
+                      style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 12, padding: '2px 8px', borderRadius: 999, cursor: 'pointer', background: info.mine ? 'var(--paper-2)' : 'var(--card)', border: info.mine ? '1.5px solid var(--forest)' : '1px solid var(--line)' }}>
+                      <span>{emoji}</span>{info.count > 1 && <span style={{ color: 'var(--muted)', fontWeight: 600 }}>{info.count}</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}
@@ -125,7 +193,7 @@ export default function GroupChat({ me, groupId, onBack }) {
       )}
 
       <div style={{ display: 'flex', gap: 8, paddingTop: 10, borderTop: '1px solid var(--line)', background: 'var(--paper)', flexShrink: 0 }}>
-        <input className="input" style={{ marginBottom: 0, flex: 1 }} placeholder="Message the group…" value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') send(); }} />
+        <input ref={inputRef} className="input" style={{ marginBottom: 0, flex: 1 }} placeholder="Message the group…" value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); send(); } }} />
         <button onClick={send} disabled={sending} aria-label="Send" style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--forest)', color: '#fff', border: 'none', display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0, opacity: sending ? 0.6 : 1 }}><SendIcon /></button>
       </div>
     </div>
