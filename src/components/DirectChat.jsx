@@ -87,7 +87,7 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
   const item = { display: 'flex', alignItems: 'center', gap: 9 };
 
   return (
-    <div className="screen" style={{ display: 'flex', flexDirection: 'column', height: (vh - 76 - 60) + 'px', overflow: 'hidden' }}>
+    <div className="screen" style={{ display: 'flex', flexDirection: 'column', height: (keyboardOpen ? vh - 76 : vh - 76 - 60) + 'px', overflow: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
         <div onClick={() => setShowPeer(true)} style={{ position: 'relative', cursor: 'pointer', flexShrink: 0 }}>
           <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: withAv ? 20 : 13, color: 'var(--forest)', fontWeight: 700 }}>{withAv || theirInit}</div>
