@@ -76,6 +76,7 @@ export const api = {
   group: (id) => req(`/messages?scope=groups&group=${id}`),
   createGroup: (name, memberIds) => req('/messages?scope=groups', { method: 'POST', body: { action: 'create', name, memberIds } }),
   sendGroupMessage: (groupId, body) => req('/messages?scope=groups', { method: 'POST', body: { action: 'send', groupId, body } }),
+  toggleReaction: (messageId, messageType, emoji) => req('/messages', { method: 'POST', body: { action: 'toggle_reaction', messageId, messageType, emoji } }),
   addGroupMember: (groupId, userId) => req('/messages?scope=groups', { method: 'POST', body: { action: 'add_member', groupId, userId } }),
   leaveGroup: (groupId) => req('/messages?scope=groups', { method: 'POST', body: { action: 'leave', groupId } }),
   deleteGroup: (groupId) => req('/messages?scope=groups', { method: 'POST', body: { action: 'delete', groupId } }),
