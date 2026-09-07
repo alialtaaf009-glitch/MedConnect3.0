@@ -25,13 +25,18 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
   // track the REAL visible viewport height, since dvh is unreliable once the
   // on-screen keyboard opens inside a TWA — this keeps the input pinned correctly
   const [vh, setVh] = useState(() => (window.visualViewport ? window.visualViewport.height : window.innerHeight));
+  const fullVh = useRef(vh); // the tallest height we've seen = keyboard-closed baseline
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
-    const onResize = () => setVh(vv.height);
+    const onResize = () => {
+      setVh(vv.height);
+      if (vv.height > fullVh.current) fullVh.current = vv.height;
+    };
     vv.addEventListener('resize', onResize);
     return () => vv.removeEventListener('resize', onResize);
   }, []);
+  const keyboardOpen = fullVh.current - vh > 100; // meaningful shrink = keyboard is up
 
   const load = () => api.conversation(withId).then((d) => { setMessages(d.messages || []); if (d.avatars) setAvatars(d.avatars); if (d.peer) setPeer(d.peer); localStorage.setItem('chat_read_' + withId, String(Date.now())); }).catch(() => {});
   useEffect(() => { load(); const t = setInterval(load, 4000); return () => clearInterval(t); }, [withId]);
