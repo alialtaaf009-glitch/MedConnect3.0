@@ -186,7 +186,7 @@ function DeepFocus() {
             <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
               {[['hold', '⏱', 'Hold 10 seconds', 'Press & hold to exit'], ['phrase', '✍️', 'Type a phrase', '"I am losing focus"']].map(([k, ic, t, sub]) => (
                 <div key={k} onClick={() => setMethod(k)}
-                  style={{ flex: 1, border: `1.5px solid ${method === k ? 'var(--forest)' : 'var(--line)'}`, background: method === k ? '#eef4ee' : 'var(--card)', borderRadius: 14, padding: '10px 8px', textAlign: 'center', cursor: 'pointer', transition: 'all .18s' }}>
+                  style={{ flex: 1, border: `1.5px solid ${method === k ? 'var(--forest)' : 'var(--line)'}`, background: method === k ? 'var(--paper-2)' : 'var(--card)', borderRadius: 14, padding: '10px 8px', textAlign: 'center', cursor: 'pointer', transition: 'all .18s' }}>
                   <div style={{ fontSize: 20, marginBottom: 4 }}>{ic}</div>
                   <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink)' }}>{t}</div>
                   <div style={{ fontSize: 10.5, color: 'var(--muted)', marginTop: 2 }}>{sub}</div>
@@ -220,4 +220,4 @@ function TakeABreak() {
       {tab === 'breathe' ? <Breathe /> : <Suspense fallback={<div className="center" style={{ minHeight: 160 }}><div className="spinner" /></div>}><TileGame /></Suspense>}
     </>
   );
-}
+                  }
