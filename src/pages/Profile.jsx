@@ -11,6 +11,8 @@ const AVATARS = ['🩺','💉','🧬','🦴','🫀','🧠','👨‍⚕️','👩
   '🌟','🔥','🌙','🍀','⚡','🎯','📚','☕'];
 const COUNTRIES = ['Pakistan','United Kingdom','United States','Saudi Arabia / Gulf','Australia','India','Other'];
 const EXAMS = ['MRCP — Part 1','MRCP — Part 2 (Written)','MRCP — PACES','MRCS — Part A','MRCS — Part B (OSCE)','PLAB 1 / UKMLA AKT','PLAB 2 / UKMLA CPSA','USMLE — Step 1','USMLE — Step 2 CK','FCPS — Part 1','FCPS — Part 2','AMC — Part 1','SMLE','Other'];
+const PROFESSIONS = ['Medical', 'Dental'];
+const DENTAL_EXAMS = ['INBDE','ORE — Part 1','ORE — Part 2','FCPS Dental','MDS','NEET-MDS','SDLE','ADC Exam','Other'];
 const TIMEZONES = ['GMT-8 (US Pacific)','GMT-5 (US Eastern)','GMT+0 (UK)','GMT+1 (Europe)','GMT+3 (Gulf / Saudi)','GMT+5 (Pakistan)','GMT+5:30 (India)','GMT+8 (Singapore/China)','GMT+10 (Australia East)'];
 const QBANKS = ['PassMedicine','Pastest','BMJ OnExamination','Plabable','UWorld','AMBOSS','MRCPUK Question Bank','Marrow','PrepLadder','DAMS','Cerebellum','eGurukul','Other'];
 const STUDY_WHEN = ['🌄 Early bird', '☀️ Daytime', '🌆 Evening', '🦉 Night owl'];
@@ -40,7 +42,7 @@ function Chips({ label, options, value, onChange, optional }) {
       <div className="chips">
         {options.map((o) => (
           <button key={o} className={`chip ${value === o ? 'on' : ''}`}
-            onClick={() => onChange(value === o ? '' : o)}>{o}</button>
+            onClick={() => onChange(value === o && optional ? '' : o)}>{o}</button>
         ))}
       </div>
     </div>
@@ -94,6 +96,8 @@ export default function Profile() {
   const [attempt, setAttempt] = useState(user?.attempt || '');
   const [examDate, setExamDate] = useState(user?.exam_date ? user.exam_date.slice(0, 10) : '');
   const [exam, setExam] = useState(user?.exam || EXAMS[0]);
+  const [profession, setProfession] = useState(user?.profession === 'dental' ? 'Dental' : 'Medical');
+  const examOptions = profession === 'Medical' ? EXAMS : DENTAL_EXAMS;
   const [regCouncil, setRegCouncil] = useState(user?.reg_council || '');
   const [regNumber, setRegNumber] = useState(user?.reg_number || '');
   const [medicalSchool, setMedicalSchool] = useState(user?.medical_school || '');
@@ -107,7 +111,7 @@ export default function Profile() {
     setBusy(true);
     try {
       const bio = packBio(prefers, rightNow);
-      const { user: updated } = await api.updateProfile({ name, avatar, country, timezone, questionBank, studyTime, examDate, attempt, regCouncil, regNumber, medicalSchool, bio, focus, gender, studyStyles, exam });
+      const { user: updated } = await api.updateProfile({ name, avatar, country, timezone, questionBank, studyTime, examDate, attempt, regCouncil, regNumber, medicalSchool, bio, focus, gender, studyStyles, exam, profession: profession.toLowerCase() });
       setUser(updated);
       setEditing(false);
     } catch (e) {
@@ -142,9 +146,11 @@ export default function Profile() {
         <label className="label">Display name</label>
         <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
 
+        <Chips label="Medical or dental?" options={PROFESSIONS} value={profession} onChange={(v) => { setProfession(v); setExam(v === 'Medical' ? EXAMS[0] : DENTAL_EXAMS[0]); }} />
+
         <label className="label">Exam</label>
         <select className="input" value={exam} onChange={(e) => setExam(e.target.value)}>
-          {EXAMS.map((x) => <option key={x} value={x}>{x}</option>)}
+          {examOptions.map((x) => <option key={x} value={x}>{x}</option>)}
         </select>
 
         <label className="label">Exam date <span style={{ textTransform: 'none', letterSpacing: 0, fontWeight: 400 }}>(for your countdown)</span></label>
