@@ -1008,17 +1008,7 @@ export default function Home() {
 
         <ExploreBrowse />
 
-        {/* invite a colleague — slim sage pill, native share sheet (Android & iOS), clipboard fallback */}
-        <div onClick={inviteFriend} style={{ display: 'flex', alignItems: 'center', gap: 12, borderRadius: 999, padding: '12px 16px', marginTop: 20, cursor: 'pointer', background: '#eaf1ec', color: '#1f4d3f' }}>
-          <span style={{ width: 38, height: 38, borderRadius: '50%', background: '#fff', display: 'grid', placeItems: 'center', flexShrink: 0, color: '#1f4d3f' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="8" r="3.2" /><path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5" /><path d="M18 7v6M21 10h-6" /></svg>
-          </span>
-          <span style={{ flex: 1, fontSize: 13.5, fontWeight: 700, lineHeight: 1.3 }}>Study better, together — invite a colleague</span>
-          <span style={{ width: 28, height: 28, borderRadius: '50%', background: '#eef4f0', display: 'grid', placeItems: 'center', flexShrink: 0, color: '#1f4d3f' }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
-          </span>
-          </div>
-        {invited && <p className="sub" style={{ fontSize: 12, marginTop: 8, textAlign: 'center', color: 'var(--forest)', fontWeight: 700 }}>Link copied — paste it anywhere! ✓</p>}
+      
 
 
       </div>
