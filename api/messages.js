@@ -9,6 +9,33 @@ export default async function handler(req, res) {
   if (!uid) return res.status(401).json({ error: 'Not authenticated' });
 
   try {
+    // ===================== REACTIONS (shared by direct + group) =====================
+    if (req.method === 'POST') {
+      const peek = readBody(req);
+      if (peek.action === 'toggle_reaction') {
+        await sql`CREATE TABLE IF NOT EXISTS message_reactions (
+          message_id INTEGER NOT NULL,
+          message_type TEXT NOT NULL,
+          user_id INTEGER NOT NULL,
+          emoji TEXT NOT NULL,
+          created_at TIMESTAMPTZ DEFAULT now(),
+          PRIMARY KEY (message_id, message_type, user_id)
+        )`;
+        const messageId = parseInt(peek.messageId, 10);
+        const messageType = peek.messageType === 'group' ? 'group' : 'direct';
+        const emoji = (peek.emoji || '').trim();
+        if (!messageId || !emoji) return res.status(400).json({ error: 'messageId and emoji required' });
+        const existing = await sql`SELECT emoji FROM message_reactions WHERE message_id = ${messageId} AND message_type = ${messageType} AND user_id = ${uid}`;
+        if (existing.length && existing[0].emoji === emoji) {
+          await sql`DELETE FROM message_reactions WHERE message_id = ${messageId} AND message_type = ${messageType} AND user_id = ${uid}`;
+        } else {
+          await sql`INSERT INTO message_reactions (message_id, message_type, user_id, emoji) VALUES (${messageId}, ${messageType}, ${uid}, ${emoji})
+            ON CONFLICT (message_id, message_type, user_id) DO UPDATE SET emoji = ${emoji}, created_at = now()`;
+        }
+        return res.status(200).json({ ok: true });
+      }
+    }
+
     // ===================== GROUP CHAT =====================
     // All group routes are namespaced with ?scope=groups
     if (req.query.scope === 'groups') {
@@ -26,7 +53,20 @@ export default async function handler(req, res) {
             SELECT u.id, u.name, u.avatar FROM group_members g JOIN users u ON u.id = g.user_id
             WHERE g.group_id = ${gid}`;
           const g = await sql`SELECT * FROM groups WHERE id = ${gid}`;
-          return res.status(200).json({ messages: msgs, members, group: g[0] });
+          let reactions = {};
+          try {
+            const rr = await sql`
+              SELECT mr.message_id, mr.user_id, mr.emoji FROM message_reactions mr
+              JOIN group_messages gm ON gm.id = mr.message_id AND mr.message_type = 'group'
+              WHERE gm.group_id = ${gid}`;
+            for (const r of rr) {
+              if (!reactions[r.message_id]) reactions[r.message_id] = {};
+              if (!reactions[r.message_id][r.emoji]) reactions[r.message_id][r.emoji] = { count: 0, mine: false };
+              reactions[r.message_id][r.emoji].count++;
+              if (r.user_id == uid) reactions[r.message_id][r.emoji].mine = true;
+            }
+          } catch (e) {} // table may not exist yet — no reactions sent, that's fine
+          return res.status(200).json({ messages: msgs, members, group: g[0], reactions });
         }
         // list groups I'm in, with last message
         const groups = await sql`
@@ -140,7 +180,20 @@ export default async function handler(req, res) {
           avatars[p.id] = p.avatar || '';
           if (p.id == other) peer = { exam: p.exam, country: p.country, timezone: p.timezone, last_seen: p.last_seen };
         }
-        return res.status(200).json({ messages: msgs, avatars, peer });
+        let reactions = {};
+        try {
+          const rr = await sql`
+            SELECT mr.message_id, mr.user_id, mr.emoji FROM message_reactions mr
+            JOIN messages m ON m.id = mr.message_id AND mr.message_type = 'direct'
+            WHERE (m.sender = ${uid} AND m.recipient = ${other}) OR (m.sender = ${other} AND m.recipient = ${uid})`;
+          for (const r of rr) {
+            if (!reactions[r.message_id]) reactions[r.message_id] = {};
+            if (!reactions[r.message_id][r.emoji]) reactions[r.message_id][r.emoji] = { count: 0, mine: false };
+            reactions[r.message_id][r.emoji].count++;
+            if (r.user_id == uid) reactions[r.message_id][r.emoji].mine = true;
+          }
+        } catch (e) {} // table may not exist yet — no reactions sent, that's fine
+        return res.status(200).json({ messages: msgs, avatars, peer, reactions });
       }
 
       // conversation list: the most recent message with each other person
