@@ -28,7 +28,7 @@ function Chips({ label, options, value, onChange, optional }) {
       <label className="label">{label}{optional ? '  (optional)' : ''}</label>
       <div className="chips">
         {options.map((o) => (
-          <button key={o} className={`chip ${value === o ? 'on' : ''}`} onClick={() => onChange(o)}>{o}</button>
+          <button key={o} className={`chip ${value === o ? 'on' : ''}`} onClick={() => onChange(value === o && optional ? '' : o)}>{o}</button>
         ))}
       </div>
     </div>
