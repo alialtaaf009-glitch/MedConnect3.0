@@ -31,20 +31,6 @@ function ConversationList({ nav, me }) {
   const [friends, setFriends] = useState([]);
   const [picked, setPicked] = useState([]);
 
-  // swipe between Direct / Groups tabs
-  const MODE_ORDER = ['direct', 'groups'];
-  const tabTouchStart = useRef(null);
-  const onTabTouchStart = (e) => { tabTouchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }; };
-  const onTabTouchEnd = (e) => {
-    if (!tabTouchStart.current) return;
-    const dx = e.changedTouches[0].clientX - tabTouchStart.current.x;
-    const dy = e.changedTouches[0].clientY - tabTouchStart.current.y;
-    tabTouchStart.current = null;
-    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-    const idx = MODE_ORDER.indexOf(tab);
-    if (dx < 0 && idx < MODE_ORDER.length - 1) setTab(MODE_ORDER[idx + 1]);
-    else if (dx > 0 && idx > 0) setTab(MODE_ORDER[idx - 1]);
-  };
 
   // delete a chat — reachable by long-press OR swipe-left
   const [swipeId, setSwipeId] = useState(null);
@@ -107,7 +93,7 @@ function ConversationList({ nav, me }) {
 
   return (
     <div className="screen" style={{ padding: 0 }}>
-      <div style={{ background: 'var(--section-hero)', color: '#fff', padding: '18px 20px 32px', minHeight: 150, boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -20, position: 'relative', padding: '18px 16px', minHeight: '60vh' }}>
         <div style={{ position: 'absolute', right: -8, bottom: -16, fontSize: 90, opacity: .1, lineHeight: 1, pointerEvents: 'none' }}>💬</div>
         <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 26, fontWeight: 900, lineHeight: 1 }}>Messages</h1>
         <p style={{ fontSize: 12.5, opacity: 0.85, marginTop: 5 }}>Your study <span style={{ color: 'var(--gold)', fontWeight: 700 }}>conversations</span> and groups.</p>
