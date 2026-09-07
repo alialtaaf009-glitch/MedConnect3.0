@@ -20,6 +20,18 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
   const [sending, setSending] = useState(false);
   const [menu, setMenu] = useState(false);
   const endRef = useRef(null);
+  const inputRef = useRef(null);
+
+  // track the REAL visible viewport height, since dvh is unreliable once the
+  // on-screen keyboard opens inside a TWA — this keeps the input pinned correctly
+  const [vh, setVh] = useState(() => (window.visualViewport ? window.visualViewport.height : window.innerHeight));
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const onResize = () => setVh(vv.height);
+    vv.addEventListener('resize', onResize);
+    return () => vv.removeEventListener('resize', onResize);
+  }, []);
 
   const load = () => api.conversation(withId).then((d) => { setMessages(d.messages || []); if (d.avatars) setAvatars(d.avatars); if (d.peer) setPeer(d.peer); localStorage.setItem('chat_read_' + withId, String(Date.now())); }).catch(() => {});
   useEffect(() => { load(); const t = setInterval(load, 4000); return () => clearInterval(t); }, [withId]);
@@ -32,7 +44,18 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
     setSending(true);
     const body = text.trim();
     setText('');
-    try { await api.sendMessage(withId, body); await load(); } catch (e) {} finally { setSending(false); }
+    // show it instantly — don't wait on the network before it appears
+    const tempId = 'temp-' + Date.now();
+    setMessages((prev) => [...prev, { id: tempId, sender: me.id, body, created_at: new Date().toISOString() }]);
+    try {
+      await api.sendMessage(withId, body);
+      await load(); // reconciles with the real saved message, replacing the temp one
+    } catch (e) {
+      setMessages((prev) => prev.filter((m) => m.id !== tempId)); // roll back if it failed to send
+    } finally {
+      setSending(false);
+      inputRef.current?.focus(); // keep the keyboard open for the next message
+    }
   };
 
   const doDelete = async () => {
@@ -59,7 +82,7 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
   const item = { display: 'flex', alignItems: 'center', gap: 9 };
 
   return (
-    <div className="screen" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100dvh - 76px - 60px)', overflow: 'hidden' }}>
+    <div className="screen" style={{ display: 'flex', flexDirection: 'column', height: (vh - 76 - 60) + 'px', overflow: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
         <div onClick={() => setShowPeer(true)} style={{ position: 'relative', cursor: 'pointer', flexShrink: 0 }}>
           <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: withAv ? 20 : 13, color: 'var(--forest)', fontWeight: 700 }}>{withAv || theirInit}</div>
@@ -149,9 +172,9 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
       )}
 
       <div style={{ display: 'flex', gap: 8, paddingTop: 10, borderTop: '1px solid var(--line)', background: 'var(--paper)', flexShrink: 0 }}>
-        <input className="input" style={{ marginBottom: 0, flex: 1 }} placeholder="Type a message…"
+        <input ref={inputRef} className="input" style={{ marginBottom: 0, flex: 1 }} placeholder="Type a message…"
           value={text} onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter') send(); }} />
+          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); send(); } }} />
         <button onClick={send} disabled={sending} aria-label="Send" style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--forest)', color: '#fff', border: 'none', display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0, opacity: sending ? 0.6 : 1 }}><SendIcon /></button>
       </div>
     </div>
