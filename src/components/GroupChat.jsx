@@ -49,7 +49,7 @@ export default function GroupChat({ me, groupId, onBack }) {
   useEffect(() => { load(); const t = setInterval(load, 4000); return () => clearInterval(t); }, [groupId]);
   // only scroll when a genuinely new message lands (not on every 4s poll)
   const lastMsgId = (data.messages || []).length ? data.messages[data.messages.length - 1].id : 0;
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [lastMsgId]);
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, [lastMsgId]);
 
   const send = async () => {
     if (!text.trim() || sending) return;
@@ -201,4 +201,4 @@ export default function GroupChat({ me, groupId, onBack }) {
       {ConfirmDialog}
     </div>
   );
-}
+            }
