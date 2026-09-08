@@ -73,6 +73,13 @@ export default function Partners() {
   };
   useEffect(() => { loadMatches(); loadConns(); }, []);
 
+  // refresh automatically when someone returns to the app/tab, instead of relying on pull-to-refresh
+  useEffect(() => {
+    const onVisible = () => { if (document.visibilityState === 'visible') { loadMatches(); loadConns(); } };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, []);
+
   const connect = async (id) => {
     const person = matches.find((x) => x.user.id === id);
     setMatches((m) => m.filter((x) => x.user.id !== id));
@@ -291,4 +298,4 @@ export default function Partners() {
       )}
     </div>
   );
-  }
+}
