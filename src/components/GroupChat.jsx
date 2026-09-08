@@ -2,9 +2,11 @@ import { useEffect, useState, useRef } from 'react';
 import { api } from '../lib/api';
 import { SendIcon, IcoPlus, IcoUsers, IcoLeave, IcoTrash, otherPerson, Stamp } from './ChatBits.jsx';
 import { useBack } from '../context/Back.jsx';
+import { useConfirm } from './ConfirmDialog.jsx';
 
 export default function GroupChat({ me, groupId, onBack }) {
   const { registerBack, clearBack, enterImmersive, exitImmersive } = useBack();
+  const [confirm, ConfirmDialog] = useConfirm();
   useEffect(() => {
     registerBack(() => onBack());
     enterImmersive(); // hide the global top bar + nav — this screen owns the whole viewport now
@@ -76,12 +78,12 @@ export default function GroupChat({ me, groupId, onBack }) {
   };
   const leave = async () => {
     setMenu(false);
-    if (!window.confirm('Leave this group?')) return;
+    if (!(await confirm('Leave this group?'))) return;
     try { await api.leaveGroup(groupId); onBack(); } catch (e) {}
   };
   const del = async () => {
     setMenu(false);
-    if (!window.confirm('Delete this group for everyone? This cannot be undone.')) return;
+    if (!(await confirm('Delete this group for everyone? This cannot be undone.'))) return;
     try { await api.deleteGroup(groupId); onBack(); } catch (e) {}
   };
 
@@ -196,6 +198,7 @@ export default function GroupChat({ me, groupId, onBack }) {
         <input ref={inputRef} className="input" style={{ marginBottom: 0, flex: 1 }} placeholder="Message the group…" value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); send(); } }} />
         <button onClick={send} disabled={sending} aria-label="Send" style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--forest)', color: '#fff', border: 'none', display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0, opacity: sending ? 0.6 : 1 }}><SendIcon /></button>
       </div>
+      {ConfirmDialog}
     </div>
   );
 }
