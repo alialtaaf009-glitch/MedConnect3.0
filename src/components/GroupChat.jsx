@@ -65,7 +65,7 @@ export default function GroupChat({ me, groupId, onBack }) {
       setData((prev) => ({ ...prev, messages: (prev.messages || []).filter((m) => m.id !== tempId) })); // roll back if it failed
     } finally {
       setSending(false);
-      inputRef.current?.focus(); // keep the keyboard open for the next message
+      setTimeout(() => inputRef.current?.focus(), 60); // wait for the re-render/scroll to settle first
     }
   };
   const openAdd = async () => {
@@ -201,4 +201,4 @@ export default function GroupChat({ me, groupId, onBack }) {
       {ConfirmDialog}
     </div>
   );
-            }
+}
