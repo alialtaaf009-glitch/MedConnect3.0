@@ -222,11 +222,11 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
         <input ref={inputRef} className="input" autoComplete="off" style={{ marginBottom: 0, flex: 1 }} placeholder="Type a message…"
           value={text} onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); send(); } }} />
-        <button onClick={send} disabled={sending} aria-label="Send" style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--forest)', color: '#fff', border: 'none', display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0, opacity: sending ? 0.6 : 1 }}><SendIcon /></button>
+        <button onClick={send} onMouseDown={(e) => e.preventDefault()} disabled={sending} aria-label="Send" style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--forest)', color: '#fff', border: 'none', display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0, opacity: sending ? 0.6 : 1 }}><SendIcon /></button>
       </div>
       {ConfirmDialog}
     </div>
   );
   }
 
-    
+                      
