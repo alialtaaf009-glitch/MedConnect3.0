@@ -109,7 +109,7 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
           {peer && isOnline(peer.last_seen) && <span style={{ position: 'absolute', bottom: 0, right: 0, width: 11, height: 11, borderRadius: '50%', background: '#3aaa6f', border: '2px solid var(--paper)' }} />}
         </div>
         <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => setShowPeer(true)}>
-          <h2 style={{ fontSize: 17, fontWeight: 600 }}>{withName}</h2>
+          <h2 style={{ fontSize: 17, fontWeight: 600 }}>{peer?.name || withName}</h2>
           {peer && <div className="meta" style={{ fontSize: 11 }}>{[peer.exam, peer.country, peer.timezone].filter(Boolean).join(' · ')}</div>}
         </div>
         <div style={{ position: 'relative' }}>
@@ -209,7 +209,7 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
         <div onClick={() => setShowPeer(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'grid', placeItems: 'center', zIndex: 200, padding: 24 }}>
           <div onClick={(e) => e.stopPropagation()} className="card" style={{ maxWidth: 320, width: '100%', textAlign: 'center', animation: 'popIn .3s cubic-bezier(0.34, 1.56, 0.64, 1) both', margin: 0 }}>
             <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--paper-2)', border: '2px solid var(--forest)', display: 'grid', placeItems: 'center', fontSize: 32, margin: '0 auto 10px' }}>{withAv || theirInit}</div>
-            <div style={{ fontSize: 18, fontWeight: 700 }}>{withName}</div>
+            <div style={{ fontSize: 18, fontWeight: 700 }}>{peer?.name || withName}</div>
             {peer && <div className="meta" style={{ marginTop: 4, lineHeight: 1.6 }}>{[peer.exam, peer.country, peer.timezone].filter(Boolean).join(' · ')}</div>}
             <button className="btn ghost" style={{ marginTop: 14 }} onClick={() => setShowPeer(false)}>Close</button>
           </div>
@@ -225,4 +225,4 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
     </div>
   );
   }
-    
+
