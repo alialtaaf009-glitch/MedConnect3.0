@@ -10,7 +10,7 @@ const AVATARS = ['🩺','💉','🧬','🦴','🫀','🧠','👨‍⚕️','👩
   '🐱','🦊','🦉','🐼','🐨','🦁','🐸','🦋','🐧','🐢','🦄','🐙',
   '🌟','🔥','🌙','🍀','⚡','🎯','📚','☕'];
 const COUNTRIES = ['Pakistan','United Kingdom','United States','Saudi Arabia / Gulf','Australia','India','Other'];
-const EXAMS = ['MRCP — Part 1','MRCP — Part 2 (Written)','MRCP — PACES','MRCS — Part A','MRCS — Part B (OSCE)','PLAB 1 / UKMLA AKT','PLAB 2 / UKMLA CPSA','USMLE — Step 1','USMLE — Step 2 CK','FCPS — Part 1','FCPS — Part 2','AMC — Part 1','SMLE','Other'];
+const EXAMS = ['MRCP — Part 1','MRCP — Part 2 (Written)','MRCP — PACES','MRCS — Part A','MRCS — Part B (OSCE)','PLAB 1 / UKMLA AKT','PLAB 2 / UKMLA CPSA','USMLE — Step 1','USMLE — Step 2 CK','FCPS — Part 1','FCPS — Part 2','AMC — Part 1','SMLE','NEET-PG','INI-CET','Other'];
 const PROFESSIONS = ['Medical', 'Dental'];
 const DENTAL_EXAMS = ['INBDE','ORE — Part 1','ORE — Part 2','FCPS Dental','MDS','NEET-MDS','SDLE','ADC Exam','Other'];
 const TIMEZONES = ['GMT-8 (US Pacific)','GMT-5 (US Eastern)','GMT+0 (UK)','GMT+1 (Europe)','GMT+3 (Gulf / Saudi)','GMT+5 (Pakistan)','GMT+5:30 (India)','GMT+8 (Singapore/China)','GMT+10 (Australia East)'];
@@ -391,9 +391,8 @@ function NotifToggle() {
               alert('Server push test failed: ' + (e.message || e));
             }
           }}>Send a test notification</button>
-          <p style={{ fontSize: 11, color: 'var(--subtle)', marginTop: 4 }}>Confirm notifications are working on this device</p>
         </div>
       )}
     </>
   );
-}
+          }
