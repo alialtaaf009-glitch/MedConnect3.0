@@ -167,6 +167,11 @@ export default function Partners() {
               Showing {examLabel} partners · <button className="link" onClick={() => nav('/partners')}>Show all</button>
             </p>
           )}
+          {mStatus === 'ok' && visibleMatches.length > 0 && (
+            <p className="sub" style={{ marginBottom: 14, fontSize: 11.5 }}>
+              Match % reflects how closely your exam, country, and timezone line up with theirs.
+            </p>
+          )}
           {mStatus === 'loading' && <div className="center" style={{ minHeight: 160 }}><div className="spinner" /></div>}
           {mStatus === 'error' && <div className="center" style={{ flexDirection: 'column' }}><p>{err}</p><button className="link" onClick={loadMatches}>Try again</button></div>}
           {mStatus === 'ok' && visibleMatches.length === 0 && (
