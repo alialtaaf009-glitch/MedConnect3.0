@@ -6,6 +6,7 @@ import { useBack } from '../context/Back.jsx';
 import { useTheme } from '../context/Theme.jsx';
 import { quoteOfTheDay } from '../lib/quotes';
 import Motivation from './Motivation.jsx';
+import NotifyPrompt from '../components/NotifyPrompt.jsx';
 import { api } from '../lib/api';
 
 // country -> exams -> parts (three levels, like the prototype)
@@ -899,6 +900,8 @@ export default function Home() {
   };
 
   return (
+    <>
+    <NotifyPrompt />
     <div className="screen" style={{ padding: 0 }}>
       {/* ===== GREEN BAND: greeting + motivation quote + nudges + quick circles ===== */}
       <div className="mc-home-band" style={{ padding: '14px 18px 40px', color: '#fff' }}>
