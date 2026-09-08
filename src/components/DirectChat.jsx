@@ -73,7 +73,7 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
       setMessages((prev) => prev.filter((m) => m.id !== tempId)); // roll back if it failed to send
     } finally {
       setSending(false);
-      inputRef.current?.focus(); // keep the keyboard open for the next message
+      setTimeout(() => inputRef.current?.focus(), 60); // wait for the re-render/scroll to settle first
     }
   };
 
@@ -229,4 +229,3 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
   );
   }
 
-                                
