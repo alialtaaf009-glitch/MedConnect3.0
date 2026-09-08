@@ -302,7 +302,7 @@ export default async function handler(req, res) {
         await sendPushToUser(toId, {
           title: senderName,
           body: body.trim().slice(0, 120),
-          url: `/chat?with=${uid}`,
+          url: `/chat?with=${uid}&name=${encodeURIComponent(senderName)}`,
           tag: `msg-${uid}`,
           badgeCount,
         });
