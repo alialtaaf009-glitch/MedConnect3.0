@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, lazy, Suspense } from 'react';
+import { useEffect, useState, useRef, useCallback, lazy, Suspense } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../context/Auth.jsx';
@@ -15,9 +15,11 @@ export default function Chat() {
   const withName = params.get('name') || 'Chat';
   const withAv = params.get('av') || '';
   const groupId = params.get('group');
+  const backToGroups = useCallback(() => nav('/chat?tab=groups'), [nav]);
+  const backToDirect = useCallback(() => nav('/chat'), [nav]);
 
-  if (groupId) return <Suspense fallback={<div className="center" style={{ minHeight: 200 }}><div className="spinner" /></div>}><GroupChat me={user} groupId={groupId} onBack={() => nav('/chat?tab=groups')} /></Suspense>;
-  if (withId) return <Suspense fallback={<div className="center" style={{ minHeight: 200 }}><div className="spinner" /></div>}><DirectChat me={user} withId={withId} withName={withName} withAv={withAv} onBack={() => nav('/chat')} /></Suspense>;
+  if (groupId) return <Suspense fallback={<div className="center" style={{ minHeight: 200 }}><div className="spinner" /></div>}><GroupChat me={user} groupId={groupId} onBack={backToGroups} /></Suspense>;
+  if (withId) return <Suspense fallback={<div className="center" style={{ minHeight: 200 }}><div className="spinner" /></div>}><DirectChat me={user} withId={withId} withName={withName} withAv={withAv} onBack={backToDirect} /></Suspense>;
   return <ConversationList nav={nav} me={user} />;
 }
 
@@ -195,4 +197,3 @@ function ConversationList({ nav, me }) {
     </div>
   );
 }
-
