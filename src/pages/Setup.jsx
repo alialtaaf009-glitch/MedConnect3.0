@@ -71,9 +71,12 @@ export default function Setup() {
       <Chips label="Question bank" options={QBANKS} value={questionBank} onChange={setQuestionBank} optional />
       <Chips label="Preferred study time" options={TIMES} value={studyTime} onChange={setStudyTime} optional />
       {err && <p style={{ color: 'var(--rose)', fontSize: 13, marginTop: 12 }}>{err}</p>}
-      <button className="btn" style={{ marginTop: 24 }} onClick={save} disabled={busy}>
-        {busy ? 'Saving…' : 'Save & find study partners'}
-      </button>
+      <div style={{ height: 90 }} />
+      <div className="floating-save">
+        <button className="btn" onClick={save} disabled={busy}>
+          {busy ? 'Saving…' : 'Save & find study partners'}
+        </button>
+      </div>
     </div>
   );
 }
