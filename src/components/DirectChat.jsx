@@ -3,9 +3,11 @@ import { api } from '../lib/api';
 import { SendIcon, IcoTrash, IcoLeave, IcoBan, IcoFlag, Stamp } from './ChatBits.jsx';
 import { isOnline } from '../lib/presence';
 import { useBack } from '../context/Back.jsx';
+import { useConfirm } from './ConfirmDialog.jsx';
 
 export default function DirectChat({ me, withId, withName, withAv, onBack }) {
   const { registerBack, clearBack, enterImmersive, exitImmersive } = useBack();
+  const [confirm, ConfirmDialog] = useConfirm();
   useEffect(() => {
     registerBack(() => onBack());
     enterImmersive(); // hide the global top bar + nav — this screen owns the whole viewport now
@@ -77,17 +79,17 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
 
   const doDelete = async () => {
     setMenu(false);
-    if (!window.confirm('Delete this entire chat? This cannot be undone.')) return;
+    if (!(await confirm('Delete this entire chat? This cannot be undone.'))) return;
     try { await api.deleteChat(withId); setMessages([]); } catch (e) {}
   };
   const doBlock = async () => {
     setMenu(false);
-    if (!window.confirm(`Block ${withName}? They will be removed from your connections and can no longer message you.`)) return;
+    if (!(await confirm(`Block ${withName}? They will be removed from your connections and can no longer message you.`))) return;
     try { await api.blockUser(withId); onBack(); } catch (e) {}
   };
   const doUnfriend = async () => {
     setMenu(false);
-    if (!window.confirm(`Remove ${withName} from your connections? You can reconnect later.`)) return;
+    if (!(await confirm(`Remove ${withName} from your connections? You can reconnect later.`))) return;
     try { await api.unfriendUser(withId); onBack(); } catch (e) {}
   };
   const doReport = async () => {
@@ -222,6 +224,7 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); send(); } }} />
         <button onClick={send} disabled={sending} aria-label="Send" style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--forest)', color: '#fff', border: 'none', display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0, opacity: sending ? 0.6 : 1 }}><SendIcon /></button>
       </div>
+      {ConfirmDialog}
     </div>
   );
   }
