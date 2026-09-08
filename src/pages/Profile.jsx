@@ -391,6 +391,7 @@ function NotifToggle() {
               alert('Server push test failed: ' + (e.message || e));
             }
           }}>Send a test notification</button>
+          <p style={{ fontSize: 11, color: 'var(--subtle)', marginTop: 4 }}>Confirm notifications are working on this device</p>
         </div>
       )}
     </>
