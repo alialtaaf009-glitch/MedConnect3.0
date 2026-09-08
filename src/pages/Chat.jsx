@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../context/Auth.jsx';
 import { otherPerson, IcoTrash } from '../components/ChatBits.jsx';
+import { useConfirm } from '../components/ConfirmDialog.jsx';
 const GroupChat = lazy(() => import('../components/GroupChat.jsx'));
 const DirectChat = lazy(() => import('../components/DirectChat.jsx'));
 
@@ -37,11 +38,11 @@ function ConversationList({ nav, me }) {
   const dxRef = useRef(0);
   const pressTimer = useRef(null);
   const longFired = useRef(false);
-  const delChat = (c) => {
-    if (window.confirm(`Delete your chat with ${c.name}? This cannot be undone.`)) {
-      api.deleteChat(c.other_id).then(() => setConvos((v) => v.filter((x) => x.other_id !== c.other_id))).catch(() => {});
-    }
+  const [confirm, ConfirmDialog] = useConfirm();
+  const delChat = async (c) => {
     setSwipeId(null);
+    if (!(await confirm(`Delete your chat with ${c.name}? This cannot be undone.`))) return;
+    api.deleteChat(c.other_id).then(() => setConvos((v) => v.filter((x) => x.other_id !== c.other_id))).catch(() => {});
   };
   const pressStart = (c, x) => {
     longFired.current = false;
@@ -190,6 +191,8 @@ function ConversationList({ nav, me }) {
           </div>
         </div>
       )}
+      {ConfirmDialog}
     </div>
   );
 }
+
