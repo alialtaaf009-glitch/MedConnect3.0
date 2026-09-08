@@ -106,6 +106,24 @@ export default async function handler(req, res) {
           const mem = await sql`SELECT 1 FROM group_members WHERE group_id = ${gid} AND user_id = ${uid}`;
           if (!mem.length) return res.status(403).json({ error: 'Not a member' });
           const rows = await sql`INSERT INTO group_messages (group_id, sender, body) VALUES (${gid}, ${uid}, ${text}) RETURNING *`;
+          // fire a push to every other group member (best-effort, never blocks the response)
+          try {
+            const me = await sql`SELECT name FROM users WHERE id = ${uid}`;
+            const senderName = me[0]?.name || 'Someone';
+            const g = await sql`SELECT name FROM groups WHERE id = ${gid}`;
+            const groupName = g[0]?.name || 'a study group';
+            const others = await sql`SELECT user_id FROM group_members WHERE group_id = ${gid} AND user_id != ${uid}`;
+            for (const o of others) {
+              try {
+                await sendPushToUser(o.user_id, {
+                  title: `${senderName} in ${groupName}`,
+                  body: text.slice(0, 120),
+                  url: `/chat?group=${gid}`,
+                  tag: `group-${gid}`,
+                });
+              } catch (e) {}
+            }
+          } catch (e) {}
           return res.status(201).json({ message: rows[0] });
         }
 
