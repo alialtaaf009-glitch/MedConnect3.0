@@ -691,7 +691,13 @@ function QuickRow({ user, nav, onGreen }) {
               <div style={{ flex: 1, background: 'var(--paper)', borderRadius: '24px 24px 0 0', marginTop: -16, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
                 {bloom.key === 'countdown' && (
                   <div style={{ textAlign: 'center', padding: '26px 22px' }}>
-                    <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 14 }}>{examTs ? new Date(user.exam_date).toDateString() : 'Add your exam date in Profile.'}</div>
+                    {examTs ? (
+                      <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 14 }}>{new Date(user.exam_date).toDateString()}</div>
+                    ) : (
+                      <button onClick={() => { closeBloom(); nav('/profile'); }} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: 13, fontWeight: 700, color: 'var(--forest)', textDecoration: 'underline', marginBottom: 14 }}>
+                        Tap to add your exam date →
+                      </button>
+                    )}
                     <div style={{ display: 'inline-block', fontSize: 13, fontWeight: 700, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 999, padding: '7px 16px' }}>{coachLine(dLeft ?? 999)}</div>
                     <p style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 15, lineHeight: 1.5, color: 'var(--ink)', fontStyle: 'italic', margin: '18px auto 0', maxWidth: 260 }}>"{moraleFor('countdown')}"</p>
                     <button className="btn ghost" style={{ marginTop: 20, maxWidth: 220, margin: '20px auto 0' }} onClick={closeBloom}>Back to it</button>
