@@ -694,9 +694,13 @@ function QuickRow({ user, nav, onGreen }) {
                     {examTs ? (
                       <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 14 }}>{new Date(user.exam_date).toDateString()}</div>
                     ) : (
-                      <button onClick={() => { closeBloom(); nav('/profile'); }} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: 13, fontWeight: 700, color: 'var(--forest)', textDecoration: 'underline', marginBottom: 14 }}>
-                        Tap to add your exam date →
-                      </button>
+                      <div style={{ marginBottom: 14 }}>
+                        <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 10 }}>When's your exam?</div>
+                        <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                          <input type="date" className="input" style={{ marginBottom: 0, maxWidth: 170 }} value={newExamDate} onChange={(e) => setNewExamDate(e.target.value)} />
+                          <button className="btn" style={{ marginTop: 0, padding: '0 18px' }} disabled={!newExamDate || savingDate} onClick={saveExamDate}>{savingDate ? '…' : 'Set'}</button>
+                        </div>
+                      </div>
                     )}
                     <div style={{ display: 'inline-block', fontSize: 13, fontWeight: 700, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 999, padding: '7px 16px' }}>{coachLine(dLeft ?? 999)}</div>
                     <p style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 15, lineHeight: 1.5, color: 'var(--ink)', fontStyle: 'italic', margin: '18px auto 0', maxWidth: 260 }}>"{moraleFor('countdown')}"</p>
@@ -854,7 +858,18 @@ function QuickRow({ user, nav, onGreen }) {
   );
 }
 export default function Home() {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
+  const [newExamDate, setNewExamDate] = useState('');
+  const [savingDate, setSavingDate] = useState(false);
+  const saveExamDate = async () => {
+    if (!newExamDate) return;
+    setSavingDate(true);
+    try {
+      const { user: updated } = await api.updateProfile({ examDate: newExamDate });
+      if (updated) setUser(updated);
+    } catch (e) {}
+    setSavingDate(false);
+  };
   const nav = useNavigate();
   const initials = (user?.name || 'Dr A').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map(x => x[0]?.toUpperCase()).join('');
   const quote = quoteOfTheDay();
