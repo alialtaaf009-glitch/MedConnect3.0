@@ -10,9 +10,11 @@ export default function GroupChat({ me, groupId, onBack }) {
   useEffect(() => {
     registerBack(() => onBack());
     enterImmersive(); // hide the global top bar + nav — this screen owns the whole viewport now
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden'; // the page itself must never scroll while chat owns the screen
-    return () => { clearBack(); exitImmersive(); document.body.style.overflow = prevOverflow; };
+    const prevBodyOverflow = document.body.style.overflow;
+    const prevHtmlOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden'; // html itself, not just body — this is what actually owns page scroll in most browsers
+    return () => { clearBack(); exitImmersive(); document.body.style.overflow = prevBodyOverflow; document.documentElement.style.overflow = prevHtmlOverflow; };
   }, [onBack, registerBack, clearBack, enterImmersive, exitImmersive]);
   const [data, setData] = useState({ messages: [], members: [], group: null });
   const [text, setText] = useState('');
