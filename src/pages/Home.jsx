@@ -263,6 +263,18 @@ function ExploreBrowse() {
 // Quick row: Qbank · Flashcards · Countdown · Streak (circles). Stats open inline; tools navigate.
 function QuickRow({ user, nav, onGreen }) {
   const { enterImmersive, exitImmersive, registerBack, clearBack } = useBack();
+  const { setUser } = useAuth();
+  const [newExamDate, setNewExamDate] = useState('');
+  const [savingDate, setSavingDate] = useState(false);
+  const saveExamDate = async () => {
+    if (!newExamDate) return;
+    setSavingDate(true);
+    try {
+      const { user: updated } = await api.updateProfile({ examDate: newExamDate });
+      if (updated) setUser(updated);
+    } catch (e) {}
+    setSavingDate(false);
+  };
   // user-hideable tiles (Profile -> Home screen)
   const hideCd = localStorage.getItem('hide_countdown') === '1';
   const hideSt = localStorage.getItem('hide_streak') === '1';
@@ -864,18 +876,7 @@ function QuickRow({ user, nav, onGreen }) {
   );
 }
 export default function Home() {
-  const { user, setUser } = useAuth();
-  const [newExamDate, setNewExamDate] = useState('');
-  const [savingDate, setSavingDate] = useState(false);
-  const saveExamDate = async () => {
-    if (!newExamDate) return;
-    setSavingDate(true);
-    try {
-      const { user: updated } = await api.updateProfile({ examDate: newExamDate });
-      if (updated) setUser(updated);
-    } catch (e) {}
-    setSavingDate(false);
-  };
+  const { user } = useAuth();
   const nav = useNavigate();
   const initials = (user?.name || 'Dr A').replace(/^Dr\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map(x => x[0]?.toUpperCase()).join('');
   const quote = quoteOfTheDay();
