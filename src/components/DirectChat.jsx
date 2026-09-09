@@ -130,7 +130,7 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
         </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 10 }}>
+      <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 10, overscrollBehavior: 'contain' }}>
         {messages.length === 0 && <p className="sub" style={{ textAlign: 'center', marginTop: 20 }}>Say hello 👋</p>}
         {(() => {
           const getDateLabel = (ts) => {
@@ -229,4 +229,4 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
   );
   }
 
-                      
+                                                                                                                    
