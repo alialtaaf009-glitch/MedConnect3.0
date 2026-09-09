@@ -11,7 +11,9 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
   useEffect(() => {
     registerBack(() => onBack());
     enterImmersive(); // hide the global top bar + nav — this screen owns the whole viewport now
-    return () => { clearBack(); exitImmersive(); };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden'; // the page itself must never scroll while chat owns the screen
+    return () => { clearBack(); exitImmersive(); document.body.style.overflow = prevOverflow; };
   }, [onBack, registerBack, clearBack, enterImmersive, exitImmersive]);
   const [messages, setMessages] = useState([]);
   const [avatars, setAvatars] = useState({});
@@ -229,4 +231,3 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
   );
   }
 
-                                                                                                                    
