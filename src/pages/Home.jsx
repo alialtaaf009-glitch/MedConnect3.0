@@ -30,6 +30,7 @@ const CATALOG = [
     ['IMM', ['Medicine', 'Surgery', 'Gynae & Obs', 'Paediatrics', 'Anaesthesia', 'Radiology', 'Pathology', 'Ophthalmology', 'ENT']],
     ['FCPS Part 2', ['Medicine', 'Surgery', 'Gynae & Obs', 'Paediatrics', 'Anaesthesia', 'Radiology', 'Pathology', 'Ophthalmology', 'ENT', 'Psychiatry']],
     ['MCPS', ['Medicine', 'Surgery', 'Gynae & Obs', 'Paediatrics', 'Anaesthesia', 'Psychiatry']],
+    ['PGET', ['Post Graduate Entrance Test']],
   ]],
   ['🇦🇺', 'Australia', [
     ['AMC', ['CAT MCQ (Part 1)', 'Clinical (Part 2)']],
