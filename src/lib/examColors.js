@@ -1,7 +1,7 @@
 // shared per-exam signature colors (v1 vibrancy system)
 export const EXAM_COLORS = {
   'USMLE': '#1a5a8a', 'MRCP': '#1f5d4a', 'MRCS': '#2a6a8a', 'MRCPCH': '#1f6048',
-  'MRCGP': '#2f6a44', 'MRCPath': '#2a5a6a', 'MRCEM': '#1a5f7a', 'MRCOG': '#2e4a7a',
+  'MRCGP': '#2f6a44', 'FRCPath': '#2a5a6a', 'MRCEM': '#1a5f7a', 'MRCOG': '#2e4a7a',
   'MRCPsych': '#1a6b8a', 'PLAB / UKMLA': '#1f6354', 'PLAB': '#1f6354', 'FCPS Part 1': '#1f6048',
   'FCPS Part 2': '#306034', 'FCPS': '#1f6048', 'IMM': '#2a6a7a', 'MCPS': '#2f6a44',
   'AMC': '#1a5f7a', 'RACP': '#1f5d4a', 'RACS': '#2a5a6a',
