@@ -19,7 +19,7 @@ const CATALOG = [
     ['MRCS', ['Part A', 'Part B (OSCE)']],
     ['MRCPCH', ['FOP', 'TAS', 'AKP', 'Clinical']],
     ['MRCGP', ['AKT', 'SCA']],
-    ['MRCPath', ['Part 1', 'Part 2']],
+    ['FRCPath', ['Part 1', 'Part 2']],
     ['MRCEM', ['Primary', 'Intermediate SBA', 'OSCE']],
     ['MRCOG', ['Part 1', 'Part 2', 'Part 3 (Clinical)']],
     ['MRCPsych', ['Paper A', 'Paper B', 'CASC']],
@@ -78,7 +78,7 @@ const DENTAL_CATALOG = [
 // v1 vibrancy: each exam family carries its own signature color
 const EXAM_COLORS = {
   'USMLE': '#1a5a8a', 'MRCP': '#1a6b5a', 'MRCS': '#2a6a8a', 'MRCPCH': '#1a7a4a',
-  'MRCGP': '#3a7a4a', 'MRCPath': '#2a5a6a', 'MRCEM': '#1a5f7a', 'MRCOG': '#2e4a7a',
+  'MRCGP': '#3a7a4a', 'FRCPath': '#2a5a6a', 'MRCEM': '#1a5f7a', 'MRCOG': '#2e4a7a',
   'MRCPsych': '#1a6b8a', 'PLAB / UKMLA': '#1a7a6a', 'FCPS Part 1': '#1a7a4a',
   'FCPS Part 2': '#3a6a3a', 'IMM': '#2a6a7a', 'MCPS': '#3a7a4a',
   'AMC': '#1a5f7a', 'RACP': '#1a6b5a', 'RACS': '#2a5a6a',
