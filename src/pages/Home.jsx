@@ -703,6 +703,12 @@ function QuickRow({ user, nav, onGreen }) {
                       </div>
                     )}
                     <div style={{ display: 'inline-block', fontSize: 13, fontWeight: 700, color: 'var(--forest)', background: 'var(--paper-2)', borderRadius: 999, padding: '7px 16px' }}>{coachLine(dLeft ?? 999)}</div>
+                    {examTs && dLeft < 0 && (
+                      <div style={{ marginTop: 14, display: 'flex', gap: 8, justifyContent: 'center' }}>
+                        <input type="date" className="input" style={{ marginBottom: 0, maxWidth: 170 }} value={newExamDate} onChange={(e) => setNewExamDate(e.target.value)} />
+                        <button className="btn" style={{ marginTop: 0, padding: '0 18px' }} disabled={!newExamDate || savingDate} onClick={saveExamDate}>{savingDate ? '…' : 'Set'}</button>
+                      </div>
+                    )}
                     <p style={{ fontFamily: "'Newsreader',Georgia,serif", fontSize: 15, lineHeight: 1.5, color: 'var(--ink)', fontStyle: 'italic', margin: '18px auto 0', maxWidth: 260 }}>"{moraleFor('countdown')}"</p>
                     <button className="btn ghost" style={{ marginTop: 20, maxWidth: 220, margin: '20px auto 0' }} onClick={closeBloom}>Back to it</button>
                   </div>
