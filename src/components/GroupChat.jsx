@@ -117,7 +117,7 @@ export default function GroupChat({ me, groupId, onBack }) {
         </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 10 }}>
+      <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 10, overscrollBehavior: 'contain' }}>
         {(data.messages || []).length === 0 && <p className="sub" style={{ textAlign: 'center', marginTop: 20 }}>No messages yet. Say hello to your study group 👋</p>}
         {(data.messages || []).map((m) => {
           const mine = m.sender == me?.id;
@@ -201,4 +201,4 @@ export default function GroupChat({ me, groupId, onBack }) {
       {ConfirmDialog}
     </div>
   );
-              }
+                              }
