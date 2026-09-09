@@ -13,6 +13,7 @@ export default function SignIn() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [googleReady, setGoogleReady] = useState(false);
   const [err, setErr] = useState('');
   const googleBtnRef = useRef(null);
 
@@ -33,6 +34,7 @@ export default function SignIn() {
         window.google.accounts.id.renderButton(googleBtnRef.current, {
           theme: 'outline', size: 'large', width: 280, text: 'continue_with', shape: 'pill',
         });
+        setTimeout(() => setGoogleReady(true), 500); // let Google's script fully settle before it's tappable
         return true;
       }
       return false;
@@ -106,7 +108,7 @@ export default function SignIn() {
         <div style={{ flex: 1, height: 1, background: 'var(--line)' }} />
       </div>
       {/* Google Sign-In button (rendered by Google's script) */}
-      <div ref={googleBtnRef} style={{ display: 'flex', justifyContent: 'center', minHeight: 44 }} />
+      <div ref={googleBtnRef} style={{ display: 'flex', justifyContent: 'center', minHeight: 44, opacity: googleReady ? 1 : 0, pointerEvents: googleReady ? 'auto' : 'none', transition: 'opacity .2s ease' }} />
 
       <button className="link" style={{ marginTop: 16 }} onClick={() => setMode(mode === 'login' ? 'register' : 'login')}>
         {mode === 'login' ? 'New here? Create an account' : 'Have an account? Sign in'}
@@ -123,3 +125,4 @@ export default function SignIn() {
     </div>
   );
 }
+
