@@ -44,6 +44,7 @@ export default function Setup() {
   const [questionBank, setQuestionBank] = useState('');
   const [studyTime, setStudyTime] = useState('');
   const [timezone, setTimezone] = useState('');
+  const [examDate, setExamDate] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
 
@@ -54,7 +55,7 @@ export default function Setup() {
     setBusy(true); setErr('');
     try {
       const fullExam = (subjectOptions[exam] && subject) ? `${exam} — ${subject}` : exam;
-      const { user } = await api.updateProfile({ profession: profession.toLowerCase(), exam: fullExam, country, timezone, questionBank, studyTime });
+      const { user } = await api.updateProfile({ profession: profession.toLowerCase(), exam: fullExam, country, timezone, questionBank, studyTime, examDate });
       setUser(user);
     } catch (e) { setErr(e.message); } finally { setBusy(false); }
   };
@@ -66,6 +67,10 @@ export default function Setup() {
       <Chips label="Medical or dental?" options={PROFESSIONS} value={profession} onChange={(v) => { setProfession(v); setExam(v === 'Medical' ? EXAMS[0] : DENTAL_EXAMS[0]); setSubject(''); }} />
       <Chips label="Exam you're preparing for" options={examOptions} value={exam} onChange={(v) => { setExam(v); setSubject(''); }} />
       {subjectOptions[exam] && <Chips label="Which subject / specialty?" options={subjectOptions[exam]} value={subject} onChange={setSubject} />}
+      <div>
+        <label className="label">Exam date  (optional)</label>
+        <input className="input" type="date" value={examDate} onChange={(e) => setExamDate(e.target.value)} />
+      </div>
       <Chips label="Country" options={COUNTRIES} value={country} onChange={setCountry} />
       <Chips label="Timezone" options={TIMEZONES} value={timezone} onChange={setTimezone} />
       <Chips label="Question bank" options={QBANKS} value={questionBank} onChange={setQuestionBank} optional />
