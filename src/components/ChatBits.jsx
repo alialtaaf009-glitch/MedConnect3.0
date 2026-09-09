@@ -31,7 +31,7 @@ export function fmtTime(ts) {
   try {
     const d = new Date(ts);
     if (isNaN(d.getTime())) return '';
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
   } catch (e) { return ''; }
 }
 
