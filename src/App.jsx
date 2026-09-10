@@ -504,7 +504,14 @@ function AppInner() {
   // hold the splash long enough for the draw animation to finish, even if auth resolves instantly
   const [splashDone, setSplashDone] = useState(false);
   useEffect(() => {
-    const t = setTimeout(() => setSplashDone(true), 800);
+    const t = setTimeout(() => {
+      setSplashDone(true);
+      const staticSplash = document.getElementById('app-splash');
+      if (staticSplash) {
+        staticSplash.style.opacity = '0';
+        setTimeout(() => staticSplash.remove(), 400);
+      }
+    }, 800);
     return () => clearTimeout(t);
   }, []);
   if (loading || !splashDone) return (
