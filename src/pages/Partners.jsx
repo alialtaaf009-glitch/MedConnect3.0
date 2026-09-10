@@ -272,7 +272,7 @@ export default function Partners() {
                   <div className="meta" style={{ color: examColor(o.exam), fontWeight: 700 }}>{o.exam}</div>
                 </div>
                 <div style={{ display: 'flex', gap: 7 }}>
-                  <button className="btn-sm" onClick={() => respond(c.id, 'accept')}>Accept</button>
+                  <button className="btn-sm" style={{ minWidth: 66, textAlign: 'center' }} onClick={() => respond(c.id, 'accept')}>{respondingId === c.id ? '…' : 'Accept'}</button>
                   <button className="btn-sm ghost" onClick={() => respond(c.id, 'decline')}>✕</button>
                 </div>
               </div>
