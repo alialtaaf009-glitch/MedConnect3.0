@@ -14,7 +14,7 @@ export default function About() {
       <div style={{ background: 'var(--paper)', borderRadius: '26px 26px 0 0', marginTop: -20, position: 'relative', padding: '20px 16px 24px', minHeight: '60vh' }}>
 
       <div className="card" style={{ lineHeight: 1.65 }}>
-        <p style={{ fontSize: 17, color: 'var(--forest)', marginBottom: 14 }}>
+        <p style={{ marginBottom: 14 }}>
           Preparing for medical and dental licensing exams is a rigorous and often isolating journey. MedConnect was created to change that.
         </p>
         <p style={{ marginBottom: 12 }}>
