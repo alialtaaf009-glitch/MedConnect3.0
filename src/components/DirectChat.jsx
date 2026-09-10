@@ -111,7 +111,7 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
           <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
         </button>
         <div onClick={() => setShowPeer(true)} style={{ position: 'relative', cursor: 'pointer', flexShrink: 0 }}>
-          <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: withAv ? 20 : 13, color: 'var(--forest)', fontWeight: 700 }}>{withAv || theirInit}</div>
+          <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--paper-2)', border: '1.5px solid var(--line)', display: 'grid', placeItems: 'center', fontSize: (peer?.avatar || withAv) ? 20 : 13, color: 'var(--forest)', fontWeight: 700 }}>{peer?.avatar || withAv || theirInit}</div>
           {peer && isOnline(peer.last_seen) && <span style={{ position: 'absolute', bottom: 0, right: 0, width: 11, height: 11, borderRadius: '50%', background: '#3aaa6f', border: '2px solid var(--paper)' }} />}
         </div>
         <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => setShowPeer(true)}>
@@ -214,7 +214,7 @@ export default function DirectChat({ me, withId, withName, withAv, onBack }) {
       {showPeer && (
         <div onClick={() => setShowPeer(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'grid', placeItems: 'center', zIndex: 200, padding: 24 }}>
           <div onClick={(e) => e.stopPropagation()} className="card" style={{ maxWidth: 320, width: '100%', textAlign: 'center', animation: 'popIn .3s cubic-bezier(0.34, 1.56, 0.64, 1) both', margin: 0 }}>
-            <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--paper-2)', border: '2px solid var(--forest)', display: 'grid', placeItems: 'center', fontSize: 32, margin: '0 auto 10px' }}>{withAv || theirInit}</div>
+            <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--paper-2)', border: '2px solid var(--forest)', display: 'grid', placeItems: 'center', fontSize: 32, margin: '0 auto 10px' }}>{peer?.avatar || withAv || theirInit}</div>
             <div style={{ fontSize: 18, fontWeight: 700 }}>{peer?.name || withName}</div>
             {peer && <div className="meta" style={{ marginTop: 4, lineHeight: 1.6 }}>{[peer.exam, peer.country, peer.timezone].filter(Boolean).join(' · ')}</div>}
             <button className="btn ghost" style={{ marginTop: 14 }} onClick={() => setShowPeer(false)}>Close</button>
