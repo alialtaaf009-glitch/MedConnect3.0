@@ -85,7 +85,12 @@ export default function Partners() {
     setMatches((m) => m.filter((x) => x.user.id !== id));
     try { await api.sendRequest(id); loadConns(); showToast(`Request sent to ${person?.user?.name || 'them'} ✓`); } catch (e) { showToast('Could not send request — try again'); }
   };
-  const respond = async (id, action) => { try { await api.respond(id, action); loadConns(); } catch (e) {} };
+  const [respondingId, setRespondingId] = useState(null);
+  const respond = async (id, action) => {
+    setRespondingId(id);
+    try { await api.respond(id, action); await loadConns(); } catch (e) {}
+    setRespondingId(null);
+  };
 
   const toggleStar = (id) => {
     setStars((prev) => {
@@ -165,6 +170,11 @@ export default function Partners() {
           {examLabel && (
             <p className="sub" style={{ marginBottom: 14 }}>
               Showing {examLabel} partners · <button className="link" onClick={() => nav('/partners')}>Show all</button>
+            </p>
+          )}
+          {mStatus === 'ok' && visibleMatches.length > 0 && (
+            <p className="sub" style={{ marginBottom: 14, fontSize: 11.5 }}>
+              Match % reflects how closely your exam, country, and timezone line up with theirs.
             </p>
           )}
           {mStatus === 'loading' && <div className="center" style={{ minHeight: 160 }}><div className="spinner" /></div>}
@@ -271,8 +281,8 @@ export default function Partners() {
                   <div className="name">{o.name}</div>
                   <div className="meta" style={{ color: examColor(o.exam), fontWeight: 700 }}>{o.exam}</div>
                 </div>
-                <div style={{ display: 'flex', gap: 7 }}>
-                  <button className="btn-sm" style={{ minWidth: 66, textAlign: 'center' }} onClick={() => respond(c.id, 'accept')}>{respondingId === c.id ? '…' : 'Accept'}</button>
+                <div style={{ display: 'flex', gap: 7, opacity: respondingId === c.id ? 0.5 : 1, pointerEvents: respondingId === c.id ? 'none' : 'auto' }}>
+                  <button className="btn-sm" onClick={() => respond(c.id, 'accept')}>{respondingId === c.id ? '…' : 'Accept'}</button>
                   <button className="btn-sm ghost" onClick={() => respond(c.id, 'decline')}>✕</button>
                 </div>
               </div>
@@ -298,4 +308,5 @@ export default function Partners() {
       )}
     </div>
   );
-                                 }
+          }
+                
