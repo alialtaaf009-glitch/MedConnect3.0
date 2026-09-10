@@ -196,7 +196,7 @@ export default async function handler(req, res) {
         let peer = null;
         for (const p of people) {
           avatars[p.id] = p.avatar || '';
-          if (p.id == other) peer = { exam: p.exam, country: p.country, timezone: p.timezone, last_seen: p.last_seen };
+          if (p.id == other) peer = { name: p.name, avatar: p.avatar, exam: p.exam, country: p.country, timezone: p.timezone, last_seen: p.last_seen };
         }
         let reactions = {};
         try {
