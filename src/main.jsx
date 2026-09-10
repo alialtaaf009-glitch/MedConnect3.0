@@ -8,14 +8,6 @@ import { TimerProvider } from './context/Timer.jsx';
 import { BackProvider } from './context/Back.jsx';
 import './styles/app.css';
 
-requestAnimationFrame(() => requestAnimationFrame(() => {
-  const splash = document.getElementById('app-splash');
-  if (splash) {
-    splash.style.opacity = '0';
-    setTimeout(() => splash.remove(), 400);
-  }
-}));
-
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ThemeProvider>
