@@ -20,9 +20,9 @@ export default async function handler(req, res) {
         AND u.profile_complete = TRUE
         AND u.profession = COALESCE(${me.profession}, 'medical')
         AND u.id NOT IN (
-          SELECT recipient FROM connections WHERE requester = ${uid}
+          SELECT recipient FROM connections WHERE requester = ${uid} AND status != 'declined'
           UNION
-          SELECT requester FROM connections WHERE recipient = ${uid}
+          SELECT requester FROM connections WHERE recipient = ${uid} AND status != 'declined'
         )
         AND u.id NOT IN (
           SELECT blocked FROM blocks WHERE blocker = ${uid}
