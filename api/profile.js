@@ -1,4 +1,5 @@
 import { sql, getUserId, safeUser, readBody } from './_shared/util.js';
+import { containsBlockedWord } from './_shared/profanity.js';
 
 export default async function handler(req, res) {
   const uid = getUserId(req);
@@ -281,6 +282,9 @@ export default async function handler(req, res) {
 
   try {
     const body = readBody(req);
+    if (body.name && containsBlockedWord(body.name)) {
+      return res.status(400).json({ error: 'That name isn\'t allowed. Please choose something else.' });
+    }
     const hasExamDate = Object.prototype.hasOwnProperty.call(body, 'examDate');
     const examDateVal = hasExamDate ? (body.examDate || null) : undefined;
 
