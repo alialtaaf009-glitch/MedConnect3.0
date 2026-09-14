@@ -504,16 +504,22 @@ function AppInner() {
   // hold the splash long enough for the draw animation to finish, even if auth resolves instantly
   const [splashDone, setSplashDone] = useState(false);
   useEffect(() => {
-    const t = setTimeout(() => {
-      setSplashDone(true);
+    const t = setTimeout(() => setSplashDone(true), 800);
+    return () => clearTimeout(t);
+  }, []);
+  useEffect(() => {
+    // remove the static splash at the exact moment we're about to show real
+    // content — the same instant `loading || !splashDone` becomes false below.
+    // Tying this to that combined condition (not a fixed timer alone) guarantees
+    // the handoff is perfectly synced, even if the network is slower than 800ms.
+    if (!loading && splashDone) {
       const staticSplash = document.getElementById('app-splash');
       if (staticSplash) {
         staticSplash.style.opacity = '0';
         setTimeout(() => staticSplash.remove(), 400);
       }
-    }, 800);
-    return () => clearTimeout(t);
-  }, []);
+    }
+  }, [loading, splashDone]);
   if (loading || !splashDone) return (
     <div className="app">
       <div className="center splash" style={{ flexDirection: 'column', gap: 14 }}>
