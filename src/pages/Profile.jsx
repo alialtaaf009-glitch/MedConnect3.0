@@ -5,6 +5,7 @@ import { pushSupported, isSubscribed, subscribePush, unsubscribePush } from '../
 import { useAuth } from '../context/Auth.jsx';
 import { useTheme } from '../context/Theme.jsx';
 import { APP_VERSION } from '../lib/version.js';
+import { containsBlockedWord } from '../lib/profanity.js';
 
 const AVATARS = ['🩺','💉','🧬','🦴','🫀','🧠','👨‍⚕️','👩‍⚕️','🥼','🔬','💊','🚑',
   '🐱','🦊','🦉','🐼','🐨','🦁','🐸','🦋','🐧','🐢','🦄','🐙',
@@ -108,6 +109,10 @@ export default function Profile() {
   const [confirmLogout, setConfirmLogout] = useState(false);
 
   const save = async () => {
+    if (name && containsBlockedWord(name)) {
+      window.alert('That name isn\'t allowed. Please choose something else.');
+      return;
+    }
     setBusy(true);
     try {
       const bio = packBio(prefers, rightNow);
@@ -395,4 +400,4 @@ function NotifToggle() {
       )}
     </>
   );
-          }
+}
