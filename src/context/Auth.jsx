@@ -18,7 +18,12 @@ export function AuthProvider({ children }) {
     // If offline, skip the network call entirely — stay logged in with cached data
     if (!navigator.onLine) { setLoading(false); return; }
 
-    api.me()
+    const withTimeout = (promise, ms) => Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms)),
+    ]);
+
+    withTimeout(api.me(), 8000)
       .then((d) => { setUser(d.user); localStorage.setItem('mc_user', JSON.stringify(d.user)); })
       .catch((err) => {
         // Only log out if the SERVER explicitly rejected the token (401/403).
