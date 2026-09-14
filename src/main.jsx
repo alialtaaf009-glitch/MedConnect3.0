@@ -13,11 +13,11 @@ createRoot(document.getElementById('root')).render(
     <ThemeProvider>
       <AuthProvider>
         <TimerProvider>
-          <BackProvider>
-            <BrowserRouter>
+          <BrowserRouter>
+            <BackProvider>
               <App />
-            </BrowserRouter>
-          </BackProvider>
+            </BackProvider>
+          </BrowserRouter>
         </TimerProvider>
       </AuthProvider>
     </ThemeProvider>
