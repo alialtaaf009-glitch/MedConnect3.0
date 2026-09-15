@@ -141,6 +141,15 @@ function DeckDetail({ deck, onBack, onStudy }) {
     return out;
   };
 
+  const handleFilePick = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setBulkText((reader.result || '').toString());
+    reader.readAsText(file);
+    e.target.value = ''; // lets the same file be picked again if needed
+  };
+
   const importBulk = async () => {
     if (saving) return;
     const parsed = parseBulk(bulkText);
@@ -194,7 +203,11 @@ function DeckDetail({ deck, onBack, onStudy }) {
           </>
         ) : (
           <>
-            <p className="sub" style={{ fontSize: 12, marginBottom: 8 }}>One card per line. Separate front &amp; back with <b>|</b> (or a comma).</p>
+            <p className="sub" style={{ fontSize: 12, marginBottom: 8 }}>One card per line. Separate front &amp; back with <b>|</b> (or a comma). Paste below, or upload a .txt/.csv file.</p>
+            <label className="btn ghost bouncy" style={{ display: 'inline-block', marginBottom: 10, cursor: 'pointer' }}>
+              📄 Upload a file instead
+              <input type="file" accept=".txt,.csv" onChange={handleFilePick} style={{ display: 'none' }} />
+            </label>
             <textarea className="input" rows={6} placeholder={'Most common cause of AF? | Hypertension\nECG hallmark of WPW? | Delta wave + short PR'} value={bulkText} onChange={(e) => setBulkText(e.target.value)} style={{ marginBottom: 10, resize: 'vertical', borderRadius: 18, fontSize: 13 }} />
             <button onClick={importBulk} className="btn bouncy" style={{ background: 'var(--forest)', opacity: saving ? 0.6 : 1 }}>{saving ? 'Importing…' : 'Import cards'}</button>
             {bulkMsg && <p className="sub" style={{ textAlign: 'center', marginTop: 8, fontSize: 12, color: bulkMsg.includes('✓') ? 'var(--forest)' : 'var(--rust)', fontWeight: 600 }}>{bulkMsg}</p>}
